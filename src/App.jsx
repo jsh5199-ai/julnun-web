@@ -4,18 +4,39 @@ import {
   CheckCircle2, Info, Copy, RefreshCw, Phone, Sparkles, Hammer, Sofa, Palette, Crown, Gift, Eraser, Star, Image as ImageIcon, X, ChevronDown
 } from 'lucide-react';
 
-// ... (이전 상수들은 동일) ...
-
+// =================================================================
+// [1] 현장 유형 설정
+// =================================================================
 const HOUSING_TYPES = [
   { id: 'new', label: '신축 아파트(입주 전)', multiplier: 1.0 },
   { id: 'old', label: '구축/거주 중', multiplier: 1.0 },
 ];
 
+// =================================================================
+// [2] 재료 설정 (명칭 및 뱃지 수정)
+// =================================================================
 const MATERIALS = [
-  { id: 'poly', label: '일반형 (폴리아스파틱)', priceMod: 1.0, description: '탄성과 광택이 우수하며 가성비가 좋습니다.' },
-  { id: 'kerapoxy', label: '고급형 (에폭시/무광,무펄)', priceMod: 1.8, description: '내구성이 뛰어나고 매트한 질감 (프리미엄)' },
+  { 
+    id: 'poly', 
+    label: '폴리아스파틱', 
+    priceMod: 1.0, 
+    description: '탄성과 광택이 우수하며 가성비가 좋습니다.',
+    badge: '일반', 
+    badgeColor: 'bg-teal-100 text-teal-700'
+  },
+  { 
+    id: 'kerapoxy', 
+    label: '에폭시(무광/무펄)', 
+    priceMod: 1.8, 
+    description: '내구성이 뛰어나고 매트한 질감', 
+    badge: '프리미엄', 
+    badgeColor: 'bg-orange-100 text-orange-600'
+  },
 ];
 
+// =================================================================
+// [3] 줄눈 시공 구역
+// =================================================================
 const SERVICE_AREAS = [
   { id: 'entrance', label: '현관', basePrice: 50000, icon: DoorOpen, unit: '개소' },
   { id: 'bathroom_floor', label: '욕실 바닥', basePrice: 150000, icon: Bath, unit: '개소' },
@@ -28,6 +49,9 @@ const SERVICE_AREAS = [
   { id: 'living_room', label: '거실 바닥', basePrice: 550000, icon: Sofa, unit: '구역', desc: '복도,주방 포함' },
 ];
 
+// =================================================================
+// [4] 실리콘 교체/리폼 구역
+// =================================================================
 const SILICON_AREAS = [
   { id: 'silicon_bathtub', label: '욕조 테두리 교체', basePrice: 80000, icon: Eraser, unit: '개소', desc: '단독 8만 / 패키지시 5만' },
   { id: 'silicon_sink', label: '세면대+젠다이 교체', basePrice: 30000, icon: Eraser, unit: '개소', desc: '오염된 실리콘 제거 후 재시공' },
@@ -35,11 +59,17 @@ const SILICON_AREAS = [
   { id: 'silicon_living_baseboard', label: '거실 걸레받이 실리콘', basePrice: 400000, icon: Sofa, unit: '구역', desc: '단독 40만 / 패키지시 35만' },
 ];
 
+// =================================================================
+// [5] 리뷰 이벤트
+// =================================================================
 const REVIEW_EVENTS = [
   { id: 'soomgo_review', label: '숨고 리뷰이벤트', discount: 20000, icon: Star, desc: '시공 후기 작성 약속' },
   { id: 'karrot_review', label: '당근마켓 리뷰이벤트', discount: 10000, icon: Star, desc: '동네생활 후기 작성 약속' },
 ];
 
+// =================================================================
+// [6] 갤러리 데이터
+// =================================================================
 const PORTFOLIO_IMAGES = [
   { id: 1, title: "시공 사례 1", desc: "깔끔한 마감", src: "/photo1.jpg" },
   { id: 2, title: "시공 사례 2", desc: "프리미엄 시공", src: "/photo2.jpg" },
@@ -285,10 +315,11 @@ export default function GroutEstimatorApp() {
     
     if (calculation.isPackageActive) {
       text += `\n🎁 [패키지 서비스 적용됨]\n`;
+      // 요청하신 순서 반영 (현관 -> 테두리 -> 젠다이 -> 싱크볼)
+      if (calculation.isFreeEntrance && material !== 'kerapoxy') text += `- 현관바닥 (무료)\n`;
+      text += `- 변기테두리, 바닥테두리\n`;
       text += `- 욕실 젠다이 실리콘 오염방지\n`;
       text += `- 주방 싱크볼\n`;
-      text += `- 변기테두리, 바닥테두리\n`;
-      if (calculation.isFreeEntrance && material !== 'kerapoxy') text += `- 현관바닥 (무료)\n`;
     }
 
     text += `\n💰 예상 견적가: ${calculation.price.toLocaleString()}원`;
@@ -390,7 +421,7 @@ export default function GroutEstimatorApp() {
                       <div className="flex-1">
                         <div className="flex justify-between items-center">
                           <span className="font-bold text-gray-800">{item.label}</span>
-                          {item.priceMod > 1 && <span className="text-xs font-bold text-orange-600 bg-orange-100 px-2 py-0.5 rounded">프리미엄</span>}
+                          <span className={`text-xs font-bold ${item.badgeColor} px-2 py-0.5 rounded`}>{item.badge}</span>
                         </div>
                         <p className="text-xs text-gray-500 mt-0.5">{item.description}</p>
                       </div>
@@ -513,13 +544,13 @@ export default function GroutEstimatorApp() {
                     onClick={() => setSelectedImage(img)}
                     className="group relative aspect-square rounded-lg overflow-hidden cursor-pointer border border-gray-100"
                   >
-                    {/* ★ 안전장치 추가: 이미지가 깨지면 회색 박스+텍스트 표시 ★ */}
+                    {/* ★ 이미지가 없을 때를 대비한 onError 핸들러 ★ */}
                     <img 
                       src={img.src} 
                       alt={img.title} 
                       className="w-full h-full object-cover transition-transform group-hover:scale-110" 
                       onError={(e) => {
-                        e.target.onerror = null;
+                        e.target.onerror = null; // 무한 루프 방지
                         e.target.src = "https://placehold.co/600x600/e2e8f0/1e293b?text=이미지+준비중";
                       }}
                     />
@@ -542,44 +573,42 @@ export default function GroutEstimatorApp() {
             </div>
             
             <div className="bg-yellow-50 p-4 rounded-lg text-xs text-yellow-800">
-              💡 <strong>사진이 안 나온다면?</strong><br/>
-              1. 사진 파일 22개를 <code>public</code> 폴더에 넣으셨나요?<br/>
-              2. 파일 이름을 <code>photo1.jpg</code>로 정확히 맞추셨나요? (대문자 JPG 안됨) <br/>
-              3. 사진을 넣은 후 <code>git push</code>를 하셨나요?
+              💡 <strong>사진 추가 방법</strong><br/>
+              public 폴더에 사진을 넣고, 코드 상단의 <code>PORTFOLIO_IMAGES</code> 목록에 파일명을 추가하면 자동으로 이곳에 나타납니다.
             </div>
           </div>
         )}
       </main>
 
-      {/* 하단 고정바 */}
-      {activeTab === 'calculator' && (
-        <>
-          {calculation.isPackageActive && (
-            <div className="fixed bottom-[90px] left-4 right-4 max-w-md mx-auto z-10 animate-bounce-up">
-              <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-3 rounded-lg shadow-lg flex items-center gap-3">
-                <div className="bg-white/20 p-2 rounded-full"><Gift className="w-5 h-5 text-yellow-300" /></div>
-                <div className="text-xs">
-                  <div className="font-bold text-yellow-300 mb-0.5">🎉 패키지 혜택 적용중!</div>
-                  <div>욕실 젠다이, 싱크볼, 변기/바닥테두리 <span className="font-bold underline">서비스</span>{calculation.isFreeEntrance && material !== 'kerapoxy' && <span>, 현관바닥 무료</span>}</div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg p-4 safe-area-bottom z-20">
-            <div className="max-w-md mx-auto flex items-center justify-between gap-4">
+      {/* 패키지 서비스 알림 바 */}
+      {calculation.isPackageActive && (
+        <div className="fixed bottom-[90px] left-4 right-4 max-w-md mx-auto z-10 animate-bounce-up">
+          <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-3 rounded-lg shadow-lg flex items-center gap-3">
+            <div className="bg-white/20 p-2 rounded-full"><Gift className="w-5 h-5 text-yellow-300" /></div>
+            <div className="text-xs">
+              <div className="font-bold text-yellow-300 mb-0.5">🎉 패키지 혜택 적용중!</div>
               <div>
-                <div className="text-xs text-gray-500">총 예상 견적가</div>
-                <div className="flex items-end gap-2">
-                  <div className="text-2xl font-bold text-teal-600">{calculation.price.toLocaleString()}<span className="text-sm font-normal text-gray-500">원</span></div>
-                  {calculation.label && <div className="text-xs font-bold text-orange-500 mb-1 animate-pulse">{calculation.label}</div>}
-                </div>
+                {/* 현관바닥(무료)가 있다면 맨 앞에 표시, 그 뒤에 나머지 나열 */}
+                {calculation.isFreeEntrance && material !== 'kerapoxy' && <span>현관바닥(무료), </span>}
+                변기/바닥테두리, 욕실 젠다이, <span className="font-bold underline">싱크볼 서비스</span>
               </div>
-              <button onClick={() => setShowModal(true)} disabled={!hasSelections} className={`px-6 py-3 rounded-xl font-bold text-white shadow-md transition-all ${hasSelections ? 'bg-teal-600 hover:bg-teal-700 active:scale-95' : 'bg-gray-300 cursor-not-allowed'}`}>견적서 보기</button>
             </div>
           </div>
-        </>
+        </div>
       )}
+
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg p-4 safe-area-bottom z-20">
+        <div className="max-w-md mx-auto flex items-center justify-between gap-4">
+          <div>
+            <div className="text-xs text-gray-500">총 예상 견적가</div>
+            <div className="flex items-end gap-2">
+              <div className="text-2xl font-bold text-teal-600">{calculation.price.toLocaleString()}<span className="text-sm font-normal text-gray-500">원</span></div>
+              {calculation.label && <div className="text-xs font-bold text-orange-500 mb-1 animate-pulse">{calculation.label}</div>}
+            </div>
+          </div>
+          <button onClick={() => setShowModal(true)} disabled={!hasSelections} className={`px-6 py-3 rounded-xl font-bold text-white shadow-md transition-all ${hasSelections ? 'bg-teal-600 hover:bg-teal-700 active:scale-95' : 'bg-gray-300 cursor-not-allowed'}`}>견적서 보기</button>
+        </div>
+      </div>
 
       {/* 갤러리 확대 모달 */}
       {selectedImage && (
@@ -590,7 +619,7 @@ export default function GroutEstimatorApp() {
               src={selectedImage.src} 
               alt={selectedImage.title} 
               className="w-full h-auto" 
-              onError={(e) => e.target.src = "https://placehold.co/600x600/e2e8f0/1e293b?text=이미지+준비중"} 
+              onError={(e) => e.target.src = "https://placehold.co/600x600/e2e8f0/1e293b?text=이미지+없음"} 
             />
             <div className="p-4">
               <h3 className="font-bold text-lg">{selectedImage.title}</h3>
@@ -647,10 +676,11 @@ export default function GroutEstimatorApp() {
                     <div className="bg-indigo-50 p-3 rounded-lg mb-3 text-xs text-indigo-800 border border-indigo-100">
                       <div className="font-bold mb-1 flex items-center gap-1"><Gift size={14} /> 서비스 혜택 적용됨</div>
                       <ul className="list-disc list-inside text-indigo-600 space-y-0.5 pl-1">
+                        {/* ★ 수정됨: 목록 순서 반영 ★ */}
+                        {calculation.isFreeEntrance && material !== 'kerapoxy' && <li>현관 바닥 (무료)</li>}
+                        <li>변기테두리, 바닥테두리</li>
                         <li>욕실 젠다이 실리콘 오염방지</li>
                         <li>주방 싱크볼</li>
-                        <li>변기테두리, 바닥테두리</li>
-                        {calculation.isFreeEntrance && material !== 'kerapoxy' && <li>현관 바닥 (무료)</li>}
                       </ul>
                     </div>
                   )}
