@@ -10,12 +10,12 @@ import {
 const HOUSING_TYPES = [
   { 
     id: 'new', 
-    label: '신축 아파트 (입주 전)', 
+    label: '신축 아파트(입주 전)'
     multiplier: 1.0, 
   },
   { 
     id: 'old', 
-    label: '구축/거주 중', 
+    label: '구축/거주 중'
     multiplier: 1.3, 
   },
 ];
@@ -32,7 +32,7 @@ const MATERIALS = [
   },
   { 
     id: 'kerapoxy', 
-    label: '고급형 (에폭시/무광)', 
+    label: '고급형 (에폭시/무광,무펄)', 
     priceMod: 1.8, 
     description: '내구성이 뛰어나고 매트한 질감 (프리미엄)' 
   },
@@ -43,11 +43,11 @@ const MATERIALS = [
 // =================================================================
 const SERVICE_AREAS = [
   { id: 'entrance', label: '현관', basePrice: 50000, icon: DoorOpen, unit: '개소' },
-  { id: 'bathroom_floor', label: '욕실 바닥', basePrice: 120000, icon: Bath, unit: '개소' },
+  { id: 'bathroom_floor', label: '욕실 바닥', basePrice: 150000, icon: Bath, unit: '개소' },
   { id: 'balcony_laundry', label: '베란다/세탁실', basePrice: 150000, icon: LayoutGrid, unit: '개소', desc: '원하는 개수만큼 선택' },
   { id: 'kitchen_wall', label: '주방 벽면', basePrice: 200000, icon: Utensils, unit: '구역' },
   { id: 'silicon_package', label: '실리콘 오염방지', basePrice: 100000, icon: Sparkles, unit: '세트', desc: '욕조+젠다이+세면대+싱크볼' },
-  { id: 'living_room', label: '거실 타일(복도,주방 포함)', basePrice: 550000, icon: Sofa, unit: '구역', desc: '폴리 55만 / 에폭시 110만' },
+  { id: 'living_room', label: '거실 바닥', basePrice: 550000, icon: Sofa, unit: '구역', desc: '복도,주방 포함' },
 ];
 
 export default function GroutEstimatorApp() {
@@ -135,7 +135,7 @@ export default function GroutEstimatorApp() {
     textArea.select();
     try {
         document.execCommand('copy');
-        alert("견적서가 복사되었습니다! 문자나 카톡에 붙여넣기 하세요.");
+        alert("견적서가 복사되었습니다! 상담원에게 꼭! 전달해주세요!");
     } catch (err) {
         console.error('Unable to copy', err);
     }
@@ -292,7 +292,7 @@ export default function GroutEstimatorApp() {
         <section className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
           <h2 className="text-lg font-bold flex items-center gap-2 mb-3">
             <Calculator className="h-5 w-5 text-teal-600" />
-            3. 시공 구역 추가
+            3. 개별 시공범위 견적
           </h2>
           <div className="space-y-3">
             {SERVICE_AREAS.map((area) => {
@@ -340,7 +340,7 @@ export default function GroutEstimatorApp() {
         <div className="bg-blue-50 p-4 rounded-lg text-xs text-blue-700 flex items-start gap-2">
           <Info className="h-4 w-4 flex-shrink-0 mt-0.5" />
           <p>
-            위 가격은 대략적인 예상 금액이며, 타일 크기(소형 타일일수록 비쌈)나 현장 컨디션에 따라 최종 견적은 달라질 수 있습니다. 정확한 견적은 방문 후 확정됩니다.
+            위 가격은 타일크기 바닥 30x30cm, 벽면 30x60 크기 기준이며, 재시공은 기존 견적가의 1.5배로 산정됩니다.
           </p>
         </div>
 
@@ -428,14 +428,14 @@ export default function GroutEstimatorApp() {
                 className="flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 py-3 rounded-xl font-bold hover:bg-gray-50 transition"
               >
                 <Copy size={18} />
-                복사하기
+                견적서 저장
               </button>
               <button 
                 onClick={() => window.location.href = 'tel:010-7734-6709'}
                 className="flex items-center justify-center gap-2 bg-teal-600 text-white py-3 rounded-xl font-bold hover:bg-teal-700 transition shadow-sm"
               >
                 <Phone size={18} />
-                상담 예약
+                상담원 연결
               </button>
             </div>
           </div>
