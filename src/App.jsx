@@ -72,31 +72,31 @@ const REVIEW_EVENTS = [
 ];
 
 // =================================================================
-// [6] 갤러리 데이터 (22장으로 확장됨)
+// [6] 갤러리 데이터 (22장, .jpg로 복구됨)
 // =================================================================
 const PORTFOLIO_IMAGES = [
-  { id: 1, title: "시공 사례 1", desc: "깔끔한 마감", src: "/photo1.png" },
-  { id: 2, title: "시공 사례 2", desc: "프리미엄 시공", src: "/photo2.png" },
-  { id: 3, title: "시공 사례 3", desc: "줄눈의미학", src: "/photo3.png" },
-  { id: 4, title: "시공 사례 4", desc: "꼼꼼한 작업", src: "/photo4.png" },
-  { id: 5, title: "시공 사례 5", desc: "고객 만족", src: "/photo5.png" },
-  { id: 6, title: "시공 사례 6", desc: "완벽한 결과", src: "/photo6.png" },
-  { id: 7, title: "시공 사례 7", desc: "디테일 컷", src: "/photo7.png" },
-  { id: 8, title: "시공 사례 8", desc: "비포 & 애프터", src: "/photo8.png" },
-  { id: 9, title: "시공 사례 9", desc: "화장실 시공", src: "/photo9.png" },
-  { id: 10, title: "시공 사례 10", desc: "현관 시공", src: "/photo10.png" },
-  { id: 11, title: "시공 사례 11", desc: "주방 시공", src: "/photo11.png" },
-  { id: 12, title: "시공 사례 12", desc: "베란다 시공", src: "/photo12.png" },
-  { id: 13, title: "시공 사례 13", desc: "세탁실 시공", src: "/photo13.png" },
-  { id: 14, title: "시공 사례 14", desc: "실리콘 리폼", src: "/photo14.png" },
-  { id: 15, title: "시공 사례 15", desc: "케라폭시", src: "/photo15.png" },
-  { id: 16, title: "시공 사례 16", desc: "폴리우레아", src: "/photo16.png" },
-  { id: 17, title: "시공 사례 17", desc: "아트월", src: "/photo17.png" },
-  { id: 18, title: "시공 사례 18", desc: "샤워부스", src: "/photo18.png" },
-  { id: 19, title: "시공 사례 19", desc: "욕조 테두리", src: "/photo19.png" },
-  { id: 20, title: "시공 사례 20", desc: "전체 시공", src: "/photo20.png" },
-  { id: 21, title: "시공 사례 21", desc: "추가 시공 1", src: "/photo21.png" },
-  { id: 22, title: "시공 사례 22", desc: "추가 시공 2", src: "/photo22.png" },
+  { id: 1, title: "시공 사례 1", desc: "깔끔한 마감", src: "/photo1.jpg" },
+  { id: 2, title: "시공 사례 2", desc: "프리미엄 시공", src: "/photo2.jpg" },
+  { id: 3, title: "시공 사례 3", desc: "줄눈의미학", src: "/photo3.jpg" },
+  { id: 4, title: "시공 사례 4", desc: "꼼꼼한 작업", src: "/photo4.jpg" },
+  { id: 5, title: "시공 사례 5", desc: "고객 만족", src: "/photo5.jpg" },
+  { id: 6, title: "시공 사례 6", desc: "완벽한 결과", src: "/photo6.jpg" },
+  { id: 7, title: "시공 사례 7", desc: "디테일 컷", src: "/photo7.jpg" },
+  { id: 8, title: "시공 사례 8", desc: "비포 & 애프터", src: "/photo8.jpg" },
+  { id: 9, title: "시공 사례 9", desc: "화장실 시공", src: "/photo9.jpg" },
+  { id: 10, title: "시공 사례 10", desc: "현관 시공", src: "/photo10.jpg" },
+  { id: 11, title: "시공 사례 11", desc: "주방 시공", src: "/photo11.jpg" },
+  { id: 12, title: "시공 사례 12", desc: "베란다 시공", src: "/photo12.jpg" },
+  { id: 13, title: "시공 사례 13", desc: "세탁실 시공", src: "/photo13.jpg" },
+  { id: 14, title: "시공 사례 14", desc: "실리콘 리폼", src: "/photo14.jpg" },
+  { id: 15, title: "시공 사례 15", desc: "케라폭시", src: "/photo15.jpg" },
+  { id: 16, title: "시공 사례 16", desc: "폴리우레아", src: "/photo16.jpg" },
+  { id: 17, title: "시공 사례 17", desc: "아트월", src: "/photo17.jpg" },
+  { id: 18, title: "시공 사례 18", desc: "샤워부스", src: "/photo18.jpg" },
+  { id: 19, title: "시공 사례 19", desc: "욕조 테두리", src: "/photo19.jpg" },
+  { id: 20, title: "시공 사례 20", desc: "전체 시공", src: "/photo20.jpg" },
+  { id: 21, title: "시공 사례 21", desc: "추가 시공 1", src: "/photo21.jpg" },
+  { id: 22, title: "시공 사례 22", desc: "추가 시공 2", src: "/photo22.jpg" },
 ];
 
 export default function GroutEstimatorApp() {
@@ -700,7 +700,7 @@ export default function GroutEstimatorApp() {
             </div>
             <div className="p-4 bg-gray-50 grid grid-cols-2 gap-3">
                <button onClick={copyToClipboard} className="flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 py-3 rounded-xl font-bold hover:bg-gray-50 transition"><Copy size={18} />복사하기</button>
-               <button onClick={() => window.location.href = 'tel:010-1234-5678'} className="flex items-center justify-center gap-2 bg-teal-600 text-white py-3 rounded-xl font-bold hover:bg-teal-700 transition shadow-sm"><Phone size={18} />상담 예약</button>
+               <button onClick={() => window.location.href = 'tel:010-7734-6709'} className="flex items-center justify-center gap-2 bg-teal-600 text-white py-3 rounded-xl font-bold hover:bg-teal-700 transition shadow-sm"><Phone size={18} />상담 예약</button>
             </div>
           </div>
         </div>
