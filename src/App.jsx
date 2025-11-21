@@ -344,9 +344,11 @@ export default function GroutEstimatorApp() {
                 상담 예약
               </button>
             </div>
+          
           </div>
         </div>
       )}
     </div>
   );
 }
+
