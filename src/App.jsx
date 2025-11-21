@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Calculator, Home, Bath, DoorOpen, Utensils, LayoutGrid, 
-  CheckCircle2, Info, Copy, RefreshCw, Phone, Sparkles, Hammer, Sofa, Palette, Crown, Gift, Eraser, Star, Image as ImageIcon, X
+  CheckCircle2, Info, Copy, RefreshCw, Phone, Sparkles, Hammer, Sofa, Palette, Crown, Gift, Eraser, Star, Image as ImageIcon, X, ChevronDown
 } from 'lucide-react';
 
 // =================================================================
-// [1] 현장 유형 설정
+// [1] 현장 유형 설정 (신축/구축 가격 동일하게 변경됨)
 // =================================================================
 const HOUSING_TYPES = [
   { 
@@ -16,7 +16,7 @@ const HOUSING_TYPES = [
   { 
     id: 'old', 
     label: '구축/거주 중', 
-    multiplier: 1.5, 
+    multiplier: 1.0, 
   },
 ];
 
@@ -76,19 +76,33 @@ const REVIEW_EVENTS = [
 ];
 
 // =================================================================
-// [6] 갤러리 데이터 (샘플 이미지)
+// [6] 갤러리 데이터
 // =================================================================
 const PORTFOLIO_IMAGES = [
-  { id: 1, title: "욕실 바닥 시공", desc: "깔끔한 화이트 펄 시공", src: "https://images.unsplash.com/photo-1584622050111-993a426fbf0a?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" },
+  { id: 1, title: "욕실 바닥 시공", desc: "깔끔한 화이트 펄", src: "https://images.unsplash.com/photo-1584622050111-993a426fbf0a?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" },
   { id: 2, title: "현관 폴리싱 타일", desc: "고급스러운 골드 펄", src: "https://images.unsplash.com/photo-1600607686527-6fb886090705?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" },
   { id: 3, title: "주방 벽면", desc: "기름때 방지 시공", src: "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" },
   { id: 4, title: "케라폭시 시공", desc: "무광 매트 질감", src: "https://images.unsplash.com/photo-1620626012053-1847789ae40b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" },
   { id: 5, title: "실리콘 오염방지", desc: "욕조 테두리 리폼", src: "https://images.unsplash.com/photo-1507652313519-d4e9174996dd?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" },
   { id: 6, title: "베란다 타일", desc: "곰팡이 방지 시공", src: "https://images.unsplash.com/photo-1505691723518-36a5ac3be353?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" },
+  { id: 7, title: "안방 욕실", desc: "그레이 펄 시공", src: "https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" },
+  { id: 8, title: "샤워부스 벽면", desc: "물때 방지 코팅", src: "https://images.unsplash.com/photo-1564540586988-aa4e53c3d799?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" },
+  { id: 9, title: "공용 욕실", desc: "스노우 화이트", src: "https://images.unsplash.com/photo-1604709177595-ee9c2580e9a3?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" },
+  { id: 10, title: "현관 입구", desc: "다크 그레이", src: "https://images.unsplash.com/photo-1519974719765-e6559e63b30a?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" },
+  { id: 11, title: "세탁실 바닥", desc: "곰팡이 완벽 차단", src: "https://images.unsplash.com/photo-1610557892470-55d9e80c0bce?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" },
+  { id: 12, title: "싱크대볼 테두리", desc: "실리콘 리폼", src: "https://images.unsplash.com/photo-1588854337473-b958d756d289?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" },
+  { id: 13, title: "거실 폴리싱", desc: "케라폭시 무광", src: "https://images.unsplash.com/photo-1481277542470-605612bd2d61?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" },
+  { id: 14, title: "욕조 테두리", desc: "프리미엄 실리콘", src: "https://images.unsplash.com/photo-1595428774223-ef52624120d2?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" },
+  { id: 15, title: "아트월 줄눈", desc: "벽면 디자인 시공", src: "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" },
+  { id: 16, title: "베란다 탄성코트", desc: "결로 방지", src: "https://images.unsplash.com/photo-1533750516457-a7f992034fec?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" },
+  { id: 17, title: "드레스룸", desc: "바닥 타일 코팅", src: "https://images.unsplash.com/photo-1558603668-6570496b66f8?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" },
+  { id: 18, title: "팬트리룸", desc: "깔끔한 마감", src: "https://images.unsplash.com/photo-1595515106969-1ce29569ff53?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" },
+  { id: 19, title: "상가 바닥", desc: "대형 타일 시공", src: "https://images.unsplash.com/photo-1565183997392-2f6f122e5912?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" },
+  { id: 20, title: "부분 보수", desc: "탈락된 줄눈 재시공", src: "https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" },
 ];
 
 export default function GroutEstimatorApp() {
-  const [activeTab, setActiveTab] = useState('calculator'); // 'calculator' or 'gallery'
+  const [activeTab, setActiveTab] = useState('calculator');
   const [housingType, setHousingType] = useState('new');
   const [material, setMaterial] = useState('poly');
   
@@ -101,7 +115,8 @@ export default function GroutEstimatorApp() {
   
   const [selectedReviews, setSelectedReviews] = useState(new Set());
   const [showModal, setShowModal] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(null); // 갤러리 모달용
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [visibleImages, setVisibleImages] = useState(6);
 
   const handleQuantityChange = (id, delta) => {
     setQuantities(prev => {
@@ -315,6 +330,7 @@ export default function GroutEstimatorApp() {
       text += `\n🎁 [패키지 서비스 적용됨]\n`;
       text += `- 욕실 젠다이 실리콘 오염방지\n`;
       text += `- 주방 싱크볼\n`;
+      text += `- 변기테두리, 바닥테두리\n`;
       if (calculation.isFreeEntrance) text += `- 현관바닥 (무료)\n`;
     }
 
@@ -359,7 +375,7 @@ export default function GroutEstimatorApp() {
           </button>
         </div>
         
-        {/* 탭 메뉴 추가 */}
+        {/* 탭 메뉴 */}
         <div className="flex text-sm font-bold">
           <button 
             onClick={() => setActiveTab('calculator')}
@@ -383,7 +399,7 @@ export default function GroutEstimatorApp() {
       <main className="max-w-md mx-auto p-4 space-y-6">
         {activeTab === 'calculator' ? (
           <>
-            {/* 기존 견적기 화면 */}
+            {/* --- 견적기 탭 내용 --- */}
             <section className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
               <h2 className="text-lg font-bold flex items-center gap-2 mb-3">
                 <Home className="h-5 w-5 text-teal-600" /> 1. 현장 유형을 선택하세요
@@ -526,14 +542,15 @@ export default function GroutEstimatorApp() {
             </div>
           </>
         ) : (
-          // 갤러리 탭 내용
+          // --- 갤러리 탭 내용 ---
           <div className="space-y-4 animate-fade-in">
             <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
               <h2 className="text-lg font-bold text-gray-800 mb-1">시공 포트폴리오</h2>
               <p className="text-xs text-gray-500 mb-4">줄눈의미학의 꼼꼼한 시공 사례를 확인해보세요.</p>
               
+              {/* 갤러리 그리드 (반응형) */}
               <div className="grid grid-cols-2 gap-3">
-                {PORTFOLIO_IMAGES.map((img) => (
+                {PORTFOLIO_IMAGES.slice(0, visibleImages).map((img) => (
                   <div 
                     key={img.id} 
                     onClick={() => setSelectedImage(img)}
@@ -547,16 +564,27 @@ export default function GroutEstimatorApp() {
                   </div>
                 ))}
               </div>
+
+              {/* 더보기 버튼 (사진이 더 남아있을 때만 표시) */}
+              {visibleImages < PORTFOLIO_IMAGES.length && (
+                <button 
+                  onClick={() => setVisibleImages(prev => prev + 6)} // 6장씩 더 보여줌
+                  className="w-full mt-4 py-3 rounded-lg bg-gray-100 text-gray-600 font-bold text-sm hover:bg-gray-200 flex items-center justify-center gap-1"
+                >
+                  더 보기 <ChevronDown size={16} />
+                </button>
+              )}
             </div>
+            
             <div className="bg-yellow-50 p-4 rounded-lg text-xs text-yellow-800">
-              💡 <strong>갤러리 사진 교체 방법</strong><br/>
-              사장님이 직접 찍은 사진 파일을 <code>public</code> 폴더에 넣고 코드를 수정하면 이곳에 내 사진을 띄울 수 있습니다.
+              💡 <strong>사진 추가 방법</strong><br/>
+              public 폴더에 사진을 넣고, 코드 상단의 <code>PORTFOLIO_IMAGES</code> 목록에 파일명을 추가하면 자동으로 이곳에 나타납니다.
             </div>
           </div>
         )}
       </main>
 
-      {/* 하단 고정바 (갤러리 탭에서는 숨김 처리할 수도 있으나, 견적 유도를 위해 유지하는 것이 좋음. 단, 갤러리 탭에서는 '견적내러 가기' 버튼으로 바꾸는 것도 방법. 여기서는 유지하되 탭에 따라 동작 변경) */}
+      {/* 하단 고정바 */}
       {activeTab === 'calculator' && (
         <>
           {calculation.isPackageActive && (
@@ -565,7 +593,7 @@ export default function GroutEstimatorApp() {
                 <div className="bg-white/20 p-2 rounded-full"><Gift className="w-5 h-5 text-yellow-300" /></div>
                 <div className="text-xs">
                   <div className="font-bold text-yellow-300 mb-0.5">🎉 패키지 혜택 적용중!</div>
-                  <div>욕실 젠다이 실리콘, 주방 싱크볼 <span className="font-bold underline">서비스</span>{calculation.isFreeEntrance && <span>, 현관바닥 무료</span>}</div>
+                  <div>젠다이, 싱크볼, 변기/바닥테두리 <span className="font-bold underline">서비스</span>{calculation.isFreeEntrance && <span>, 현관바닥 무료</span>}</div>
                 </div>
               </div>
             </div>
@@ -586,7 +614,7 @@ export default function GroutEstimatorApp() {
         </>
       )}
 
-      {/* 갤러리 이미지 확대 모달 */}
+      {/* 갤러리 모달 */}
       {selectedImage && (
         <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4" onClick={() => setSelectedImage(null)}>
           <button className="absolute top-4 right-4 text-white p-2"><X size={24} /></button>
@@ -600,7 +628,7 @@ export default function GroutEstimatorApp() {
         </div>
       )}
 
-      {/* 견적서 모달 (기존 코드) */}
+      {/* 견적서 모달 */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-fade-in">
           <div className="bg-white w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden">
@@ -645,6 +673,7 @@ export default function GroutEstimatorApp() {
                       <ul className="list-disc list-inside text-indigo-600 space-y-0.5 pl-1">
                         <li>욕실 젠다이 실리콘 오염방지</li>
                         <li>주방 싱크볼</li>
+                        <li>변기테두리, 바닥테두리</li>
                         {calculation.isFreeEntrance && <li>현관 바닥 (무료)</li>}
                       </ul>
                     </div>
