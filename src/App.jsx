@@ -12,13 +12,11 @@ const HOUSING_TYPES = [
     id: 'new', 
     label: '신축 아파트 (입주 전)', 
     multiplier: 1.0, 
-    description: '백시멘트 제거가 비교적 쉽습니다.' 
   },
   { 
     id: 'old', 
     label: '구축/거주 중', 
     multiplier: 1.3, 
-    description: '기존 줄눈 제거 비용이 추가됩니다.' 
   },
 ];
 
