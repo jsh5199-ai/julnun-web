@@ -544,19 +544,19 @@ export default function GroutEstimatorApp() {
                     onClick={() => setSelectedImage(img)}
                     className="group relative aspect-square rounded-lg overflow-hidden cursor-pointer border border-gray-100"
                   >
-                    {/* ★ 이미지가 없을 때를 대비한 onError 핸들러 ★ */}
+                    {/* ★ 사진만 나오도록 오버레이 (설명 텍스트)를 숨김 ★ */}
                     <img 
                       src={img.src} 
                       alt={img.title} 
                       className="w-full h-full object-cover transition-transform group-hover:scale-110" 
                       onError={(e) => {
-                        e.target.onerror = null; // 무한 루프 방지
+                        e.target.onerror = null; 
                         e.target.src = "https://placehold.co/600x600/e2e8f0/1e293b?text=이미지+준비중";
                       }}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-3">
-                      <span className="text-white font-bold text-sm">{img.title}</span>
-                      <span className="text-white/80 text-xs">{img.desc}</span>
+                    {/* 👇 이 부분이 설명 텍스트를 감추는 역할입니다. (opacity-0으로 숨김) */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 transition-opacity">
+                      {/* 텍스트 내용 자체가 없으므로, 오버레이만 남기고 텍스트는 렌더링하지 않습니다. */}
                     </div>
                   </div>
                 ))}
@@ -572,10 +572,6 @@ export default function GroutEstimatorApp() {
               )}
             </div>
             
-            <div className="bg-yellow-50 p-4 rounded-lg text-xs text-yellow-800">
-              💡 <strong>사진 추가 방법</strong><br/>
-              public 폴더에 사진을 넣고, 코드 상단의 <code>PORTFOLIO_IMAGES</code> 목록에 파일명을 추가하면 자동으로 이곳에 나타납니다.
-            </div>
           </div>
         )}
       </main>
