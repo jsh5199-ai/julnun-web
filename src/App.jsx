@@ -120,14 +120,10 @@ const Accordion = ({ question, answer }) => {
 };
 
 // =================================================================
-// [9] Gemini API 설정
+// [9] Gemini API 설정 (사용하지 않으므로 삭제)
 // =================================================================
-const apiKey = ""; 
-const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
 
-// =================================================================
-// [10] 메인 앱 컴포넌트
-// =================================================================
+
 export default function GroutEstimatorApp() {
   const [activeTab, setActiveTab] = useState('calculator');
   const [housingType, setHousingType] = useState('new');
@@ -148,9 +144,9 @@ export default function GroutEstimatorApp() {
   const [selectedImage, setSelectedImage] = useState(null);
   const [visibleImages, setVisibleImages] = useState(6);
 
-  // Gemini LLM 관련 상태
-  const [llmInstructions, setLlmInstructions] = useState('');
-  const [isLlmLoading, setIsLlmLoading] = useState(false);
+  // Gemini LLM 관련 상태 (삭제)
+  // const [llmInstructions, setLlmInstructions] = useState('');
+  // const [isLlmLoading, setIsLlmLoading] = useState(false);
 
 
   const SOOMGO_REVIEW_URL = 'https://www.soomgo.com/profile/users/10755579?tab=review';
@@ -179,66 +175,8 @@ export default function GroutEstimatorApp() {
     });
   };
   
-  // LLM 호출 함수 (맞춤 관리법 생성)
-  const generateCareInstructions = async () => {
-    if (isLlmLoading || llmInstructions) return;
-
-    setIsLlmLoading(true);
-    setLlmInstructions('');
-    
-    const selectedMaterial = MATERIALS.find(m => m.id === material);
-    const materialType = selectedMaterial.label; // 폴리아스파틱 또는 에폭시(무광/무펄)
-
-    const curingInfo = material === 'poly' 
-        ? "폴리아스파틱은 6시간 양생기간이 필요하며, 2년 A/S가 제공됩니다."
-        : "에폭시(케라폭시/스타라이크)는 24시간~2~3일 양생기간이 필요하며, 5년 A/S가 제공됩니다.";
-
-    const systemPrompt = `You are an expert grout installation specialist. Your task is to generate concise, step-by-step post-installation care instructions based ONLY on the provided material type and curing details. Use polite, easy-to-understand Korean. Use markdown lists. Do not add any extra promotional content or quotes.`;
-    
-    const userQuery = `선택된 시공재료는 ${materialType}입니다. 이 재료의 양생 및 관리 정보는 다음과 같습니다: ${curingInfo}. 고객에게 전달할 명확하고 친절한 시공 후 관리 방법을 생성해 주세요. 물 사용, 청소, A/S 기간을 중점적으로 설명해 주세요.`;
-
-    const payload = {
-        contents: [{ parts: [{ text: userQuery }] }],
-        systemInstruction: { parts: [{ text: systemPrompt }] },
-    };
-
-    try {
-        let response = await fetch(apiUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-
-        // Exponential backoff retry logic (simplified for demonstration)
-        const MAX_RETRIES = 3;
-        let retryCount = 0;
-        while (!response.ok && retryCount < MAX_RETRIES) {
-            const delay = Math.pow(2, retryCount) * 1000;
-            await new Promise(resolve => setTimeout(resolve, delay));
-            response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            retryCount++;
-        }
-
-        if (!response.ok) {
-            throw new Error(`API call failed with status: ${response.status}`);
-        }
-
-        const result = await response.json();
-        const text = result.candidates?.[0]?.content?.parts?.[0]?.text || "죄송합니다. 관리법 생성에 실패했습니다.";
-        
-        setLlmInstructions(text);
-
-    } catch (error) {
-        console.error("Gemini API Error:", error);
-        setLlmInstructions("🚨 관리법 생성 중 서버 오류가 발생했습니다.");
-    } finally {
-        setIsLlmLoading(false);
-    }
-  };
+  // LLM 호출 함수 (삭제)
+  // const generateCareInstructions = async () => { ... }
 
 
   const calculation = useMemo(() => {
@@ -309,7 +247,7 @@ export default function GroutEstimatorApp() {
             isFreeEntrance = true; 
             labelText = '(패키지 할인 적용)';
         }
-        else if (qBathFloor >= 2 && (qShower >= 1 || qBathtub >= 1)) { // 욕실2 + 샤워 OR 욕조 (75万)
+        else if (qBathFloor >= 2 && (qShower >= 1 || qBathtub >= 1)) { // 욕실2 + 샤워 OR 욕조 (75만)
             total += 750000;
             q['bathroom_floor'] -= 2;
             if (qShower >= 1) q['shower_booth'] -= 1;
@@ -341,7 +279,7 @@ export default function GroutEstimatorApp() {
         isFreeEntrance = true;
         labelText = '(풀패키지 할인 적용)';
       }
-      else if (qBathFloor >= 2 && (qShower >= 1 || qBathtub >= 1)) { // 욕실2 + 샤워 OR 욕조 (38万)
+      else if (qBathFloor >= 2 && (qShower >= 1 || qBathtub >= 1)) { // 욕실2 + 샤워 OR 욕조 (38만)
         total += 380000;
         q['bathroom_floor'] -= 2;
         if (qShower >= 1) q['shower_booth'] -= 1;
@@ -475,7 +413,7 @@ export default function GroutEstimatorApp() {
 
     // 추가 비용 발생 가능 요소 (견적서에도 포함)
     text += `\n⚠️ [추가 비용 발생 가능 요소]\n`;
-    text += `- 타일 크기: 바닥 30x30cm, 벽 30x60cm 크기보다 작은 타일일 경우\n`;
+    text += `- 견적은 타일크기 바닥 30x30cm, 벽면 30x60cm 기준이며, 기준보다 작을 경우(조각타일 시공불가)\n`;
     text += `- 재시공: 셀프 시공 포함 재시공일 경우\n`;
     text += `- 특이 구조: 일반 사이즈 공간이 아닌, 넓거나 특이 구조일 경우\n`;
     
@@ -693,50 +631,6 @@ export default function GroutEstimatorApp() {
               </div>
               <p className="text-xs text-indigo-400 mt-2 text-center">※ 중복 선택 가능합니다. 시공 완료 후 꼭 작성해주세요!</p>
             </section>
-
-            {/* --- 사진 첨부 안내 섹션 --- */}
-            <section className="bg-gray-100 p-4 rounded-xl shadow-sm border border-gray-300">
-                <h2 className="text-lg font-bold flex items-center gap-2 mb-3 text-gray-800">
-                    <Camera className="h-5 w-5 text-gray-600" /> 6. 사진 첨부 (상담 전 필수)
-                </h2>
-                <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200">
-                    <div className="flex items-center">
-                        <input 
-                            type="checkbox" 
-                            id="photoCheck" 
-                            checked={isPhotoChecked}
-                            onChange={(e) => setIsPhotoChecked(e.target.checked)}
-                            className="h-4 w-4 text-teal-600 border-gray-300 rounded focus:ring-teal-500 mr-3"
-                        />
-                        <label htmlFor="photoCheck" className="text-sm font-medium text-gray-700">현장 사진을 카톡/문자로 보냈습니다.</label>
-                    </div>
-                </div>
-                <p className="text-xs text-gray-500 mt-2">
-                    *정확한 견적과 상담을 위해 시공 부위 사진을 카카오톡 채널 또는 문자로 보내주세요.
-                </p>
-            </section>
-            
-            {/* --- 추가 비용 발생 가능 요소 섹션 --- */}
-            <section className="bg-red-50 p-4 rounded-xl shadow-sm border border-red-200">
-                <h2 className="text-lg font-bold flex items-center gap-2 mb-3 text-red-700">
-                    <AlertTriangle className="h-5 w-5 text-red-600" /> 추가 비용 발생 가능 요소
-                </h2>
-                <ul className="list-disc list-outside space-y-2 text-sm text-gray-700 ml-4">
-                    <li>
-                        <span className="font-bold">타일 크기:</span> 바닥 30x30cm, 벽 30x60cm 크기보다 작은(조각) 타일일 경우
-                    </li>
-                    <li>
-                        <span className="font-bold">재시공:</span> 기존 줄눈을 제거하는(셀프 시공 포함) 재시공일 경우
-                    </li>
-                    <li>
-                        <span className="font-bold">특이 구조:</span> 일반 사이즈 공간이 아닌, 넓거나 특이 구조일 경우
-                    </li>
-                </ul>
-                <p className="text-xs font-bold text-red-600 mt-3 p-2 border-t border-red-100 pt-3 flex items-center gap-1">
-                    <Camera className="w-4 h-4" />
-                    정확한 견적을 위해 해당 공간의 사진을 상담원에게 전달해주세요.
-                </p>
-            </section>
             
             
             {/* --- 자주 묻는 질문 (FAQ) --- */}
@@ -897,25 +791,7 @@ export default function GroutEstimatorApp() {
                   </span>
                 </div>
                 
-                {/* AI 관리법 버튼 */}
-                <button
-                    onClick={generateCareInstructions}
-                    disabled={isLlmLoading}
-                    className="w-full py-2 rounded-lg bg-teal-50 text-teal-700 font-bold text-sm border border-teal-200 hover:bg-teal-100 transition flex items-center justify-center gap-2"
-                >
-                    {isLlmLoading ? (
-                        <>
-                            <svg className="animate-spin h-4 w-4 text-teal-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                            AI가 관리법 생성 중...
-                        </>
-                    ) : (
-                        <>
-                            <Clock size={16} />
-                            AI 맞춤 관리법 생성
-                        </>
-                    )}
-                </button>
-                
+                {/* AI 관리법 버튼 (제거됨) */}
                 <div className="space-y-2 border-b pb-4">
                   <p className="text-gray-500 text-xs mb-1 font-bold">📋 줄눈 시공 범위</p>
                   {SERVICE_AREAS.map(area => {if (quantities[area.id] > 0) {return (<div key={area.id} className="flex justify-between items-center bg-gray-50 p-2 rounded"><span>{area.label} <span className="text-gray-400 text-xs">x {quantities[area.id]}</span></span></div>);}return null;})}
@@ -935,14 +811,14 @@ export default function GroutEstimatorApp() {
                   </div>
                 )}
 
-                {/* 추가 비용 발생 가능 요소 (견적서 모달 내) */}
+                {/* 추가 비용 발생 가능 요소 (견적서 모달 내) - 문구 수정됨 */}
                 <div className="space-y-2 border-b pb-4 bg-red-50 p-3 rounded-lg border border-red-100">
                     <p className="text-red-700 text-xs mb-1 font-bold flex items-center gap-1">
                         <Info size={14} /> 추가 비용 발생 가능 요소
                     </p>
                     <ul className="list-disc list-outside text-xs text-gray-700 ml-4 space-y-1">
                         <li>
-                            <span className="font-bold">타일 크기:</span> 바닥 30x30cm, 벽 30x60cm보다 작은 타일일 경우
+                            <span className="font-bold">견적 기준:</span> 타일크기 바닥 30x30cm, 벽면 30x60cm 기준이며, 기준보다 작을 경우(조각타일 시공불가)
                         </li>
                         <li>
                             <span className="font-bold">재시공:</span> 셀프 시공 포함 재시공일 경우
