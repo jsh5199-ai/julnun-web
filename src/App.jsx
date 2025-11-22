@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { 
   Calculator, Home, Bath, DoorOpen, Utensils, LayoutGrid, 
-  CheckCircle2, Info, Copy, RefreshCw, Phone, Sparkles, Hammer, Sofa, Palette, Crown, Gift, Eraser, Star, Image as ImageIcon, X, ChevronDown, MessageSquare, HelpCircle, Check, AlertTriangle, Camera, Clock
+  CheckCircle2, Info, Copy, RefreshCw, Phone, Sparkles, Hammer, Sofa, Palette, Crown, Gift, Eraser, Star, Image as ImageIcon, X, ChevronDown, MessageSquare, HelpCircle, Clock
 } from 'lucide-react';
 
 // =================================================================
@@ -88,7 +88,7 @@ const PORTFOLIO_IMAGES = [
 ];
 
 // =================================================================
-// [7] FAQ 데이터 (답변 수정됨)
+// [7] FAQ 데이터
 // =================================================================
 const FAQ_ITEMS = [
     { question: "Q1. 시공 시간은 얼마나 걸리나요?", answer: "시공범위에 따라 다르지만, 평균적으로 4~6시간 정도 소요되고 있으며 범위/소재에 따라 최대 2일 시공이 걸리는 경우도 있습니다." },
@@ -119,10 +119,6 @@ const Accordion = ({ question, answer }) => {
     );
 };
 
-// =================================================================
-// [9] Gemini API 설정 (사용하지 않으므로 삭제)
-// =================================================================
-
 
 export default function GroutEstimatorApp() {
   const [activeTab, setActiveTab] = useState('calculator');
@@ -135,23 +131,13 @@ export default function GroutEstimatorApp() {
   const [quantities, setQuantities] = useState(
     [...SERVICE_AREAS, ...SILICON_AREAS].reduce((acc, area) => ({ ...acc, [area.id]: 0 }), {})
   );
-
-  // [사진 첨부 체크박스 상태]
-  const [isPhotoChecked, setIsPhotoChecked] = useState(false);
   
   const [selectedReviews, setSelectedReviews] = useState(new Set()); 
   const [showModal, setShowModal] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [visibleImages, setVisibleImages] = useState(6);
 
-  // Gemini LLM 관련 상태 (삭제)
-  // const [llmInstructions, setLlmInstructions] = useState('');
-  // const [isLlmLoading, setIsLlmLoading] = useState(false);
-
-
   const SOOMGO_REVIEW_URL = 'https://www.soomgo.com/profile/users/10755579?tab=review';
-  const KAKAO_CHAT_URL = 'https://pf.kakao.com/_xxxxxxx'; 
-
 
   const handleQuantityChange = (id, delta) => {
     setQuantities(prev => {
@@ -175,10 +161,6 @@ export default function GroutEstimatorApp() {
     });
   };
   
-  // LLM 호출 함수 (삭제)
-  // const generateCareInstructions = async () => { ... }
-
-
   const calculation = useMemo(() => {
     const selectedHousing = HOUSING_TYPES.find(h => h.id === housingType);
     const selectedMaterial = MATERIALS.find(m => m.id === material);
@@ -302,7 +284,6 @@ export default function GroutEstimatorApp() {
 
     // --- 패키지 로직 끝 / 잔여 항목 계산 시작 ---
     
-    // 모든 항목 (줄눈 + 실리콘)을 순회하며 잔여 수량 계산
     const ALL_AREAS = [...SERVICE_AREAS, ...SILICON_AREAS];
     
     ALL_AREAS.forEach(area => {
@@ -356,7 +337,6 @@ export default function GroutEstimatorApp() {
       isPackageActive,
       isFreeEntrance,
       discountAmount,
-      isTileWarning: false // 복구된 버전에서는 타일 경고 로직을 비활성화
     };
 
   }, [housingType, material, quantities, selectedReviews]);
@@ -371,14 +351,6 @@ export default function GroutEstimatorApp() {
     let text = `[줄눈의미학 견적 문의]\n\n`;
     text += `🏠 현장유형: ${housingLabel}\n`;
     text += `✨ 시공재료: ${materialLabel}\n`;
-    
-    // 사진 첨부 안내
-    text += `\n📸 [사진 첨부] (필수)\n`;
-    if (isPhotoChecked) {
-        text += `- 고객님께서 현장 사진을 카톡/문자로 보내주셨습니다.\n`;
-    } else {
-        text += `- 상담원에게 현장 사진을 카톡이나 문자로 꼭 보내주세요.\n`;
-    }
     
     text += `\n📋 [줄눈 시공]\n`;
     SERVICE_AREAS.forEach(area => {
@@ -411,12 +383,6 @@ export default function GroutEstimatorApp() {
       });
     }
 
-    // 추가 비용 발생 가능 요소 (견적서에도 포함)
-    text += `\n⚠️ [추가 비용 발생 가능 요소]\n`;
-    text += `- 견적은 타일크기 바닥 30x30cm, 벽면 30x60cm 기준이며, 기준보다 작을 경우(조각타일 시공불가)\n`;
-    text += `- 재시공: 셀프 시공 포함 재시공일 경우\n`;
-    text += `- 특이 구조: 일반 사이즈 공간이 아닌, 넓거나 특이 구조일 경우\n`;
-    
     // 패키지 서비스 내역
     if (calculation.isPackageActive) {
       text += `\n🎁 [패키지 서비스 적용됨]\n`;
@@ -428,7 +394,7 @@ export default function GroutEstimatorApp() {
 
     text += `\n💰 예상 견적가: ${calculation.price.toLocaleString()}원`;
     if (calculation.label) text += ` ${calculation.label}`;
-    text += `\n\n※ 줄눈의미학 온라인 견적입니다. 정확한 견적을 위해 해당 공간의 사진을 상담원에게 전달해주어야 합니다. 현장 상황에 따라 변동될 수 있습니다.`;
+    text += `\n\n※ 줄눈의미학 온라인 견적입니다. 견적은 타일크기 바닥 30x30cm, 벽면 30x60cm 기준이며, 기준보다 작을 경우(조각타일 시공불가)입니다.`;
     return text;
   };
 
@@ -632,6 +598,11 @@ export default function GroutEstimatorApp() {
               <p className="text-xs text-indigo-400 mt-2 text-center">※ 중복 선택 가능합니다. 시공 완료 후 꼭 작성해주세요!</p>
             </section>
             
+            {/* 주의사항 */}
+            <div className="bg-blue-50 p-4 rounded-lg text-xs text-blue-700 flex items-start gap-2">
+              <Info className="h-4 w-4 flex-shrink-0 mt-0.5" />
+              <p>위 가격은 타일크기 바닥 30x30cm, 벽면 30x60 크기 기준이며, 재시공은 기존 견적가의 1.5배로 산정됩니다. 또한, 조각타일은 시공이 불가합니다.</p>
+            </div>
             
             {/* --- 자주 묻는 질문 (FAQ) --- */}
             <section className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm mt-6">
@@ -703,24 +674,6 @@ export default function GroutEstimatorApp() {
       {/* 하단 고정바 */}
       {(activeTab === 'calculator' || activeTab === 'gallery') && (
         <>
-          {/* AI 관리법 모달 */}
-          {llmInstructions && (
-              <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={() => setLlmInstructions('')}>
-                  <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl p-6" onClick={e => e.stopPropagation()}>
-                      <h3 className="font-bold text-xl mb-3 flex items-center gap-2 text-teal-700"><Clock size={20} /> AI 맞춤 시공 후 관리법</h3>
-                      <div className="max-h-80 overflow-y-auto border border-gray-200 p-3 rounded-lg text-sm bg-gray-50">
-                          <div dangerouslySetInnerHTML={{ __html: llmInstructions.replace(/\n/g, '<br/>') }} />
-                      </div>
-                      <button 
-                          onClick={() => setLlmInstructions('')}
-                          className="mt-4 w-full py-2 rounded-lg bg-teal-600 text-white font-bold hover:bg-teal-700 transition"
-                      >
-                          닫기
-                      </button>
-                  </div>
-              </div>
-          )}
-
           {calculation.isPackageActive && activeTab === 'calculator' && (
             <div className="fixed bottom-[90px] left-4 right-4 max-w-md mx-auto z-10 animate-bounce-up">
               <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-3 rounded-lg shadow-lg flex items-center gap-3">
@@ -791,7 +744,6 @@ export default function GroutEstimatorApp() {
                   </span>
                 </div>
                 
-                {/* AI 관리법 버튼 (제거됨) */}
                 <div className="space-y-2 border-b pb-4">
                   <p className="text-gray-500 text-xs mb-1 font-bold">📋 줄눈 시공 범위</p>
                   {SERVICE_AREAS.map(area => {if (quantities[area.id] > 0) {return (<div key={area.id} className="flex justify-between items-center bg-gray-50 p-2 rounded"><span>{area.label} <span className="text-gray-400 text-xs">x {quantities[area.id]}</span></span></div>);}return null;})}
@@ -810,24 +762,6 @@ export default function GroutEstimatorApp() {
                     {REVIEW_EVENTS.map(evt => {if (selectedReviews.has(evt.id)) {return (<div key={evt.id} className="flex justify-between items-center bg-indigo-50 p-2 rounded border border-indigo-100 text-indigo-800"><span>{evt.label}</span><span className="font-bold text-pink-600">-{evt.discount.toLocaleString()}원</span></div>);}return null;})}
                   </div>
                 )}
-
-                {/* 추가 비용 발생 가능 요소 (견적서 모달 내) - 문구 수정됨 */}
-                <div className="space-y-2 border-b pb-4 bg-red-50 p-3 rounded-lg border border-red-100">
-                    <p className="text-red-700 text-xs mb-1 font-bold flex items-center gap-1">
-                        <Info size={14} /> 추가 비용 발생 가능 요소
-                    </p>
-                    <ul className="list-disc list-outside text-xs text-gray-700 ml-4 space-y-1">
-                        <li>
-                            <span className="font-bold">견적 기준:</span> 타일크기 바닥 30x30cm, 벽면 30x60cm 기준이며, 기준보다 작을 경우(조각타일 시공불가)
-                        </li>
-                        <li>
-                            <span className="font-bold">재시공:</span> 셀프 시공 포함 재시공일 경우
-                        </li>
-                        <li>
-                            <span className="font-bold">특이 구조:</span> 일반 사이즈 공간이 아닌, 넓거나 특이 구조일 경우
-                        </li>
-                    </ul>
-                </div>
 
                 <div className="pt-2 mt-2">
                   {calculation.isPackageActive && (
