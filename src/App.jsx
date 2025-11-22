@@ -1,19 +1,27 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Calculator, Home, Bath, DoorOpen, Utensils, LayoutGrid, 
-  CheckCircle2, Info, Copy, RefreshCw, Phone, Sparkles, Hammer, Sofa, Palette, Crown, Gift, Eraser, Star, Image as ImageIcon, X, ChevronDown
+  CheckCircle2, Info, Copy, RefreshCw, Phone, Sparkles, Hammer, Sofa, Palette, Crown, Gift, Eraser, Star, Image as ImageIcon, X, ChevronDown, MessageSquare
 } from 'lucide-react';
 
 // =================================================================
 // [1] 현장 유형 설정
 // =================================================================
 const HOUSING_TYPES = [
-  { id: 'new', label: '신축 아파트(입주 전)', multiplier: 1.0 },
-  { id: 'old', label: '구축/거주 중', multiplier: 1.0 },
+  { 
+    id: 'new', 
+    label: '신축 아파트(입주 전)', 
+    multiplier: 1.0, 
+  },
+  { 
+    id: 'old', 
+    label: '구축/거주 중', 
+    multiplier: 1.0, 
+  },
 ];
 
 // =================================================================
-// [2] 재료 설정 (명칭 및 뱃지 수정)
+// [2] 재료 설정
 // =================================================================
 const MATERIALS = [
   { 
@@ -21,15 +29,15 @@ const MATERIALS = [
     label: '폴리아스파틱', 
     priceMod: 1.0, 
     description: '탄성과 광택이 우수하며 가성비가 좋습니다.',
-    badge: '일반', 
+    badge: '일반',
     badgeColor: 'bg-teal-100 text-teal-700'
   },
   { 
     id: 'kerapoxy', 
     label: '에폭시(무광/무펄)', 
     priceMod: 1.8, 
-    description: '내구성이 뛰어나고 매트한 질감', 
-    badge: '프리미엄', 
+    description: '내구성이 뛰어나고 매트한 질감.',
+    badge: '프리미엄',
     badgeColor: 'bg-orange-100 text-orange-600'
   },
 ];
@@ -71,28 +79,28 @@ const REVIEW_EVENTS = [
 // [6] 갤러리 데이터
 // =================================================================
 const PORTFOLIO_IMAGES = [
-  { id: 1, title: "시공 사례 1", desc: "깔끔한 마감", src: "/photo1.jpg" },
-  { id: 2, title: "시공 사례 2", desc: "프리미엄 시공", src: "/photo2.jpg" },
-  { id: 3, title: "시공 사례 3", desc: "줄눈의미학", src: "/photo3.jpg" },
-  { id: 4, title: "시공 사례 4", desc: "꼼꼼한 작업", src: "/photo4.jpg" },
-  { id: 5, title: "시공 사례 5", desc: "고객 만족", src: "/photo5.jpg" },
-  { id: 6, title: "시공 사례 6", desc: "완벽한 결과", src: "/photo6.jpg" },
-  { id: 7, title: "시공 사례 7", desc: "디테일 컷", src: "/photo7.jpg" },
-  { id: 8, title: "시공 사례 8", desc: "비포 & 애프터", src: "/photo8.jpg" },
-  { id: 9, title: "시공 사례 9", desc: "화장실 시공", src: "/photo9.jpg" },
-  { id: 10, title: "시공 사례 10", desc: "현관 시공", src: "/photo10.jpg" },
-  { id: 11, title: "시공 사례 11", desc: "주방 시공", src: "/photo11.jpg" },
-  { id: 12, title: "시공 사례 12", desc: "베란다 시공", src: "/photo12.jpg" },
-  { id: 13, title: "시공 사례 13", desc: "세탁실 시공", src: "/photo13.jpg" },
-  { id: 14, title: "시공 사례 14", desc: "실리콘 리폼", src: "/photo14.jpg" },
-  { id: 15, title: "시공 사례 15", desc: "케라폭시", src: "/photo15.jpg" },
-  { id: 16, title: "시공 사례 16", desc: "폴리우레아", src: "/photo16.jpg" },
-  { id: 17, title: "시공 사례 17", desc: "아트월", src: "/photo17.jpg" },
-  { id: 18, title: "시공 사례 18", desc: "샤워부스", src: "/photo18.jpg" },
-  { id: 19, title: "시공 사례 19", desc: "욕조 테두리", src: "/photo19.jpg" },
-  { id: 20, title: "시공 사례 20", desc: "전체 시공", src: "/photo20.jpg" },
-  { id: 21, title: "시공 사례 21", desc: "추가 시공 1", src: "/photo21.jpg" },
-  { id: 22, title: "시공 사례 22", desc: "추가 시공 2", src: "/photo22.jpg" },
+  { id: 1, src: "/photo1.jpg" },
+  { id: 2, src: "/photo2.jpg" },
+  { id: 3, src: "/photo3.jpg" },
+  { id: 4, src: "/photo4.jpg" },
+  { id: 5, src: "/photo5.jpg" },
+  { id: 6, src: "/photo6.jpg" },
+  { id: 7, src: "/photo7.jpg" },
+  { id: 8, src: "/photo8.jpg" },
+  { id: 9, src: "/photo9.jpg" },
+  { id: 10, src: "/photo10.jpg" },
+  { id: 11, src: "/photo11.jpg" },
+  { id: 12, src: "/photo12.jpg" },
+  { id: 13, src: "/photo13.jpg" },
+  { id: 14, src: "/photo14.jpg" },
+  { id: 15, src: "/photo15.jpg" },
+  { id: 16, src: "/photo16.jpg" },
+  { id: 17, src: "/photo17.jpg" },
+  { id: 18, src: "/photo18.jpg" },
+  { id: 19, src: "/photo19.jpg" },
+  { id: 20, src: "/photo20.jpg" },
+  { id: 21, src: "/photo21.jpg" },
+  { id: 22, src: "/photo22.jpg" },
 ];
 
 export default function GroutEstimatorApp() {
@@ -111,6 +119,11 @@ export default function GroutEstimatorApp() {
   const [showModal, setShowModal] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [visibleImages, setVisibleImages] = useState(6);
+
+  const SOOMGO_REVIEW_URL = 'https://www.soomgo.com/profile/users/10755579?tab=review';
+  // ★ 카카오톡 채널 주소 (여기에 사장님 채널 주소를 넣어주세요!)
+  const KAKAO_CHAT_URL = 'https://pf.kakao.com/_xxxxxxx'; 
+
 
   const handleQuantityChange = (id, delta) => {
     setQuantities(prev => {
@@ -154,8 +167,29 @@ export default function GroutEstimatorApp() {
     const remainingCoreItems = SERVICE_AREAS.filter(area => 
         area.id !== 'entrance' && q[area.id] > 0
     ).length;
+    
+    // --- 패키지 로직 시작 ---
 
-    if (selectedMaterial.id === 'kerapoxy') {
+    const qBathWallOne = (qMasterWall >= 1 || qCommonWall >= 1);
+    
+    // 50만원 패키지: 욕실 바닥 1 + 벽 전체 1 (재료 상관없이 고정가)
+    // 이 패키지가 가장 우선순위 높아야 다른 패키지와 겹칠 때 잘못 계산되지 않음.
+    if (qBathFloor >= 1 && qBathWallOne) {
+        let isMaster = qMasterWall >= 1;
+        let isCommon = qCommonWall >= 1;
+        
+        // 1개씩만 차감
+        total += 500000;
+        q['bathroom_floor'] -= 1;
+        if (isMaster) q['master_bath_wall'] -= 1;
+        else if (isCommon) q['common_bath_wall'] -= 1;
+        
+        isPackageActive = true;
+        labelText = '(50만원 패키지 적용)';
+    } 
+
+    // 고급형 (에폭시) 패키지
+    else if (selectedMaterial.id === 'kerapoxy') {
       if (qBathFloor >= 2 && qMasterWall >= 1 && qCommonWall >= 1) {
         total += 1300000;
         q['bathroom_floor'] -= 2;
@@ -183,17 +217,20 @@ export default function GroutEstimatorApp() {
         isFreeEntrance = true; 
         labelText = '(패키지 할인 적용)'; 
       }
-      else if (remainingCoreItems === 1 && qBathFloor === 1) {
-        total += 350000;
-        q['bathroom_floor'] -= 1;
-        labelText = '(최소 시공비 적용)';
-      }
       else if (qBathFloor >= 2 && qEntrance >= 1) {
         isPackageActive = true;
         isFreeEntrance = false; 
         labelText = '(패키지 혜택 적용)';
       }
-    } else {
+      else if (remainingCoreItems === 1 && qBathFloor === 1) {
+        total += 350000;
+        q['bathroom_floor'] -= 1;
+        labelText = '(최소 시공비 적용)';
+      }
+    } 
+    
+    // 일반형 (폴리아스파틱) 패키지
+    else { 
       if (qBathFloor >= 2 && qMasterWall >= 1 && qCommonWall >= 1) {
         total += 700000;
         q['bathroom_floor'] -= 2;
@@ -224,6 +261,8 @@ export default function GroutEstimatorApp() {
       }
     }
 
+    // --- 패키지 로직 끝 / 잔여 항목 계산 시작 ---
+
     SERVICE_AREAS.forEach(area => {
         const count = q[area.id];
         if (count > 0) {
@@ -239,6 +278,8 @@ export default function GroutEstimatorApp() {
                 let currentMod = selectedMaterial.priceMod;
                 if (selectedMaterial.id === 'kerapoxy') currentMod = 2.0;
                 let price = baseCalc * currentMod * selectedHousing.multiplier;
+                
+                // 거실 바닥 패키지 할인
                 if (isPackageActive) {
                     if (selectedMaterial.id === 'poly') price -= (50000 * count);
                     else if (selectedMaterial.id === 'kerapoxy') price -= (150000 * count);
@@ -264,6 +305,7 @@ export default function GroutEstimatorApp() {
       }
     });
 
+    // --- 리뷰 할인 적용 ---
     let discountAmount = 0;
     REVIEW_EVENTS.forEach(evt => {
       if (selectedReviews.has(evt.id)) {
@@ -300,7 +342,7 @@ export default function GroutEstimatorApp() {
     });
 
     if (SILICON_AREAS.some(area => quantities[area.id] > 0)) {
-      text += `\n📋 [실리콘 교체]\n`;
+      text += `\n🧴 [실리콘 교체]\n`;
       SILICON_AREAS.forEach(area => {
         if (quantities[area.id] > 0) text += `- ${area.label}: ${quantities[area.id]}${area.unit}\n`;
       });
@@ -315,8 +357,7 @@ export default function GroutEstimatorApp() {
     
     if (calculation.isPackageActive) {
       text += `\n🎁 [패키지 서비스 적용됨]\n`;
-      // 요청하신 순서 반영 (현관 -> 테두리 -> 젠다이 -> 싱크볼)
-      if (calculation.isFreeEntrance && material !== 'kerapoxy') text += `- 현관바닥 (무료)\n`;
+      if (calculation.isFreeEntrance && material !== 'kerapoxy') text += `- 현관 바닥 (무료)\n`;
       text += `- 변기테두리, 바닥테두리\n`;
       text += `- 욕실 젠다이 실리콘 오염방지\n`;
       text += `- 주방 싱크볼\n`;
@@ -414,19 +455,21 @@ export default function GroutEstimatorApp() {
               <div className="space-y-4">
                 {MATERIALS.map((item) => (
                   <div key={item.id} className="animate-fade-in">
-                    <div onClick={() => setMaterial(item.id)} className={`flex items-center p-3 rounded-lg border-2 cursor-pointer transition-all ${material === item.id ? 'border-teal-500 bg-teal-50 ring-1 ring-teal-500' : 'border-gray-200 hover:bg-gray-50'}`}>
-                      <div className={`w-4 h-4 rounded-full border flex items-center justify-center mr-3 ${material === item.id ? 'border-teal-600' : 'border-gray-400'}`}>
-                        {material === item.id && <div className="w-2 h-2 rounded-full bg-teal-600" />}
+                    <div onClick={() => setMaterial(item.id)} className={`flex items-center p-3 rounded-lg border-2 cursor-pointer transition-all ${item.id === material ? 'border-teal-500 bg-teal-50 ring-1 ring-teal-500' : 'border-gray-200 hover:bg-gray-50'}`}>
+                      <div className={`w-4 h-4 rounded-full border flex items-center justify-center mr-3 ${item.id === material ? 'border-teal-600' : 'border-gray-400'}`}>
+                        {item.id === material && <div className="w-2 h-2 rounded-full bg-teal-600" />}
                       </div>
                       <div className="flex-1">
                         <div className="flex justify-between items-center">
                           <span className="font-bold text-gray-800">{item.label}</span>
-                          <span className={`text-xs font-bold ${item.badgeColor} px-2 py-0.5 rounded`}>{item.badge}</span>
+                          <span className={`text-xs font-bold px-2 py-0.5 rounded ${item.badgeColor}`}>
+                            {item.badge}
+                          </span>
                         </div>
                         <p className="text-xs text-gray-500 mt-0.5">{item.description}</p>
                       </div>
                     </div>
-                    {material === 'poly' && item.id === 'poly' && (
+                    {item.id === 'poly' && item.id === material && (
                       <div className="mt-2 ml-4 pl-4 border-l-2 border-teal-100 space-y-2 animate-slide-down">
                         <div className="text-xs font-bold text-teal-700 flex items-center gap-1"><Palette size={12} /> 펄 유무 선택</div>
                         <div className="flex gap-2">
@@ -435,7 +478,7 @@ export default function GroutEstimatorApp() {
                         </div>
                       </div>
                     )}
-                    {material === 'kerapoxy' && item.id === 'kerapoxy' && (
+                    {item.id === 'kerapoxy' && item.id === material && (
                       <div className="mt-2 ml-4 pl-4 border-l-2 border-orange-100 space-y-2 animate-slide-down">
                         <div className="text-xs font-bold text-orange-700 flex items-center gap-1"><Crown size={12} /> 브랜드 선택</div>
                         <div className="flex gap-2">
@@ -524,14 +567,26 @@ export default function GroutEstimatorApp() {
               <p className="text-xs text-indigo-400 mt-2 text-center">※ 중복 선택 가능합니다. 시공 완료 후 꼭 작성해주세요!</p>
             </section>
             
+            {/* 주의사항 */}
             <div className="bg-blue-50 p-4 rounded-lg text-xs text-blue-700 flex items-start gap-2">
               <Info className="h-4 w-4 flex-shrink-0 mt-0.5" />
               <p>위 가격은 타일크기 바닥 30x30cm, 벽면 30x60 크기 기준이며, 재시공은 기존 견적가의 1.5배로 산정됩니다. 또한, 조각타일은 시공이 불가합니다.</p>
             </div>
+            
+            {/* 숨고 후기 바로가기 */}
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <button 
+                onClick={() => window.open(SOOMGO_REVIEW_URL, '_blank')}
+                className="w-full py-3 rounded-xl bg-green-500 text-white font-bold text-base hover:bg-green-600 transition shadow-lg flex items-center justify-center gap-2"
+              >
+                <Star size={20} fill="white" className="text-yellow-300" />
+                숨고 후기 바로가기 (고객 만족도 확인)
+              </button>
+            </div>
           </>
         ) : (
           // --- 갤러리 탭 내용 ---
-          <div className="space-y-4 animate-fade-in">
+          <div className="space-y-4 animate-fade-in pb-4">
             <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
               <h2 className="text-lg font-bold text-gray-800 mb-1">시공 포트폴리오</h2>
               <p className="text-xs text-gray-500 mb-4">줄눈의미학의 꼼꼼한 시공 사례를 확인해보세요.</p>
@@ -544,20 +599,15 @@ export default function GroutEstimatorApp() {
                     onClick={() => setSelectedImage(img)}
                     className="group relative aspect-square rounded-lg overflow-hidden cursor-pointer border border-gray-100"
                   >
-                    {/* ★ 사진만 나오도록 오버레이 (설명 텍스트)를 숨김 ★ */}
                     <img 
                       src={img.src} 
-                      alt={img.title} 
+                      alt={`시공사례 ${img.id}`} 
                       className="w-full h-full object-cover transition-transform group-hover:scale-110" 
                       onError={(e) => {
-                        e.target.onerror = null; 
+                        e.target.onerror = null;
                         e.target.src = "https://placehold.co/600x600/e2e8f0/1e293b?text=이미지+준비중";
                       }}
                     />
-                    {/* 👇 이 부분이 설명 텍스트를 감추는 역할입니다. (opacity-0으로 숨김) */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 transition-opacity">
-                      {/* 텍스트 내용 자체가 없으므로, 오버레이만 남기고 텍스트는 렌더링하지 않습니다. */}
-                    </div>
                   </div>
                 ))}
               </div>
@@ -571,40 +621,44 @@ export default function GroutEstimatorApp() {
                 </button>
               )}
             </div>
-            
           </div>
         )}
       </main>
 
-      {/* 패키지 서비스 알림 바 */}
-      {calculation.isPackageActive && (
-        <div className="fixed bottom-[90px] left-4 right-4 max-w-md mx-auto z-10 animate-bounce-up">
-          <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-3 rounded-lg shadow-lg flex items-center gap-3">
-            <div className="bg-white/20 p-2 rounded-full"><Gift className="w-5 h-5 text-yellow-300" /></div>
-            <div className="text-xs">
-              <div className="font-bold text-yellow-300 mb-0.5">🎉 패키지 혜택 적용중!</div>
-              <div>
-                {/* 현관바닥(무료)가 있다면 맨 앞에 표시, 그 뒤에 나머지 나열 */}
-                {calculation.isFreeEntrance && material !== 'kerapoxy' && <span>현관바닥(무료), </span>}
-                변기/바닥테두리, 욕실 젠다이, <span className="font-bold underline">싱크볼 서비스</span>
+      {/* 하단 고정바 */}
+      {activeTab === 'calculator' && (
+        <>
+          {calculation.isPackageActive && (
+            <div className="fixed bottom-[90px] left-4 right-4 max-w-md mx-auto z-10 animate-bounce-up">
+              <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-3 rounded-lg shadow-lg flex items-center gap-3">
+                <div className="bg-white/20 p-2 rounded-full"><Gift className="w-5 h-5 text-yellow-300" /></div>
+                <div className="text-xs">
+                  <div className="font-bold text-yellow-300 mb-0.5">🎉 패키지 혜택 적용중!</div>
+                  <div className="space-y-0.5">
+                    {calculation.isFreeEntrance && material !== 'kerapoxy' && <div>- 현관 바닥 무료</div>}
+                    <div>- 변기테두리, 바닥테두리</div>
+                    <div>- 욕실 젠다이 실리콘 오염방지</div>
+                    <div>- 주방 싱크볼</div>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-      )}
+          )}
 
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg p-4 safe-area-bottom z-20">
-        <div className="max-w-md mx-auto flex items-center justify-between gap-4">
-          <div>
-            <div className="text-xs text-gray-500">총 예상 견적가</div>
-            <div className="flex items-end gap-2">
-              <div className="text-2xl font-bold text-teal-600">{calculation.price.toLocaleString()}<span className="text-sm font-normal text-gray-500">원</span></div>
-              {calculation.label && <div className="text-xs font-bold text-orange-500 mb-1 animate-pulse">{calculation.label}</div>}
+          <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg p-4 safe-area-bottom z-20">
+            <div className="max-w-md mx-auto flex items-center justify-between gap-4">
+              <div>
+                <div className="text-xs text-gray-500">총 예상 견적가</div>
+                <div className="flex items-end gap-2">
+                  <div className="text-2xl font-bold text-teal-600">{calculation.price.toLocaleString()}<span className="text-sm font-normal text-gray-500">원</span></div>
+                  {calculation.label && <div className="text-xs font-bold text-orange-500 mb-1 animate-pulse">{calculation.label}</div>}
+                </div>
+              </div>
+              <button onClick={() => setShowModal(true)} disabled={!hasSelections} className={`px-6 py-3 rounded-xl font-bold text-white shadow-md transition-all ${hasSelections ? 'bg-teal-600 hover:bg-teal-700 active:scale-95' : 'bg-gray-300 cursor-not-allowed'}`}>견적서 보기</button>
             </div>
           </div>
-          <button onClick={() => setShowModal(true)} disabled={!hasSelections} className={`px-6 py-3 rounded-xl font-bold text-white shadow-md transition-all ${hasSelections ? 'bg-teal-600 hover:bg-teal-700 active:scale-95' : 'bg-gray-300 cursor-not-allowed'}`}>견적서 보기</button>
-        </div>
-      </div>
+        </>
+      )}
 
       {/* 갤러리 확대 모달 */}
       {selectedImage && (
@@ -613,14 +667,10 @@ export default function GroutEstimatorApp() {
           <div className="max-w-lg w-full bg-white rounded-lg overflow-hidden" onClick={e => e.stopPropagation()}>
             <img 
               src={selectedImage.src} 
-              alt={selectedImage.title} 
+              alt={`시공사례 ${selectedImage.id}`} 
               className="w-full h-auto" 
-              onError={(e) => e.target.src = "https://placehold.co/600x600/e2e8f0/1e293b?text=이미지+없음"} 
+              onError={(e) => e.target.src = "https://placehold.co/600x600/e2e8f0/1e293b?text=이미지+준비중"} 
             />
-            <div className="p-4">
-              <h3 className="font-bold text-lg">{selectedImage.title}</h3>
-              <p className="text-gray-500 text-sm">{selectedImage.desc}</p>
-            </div>
           </div>
         </div>
       )}
@@ -672,7 +722,6 @@ export default function GroutEstimatorApp() {
                     <div className="bg-indigo-50 p-3 rounded-lg mb-3 text-xs text-indigo-800 border border-indigo-100">
                       <div className="font-bold mb-1 flex items-center gap-1"><Gift size={14} /> 서비스 혜택 적용됨</div>
                       <ul className="list-disc list-inside text-indigo-600 space-y-0.5 pl-1">
-                        {/* ★ 수정됨: 목록 순서 반영 ★ */}
                         {calculation.isFreeEntrance && material !== 'kerapoxy' && <li>현관 바닥 (무료)</li>}
                         <li>변기테두리, 바닥테두리</li>
                         <li>욕실 젠다이 실리콘 오염방지</li>
@@ -691,9 +740,10 @@ export default function GroutEstimatorApp() {
                 </div>
               </div>
             </div>
-            <div className="p-4 bg-gray-50 grid grid-cols-2 gap-3">
-               <button onClick={copyToClipboard} className="flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 py-3 rounded-xl font-bold hover:bg-gray-50 transition"><Copy size={18} />복사하기</button>
-               <button onClick={() => window.location.href = 'tel:010-7734-6709'} className="flex items-center justify-center gap-2 bg-teal-600 text-white py-3 rounded-xl font-bold hover:bg-teal-700 transition shadow-sm"><Phone size={18} />상담 예약</button>
+            <div className="p-4 bg-gray-50 grid grid-cols-3 gap-3">
+               <button onClick={copyToClipboard} className="flex items-center justify-center gap-1 bg-white border border-gray-300 text-gray-700 py-3 rounded-xl font-bold hover:bg-gray-50 transition text-xs"><Copy size={16} />견적 저장</button>
+               <button onClick={() => window.open(KAKAO_CHAT_URL, '_blank')} className="flex items-center justify-center gap-1 bg-yellow-400 text-gray-900 py-3 rounded-xl font-bold hover:bg-yellow-500 transition shadow-sm text-xs"><MessageSquare size={16} />카톡 상담</button>
+               <button onClick={() => window.location.href = 'tel:010-7734-6709'} className="flex items-center justify-center gap-1 bg-teal-600 text-white py-3 rounded-xl font-bold hover:bg-teal-700 transition shadow-sm text-xs"><Phone size={16} />전화 연결</button>
             </div>
           </div>
         </div>
