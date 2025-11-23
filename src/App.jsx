@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 
 // =================================================================
-// [0] 아이콘 시스템 (수정됨: JSX Fragment <>...</> 적용하여 에러 해결)
+// [0] 아이콘 시스템 (오류 방지용 자체 SVG)
 // =================================================================
 const Icon = ({ name, size = 20, className = "" }) => {
   const icons = {
@@ -9,33 +9,26 @@ const Icon = ({ name, size = 20, className = "" }) => {
     hammer: <path d="M15 12l-8.5 8.5c-.83.83-2.17.83-3 0 0 0 0 0 0-3L12 9m3.5-3.5L21 11l-9 9-5-5" />,
     check: <polyline points="20 6 9 17 4 12" />,
     chevronDown: <polyline points="6 9 12 15 18 9" />,
-    
-    // 에러 수정된 부분: 여러 태그를 <>...</>로 감쌌습니다.
     arrowRight: (
       <>
         <line x1="5" y1="12" x2="19" y2="12" />
         <polyline points="12 5 19 12 12 19" />
       </>
     ),
-    
     star: <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />,
-    
     phone: <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />,
-    
     copy: (
       <>
         <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
         <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
       </>
     ),
-
     x: (
       <>
         <line x1="18" y1="6" x2="6" y2="18" />
         <line x1="6" y1="6" x2="18" y2="18" />
       </>
     ),
-
     refresh: (
       <>
         <path d="M23 4v6h-6" />
@@ -44,7 +37,6 @@ const Icon = ({ name, size = 20, className = "" }) => {
         <path d="M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
       </>
     ),
-
     gift: (
       <>
         <polyline points="20 12 20 22 4 22 4 12" />
@@ -54,9 +46,7 @@ const Icon = ({ name, size = 20, className = "" }) => {
         <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" />
       </>
     ),
-
     sparkles: <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />,
-    
     bath: (
       <>
         <path d="M9 6 6.5 3.5a1.5 1.5 0 0 0-1-1.5C3.805 1.285 2 2.375 2 4.5c0 3.5 2.5 5 2.5 5" />
@@ -65,7 +55,6 @@ const Icon = ({ name, size = 20, className = "" }) => {
         <path d="M5.5 13h16a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-16a2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2Z" />
       </>
     ),
-
     eraser: (
       <>
         <path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21" />
@@ -73,7 +62,6 @@ const Icon = ({ name, size = 20, className = "" }) => {
         <path d="m5 11 9 9" />
       </>
     ),
-
     layout: (
       <>
         <rect width="7" height="7" x="3" y="3" rx="1" />
@@ -82,7 +70,6 @@ const Icon = ({ name, size = 20, className = "" }) => {
         <rect width="7" height="7" x="3" y="14" rx="1" />
       </>
     ),
-
     door: (
       <>
         <path d="M13 4h3a2 2 0 0 1 2 2v14" />
@@ -92,7 +79,6 @@ const Icon = ({ name, size = 20, className = "" }) => {
         <path d="M13 4.562v16.157a1 1 0 0 1-1.242.97L5 20V5.562a2 2 0 0 1 1.515-1.94l4.485-1.121A2 2 0 0 1 13 4.562Z" />
       </>
     ),
-
     utensils: (
       <>
         <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" />
@@ -100,7 +86,6 @@ const Icon = ({ name, size = 20, className = "" }) => {
         <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" />
       </>
     ),
-
     shield: <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
   };
 
@@ -123,7 +108,7 @@ const Icon = ({ name, size = 20, className = "" }) => {
 };
 
 // =================================================================
-// [1] 스타일 정의: Modern Executive (Navy & White)
+// [1] 스타일 정의: Navy & White Theme (요청 반영)
 // =================================================================
 const GlobalStyles = () => (
   <style>{`
@@ -132,7 +117,7 @@ const GlobalStyles = () => (
     body { 
         font-family: "Pretendard Variable", "Pretendard", sans-serif;
         background-color: #FFFFFF;
-        color: #0f172a;
+        color: #1e3a8a; /* Navy-900: 메인 텍스트 컬러도 네이비 계열로 통일 */
         margin: 0;
         padding: 0;
     }
@@ -144,26 +129,22 @@ const GlobalStyles = () => (
     }
     .animate-enter { animation: fadeUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
     
-    /* 유틸리티 */
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
     /* 그림자 & 효과 */
-    .shadow-card { box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05); }
-    .shadow-float { box-shadow: 0 10px 40px -10px rgba(15, 23, 42, 0.15); }
-    .shadow-sharp { box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.05), 0 2px 4px rgba(15, 23, 42, 0.05); }
-    
-    /* 하이라이트 선택 효과 */
-    .selected-ring { box-shadow: 0 0 0 2px #0f172a; }
+    .shadow-card { box-shadow: 0 4px 12px rgba(30, 58, 138, 0.08); }
+    .shadow-float { box-shadow: 0 10px 40px -10px rgba(30, 58, 138, 0.2); }
+    .shadow-sharp { box-shadow: 0 0 0 1px rgba(30, 58, 138, 0.05), 0 2px 4px rgba(30, 58, 138, 0.1); }
   `}</style>
 );
 
 // =================================================================
-// [2] 데이터 (기존 로직 유지)
+// [2] 데이터 (문구 수정 반영)
 // =================================================================
 const HOUSING_TYPES = [
-  { id: 'new', label: '신축 입주', multiplier: 1.0, desc: '새로운 공간, 완벽한 시작', icon: 'home' },
-  { id: 'old', label: '구축/거주 중', multiplier: 1.0, desc: '오염 제거 및 리폼', icon: 'hammer' },
+  { id: 'new', label: '신축 입주', multiplier: 1.0, icon: 'home' },
+  { id: 'old', label: '구축/거주 중', multiplier: 1.0, icon: 'hammer' },
 ];
 
 const MATERIALS = [
@@ -222,8 +203,8 @@ const Accordion = ({ question, answer }) => {
                 className="flex justify-between items-center w-full py-4 text-left group"
                 onClick={() => setIsOpen(!isOpen)}
             >
-                <span className={`text-[15px] transition-colors ${isOpen ? 'font-bold text-slate-900' : 'font-medium text-slate-600 group-hover:text-slate-900'}`}>{question}</span>
-                <Icon name="chevronDown" className={`text-slate-400 transition-transform ${isOpen ? 'rotate-180 text-blue-700' : ''}`} size={16} />
+                <span className={`text-[15px] transition-colors ${isOpen ? 'font-bold text-[#1e3a8a]' : 'font-medium text-slate-600 group-hover:text-[#1e3a8a]'}`}>{question}</span>
+                <Icon name="chevronDown" className={`text-slate-400 transition-transform ${isOpen ? 'rotate-180 text-[#1e3a8a]' : ''}`} size={16} />
             </button>
             <div className={`overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-20 opacity-100' : 'max-h-0 opacity-0'}`}>
                 <p className="text-sm text-slate-500 pb-4">{answer}</p>
@@ -361,15 +342,15 @@ export default function GroutEstimatorApp() {
   const hasSelections = Object.values(quantities).some(v => v > 0);
 
   return (
-    <div className="min-h-screen pb-40 selection:bg-blue-900 selection:text-white bg-white">
+    <div className="min-h-screen pb-40 selection:bg-[#1e3a8a] selection:text-white bg-white">
       <GlobalStyles />
 
       {/* 헤더 */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-100">
         <div className="max-w-md mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
-             <div className="bg-[#0f172a] text-white p-1 rounded-md"><Icon name="shield" size={16} /></div>
-             <span className="font-bold text-lg tracking-tight text-slate-900">줄눈의미학</span>
+             <div className="bg-[#1e3a8a] text-white p-1 rounded-md"><Icon name="shield" size={16} /></div>
+             <span className="font-bold text-lg tracking-tight text-[#1e3a8a]">줄눈의미학</span>
           </div>
           <button onClick={() => window.location.reload()} className="p-2 rounded-md hover:bg-slate-50 transition text-slate-500">
             <Icon name="refresh" size={18} />
@@ -382,8 +363,8 @@ export default function GroutEstimatorApp() {
         {/* STEP 1: 현장 유형 */}
         <section className="animate-enter" style={{ animationDelay: '0.1s' }}>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-slate-900">현장 유형</h2>
-            <span className="text-[10px] font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full">STEP 01</span>
+            <h2 className="text-xl font-bold text-[#1e3a8a]">현장 유형</h2>
+            <span className="text-[10px] font-bold text-[#1e3a8a] bg-blue-50 px-2.5 py-1 rounded-full">STEP 01</span>
           </div>
           <div className="grid grid-cols-2 gap-4">
             {HOUSING_TYPES.map((type) => (
@@ -392,15 +373,14 @@ export default function GroutEstimatorApp() {
                 onClick={() => setHousingType(type.id)}
                 className={`flex flex-col items-start p-5 rounded-xl transition-all duration-200 border ${
                   housingType === type.id 
-                    ? 'bg-[#0f172a] border-[#0f172a] text-white shadow-card' 
+                    ? 'bg-[#1e3a8a] border-[#1e3a8a] text-white shadow-card' 
                     : 'bg-white border-slate-200 hover:border-slate-300 text-slate-900'
                 }`}
               >
-                <div className={`mb-3 ${housingType === type.id ? 'text-blue-400' : 'text-slate-400'}`}>
+                <div className={`mb-3 ${housingType === type.id ? 'text-white' : 'text-slate-400'}`}>
                     <Icon name={type.icon} size={22} />
                 </div>
                 <div className="font-bold text-base mb-1">{type.label}</div>
-                <div className={`text-xs ${housingType === type.id ? 'text-slate-400' : 'text-slate-500'}`}>{type.desc}</div>
               </button>
             ))}
           </div>
@@ -409,8 +389,8 @@ export default function GroutEstimatorApp() {
         {/* STEP 2: 재료 선택 */}
         <section className="animate-enter" style={{ animationDelay: '0.2s' }}>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-slate-900">시공 소재</h2>
-            <span className="text-[10px] font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full">STEP 02</span>
+            <h2 className="text-xl font-bold text-[#1e3a8a]">시공 소재</h2>
+            <span className="text-[10px] font-bold text-[#1e3a8a] bg-blue-50 px-2.5 py-1 rounded-full">STEP 02</span>
           </div>
           <div className="space-y-4">
             {MATERIALS.map((item) => (
@@ -418,7 +398,7 @@ export default function GroutEstimatorApp() {
                 onClick={() => setMaterial(item.id)}
                 className={`group relative overflow-hidden p-6 rounded-xl cursor-pointer transition-all duration-200 border ${
                   material === item.id 
-                    ? 'bg-[#0f172a] border-[#0f172a] text-white shadow-card' 
+                    ? 'bg-[#1e3a8a] border-[#1e3a8a] text-white shadow-card' 
                     : 'bg-white border-slate-200 hover:border-slate-300'
                 }`}
               >
@@ -426,26 +406,26 @@ export default function GroutEstimatorApp() {
                     <div>
                         <div className="flex items-center gap-2 mb-1">
                             <span className="font-bold text-lg">{item.label}</span>
-                            {material === item.id && <Icon name="check" size={18} className="text-blue-400" />}
+                            {material === item.id && <Icon name="check" size={18} className="text-white" />}
                         </div>
-                        <span className={`text-sm font-medium ${material === item.id ? 'text-slate-300' : 'text-slate-500'}`}>{item.subLabel}</span>
+                        <span className={`text-sm font-medium ${material === item.id ? 'text-slate-200' : 'text-slate-500'}`}>{item.subLabel}</span>
                     </div>
-                    <span className={`text-[10px] px-2.5 py-1 rounded-md font-bold tracking-wider ${material === item.id ? 'bg-blue-900 text-blue-300' : item.badgeColor}`}>{item.tags[0]}</span>
+                    <span className={`text-[10px] px-2.5 py-1 rounded-md font-bold tracking-wider ${material === item.id ? 'bg-[#172554] text-blue-200' : item.badgeColor}`}>{item.tags[0]}</span>
                 </div>
-                <p className={`text-xs leading-relaxed ${material === item.id ? 'text-slate-400' : 'text-slate-500'}`}>{item.description}</p>
+                <p className={`text-xs leading-relaxed ${material === item.id ? 'text-slate-300' : 'text-slate-500'}`}>{item.description}</p>
                 
                 {/* 하위 옵션 */}
                 <div className={`transition-all duration-300 ease-out ${material === item.id ? 'max-h-24 opacity-100 mt-5' : 'max-h-0 opacity-0 overflow-hidden'}`}>
                     <div className="flex gap-3">
                     {item.id === 'poly' ? (
                         <>
-                            <button onClick={(e) => {e.stopPropagation(); setPolyOption('pearl');}} className={`flex-1 py-2.5 text-xs rounded-lg font-bold transition-all border ${polyOption === 'pearl' ? 'bg-white text-[#0f172a] border-white' : 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700'}`}>펄(유광)</button>
-                            <button onClick={(e) => {e.stopPropagation(); setPolyOption('no_pearl');}} className={`flex-1 py-2.5 text-xs rounded-lg font-bold transition-all border ${polyOption === 'no_pearl' ? 'bg-white text-[#0f172a] border-white' : 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700'}`}>무펄(무광)</button>
+                            <button onClick={(e) => {e.stopPropagation(); setPolyOption('pearl');}} className={`flex-1 py-2.5 text-xs rounded-lg font-bold transition-all border ${polyOption === 'pearl' ? 'bg-white text-[#1e3a8a] border-white' : 'bg-[#172554] text-slate-300 border-[#172554] hover:bg-[#1e40af]'}`}>펄</button>
+                            <button onClick={(e) => {e.stopPropagation(); setPolyOption('no_pearl');}} className={`flex-1 py-2.5 text-xs rounded-lg font-bold transition-all border ${polyOption === 'no_pearl' ? 'bg-white text-[#1e3a8a] border-white' : 'bg-[#172554] text-slate-300 border-[#172554] hover:bg-[#1e40af]'}`}>무펄</button>
                         </>
                     ) : (
                         <>
-                            <button onClick={(e) => {e.stopPropagation(); setEpoxyOption('kerapoxy');}} className={`flex-1 py-2.5 text-xs rounded-lg font-bold transition-all border ${epoxyOption === 'kerapoxy' ? 'bg-white text-[#0f172a] border-white' : 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700'}`}>케라폭시</button>
-                            <button onClick={(e) => {e.stopPropagation(); setEpoxyOption('starlike');}} className={`flex-1 py-2.5 text-xs rounded-lg font-bold transition-all border ${epoxyOption === 'starlike' ? 'bg-white text-[#0f172a] border-white' : 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700'}`}>스타라이크</button>
+                            <button onClick={(e) => {e.stopPropagation(); setEpoxyOption('kerapoxy');}} className={`flex-1 py-2.5 text-xs rounded-lg font-bold transition-all border ${epoxyOption === 'kerapoxy' ? 'bg-white text-[#1e3a8a] border-white' : 'bg-[#172554] text-slate-300 border-[#172554] hover:bg-[#1e40af]'}`}>케라폭시</button>
+                            <button onClick={(e) => {e.stopPropagation(); setEpoxyOption('starlike');}} className={`flex-1 py-2.5 text-xs rounded-lg font-bold transition-all border ${epoxyOption === 'starlike' ? 'bg-white text-[#1e3a8a] border-white' : 'bg-[#172554] text-slate-300 border-[#172554] hover:bg-[#1e40af]'}`}>스타라이크</button>
                         </>
                     )}
                     </div>
@@ -458,19 +438,19 @@ export default function GroutEstimatorApp() {
         {/* STEP 3: 공간 선택 */}
         <section className="animate-enter" style={{ animationDelay: '0.3s' }}>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-slate-900">시공 구역</h2>
-            <span className="text-[10px] font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full">STEP 03</span>
+            <h2 className="text-xl font-bold text-[#1e3a8a]">시공 구역</h2>
+            <span className="text-[10px] font-bold text-[#1e3a8a] bg-blue-50 px-2.5 py-1 rounded-full">STEP 03</span>
           </div>
           
           <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
             <div className="p-4 bg-slate-50 border-b border-slate-200">
-                <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1"><Icon name="layout" size={14}/> Grout Area</h3>
+                <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1"><Icon name="layout" size={14}/> 줄눈 시공 범위</h3>
             </div>
             <div className="p-2">
                 {SERVICE_AREAS.map((area) => (
                     <div key={area.id} className={`flex items-center justify-between p-3 rounded-lg transition-colors ${quantities[area.id] > 0 ? 'bg-blue-50/50' : 'hover:bg-slate-50'}`}>
                         <div className="flex items-center gap-4">
-                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${quantities[area.id] > 0 ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-400'}`}>
+                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${quantities[area.id] > 0 ? 'bg-blue-100 text-[#1e3a8a]' : 'bg-slate-100 text-slate-400'}`}>
                                 <Icon name={area.icon} size={20} />
                             </div>
                             <div>
@@ -480,8 +460,8 @@ export default function GroutEstimatorApp() {
                         </div>
                         <div className="flex items-center gap-1 bg-white rounded-md border border-slate-200 p-0.5">
                              <button onClick={() => handleQuantityChange(area.id, -1)} 
-                                className={`w-8 h-8 rounded-md flex items-center justify-center transition-all ${quantities[area.id] > 0 ? 'text-blue-700 hover:bg-blue-50' : 'text-slate-300'}`}><Icon name="x" size={12} className="rotate-45" /></button>
-                             <span className={`w-6 text-center text-sm font-bold ${quantities[area.id] > 0 ? 'text-blue-900' : 'text-slate-300'}`}>{quantities[area.id]}</span>
+                                className={`w-8 h-8 rounded-md flex items-center justify-center transition-all ${quantities[area.id] > 0 ? 'text-[#1e3a8a] hover:bg-blue-50' : 'text-slate-300'}`}><Icon name="x" size={12} className="rotate-45" /></button>
+                             <span className={`w-6 text-center text-sm font-bold ${quantities[area.id] > 0 ? 'text-[#1e3a8a]' : 'text-slate-300'}`}>{quantities[area.id]}</span>
                              <button onClick={() => handleQuantityChange(area.id, 1)} 
                                 className="w-8 h-8 rounded-md text-slate-700 hover:bg-slate-100 transition-all flex items-center justify-center"><Icon name="x" size={12} /></button>
                         </div>
@@ -490,7 +470,7 @@ export default function GroutEstimatorApp() {
             </div>
 
             <div className="p-4 bg-slate-50 border-b border-slate-200 border-t">
-                <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1"><Icon name="eraser" size={14}/> Silicon Reform</h3>
+                <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1"><Icon name="eraser" size={14}/> 실리콘 오염방지/리폼</h3>
             </div>
             <div className="p-2">
                 {SILICON_AREAS.map((area) => (
@@ -518,8 +498,8 @@ export default function GroutEstimatorApp() {
         {/* 할인 혜택 */}
         <section className="animate-enter" style={{ animationDelay: '0.4s' }}>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-slate-900">프로모션</h2>
-            <Icon name="gift" size={20} className="text-blue-700" />
+            <h2 className="text-xl font-bold text-[#1e3a8a]">프로모션</h2>
+            <Icon name="gift" size={20} className="text-[#1e3a8a]" />
           </div>
           <div className="grid grid-cols-2 gap-4">
             {REVIEW_EVENTS.map((evt) => (
@@ -528,7 +508,7 @@ export default function GroutEstimatorApp() {
                 onClick={() => toggleReview(evt.id)} 
                 className={`flex flex-col items-center justify-center p-5 rounded-xl border transition-all duration-300 ${
                   selectedReviews.has(evt.id) 
-                    ? 'bg-[#0f172a] border-[#0f172a] text-white shadow-md' 
+                    ? 'bg-[#1e3a8a] border-[#1e3a8a] text-white shadow-md' 
                     : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300'
                 }`}
               >
@@ -540,11 +520,12 @@ export default function GroutEstimatorApp() {
               </button>
             ))}
           </div>
+          <p className="text-xs text-center text-rose-500 font-bold mt-3">※ 서비스 이용 후 꼭! 작성해주세요</p>
         </section>
 
         {/* FAQ */}
         <section className="pb-8">
-             <h2 className="text-xl font-bold text-slate-900 mb-5">자주 묻는 질문</h2>
+             <h2 className="text-xl font-bold text-[#1e3a8a] mb-5">자주 묻는 질문</h2>
              <div className="bg-white rounded-xl border border-slate-200 px-4">
                 {FAQ_ITEMS.map((item, idx) => <Accordion key={idx} question={item.question} answer={item.answer} />)}
              </div>
@@ -558,8 +539,8 @@ export default function GroutEstimatorApp() {
             {/* Toast */}
             {calculation.isPackageActive && (
                 <div className="absolute bottom-full left-0 right-0 mb-4 animate-enter">
-                    <div className="bg-blue-900 text-white px-4 py-3 rounded-lg shadow-md flex items-center gap-3">
-                        <div className="bg-blue-800 p-1.5 rounded-md"><Icon name="gift" size={16} /></div>
+                    <div className="bg-[#1e3a8a] text-white px-4 py-3 rounded-lg shadow-md flex items-center gap-3">
+                        <div className="bg-[#172554] p-1.5 rounded-md"><Icon name="gift" size={16} /></div>
                         <div className="flex-1">
                             <span className="font-bold text-sm block">{calculation.label} 적용됨</span>
                             <span className="text-[11px] text-blue-200 opacity-80">서비스 시공이 포함되었습니다.</span>
@@ -574,12 +555,12 @@ export default function GroutEstimatorApp() {
                 disabled={!hasSelections}
                 className={`w-full h-14 rounded-lg flex items-center justify-between px-6 transition-all ${
                     hasSelections 
-                    ? 'bg-[#0f172a] text-white hover:bg-slate-800 shadow-sharp' 
+                    ? 'bg-[#1e3a8a] text-white hover:bg-[#1e40af] shadow-sharp' 
                     : 'bg-slate-100 text-slate-400 cursor-not-allowed'
                 }`}
             >
                 <div className="flex flex-col items-start">
-                    <span className={`text-[10px] font-bold tracking-wider uppercase ${hasSelections ? 'text-slate-400' : 'text-slate-400'}`}>Total Estimate</span>
+                    <span className={`text-[10px] font-bold tracking-wider uppercase ${hasSelections ? 'text-white/60' : 'text-slate-400'}`}>Total Estimate</span>
                     <div className="text-lg font-bold flex items-baseline gap-1">
                         {calculation.price.toLocaleString()}
                         <span className="text-sm font-normal opacity-80">원</span>
@@ -598,7 +579,7 @@ export default function GroutEstimatorApp() {
             <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setShowModal(false)} />
             <div className="relative bg-white w-full max-w-sm rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden animate-enter max-h-[90vh] flex flex-col">
                 <div className="p-6 border-b border-slate-100 flex justify-between items-center">
-                    <h3 className="font-bold text-xl text-slate-900 flex items-center gap-2"><Icon name="shield" size={20} className="text-blue-700"/> 견적 상세 내역</h3>
+                    <h3 className="font-bold text-xl text-[#1e3a8a] flex items-center gap-2"><Icon name="shield" size={20} className="text-[#1e3a8a]"/> 견적 상세 내역</h3>
                     <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-700 transition"><Icon name="x" size={24}/></button>
                 </div>
                 
@@ -606,7 +587,7 @@ export default function GroutEstimatorApp() {
                     <div className="grid grid-cols-2 gap-4">
                         <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
                             <div className="text-xs text-slate-500 font-bold mb-1">현장 유형</div>
-                            <div className="font-bold text-slate-900 flex items-center gap-1"><Icon name={HOUSING_TYPES.find(h => h.id === housingType).icon} size={14}/> {HOUSING_TYPES.find(h => h.id === housingType).label}</div>
+                            <div className="font-bold text-slate-900 flex items-center gap-1"><Icon name="home" size={14}/> {HOUSING_TYPES.find(h => h.id === housingType).label}</div>
                         </div>
                         <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
                             <div className="text-xs text-slate-500 font-bold mb-1">시공 소재</div>
@@ -625,7 +606,7 @@ export default function GroutEstimatorApp() {
                                     </span>
                                     <span className="font-bold text-slate-900">
                                         {area.id === 'entrance' && calculation.isFreeEntrance 
-                                            ? <span className="text-blue-600">Service</span> 
+                                            ? <span className="text-[#1e3a8a]">Service</span> 
                                             : `${(area.basePrice * quantities[area.id]).toLocaleString()}원`}
                                     </span>
                                 </div>
@@ -636,13 +617,13 @@ export default function GroutEstimatorApp() {
                     {(calculation.isPackageActive || calculation.discountAmount > 0) && (
                         <div className="bg-blue-50 p-4 rounded-lg space-y-2 text-sm border border-blue-100">
                              {calculation.isPackageActive && (
-                                <div className="flex justify-between text-blue-800 font-bold">
+                                <div className="flex justify-between text-[#1e3a8a] font-bold">
                                     <span className="flex items-center gap-1"><Icon name="gift" size={14}/> {calculation.label}</span>
                                     <span>적용됨</span>
                                 </div>
                              )}
                              {REVIEW_EVENTS.map(evt => selectedReviews.has(evt.id) && (
-                                 <div key={evt.id} className="flex justify-between text-blue-700">
+                                 <div key={evt.id} className="flex justify-between text-[#1e3a8a]">
                                      <span className="flex items-center gap-1"><Icon name="star" size={14}/> {evt.label}</span>
                                      <span>-{evt.discount.toLocaleString()}원</span>
                                  </div>
@@ -658,7 +639,7 @@ export default function GroutEstimatorApp() {
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                         <button onClick={copyToClipboard} className="py-3.5 rounded-lg bg-white border border-slate-300 font-bold text-slate-700 hover:bg-slate-50 transition flex items-center justify-center gap-2"><Icon name="copy" size={16}/> 견적 복사</button>
-                        <button onClick={() => window.location.href = 'tel:010-0000-0000'} className="py-3.5 rounded-lg bg-[#0f172a] text-white font-bold hover:bg-slate-800 transition flex items-center justify-center gap-2">
+                        <button onClick={() => window.location.href = 'tel:010-0000-0000'} className="py-3.5 rounded-lg bg-[#1e3a8a] text-white font-bold hover:bg-[#1e40af] transition flex items-center justify-center gap-2">
                             <Icon name="phone" size={16} /> 전화 상담
                         </button>
                     </div>
