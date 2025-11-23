@@ -1,11 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import { 
   Calculator, Home, Bath, DoorOpen, Utensils, LayoutGrid, 
-  CheckCircle2, Info, Copy, RefreshCw, Phone, Sparkles, Hammer, Sofa, Palette, Crown, Gift, Eraser, Star, ChevronDown, HelpCircle, X, ShieldCheck
+  CheckCircle2, Info, Copy, RefreshCw, Phone, Sparkles, Hammer, Sofa, Crown, Gift, Eraser, Star, ChevronDown, HelpCircle, X, ArrowRight
 } from 'lucide-react';
 
 // =================================================================
-// [스타일] Warm & Modern 테마 정의
+// [스타일] Dribbble Style: Soft Shadow & Clean Card
 // =================================================================
 const GlobalStyles = () => (
   <style>{`
@@ -13,47 +13,46 @@ const GlobalStyles = () => (
     
     body { 
         font-family: "Pretendard Variable", "Pretendard", -apple-system, sans-serif;
-        background-color: #F5F5F4; /* Stone-100: 따뜻한 배경색 */
-        color: #44403C; /* Stone-700: 부드러운 검정 */
+        background-color: #F8F9FA; /* 아주 연한 쿨 그레이 배경 */
+        color: #1F2937;
     }
     
-    .font-serif-title { font-family: 'Times New Roman', serif; } /* 포인트용 세리프 */
-    
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-    
-    .animate-fade-in { animation: fadeIn 0.6s ease-out forwards; }
-    .animate-slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-    
-    .glass-panel {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.5);
+    /* 스무스한 페이드인 애니메이션 */
+    @keyframes fadeInScale { 
+        from { opacity: 0; transform: scale(0.98) translateY(10px); } 
+        to { opacity: 1; transform: scale(1) translateY(0); } 
     }
-
+    
+    .animate-card { animation: fadeInScale 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+    
+    /* 스크롤바 숨김 */
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* 커스텀 그림자: Dribbble 스타일의 부드러운 그림자 */
+    .shadow-soft { box-shadow: 0 10px 40px -10px rgba(0,0,0,0.06); }
+    .shadow-floating { box-shadow: 0 20px 60px -15px rgba(0,0,0,0.1); }
   `}</style>
 );
 
 // =================================================================
-// [데이터] (로직 유지)
+// [데이터]
 // =================================================================
 const HOUSING_TYPES = [
-  { id: 'new', label: '신축 입주', multiplier: 1.0, desc: '새로운 시작, 깨끗한 공간' },
-  { id: 'old', label: '구축/거주 중', multiplier: 1.0, desc: '생활의 흔적을 지우는 리폼' },
+  { id: 'new', label: '신축 입주', multiplier: 1.0, desc: '새 집, 새로운 시작' },
+  { id: 'old', label: '구축/거주 중', multiplier: 1.0, desc: '묵은 때 제거 & 리폼' },
 ];
 
 const MATERIALS = [
   { 
-    id: 'poly', label: 'Standard Poly', subLabel: '폴리아스파틱', priceMod: 1.0, 
-    description: '합리적인 가격과 우수한 탄성, 가성비 최고의 선택',
-    badge: 'Standard', badgeColor: 'bg-stone-100 text-stone-600'
+    id: 'poly', label: 'Standard', subLabel: '폴리아스파틱', priceMod: 1.0, 
+    description: '합리적인 가격, 우수한 탄성과 광택',
+    tags: ['가성비', '탄성우수']
   },
   { 
-    id: 'kerapoxy', label: 'Premium Epoxy', subLabel: '케라폭시/에폭시', priceMod: 1.8, 
-    description: '매트한 질감과 반영구적인 수명, 호텔 욕실의 품격',
-    badge: 'High-End', badgeColor: 'bg-[#0c4a45] text-white' 
+    id: 'kerapoxy', label: 'Premium', subLabel: '케라폭시/에폭시', priceMod: 1.8, 
+    description: '호텔 같은 매트한 질감, 반영구적 수명',
+    tags: ['반영구', '무광매트']
   },
 ];
 
@@ -82,27 +81,27 @@ const REVIEW_EVENTS = [
 ];
 
 const FAQ_ITEMS = [
-    { question: "시공 시간은 얼마나 걸리나요?", answer: "꼼꼼한 시공을 위해 평균 4~6시간이 소요됩니다." },
-    { question: "물 사용은 언제부터 가능한가요?", answer: "폴리아스파틱은 6시간, 케라폭시는 24시간 이상의 양생이 필요합니다." },
-    { question: "A/S 보증 기간은?", answer: "시공 품질에 대한 자신감으로 최대 2~5년의 무상 A/S를 보증합니다." },
+    { question: "시공 소요 시간은?", answer: "평균 4~6시간 소요됩니다." },
+    { question: "물 사용 가능 시간?", answer: "폴리 6시간, 케라폭시 24시간 후 가능합니다." },
+    { question: "A/S 기간은?", answer: "폴리 2년, 케라폭시 5년 무상 보증합니다." },
 ];
 
 // =================================================================
-// [컴포넌트] 아코디언 (Clean Style)
+// [컴포넌트] 심플 아코디언
 // =================================================================
 const Accordion = ({ question, answer }) => {
     const [isOpen, setIsOpen] = useState(false);
     return (
-        <div className="border-b border-stone-200 last:border-0">
+        <div className="border-b border-gray-100 last:border-0">
             <button
-                className="flex justify-between items-center w-full py-4 text-left transition-colors hover:text-[#0f5132]"
+                className="flex justify-between items-center w-full py-4 text-left group"
                 onClick={() => setIsOpen(!isOpen)}
             >
-                <span className={`text-[15px] ${isOpen ? 'font-bold text-[#1c1917]' : 'font-medium text-[#57534e]'}`}>{question}</span>
-                <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${isOpen ? 'rotate-180 text-[#0f5132]' : 'text-stone-400'}`} />
+                <span className={`text-[15px] transition-colors ${isOpen ? 'font-bold text-gray-900' : 'font-medium text-gray-500 group-hover:text-gray-800'}`}>{question}</span>
+                <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180 text-black' : ''}`} />
             </button>
-            <div className={`overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'}`}>
-                <p className="text-sm text-[#78716c] pb-4 leading-relaxed">{answer}</p>
+            <div className={`overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-20 opacity-100' : 'max-h-0 opacity-0'}`}>
+                <p className="text-sm text-gray-500 pb-4">{answer}</p>
             </div>
         </div>
     );
@@ -124,7 +123,7 @@ export default function GroutEstimatorApp() {
   const [selectedReviews, setSelectedReviews] = useState(new Set());
   const [showModal, setShowModal] = useState(false);
 
-  // --- 비즈니스 로직 (수정 없음) ---
+  // --- 로직 유지 ---
   const handleQuantityChange = (id, delta) => {
     setQuantities(prev => {
       const nextValue = Math.max(0, prev[id] + delta);
@@ -171,16 +170,16 @@ export default function GroutEstimatorApp() {
     } else if (selectedMaterial.id === 'poly' && qBathFloor >= 1 && qBathWallOne && qBathFloor === 1 && qBathWallTotal === 1) {
         total += 500000; q['bathroom_floor'] -= 1; qMasterWall >= 1 ? q['master_bath_wall'] -= 1 : q['common_bath_wall'] -= 1; isPackageActive = true; labelText = '50만원 패키지';
     } else if (selectedMaterial.id === 'kerapoxy') {
-        if (qBathFloor >= 2 && qBathWallTotal >= 2) { total += 1300000; q['bathroom_floor'] -= 2; q['master_bath_wall'] = Math.max(0, q['master_bath_wall'] - 1); q['common_bath_wall'] = Math.max(0, q['common_bath_wall'] - 1); isPackageActive = true; isFreeEntrance = true; labelText = 'Premium 풀패키지'; }
-        else if (qBathFloor >= 2 && qShower >= 1 && qBathtub >= 1) { total += 950000; q['bathroom_floor'] -= 2; q['shower_booth'] -= 1; q['bathtub_wall'] -= 1; isPackageActive = true; isFreeEntrance = true; labelText = 'Premium 패키지 A'; }
-        else if (qBathFloor >= 2 && (qShower >= 1 || qBathtub >= 1)) { total += 750000; q['bathroom_floor'] -= 2; qShower >= 1 ? q['shower_booth'] -= 1 : q['bathtub_wall'] -= 1; isPackageActive = true; isFreeEntrance = true; labelText = 'Premium 패키지 B'; }
-        else if (qBathFloor >= 2 && qEntrance >= 1) { isPackageActive = true; isFreeEntrance = true; labelText = '현관 무료 혜택'; }
-        else if (qBathFloor === 1) { total += 350000; q['bathroom_floor'] -= 1; labelText = 'Basic'; }
+        if (qBathFloor >= 2 && qBathWallTotal >= 2) { total += 1300000; q['bathroom_floor'] -= 2; q['master_bath_wall'] = Math.max(0, q['master_bath_wall'] - 1); q['common_bath_wall'] = Math.max(0, q['common_bath_wall'] - 1); isPackageActive = true; isFreeEntrance = true; labelText = '풀패키지 할인'; }
+        else if (qBathFloor >= 2 && qShower >= 1 && qBathtub >= 1) { total += 950000; q['bathroom_floor'] -= 2; q['shower_booth'] -= 1; q['bathtub_wall'] -= 1; isPackageActive = true; isFreeEntrance = true; labelText = '패키지 A 할인'; }
+        else if (qBathFloor >= 2 && (qShower >= 1 || qBathtub >= 1)) { total += 750000; q['bathroom_floor'] -= 2; qShower >= 1 ? q['shower_booth'] -= 1 : q['bathtub_wall'] -= 1; isPackageActive = true; isFreeEntrance = true; labelText = '패키지 B 할인'; }
+        else if (qBathFloor >= 2 && qEntrance >= 1) { isPackageActive = true; isFreeEntrance = true; labelText = '현관 무료'; }
+        else if (qBathFloor === 1) { total += 350000; q['bathroom_floor'] -= 1; labelText = '최소 시공'; }
     } else { 
       if (qBathFloor >= 2 && qBathWallTotal >= 2) { total += 700000; q['bathroom_floor'] -= 2; q['master_bath_wall'] = Math.max(0, q['master_bath_wall'] - 1); q['common_bath_wall'] = Math.max(0, q['common_bath_wall'] - 1); isPackageActive = true; isFreeEntrance = true; labelText = '풀패키지 할인'; }
       else if (qBathFloor >= 2 && (qShower >= 1 || qBathtub >= 1)) { total += 380000; q['bathroom_floor'] -= 2; qShower >= 1 ? q['shower_booth'] -= 1 : q['bathtub_wall'] -= 1; isPackageActive = true; isFreeEntrance = true; labelText = '실속 패키지'; }
-      else if (qBathFloor >= 2 && qEntrance >= 1) { isPackageActive = true; isFreeEntrance = true; labelText = '현관 무료 혜택'; }
-      else if (qBathFloor === 1) { total += 200000; q['bathroom_floor'] -= 1; labelText = 'Basic'; }
+      else if (qBathFloor >= 2 && qEntrance >= 1) { isPackageActive = true; isFreeEntrance = true; labelText = '현관 무료'; }
+      else if (qBathFloor === 1) { total += 200000; q['bathroom_floor'] -= 1; labelText = '최소 시공'; }
     }
 
     [...SERVICE_AREAS, ...SILICON_AREAS].forEach(area => {
@@ -206,31 +205,28 @@ export default function GroutEstimatorApp() {
     return { price: Math.max(0, Math.floor(total / 1000) * 1000), label: labelText, isPackageActive, isFreeEntrance, discountAmount };
   }, [housingType, material, quantities, selectedReviews]);
 
-  // --- 견적서 텍스트 생성 ---
+  // --- 텍스트 생성 ---
   const generateQuoteText = () => {
-    let text = `[줄눈의미학 | Premium Grout Service]\n\n`;
-    text += `■ 공간: ${HOUSING_TYPES.find(h => h.id === housingType).label}\n`;
-    text += `■ 소재: ${MATERIALS.find(m => m.id === material).subLabel} ${material === 'poly' ? (polyOption === 'pearl' ? '(펄)' : '(무광)') : (epoxyOption === 'kerapoxy' ? '(케라폭시)' : '(스타라이크)')}\n\n`;
+    let text = `[줄눈의미학 견적서]\n\n`;
+    text += `■ 현장: ${HOUSING_TYPES.find(h => h.id === housingType).label}\n`;
+    text += `■ 재료: ${MATERIALS.find(m => m.id === material).subLabel}\n`;
     
     const allAreas = [...SERVICE_AREAS, ...SILICON_AREAS];
     const activeAreas = allAreas.filter(area => quantities[area.id] > 0);
     
     if (activeAreas.length > 0) {
-        text += `[선택 시공 내역]\n`;
+        text += `\n[선택 내역]\n`;
         activeAreas.forEach(area => {
             let note = '';
-            if (area.id === 'entrance' && calculation.isFreeEntrance) note = ' (Service)';
-            text += `• ${area.label}: ${quantities[area.id]}${area.unit}${note}\n`;
+            if (area.id === 'entrance' && calculation.isFreeEntrance) note = ' (서비스)';
+            text += `- ${area.label}: ${quantities[area.id]}${area.unit}${note}\n`;
         });
     }
-    
-    if (calculation.isPackageActive) {
-        text += `\n[패키지 서비스 혜택]\n• 변기/바닥 테두리, 젠다이/싱크볼 서비스\n`;
-    }
+
+    if (calculation.isPackageActive) text += `\n[🎁 패키지 적용됨]\n변기/바닥 테두리, 젠다이/싱크볼 서비스 포함\n`;
 
     text += `\n총 견적: ${calculation.price.toLocaleString()}원`;
-    if (calculation.label) text += ` (${calculation.label})`;
-    text += `\n\n* 현장 상황에 따라 견적은 변동될 수 있습니다.`;
+    text += `\n\n* 실제 견적은 현장 상황에 따라 달라질 수 있습니다.`;
     return text;
   };
 
@@ -241,87 +237,94 @@ export default function GroutEstimatorApp() {
   const hasSelections = Object.values(quantities).some(v => v > 0);
 
   return (
-    <div className="min-h-screen bg-[#FAFAF9] text-[#44403C] pb-36">
+    <div className="min-h-screen pb-32 font-sans selection:bg-teal-100 selection:text-teal-900">
       <GlobalStyles />
 
-      {/* 헤더: Warm & Trustworthy */}
-      <header className="sticky top-0 z-50 bg-[#FAFAF9]/90 backdrop-blur-md border-b border-stone-200">
-        <div className="max-w-md mx-auto px-6 py-4 flex items-center justify-between">
+      {/* 헤더: 미니멀 & 클린 */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-[#F8F9FA]/80 backdrop-blur-md">
+        <div className="max-w-md mx-auto px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
-             <div className="w-8 h-8 rounded-lg bg-[#0c4a45] flex items-center justify-center text-white">
-                 <Sparkles size={16} strokeWidth={2} />
-             </div>
-             <div>
-                 <h1 className="text-lg font-bold tracking-tight text-[#1c1917]">줄눈의미학</h1>
-             </div>
+             <div className="bg-black text-white p-1 rounded-md"><Sparkles size={14} fill="white"/></div>
+             <span className="font-bold text-lg tracking-tight">줄눈의미학</span>
           </div>
-          <button onClick={() => window.location.reload()} className="p-2 rounded-full hover:bg-stone-100 transition text-[#78716c]">
-            <RefreshCw size={16} />
+          <button onClick={() => window.location.reload()} className="p-2 rounded-full hover:bg-gray-200 transition">
+            <RefreshCw size={18} className="text-gray-400" />
           </button>
         </div>
       </header>
 
-      <main className="max-w-md mx-auto px-6 pt-8 space-y-10">
+      <main className="max-w-md mx-auto px-6 pt-20 space-y-10">
         
-        {/* 1. 현장 유형: Warm Card Style */}
-        <section className="animate-fade-in" style={{ animationDelay: '0.1s' }}>
-          <h2 className="text-sm font-bold text-[#A8A29E] mb-4 tracking-wide">STEP 01. 현장 확인</h2>
-          <div className="flex gap-4">
+        {/* STEP 1: 현장 유형 (카드형 선택) */}
+        <section className="animate-card" style={{ animationDelay: '0.1s' }}>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-gray-900">어떤 현장인가요?</h2>
+            <span className="text-xs font-bold text-gray-300 bg-white px-2 py-1 rounded-full border border-gray-100">STEP 1</span>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
             {HOUSING_TYPES.map((type) => (
               <button
                 key={type.id}
                 onClick={() => setHousingType(type.id)}
-                className={`flex-1 p-5 rounded-2xl text-left transition-all duration-300 ${
+                className={`relative flex flex-col items-start p-5 rounded-[24px] transition-all duration-300 ${
                   housingType === type.id 
-                    ? 'bg-white shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-[#0c4a45] ring-1 ring-[#0c4a45]/20' 
-                    : 'bg-white shadow-sm border border-stone-100 hover:border-stone-300'
+                    ? 'bg-white shadow-soft ring-2 ring-black transform scale-[1.02] z-10' 
+                    : 'bg-white border border-transparent hover:bg-gray-50'
                 }`}
               >
-                <div className={`mb-2 ${housingType === type.id ? 'text-[#0c4a45]' : 'text-stone-300'}`}>
-                    {type.id === 'new' ? <Home size={24} /> : <Hammer size={24} />}
+                <div className={`mb-3 p-3 rounded-full ${housingType === type.id ? 'bg-black text-white' : 'bg-gray-100 text-gray-400'}`}>
+                    {type.id === 'new' ? <Home size={20} /> : <Hammer size={20} />}
                 </div>
-                <div className={`font-bold text-base ${housingType === type.id ? 'text-[#1c1917]' : 'text-stone-500'}`}>{type.label}</div>
+                <div className="font-bold text-base text-gray-900">{type.label}</div>
+                <div className="text-xs text-gray-400 mt-1 text-left leading-tight">{type.desc}</div>
               </button>
             ))}
           </div>
         </section>
 
-        {/* 2. 재료 선택: Magazine List Style */}
-        <section className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
-          <h2 className="text-sm font-bold text-[#A8A29E] mb-4 tracking-wide">STEP 02. 소재 선택</h2>
+        {/* STEP 2: 재료 선택 (리스트형 카드) */}
+        <section className="animate-card" style={{ animationDelay: '0.2s' }}>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-gray-900">재료를 선택하세요</h2>
+            <span className="text-xs font-bold text-gray-300 bg-white px-2 py-1 rounded-full border border-gray-100">STEP 2</span>
+          </div>
           <div className="space-y-4">
             {MATERIALS.map((item) => (
               <div key={item.id} 
                 onClick={() => setMaterial(item.id)}
-                className={`relative overflow-hidden p-6 rounded-2xl cursor-pointer transition-all duration-300 bg-white ${
+                className={`group relative overflow-hidden p-6 rounded-[28px] cursor-pointer transition-all duration-300 ${
                   material === item.id 
-                    ? 'shadow-[0_8px_30px_rgb(0,0,0,0.06)] ring-1 ring-[#0c4a45] border-transparent' 
-                    : 'border border-stone-100 hover:border-stone-200'
+                    ? 'bg-white shadow-soft ring-2 ring-black' 
+                    : 'bg-white border border-transparent hover:shadow-sm'
                 }`}
               >
-                {material === item.id && <div className="absolute top-0 left-0 w-1.5 h-full bg-[#0c4a45]" />}
-                
-                <div className="flex justify-between items-start mb-2 pl-2">
+                <div className="flex justify-between items-start mb-2">
                     <div>
-                        <span className={`block font-serif-title text-xl mb-1 ${material === item.id ? 'text-[#0c4a45] font-bold' : 'text-stone-400'}`}>{item.label}</span>
-                        <span className="text-sm font-medium text-[#57534e]">{item.subLabel}</span>
+                        <div className="flex items-center gap-2 mb-1">
+                            <span className="font-bold text-lg text-gray-900">{item.label}</span>
+                            {material === item.id && <CheckCircle2 size={16} className="text-teal-500 fill-teal-500" />}
+                        </div>
+                        <span className="text-sm text-gray-500 font-medium">{item.subLabel}</span>
                     </div>
-                    <span className={`text-[10px] px-2.5 py-1 rounded-full font-semibold tracking-wider ${item.badgeColor}`}>{item.badge}</span>
+                    <div className="flex flex-col gap-1 items-end">
+                        {item.tags.map(tag => (
+                            <span key={tag} className="text-[10px] bg-gray-100 text-gray-500 px-2 py-1 rounded-full font-bold">{tag}</span>
+                        ))}
+                    </div>
                 </div>
-                <p className="text-xs text-[#78716c] leading-relaxed pl-2 mb-4">{item.description}</p>
                 
-                {/* 세부 옵션: 부드러운 버튼 */}
-                <div className={`transition-all duration-500 ease-in-out pl-2 ${material === item.id ? 'max-h-20 opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
-                    <div className="flex gap-2">
+                {/* 하위 옵션 (스무스한 확장) */}
+                <div className={`transition-all duration-500 ease-out ${material === item.id ? 'max-h-24 opacity-100 mt-4' : 'max-h-0 opacity-0 overflow-hidden'}`}>
+                    <div className="flex gap-2 p-1 bg-gray-50 rounded-xl">
                     {item.id === 'poly' ? (
                         <>
-                            <button onClick={(e) => {e.stopPropagation(); setPolyOption('pearl');}} className={`px-4 py-2 text-xs rounded-lg transition-colors ${polyOption === 'pearl' ? 'bg-[#0c4a45] text-white' : 'bg-stone-100 text-stone-500'}`}>펄 (유광)</button>
-                            <button onClick={(e) => {e.stopPropagation(); setPolyOption('no_pearl');}} className={`px-4 py-2 text-xs rounded-lg transition-colors ${polyOption === 'no_pearl' ? 'bg-[#0c4a45] text-white' : 'bg-stone-100 text-stone-500'}`}>무펄 (무광)</button>
+                            <button onClick={(e) => {e.stopPropagation(); setPolyOption('pearl');}} className={`flex-1 py-3 text-xs rounded-lg font-bold transition-all ${polyOption === 'pearl' ? 'bg-white text-black shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}>✨ 펄(유광)</button>
+                            <button onClick={(e) => {e.stopPropagation(); setPolyOption('no_pearl');}} className={`flex-1 py-3 text-xs rounded-lg font-bold transition-all ${polyOption === 'no_pearl' ? 'bg-white text-black shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}>☁️ 무펄(무광)</button>
                         </>
                     ) : (
                         <>
-                            <button onClick={(e) => {e.stopPropagation(); setEpoxyOption('kerapoxy');}} className={`px-4 py-2 text-xs rounded-lg transition-colors ${epoxyOption === 'kerapoxy' ? 'bg-[#0c4a45] text-white' : 'bg-stone-100 text-stone-500'}`}>케라폭시</button>
-                            <button onClick={(e) => {e.stopPropagation(); setEpoxyOption('starlike');}} className={`px-4 py-2 text-xs rounded-lg transition-colors ${epoxyOption === 'starlike' ? 'bg-[#0c4a45] text-white' : 'bg-stone-100 text-stone-500'}`}>스타라이크</button>
+                            <button onClick={(e) => {e.stopPropagation(); setEpoxyOption('kerapoxy');}} className={`flex-1 py-3 text-xs rounded-lg font-bold transition-all ${epoxyOption === 'kerapoxy' ? 'bg-white text-black shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}>케라폭시</button>
+                            <button onClick={(e) => {e.stopPropagation(); setEpoxyOption('starlike');}} className={`flex-1 py-3 text-xs rounded-lg font-bold transition-all ${epoxyOption === 'starlike' ? 'bg-white text-black shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}>스타라이크</button>
                         </>
                     )}
                     </div>
@@ -331,47 +334,59 @@ export default function GroutEstimatorApp() {
           </div>
         </section>
 
-        {/* 3. 시공 범위: Clean List */}
-        <section className="animate-fade-in" style={{ animationDelay: '0.3s' }}>
-          <h2 className="text-sm font-bold text-[#A8A29E] mb-4 tracking-wide">STEP 03. 공간 구성</h2>
-          <div className="bg-white rounded-3xl p-6 shadow-sm border border-stone-100 space-y-8">
-            <div className="space-y-5">
-                <div className="flex items-center gap-2 pb-2 border-b border-stone-100">
-                    <LayoutGrid size={16} className="text-[#0c4a45]"/>
-                    <h3 className="text-sm font-bold text-[#1c1917]">줄눈 시공</h3>
-                </div>
+        {/* STEP 3: 공간 선택 (깔끔한 리스트 + 카운터) */}
+        <section className="animate-card" style={{ animationDelay: '0.3s' }}>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-gray-900">시공 공간</h2>
+            <span className="text-xs font-bold text-gray-300 bg-white px-2 py-1 rounded-full border border-gray-100">STEP 3</span>
+          </div>
+          
+          <div className="bg-white rounded-[32px] p-6 shadow-sm space-y-8">
+            {/* 줄눈 섹션 */}
+            <div className="space-y-6">
+                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest pl-1">Grout Area</h3>
                 {SERVICE_AREAS.map((area) => (
-                    <div key={area.id} className="flex items-center justify-between group">
-                        <div className="flex flex-col">
-                            <span className="font-medium text-[#44403C] text-[15px]">{area.label}</span>
-                            <span className="text-[11px] text-[#A8A29E]">{area.basePrice.toLocaleString()}원~</span>
+                    <div key={area.id} className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-400">
+                                <area.icon size={20} strokeWidth={1.5} />
+                            </div>
+                            <div>
+                                <div className="font-bold text-gray-800 text-[15px]">{area.label}</div>
+                                <div className="text-[11px] text-gray-400 font-medium">{area.basePrice.toLocaleString()}원~</div>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-3 bg-stone-50 rounded-lg p-1">
+                        <div className="flex items-center gap-3">
                              <button onClick={() => handleQuantityChange(area.id, -1)} 
-                                className={`w-7 h-7 rounded-md flex items-center justify-center transition-colors ${quantities[area.id] > 0 ? 'bg-white shadow-sm text-[#0c4a45]' : 'text-stone-300'}`}>-</button>
-                             <span className={`w-4 text-center text-sm font-bold ${quantities[area.id] > 0 ? 'text-[#0c4a45]' : 'text-stone-300'}`}>{quantities[area.id]}</span>
+                                className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${quantities[area.id] > 0 ? 'bg-black text-white' : 'bg-gray-100 text-gray-300'}`}>-</button>
+                             <span className={`w-4 text-center text-sm font-bold ${quantities[area.id] > 0 ? 'text-black' : 'text-gray-200'}`}>{quantities[area.id]}</span>
                              <button onClick={() => handleQuantityChange(area.id, 1)} 
-                                className="w-7 h-7 rounded-md bg-white shadow-sm text-[#0c4a45] flex items-center justify-center">+</button>
+                                className="w-8 h-8 rounded-full bg-gray-100 text-gray-600 hover:bg-black hover:text-white transition-all flex items-center justify-center">+</button>
                         </div>
                     </div>
                 ))}
             </div>
 
-            <div className="space-y-5">
-                <div className="flex items-center gap-2 pb-2 border-b border-stone-100">
-                    <Eraser size={16} className="text-[#92400e]"/>
-                    <h3 className="text-sm font-bold text-[#1c1917]">실리콘 리폼</h3>
-                </div>
+            <div className="w-full h-px bg-gray-100" />
+
+            {/* 실리콘 섹션 */}
+            <div className="space-y-6">
+                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest pl-1">Silicon Reform</h3>
                 {SILICON_AREAS.map((area) => (
                     <div key={area.id} className="flex items-center justify-between">
-                        <div className="flex flex-col">
-                            <span className="font-medium text-[#44403C] text-[15px]">{area.label}</span>
-                            <span className="text-[11px] text-[#A8A29E]">{area.basePrice.toLocaleString()}원~</span>
+                        <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-2xl bg-orange-50 flex items-center justify-center text-orange-400">
+                                <area.icon size={20} strokeWidth={1.5} />
+                            </div>
+                            <div>
+                                <div className="font-bold text-gray-800 text-[15px]">{area.label}</div>
+                                <div className="text-[11px] text-gray-400 font-medium">{area.basePrice.toLocaleString()}원~</div>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-3 bg-stone-50 rounded-lg p-1">
-                             <button onClick={() => handleQuantityChange(area.id, -1)} className={`w-7 h-7 rounded-md flex items-center justify-center transition-colors ${quantities[area.id] > 0 ? 'bg-white shadow-sm text-[#92400e]' : 'text-stone-300'}`}>-</button>
-                             <span className={`w-4 text-center text-sm font-bold ${quantities[area.id] > 0 ? 'text-[#92400e]' : 'text-stone-300'}`}>{quantities[area.id]}</span>
-                             <button onClick={() => handleQuantityChange(area.id, 1)} className="w-7 h-7 rounded-md bg-white shadow-sm text-[#92400e] flex items-center justify-center">+</button>
+                        <div className="flex items-center gap-3">
+                             <button onClick={() => handleQuantityChange(area.id, -1)} className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${quantities[area.id] > 0 ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-300'}`}>-</button>
+                             <span className={`w-4 text-center text-sm font-bold ${quantities[area.id] > 0 ? 'text-orange-600' : 'text-gray-200'}`}>{quantities[area.id]}</span>
+                             <button onClick={() => handleQuantityChange(area.id, 1)} className="w-8 h-8 rounded-full bg-gray-100 text-gray-600 hover:bg-orange-500 hover:text-white transition-all flex items-center justify-center">+</button>
                         </div>
                     </div>
                 ))}
@@ -379,134 +394,129 @@ export default function GroutEstimatorApp() {
           </div>
         </section>
 
-        {/* 4. 혜택: Elegant Badge Style */}
-        <section className="animate-fade-in" style={{ animationDelay: '0.4s' }}>
-          <h2 className="text-sm font-bold text-[#A8A29E] mb-4 tracking-wide">할인 혜택</h2>
+        {/* 할인 혜택 (티켓형 UI) */}
+        <section className="animate-card" style={{ animationDelay: '0.4s' }}>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-gray-900">할인 혜택</h2>
+            <Gift size={20} className="text-teal-500" />
+          </div>
           <div className="grid grid-cols-2 gap-4">
             {REVIEW_EVENTS.map((evt) => (
               <button 
                 key={evt.id} 
                 onClick={() => toggleReview(evt.id)} 
-                className={`flex flex-col items-center justify-center p-4 rounded-xl border transition-all duration-300 ${
+                className={`flex flex-col items-center justify-center p-5 rounded-[24px] border transition-all duration-300 ${
                   selectedReviews.has(evt.id) 
-                    ? 'bg-[#1c1917] border-[#1c1917] text-[#FAFAF9]' 
-                    : 'bg-white border-stone-200 text-stone-400 hover:border-stone-300'
+                    ? 'bg-gray-900 border-gray-900 text-white shadow-lg' 
+                    : 'bg-white border-transparent text-gray-400 hover:border-gray-200 shadow-sm'
                 }`}
               >
-                <div className="text-xs font-medium mb-1">{evt.label}</div>
-                <div className={`text-lg font-bold ${selectedReviews.has(evt.id) ? 'text-[#fbbf24]' : 'text-stone-300'}`}>-{evt.discount.toLocaleString()}</div>
+                <div className="text-xs font-bold mb-1 opacity-80">{evt.label}</div>
+                <div className={`text-lg font-bold ${selectedReviews.has(evt.id) ? 'text-teal-300' : 'text-gray-300'}`}>-{evt.discount.toLocaleString()}</div>
               </button>
             ))}
           </div>
         </section>
 
-        {/* FAQ: Clean Accordion */}
+        {/* FAQ */}
         <section className="pb-8">
-             <h2 className="text-sm font-bold text-[#A8A29E] mb-4 tracking-wide flex items-center gap-2"><HelpCircle size={14}/> 시공 가이드</h2>
-             <div className="bg-white rounded-2xl p-4 shadow-sm border border-stone-100">
+             <h2 className="text-xl font-bold text-gray-900 mb-4">자주 묻는 질문</h2>
+             <div className="bg-white rounded-[24px] p-4 shadow-sm">
                 {FAQ_ITEMS.map((item, idx) => <Accordion key={idx} question={item.question} answer={item.answer} />)}
              </div>
         </section>
 
       </main>
 
-      {/* --- 하단 액션 바 (Floating) --- */}
-      <div className="fixed bottom-0 left-0 right-0 z-40">
+      {/* --- Floating Bottom Bar (Dribbble Style) --- */}
+      <div className="fixed bottom-6 left-6 right-6 z-50">
         
-        {/* 패키지 적용 알림 (Toast Style) */}
+        {/* Toast Notification for Package */}
         {calculation.isPackageActive && (
-            <div className="absolute bottom-24 left-6 right-6 animate-slide-up">
-                <div className="bg-[#1c1917]/95 backdrop-blur text-[#FAFAF9] p-4 rounded-xl shadow-2xl flex items-center justify-between border border-stone-700">
+            <div className="absolute bottom-20 left-0 right-0 animate-card">
+                <div className="bg-gray-800/90 backdrop-blur-md text-white px-5 py-3 rounded-2xl shadow-floating flex items-center justify-between">
                     <div className="flex flex-col">
-                        <span className="text-[#fbbf24] font-bold text-sm flex items-center gap-1"><Gift size={14}/> {calculation.label || '특별 혜택'} 적용</span>
-                        <span className="text-[11px] text-stone-400 mt-0.5">현관 무료 / 서비스 시공 포함</span>
-                    </div>
-                    <div className="h-8 w-8 rounded-full bg-[#333] flex items-center justify-center">
-                        <ShieldCheck size={16} className="text-[#fbbf24]" />
+                        <span className="text-teal-300 font-bold text-sm">🎉 {calculation.label} 적용</span>
+                        <span className="text-[10px] text-gray-300">현관 무료 시공 등 혜택 포함</span>
                     </div>
                 </div>
             </div>
         )}
 
-        {/* 결제 버튼 영역 */}
-        <div className="bg-white border-t border-stone-100 p-5 pb-8 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] safe-area-bottom">
-            <div className="max-w-md mx-auto flex items-center justify-between gap-6">
-                <div className="flex flex-col">
-                    <span className="text-[11px] text-stone-400 font-medium">예상 견적가</span>
-                    <span className="text-2xl font-serif-title font-bold text-[#1c1917] tracking-tight">{calculation.price.toLocaleString()}<span className="text-sm font-sans text-stone-400 ml-1">원</span></span>
+        {/* Main Action Button */}
+        <button 
+            onClick={() => setShowModal(true)} 
+            disabled={!hasSelections}
+            className={`w-full h-16 rounded-[24px] shadow-floating flex items-center justify-between px-6 transition-all transform active:scale-95 ${
+                hasSelections 
+                ? 'bg-black text-white hover:bg-gray-900' 
+                : 'bg-white text-gray-300 cursor-not-allowed'
+            }`}
+        >
+            <div className="flex flex-col items-start">
+                <span className="text-[10px] opacity-60 font-medium">TOTAL ESTIMATE</span>
+                <div className="text-xl font-bold flex items-baseline gap-1">
+                    {calculation.price.toLocaleString()}
+                    <span className="text-sm font-normal opacity-60">원</span>
                 </div>
-                <button 
-                    onClick={() => setShowModal(true)} 
-                    disabled={!hasSelections}
-                    className={`flex-1 h-12 rounded-xl font-bold text-sm transition-all transform active:scale-95 shadow-lg ${hasSelections ? 'bg-[#0c4a45] text-white hover:bg-[#0a3f3b] shadow-[#0c4a45]/20' : 'bg-stone-200 text-stone-400 cursor-not-allowed'}`}
-                >
-                    견적서 확인하기
-                </button>
             </div>
-        </div>
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${hasSelections ? 'bg-teal-500 text-white' : 'bg-gray-100 text-gray-200'}`}>
+                <ArrowRight size={20} />
+            </div>
+        </button>
       </div>
 
-      {/* --- 견적서 모달 (Warm Theme) --- */}
+      {/* --- Modal (Modern Clean) --- */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1c1917]/60 backdrop-blur-sm animate-fade-in">
-            <div className="bg-[#FAFAF9] w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-slide-up max-h-[85vh] flex flex-col">
-                <div className="bg-white p-5 border-b border-stone-100 flex justify-between items-center">
-                    <h3 className="font-bold text-lg text-[#1c1917]">견적 내역서</h3>
-                    <button onClick={() => setShowModal(false)} className="text-stone-400 hover:text-stone-600"><X size={20}/></button>
-                </div>
-                
-                <div className="p-6 overflow-y-auto no-scrollbar space-y-6">
-                    <div className="space-y-3 text-sm">
-                        <div className="flex justify-between border-b border-dashed border-stone-200 pb-3">
-                            <span className="text-stone-500">현장 유형</span>
-                            <span className="font-bold text-[#1c1917]">{HOUSING_TYPES.find(h => h.id === housingType).label}</span>
-                        </div>
-                        <div className="flex justify-between border-b border-dashed border-stone-200 pb-3">
-                            <span className="text-stone-500">시공 소재</span>
-                            <span className="font-bold text-[#0c4a45]">{MATERIALS.find(m => m.id === material).label}</span>
-                        </div>
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4">
+            <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onClick={() => setShowModal(false)} />
+            <div className="relative bg-white w-full max-w-sm rounded-t-[32px] sm:rounded-[32px] shadow-2xl overflow-hidden animate-card max-h-[90vh] flex flex-col">
+                <div className="p-6 pb-2">
+                    <div className="w-12 h-1 bg-gray-200 rounded-full mx-auto mb-6 sm:hidden" />
+                    <div className="flex justify-between items-center mb-6">
+                        <h3 className="font-bold text-2xl text-gray-900">견적 내역</h3>
+                        <button onClick={() => setShowModal(false)} className="bg-gray-100 p-2 rounded-full text-gray-500 hover:bg-gray-200"><X size={20}/></button>
                     </div>
-
-                    <div className="space-y-3">
-                        <p className="text-xs font-bold text-stone-400 uppercase tracking-widest">Selected Areas</p>
-                        {[...SERVICE_AREAS, ...SILICON_AREAS].filter(a => quantities[a.id] > 0).map(area => (
-                            <div key={area.id} className="flex justify-between text-sm items-center">
-                                <span className="text-[#44403C]">{area.label} <span className="text-stone-400 text-xs">x{quantities[area.id]}</span></span>
-                                <span className="font-medium text-[#1c1917]">
-                                    {area.id === 'entrance' && calculation.isFreeEntrance 
-                                        ? <span className="text-[#0c4a45] font-bold">Service</span> 
-                                        : `${(area.basePrice * quantities[area.id]).toLocaleString()}원`}
-                                </span>
-                            </div>
-                        ))}
-                    </div>
-
-                    {(calculation.isPackageActive || calculation.discountAmount > 0) && (
-                        <div className="bg-[#E7E5E4]/50 p-4 rounded-xl space-y-2 text-xs">
-                             {calculation.isPackageActive && (
-                                <div className="flex justify-between text-[#0c4a45] font-bold">
-                                    <span>패키지 적용</span>
-                                    <span>{calculation.label}</span>
-                                </div>
-                             )}
-                             {REVIEW_EVENTS.map(evt => selectedReviews.has(evt.id) && (
-                                 <div key={evt.id} className="flex justify-between text-stone-500">
-                                     <span>{evt.label}</span>
-                                     <span className="text-[#b91c1c]">-{evt.discount.toLocaleString()}원</span>
-                                 </div>
-                             ))}
-                        </div>
-                    )}
                     
-                    <div className="bg-[#fff1f2] p-3 rounded-lg flex gap-2 items-start">
-                        <Info size={14} className="text-[#e11d48] mt-0.5 shrink-0" />
-                        <p className="text-[11px] text-[#e11d48] leading-snug">현장 상태(오염도, 타일 크기 등)에 따라 추가 비용이 발생할 수 있습니다.</p>
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-2xl">
+                            <div className="p-2 bg-white rounded-xl shadow-sm"><Home size={20} className="text-gray-700"/></div>
+                            <div className="flex-1">
+                                <div className="text-xs text-gray-400 font-bold">TYPE</div>
+                                <div className="font-bold text-gray-900">{HOUSING_TYPES.find(h => h.id === housingType).label}</div>
+                            </div>
+                            <div className="flex-1 border-l pl-4 border-gray-200">
+                                <div className="text-xs text-gray-400 font-bold">MATERIAL</div>
+                                <div className="font-bold text-gray-900">{MATERIALS.find(m => m.id === material).label}</div>
+                            </div>
+                        </div>
+
+                        <div className="max-h-[30vh] overflow-y-auto no-scrollbar space-y-3 py-2">
+                            {[...SERVICE_AREAS, ...SILICON_AREAS].filter(a => quantities[a.id] > 0).map(area => (
+                                <div key={area.id} className="flex justify-between items-center text-sm p-3 hover:bg-gray-50 rounded-xl transition-colors">
+                                    <span className="text-gray-600 font-medium">{area.label} <span className="text-gray-300 text-xs">x{quantities[area.id]}</span></span>
+                                    <span className="font-bold text-gray-900">
+                                        {area.id === 'entrance' && calculation.isFreeEntrance 
+                                            ? <span className="text-teal-500">Free</span> 
+                                            : `${(area.basePrice * quantities[area.id]).toLocaleString()}`}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
 
-                <div className="p-4 bg-white border-t border-stone-100 grid grid-cols-2 gap-3">
-                    <button onClick={copyToClipboard} className="py-3.5 rounded-xl bg-stone-100 text-stone-600 font-bold text-sm hover:bg-stone-200 transition">견적 복사</button>
-                    <button onClick={() => window.location.href = 'tel:010-0000-0000'} className="py-3.5 rounded-xl bg-[#0c4a45] text-white font-bold text-sm hover:bg-[#0a3f3b] transition shadow-lg shadow-[#0c4a45]/20">전화 상담</button>
+                <div className="p-6 bg-gray-50 border-t border-gray-100 mt-auto">
+                    <div className="flex justify-between items-center mb-6">
+                        <span className="text-gray-500 font-bold">총 합계</span>
+                        <span className="text-3xl font-bold text-gray-900">{calculation.price.toLocaleString()}<span className="text-lg text-gray-400 ml-1">원</span></span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                        <button onClick={copyToClipboard} className="py-4 rounded-2xl bg-white border border-gray-200 font-bold text-gray-600 shadow-sm hover:bg-gray-50 transition">견적 복사</button>
+                        <button onClick={() => window.location.href = 'tel:010-0000-0000'} className="py-4 rounded-2xl bg-black text-white font-bold hover:bg-gray-800 transition shadow-lg flex items-center justify-center gap-2">
+                            <Phone size={18} /> 전화 상담
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
