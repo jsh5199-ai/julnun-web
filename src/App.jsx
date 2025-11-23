@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { 
   Calculator, Home, Bath, DoorOpen, Utensils, LayoutGrid, 
-  CheckCircle2, Info, Copy, RefreshCw, Phone, Sparkles, Hammer, Sofa, Palette, Crown, Gift, Eraser, Star, Image as ImageIcon, X, ChevronDown, MessageSquare, HelpCircle, Check, AlertTriangle, Camera, Clock
+  CheckCircle2, Info, Copy, RefreshCw, Phone, Sparkles, Hammer, Sofa, Palette, Crown, Gift, Eraser, Star, X, ChevronDown, MessageSquare, HelpCircle
 } from 'lucide-react';
 
 // =================================================================
@@ -76,18 +76,6 @@ const REVIEW_EVENTS = [
 ];
 
 // =================================================================
-// [6] 갤러리 데이터
-// =================================================================
-const PORTFOLIO_IMAGES = [
-  { id: 1, src: "/photo1.jpg" }, { id: 2, src: "/photo2.jpg" }, { id: 3, src: "/photo3.jpg" }, { id: 4, src: "/photo4.jpg" }, 
-  { id: 5, src: "/photo5.jpg" }, { id: 6, src: "/photo6.jpg" }, { id: 7, src: "/photo7.jpg" }, { id: 8, src: "/photo8.jpg" }, 
-  { id: 9, src: "/photo9.jpg" }, { id: 10, src: "/photo10.jpg" }, { id: 11, src: "/photo11.jpg" }, { id: 12, src: "/photo12.jpg" }, 
-  { id: 13, src: "/photo13.jpg" }, { id: 14, src: "/photo14.jpg" }, { id: 15, src: "/photo15.jpg" }, { id: 16, src: "/photo16.jpg" }, 
-  { id: 17, src: "/photo17.jpg" }, { id: 18, src: "/photo18.jpg" }, { id: 19, src: "/photo19.jpg" }, { id: 20, src: "/photo20.jpg" }, 
-  { id: 21, src: "/photo21.jpg" }, { id: 22, src: "/photo22.jpg" },
-];
-
-// =================================================================
 // [7] FAQ 데이터
 // =================================================================
 const FAQ_ITEMS = [
@@ -119,9 +107,7 @@ const Accordion = ({ question, answer }) => {
     );
 };
 
-
 export default function GroutEstimatorApp() {
-  const [activeTab, setActiveTab] = useState('calculator');
   const [housingType, setHousingType] = useState('new');
   const [material, setMaterial] = useState('poly');
   
@@ -134,8 +120,6 @@ export default function GroutEstimatorApp() {
 
   const [selectedReviews, setSelectedReviews] = useState(new Set()); 
   const [showModal, setShowModal] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [visibleImages, setVisibleImages] = useState(6);
 
   const SOOMGO_REVIEW_URL = 'https://www.soomgo.com/profile/users/10755579?tab=review';
   const KAKAO_CHAT_URL = 'https://pf.kakao.com/_xxxxxxx'; 
@@ -385,6 +369,9 @@ export default function GroutEstimatorApp() {
     let text = `[줄눈의미학 견적 문의]\n\n`;
     text += `🏠 현장유형: ${housingLabel}\n`;
     text += `✨ 시공재료: ${materialLabel}\n`;
+    
+    text += `\n📸 [사진 첨부] (필수)\n`;
+    text += `- 상담원에게 현장 사진을 카톡이나 문자로 꼭 보내주세요.\n`; // 단순화된 문구
     
     text += `\n📋 [줄눈 시공]\n`;
     SERVICE_AREAS.forEach(area => {
@@ -665,49 +652,12 @@ export default function GroutEstimatorApp() {
           </>
         )}
         
-        {activeTab === 'gallery' && (
-          // --- 갤러리 탭 내용 ---
-          <div className="space-y-4 animate-fade-in pb-4">
-            <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
-              <h2 className="text-lg font-bold text-gray-800 mb-1">시공 포트폴리오</h2>
-              <p className="text-xs text-gray-500 mb-4">줄눈의미학의 꼼꼼한 시공 사례를 확인해보세요.</p>
-              
-              {/* 갤러리 그리드 (반응형) */}
-              <div className="grid grid-cols-2 gap-3">
-                {PORTFOLIO_IMAGES.slice(0, visibleImages).map((img) => (
-                  <div 
-                    key={img.id} 
-                    onClick={() => setSelectedImage(img)}
-                    className="group relative aspect-square rounded-lg overflow-hidden cursor-pointer border border-gray-100"
-                  >
-                    <img 
-                      src={img.src} 
-                      alt={`시공사례 ${img.id}`} 
-                      className="w-full h-full object-cover transition-transform group-hover:scale-110" 
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src = "https://placehold.co/600x600/e2e8f0/1e293b?text=이미지+준비중";
-                      }}
-                    />
-                  </div>
-                ))}
-              </div>
+        {/* 갤러리 탭 내용은 삭제되었으므로 렌더링하지 않음 */}
 
-              {visibleImages < PORTFOLIO_IMAGES.length && (
-                <button 
-                  onClick={() => setVisibleImages(prev => prev + 6)}
-                  className="w-full mt-4 py-3 rounded-lg bg-gray-100 text-gray-600 font-bold text-sm hover:bg-gray-200 flex items-center justify-center gap-1"
-                >
-                  더 보기 <ChevronDown size={16} />
-                </button>
-              )}
-            </div>
-          </div>
-        )}
       </main>
 
       {/* 하단 고정바 */}
-      {(activeTab === 'calculator' || activeTab === 'gallery') && (
+      {activeTab === 'calculator' && (
         <>
           {/* AI 관리법 모달 */}
           {llmInstructions && (
@@ -727,7 +677,7 @@ export default function GroutEstimatorApp() {
               </div>
           )}
 
-          {calculation.isPackageActive && activeTab === 'calculator' && (
+          {calculation.isPackageActive && (
             <div className="fixed bottom-[90px] left-4 right-4 max-w-md mx-auto z-10 animate-bounce-up">
               <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-3 rounded-lg shadow-lg flex flex-col gap-1">
                 <div className="flex items-start gap-3">
@@ -735,20 +685,19 @@ export default function GroutEstimatorApp() {
                   <div className="text-xs flex-1">
                     <div className="font-bold text-yellow-300 mb-0.5">🎉 패키지 혜택 적용중!</div>
                     <div className="space-y-0.5">
-                      {calculation.isFreeEntrance && <div>- 현관 바닥 서비스(폴리아스파틱)</div>}
-                      <div>- 변기테두리, 바닥테두리</div>
-                      <div>- 욕실 젠다이 실리콘 오염방지</div>
-                      <div>- 주방 싱크볼</div>
+                      {/* 타일 크기 기준 문구 통합 (가장 최근 요청) */}
+                      <div className="font-bold text-red-300 bg-indigo-800/30 py-1 px-2 rounded">
+                          🚨 견적은 바닥 30x30cm, 벽면 30x60cm 크기 기준이며,<br/>
+                          기준보다 작을 경우(조각타일 시공불가)
+                      </div>
+                      <div className='pt-1 border-t border-white/20'>
+                        {calculation.isFreeEntrance && <div>- 현관 바닥 서비스(폴리아스파틱)</div>}
+                        <div>- 변기테두리, 바닥테두리</div>
+                        <div>- 욕실 젠다이 실리콘 오염방지</div>
+                        <div>- 주방 싱크볼</div>
+                      </div>
                     </div>
                   </div>
-                </div>
-                
-                {/* 타일 크기 기준 문구 (보라색 박스 안, 최하단 강조) */}
-                <div className="mt-2 pt-2 border-t border-indigo-400/50 text-center">
-                    <p className="text-[11px] font-bold text-yellow-300 bg-indigo-800/30 py-1 px-2 rounded">
-                        🚨 견적은 바닥 30x30cm, 벽면 30x60cm 크기 기준이며,<br/>
-                        기준보다 작을 경우(조각타일 시공불가)
-                    </p>
                 </div>
               </div>
             </div>
@@ -826,7 +775,7 @@ export default function GroutEstimatorApp() {
                   </div>
                 )}
 
-                {/* 추가 비용 발생 가능 요소 (견적서 모달 내) */}
+                {/* 추가 비용 발생 가능 요소 (견적서 모달 내) - 문구 수정됨 */}
                 <div className="space-y-2 border-b pb-4 bg-red-50 p-3 rounded-lg border border-red-100">
                     <p className="text-red-700 text-xs mb-1 font-bold flex items-center gap-1">
                         <Info size={14} /> 추가 비용 발생 가능 요소
