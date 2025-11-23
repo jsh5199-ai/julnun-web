@@ -868,7 +868,7 @@ export default function GroutEstimatorApp() {
                     
                     <div className="flex justify-between items-center mb-4">
                         <h3 className="font-bold text-2xl text-[#0f172a] flex items-center gap-2">
-                            <Icon name="shield" size={24} className="text-[#1e3a8a]"/> 정식 견적서 &gt; 줄눈의미학
+                            <Icon name="shield" size={24} className="text-[#1e3a8a]"/> 줄눈의미학
                         </h3>
                         <span className="text-xs text-slate-500 font-medium">발행일: {new Date().toLocaleDateString()}</span>
                     </div>
