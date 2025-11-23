@@ -1,11 +1,11 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { 
   Calculator, Home, Bath, DoorOpen, Utensils, LayoutGrid, 
   CheckCircle2, Info, Copy, RefreshCw, Phone, Sparkles, Hammer, Sofa, Palette, Crown, Gift, Eraser, Star, X, ChevronDown, HelpCircle,
 } from 'lucide-react';
 
 // =================================================================
-// [스타일] 애니메이션 정의 (tailwind.config.js 설정 없이 작동하도록 추가)
+// [스타일] 애니메이션 정의 
 // =================================================================
 const GlobalStyles = () => (
   <style>{`
@@ -107,6 +107,7 @@ const Accordion = ({ question, answer }) => {
         </div>
     );
 };
+
 
 export default function GroutEstimatorApp() {
   const [housingType, setHousingType] = useState('new');
@@ -358,6 +359,7 @@ export default function GroutEstimatorApp() {
     
     text += `\n📋 [줄눈 시공]\n`;
     SERVICE_AREAS.forEach(area => {
+      // 현관이 무료일 경우 견적서에 [무료]로 표시
       if (area.id === 'entrance' && quantities[area.id] > 0 && calculation.isFreeEntrance) {
         text += `- ${area.label}: ${quantities[area.id]}${area.unit} (패키지 서비스)\n`;
       } else if (quantities[area.id] > 0) {
@@ -365,6 +367,7 @@ export default function GroutEstimatorApp() {
       }
     });
 
+    // 실리콘 교체 범위
     if (SILICON_AREAS.some(area => quantities[area.id] > 0)) {
       text += `\n🧴 [실리콘 교체]\n`;
       SILICON_AREAS.forEach(area => {
@@ -377,6 +380,7 @@ export default function GroutEstimatorApp() {
       });
     }
     
+    // 리뷰 할인 혜택
     if (selectedReviews.size > 0) {
       text += `\n🎁 [할인 혜택]\n`;
       REVIEW_EVENTS.forEach(evt => {
@@ -384,11 +388,13 @@ export default function GroutEstimatorApp() {
       });
     }
 
+    // 추가 비용 발생 가능 요소 (견적서에도 포함 - 요청하신 문구로 수정)
     text += `\n⚠️ [추가 비용 발생 가능 요소]\n`;
     text += `- 견적은 타일크기 바닥 30x30cm, 벽면 30x60cm 기준이며, 기준보다 작을 경우(조각타일 시공불가)\n`;
     text += `- 재시공: 셀프 시공 포함 재시공일 경우\n`;
     text += `- 특이 구조: 일반 사이즈 공간이 아닌, 넓거나 특이 구조일 경우\n`;
     
+    // 패키지 서비스 내역
     if (calculation.isPackageActive) {
       text += `\n🎁 [패키지 서비스 적용됨]\n`;
       if (calculation.isFreeEntrance) text += `- 현관 바닥 서비스(폴리아스파틱)\n`;
@@ -446,9 +452,8 @@ export default function GroutEstimatorApp() {
               className="h-8 w-auto object-contain bg-white rounded-full" 
               onError={(e) => { e.target.style.display = 'none'; }}
             />
-            <h1 className="text-xl font-bold flex items-center gap-2">
-                <Calculator size={20} className="text-teal-300"/> 줄눈 견적 계산기
-            </h1>
+            {/* ✨ 문구 변경 적용: "줄눈의미학" */}
+            <h1 className="text-xl font-bold">줄눈의미학</h1>
           </div>
           <button onClick={() => window.location.reload()} className="text-xs bg-teal-700 px-2 py-1 rounded hover:bg-teal-800 transition">
             <RefreshCw size={12} className="inline mr-1" /> 초기화
@@ -458,171 +463,176 @@ export default function GroutEstimatorApp() {
 
       <main className="max-w-md mx-auto p-4 space-y-6">
         
-          {/* --- 1. 현장 유형 섹션 --- */}
-          <section className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-            <h2 className="text-lg font-bold flex items-center gap-2 mb-3">
-              <Home className="h-5 w-5 text-teal-600" /> 1. 현장 유형을 선택하세요
-            </h2>
-            <div className="grid grid-cols-2 gap-3">
-              {HOUSING_TYPES.map((type) => (
-                <button
-                  key={type.id}
-                  onClick={() => setHousingType(type.id)}
-                  className={`p-3 rounded-lg border-2 text-center transition-all ${
-                    housingType === type.id ? 'border-teal-500 bg-teal-50 text-teal-900 ring-1 ring-teal-500' : 'border-gray-200 hover:border-gray-300 text-gray-600'
-                  }`}
-                >
-                  <div className="font-bold text-sm">{type.label}</div>
-                </button>
-              ))}
-            </div>
-          </section>
-
-          <section className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-            <h2 className="text-lg font-bold flex items-center gap-2 mb-3">
-              <Hammer className="h-5 w-5 text-teal-600" /> 2. 시공 재료 선택
-            </h2>
-            <div className="space-y-4">
-              {MATERIALS.map((item) => (
-                <div key={item.id} className="animate-fade-in">
-                  <div onClick={() => setMaterial(item.id)} className={`flex items-center p-3 rounded-lg border-2 cursor-pointer transition-all ${item.id === material ? 'border-teal-500 bg-teal-50 ring-1 ring-teal-500' : 'border-gray-200 hover:bg-gray-50'}`}>
-                    <div className="flex-1">
-                      <div className="flex justify-between items-center">
-                        <div className='flex items-center gap-3'>
-                          <div className={`w-4 h-4 rounded-full border flex items-center justify-center mr-3 ${item.id === material ? 'border-teal-600' : 'border-gray-400'}`}>
-                            {item.id === material && <div className="w-2 h-2 rounded-full bg-teal-600" />}
-                          </div>
-                          <span className="font-bold text-gray-800">{item.label}</span>
-                        </div>
-                        <span className={`text-xs font-bold px-2 py-0.5 rounded ${item.badgeColor}`}>
-                          {item.badge}
-                        </span>
-                      </div>
-                      <p className="text-xs text-gray-500 mt-0.5">{item.description}</p>
-                    </div>
-                  </div>
-                  {item.id === 'poly' && item.id === material && (
-                    <div className="mt-2 ml-4 pl-4 border-l-2 border-teal-100 space-y-2 animate-slide-down">
-                      <div className="text-xs font-bold text-teal-700 flex items-center gap-1"><Palette size={12} /> 펄 유무 선택</div>
-                      <div className="flex gap-2">
-                        <button onClick={() => setPolyOption('pearl')} className={`flex-1 py-2 text-sm rounded-md border transition-all ${polyOption === 'pearl' ? 'bg-teal-600 text-white border-teal-600 font-bold shadow-sm' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'}`}>펄</button>
-                        <button onClick={() => setPolyOption('no_pearl')} className={`flex-1 py-2 text-sm rounded-md border transition-all ${polyOption === 'no_pearl' ? 'bg-teal-600 text-white border-teal-600 font-bold shadow-sm' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'}`}>무펄</button>
-                      </div>
-                    </div>
-                  )}
-                  {item.id === 'kerapoxy' && item.id === material && (
-                    <div className="mt-2 ml-4 pl-4 border-l-2 border-orange-100 space-y-2 animate-slide-down">
-                      <div className="text-xs font-bold text-orange-700 flex items-center gap-1"><Crown size={12} /> 브랜드 선택</div>
-                      <div className="flex gap-2">
-                        <button onClick={() => setEpoxyOption('kerapoxy')} className={`flex-1 py-2 text-sm rounded-md border transition-all ${epoxyOption === 'kerapoxy' ? 'bg-orange-600 text-white border-orange-600 font-bold shadow-sm' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'}`}>케라폭시</button>
-                        <button onClick={() => setEpoxyOption('starlike')} className={`flex-1 py-2 text-sm rounded-md border transition-all ${epoxyOption === 'starlike' ? 'bg-orange-600 text-white border-orange-600 font-bold shadow-sm' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'}`}>스타라이크</button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <section className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-            <h2 className="text-lg font-bold flex items-center gap-2 mb-3">
-              <Calculator className="h-5 w-5 text-teal-600" /> 3. 원하는 시공범위를 선택해주세요
-            </h2>
-            <div className="space-y-3">
-              {SERVICE_AREAS.map((area) => {
-                const Icon = area.icon;
-                return (
-                  <div key={area.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100">
-                    <div className="flex items-center gap-3">
-                      <div className="bg-white p-2 rounded-full shadow-sm text-teal-600"><Icon size={20} /></div>
-                      <div>
-                        <div className="font-bold text-gray-800">{area.label}</div>
-                        <div className="text-xs text-gray-500">기본 {area.basePrice.toLocaleString()}원~{area.desc && <span className="block text-teal-600">{area.desc}</span>}</div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3 bg-white px-2 py-1 rounded-lg shadow-sm border border-gray-200">
-                      <button onClick={() => handleQuantityChange(area.id, -1)} className={`w-8 h-8 flex items-center justify-center rounded-full transition ${quantities[area.id] > 0 ? 'text-teal-600 hover:bg-teal-50 font-bold text-lg' : 'text-gray-300'}`}>-</button>
-                      <span className={`w-6 text-center font-bold ${quantities[area.id] > 0 ? 'text-gray-900' : 'text-gray-300'}`}>{quantities[area.id]}</span>
-                      <button onClick={() => handleQuantityChange(area.id, 1)} className="w-8 h-8 flex items-center justify-center text-teal-600 hover:bg-teal-50 rounded-full font-bold text-lg">+</button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </section>
-
-          <section className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-            <h2 className="text-lg font-bold flex items-center gap-2 mb-3">
-              <Eraser className="h-5 w-5 text-teal-600" /> 4. 실리콘 교체할 곳 선택
-            </h2>
-            <div className="space-y-3">
-              {SILICON_AREAS.map((area) => {
-                const Icon = area.icon;
-                return (
-                  <div key={area.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100">
-                    <div className="flex items-center gap-3">
-                      <div className="bg-white p-2 rounded-full shadow-sm text-teal-600"><Icon size={20} /></div>
-                      <div>
-                        <div className="font-bold text-gray-800">{area.label}</div>
-                        <div className="text-xs text-gray-500">{area.basePrice.toLocaleString()}원{area.desc && <span className="block text-teal-600">{area.desc}</span>}</div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3 bg-white px-2 py-1 rounded-lg shadow-sm border border-gray-200">
-                      <button onClick={() => handleQuantityChange(area.id, -1)} className={`w-8 h-8 flex items-center justify-center rounded-full transition ${quantities[area.id] > 0 ? 'text-teal-600 hover:bg-teal-50 font-bold text-lg' : 'text-gray-300'}`}>-</button>
-                      <span className={`w-6 text-center font-bold ${quantities[area.id] > 0 ? 'text-gray-900' : 'text-gray-300'}`}>{quantities[area.id]}</span>
-                      <button onClick={() => handleQuantityChange(area.id, 1)} className="w-8 h-8 flex items-center justify-center text-teal-600 hover:bg-teal-50 rounded-full font-bold text-lg">+</button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </section>
-
-          <section className="bg-indigo-50 p-4 rounded-xl shadow-sm border border-indigo-100">
-            <h2 className="text-lg font-bold flex items-center gap-2 mb-3 text-indigo-900">
-              <Gift className="h-5 w-5 text-indigo-600" /> 5. 할인 혜택 (리뷰 이벤트)
-            </h2>
-            <div className="grid grid-cols-2 gap-3">
-              {REVIEW_EVENTS.map((evt) => {
-                const isSelected = selectedReviews.has(evt.id);
-                return (
-                  <button key={evt.id} onClick={() => toggleReview(evt.id)} className={`p-3 rounded-lg border-2 transition-all relative overflow-hidden ${isSelected ? 'border-indigo-500 bg-white shadow-md ring-1 ring-indigo-500' : 'border-gray-200 bg-white/50 text-gray-500 hover:bg-white'}`}>
-                    {isSelected && <div className="absolute top-0 right-0 bg-indigo-500 text-white text-[10px] px-1.5 py-0.5 rounded-bl-lg font-bold">선택됨</div>}
-                    <div className="flex flex-col items-center text-center gap-1">
-                      <span className={`font-bold text-sm ${isSelected ? 'text-indigo-900' : 'text-gray-600'}`}>{evt.label}</span>
-                      <span className={`text-xs font-bold ${isSelected ? 'text-pink-600' : 'text-gray-400'}`}>-{evt.discount.toLocaleString()}원</span>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-            <p className="text-xs text-indigo-400 mt-2 text-center">※ 중복 선택 가능합니다. 시공 완료 후 꼭 작성해주세요!</p>
-          </section>
-          
-          
-          {/* --- 자주 묻는 질문 (FAQ) --- */}
-          <section className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm mt-6">
-              <h2 className="text-xl font-bold text-teal-700 mb-2 flex items-center gap-2">
-                  <HelpCircle className="w-6 h-6 text-teal-600"/> 자주 묻는 질문
-              </h2>
-              <div className="space-y-1">
-                  {FAQ_ITEMS.map((item, index) => (
-                      <Accordion key={index} question={item.question} answer={item.answer} />
-                  ))}
-              </div>
-          </section>
-
-          
-          {/* 숨고 후기 바로가기 */}
-          <div className="mt-4 pt-4 border-t border-gray-200">
-            <button 
-              onClick={() => window.open(SOOMGO_REVIEW_URL, '_blank')}
-              className="w-full py-3 rounded-xl bg-green-500 text-white font-bold text-base hover:bg-green-600 transition shadow-lg flex items-center justify-center gap-2"
-            >
-              <Star size={20} fill="white" className="text-yellow-300" />
-              숨고 후기 바로가기 (고객 만족도 확인)
-            </button>
+        {/* --- 1. 현장 유형 섹션 --- */}
+        <section className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+          <h2 className="text-lg font-bold flex items-center gap-2 mb-3">
+            <Home className="h-5 w-5 text-teal-600" /> 1. 현장 유형을 선택하세요
+          </h2>
+          <div className="grid grid-cols-2 gap-3">
+            {HOUSING_TYPES.map((type) => (
+              <button
+                key={type.id}
+                onClick={() => setHousingType(type.id)}
+                className={`p-3 rounded-lg border-2 text-center transition-all ${
+                  housingType === type.id ? 'border-teal-500 bg-teal-50 text-teal-900 ring-1 ring-teal-500' : 'border-gray-200 hover:border-gray-300 text-gray-600'
+                }`}
+              >
+                <div className="font-bold text-sm">{type.label}</div>
+              </button>
+            ))}
           </div>
+        </section>
+
+        {/* --- 2. 시공 재료 선택 --- */}
+        <section className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+          <h2 className="text-lg font-bold flex items-center gap-2 mb-3">
+            <Hammer className="h-5 w-5 text-teal-600" /> 2. 시공 재료 선택
+          </h2>
+          <div className="space-y-4">
+            {MATERIALS.map((item) => (
+              <div key={item.id} className="animate-fade-in">
+                <div onClick={() => setMaterial(item.id)} className={`flex items-center p-3 rounded-lg border-2 cursor-pointer transition-all ${item.id === material ? 'border-teal-500 bg-teal-50 ring-1 ring-teal-500' : 'border-gray-200 hover:bg-gray-50'}`}>
+                  <div className="flex-1">
+                    <div className="flex justify-between items-center">
+                      <div className='flex items-center gap-3'>
+                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center mr-3 ${item.id === material ? 'border-teal-600' : 'border-gray-400'}`}>
+                          {item.id === material && <div className="w-2 h-2 rounded-full bg-teal-600" />}
+                        </div>
+                        <span className="font-bold text-gray-800">{item.label}</span>
+                      </div>
+                      <span className={`text-xs font-bold px-2 py-0.5 rounded ${item.badgeColor}`}>
+                        {item.badge}
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-0.5">{item.description}</p>
+                  </div>
+                </div>
+                {item.id === 'poly' && item.id === material && (
+                  <div className="mt-2 ml-4 pl-4 border-l-2 border-teal-100 space-y-2 animate-slide-down">
+                    <div className="text-xs font-bold text-teal-700 flex items-center gap-1"><Palette size={12} /> 펄 유무 선택</div>
+                    <div className="flex gap-2">
+                      <button onClick={() => setPolyOption('pearl')} className={`flex-1 py-2 text-sm rounded-md border transition-all ${polyOption === 'pearl' ? 'bg-teal-600 text-white border-teal-600 font-bold shadow-sm' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'}`}>펄</button>
+                      <button onClick={() => setPolyOption('no_pearl')} className={`flex-1 py-2 text-sm rounded-md border transition-all ${polyOption === 'no_pearl' ? 'bg-teal-600 text-white border-teal-600 font-bold shadow-sm' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'}`}>무펄</button>
+                    </div>
+                  </div>
+                )}
+                {item.id === 'kerapoxy' && item.id === material && (
+                  <div className="mt-2 ml-4 pl-4 border-l-2 border-orange-100 space-y-2 animate-slide-down">
+                    <div className="text-xs font-bold text-orange-700 flex items-center gap-1"><Crown size={12} /> 브랜드 선택</div>
+                    <div className="flex gap-2">
+                      <button onClick={() => setEpoxyOption('kerapoxy')} className={`flex-1 py-2 text-sm rounded-md border transition-all ${epoxyOption === 'kerapoxy' ? 'bg-orange-600 text-white border-orange-600 font-bold shadow-sm' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'}`}>케라폭시</button>
+                      <button onClick={() => setEpoxyOption('starlike')} className={`flex-1 py-2 text-sm rounded-md border transition-all ${epoxyOption === 'starlike' ? 'bg-orange-600 text-white border-orange-600 font-bold shadow-sm' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'}`}>스타라이크</button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* --- 3. 원하는 시공범위를 선택해주세요 --- */}
+        <section className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+          <h2 className="text-lg font-bold flex items-center gap-2 mb-3">
+            <Calculator className="h-5 w-5 text-teal-600" /> 3. 원하는 시공범위를 선택해주세요
+          </h2>
+          <div className="space-y-3">
+            {SERVICE_AREAS.map((area) => {
+              const Icon = area.icon;
+              return (
+                <div key={area.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-white p-2 rounded-full shadow-sm text-teal-600"><Icon size={20} /></div>
+                    <div>
+                      <div className="font-bold text-gray-800">{area.label}</div>
+                      <div className="text-xs text-gray-500">기본 {area.basePrice.toLocaleString()}원~{area.desc && <span className="block text-teal-600">{area.desc}</span>}</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 bg-white px-2 py-1 rounded-lg shadow-sm border border-gray-200">
+                    <button onClick={() => handleQuantityChange(area.id, -1)} className={`w-8 h-8 flex items-center justify-center rounded-full transition ${quantities[area.id] > 0 ? 'text-teal-600 hover:bg-teal-50 font-bold text-lg' : 'text-gray-300'}`}>-</button>
+                    <span className={`w-6 text-center font-bold ${quantities[area.id] > 0 ? 'text-gray-900' : 'text-gray-300'}`}>{quantities[area.id]}</span>
+                    <button onClick={() => handleQuantityChange(area.id, 1)} className="w-8 h-8 flex items-center justify-center text-teal-600 hover:bg-teal-50 rounded-full font-bold text-lg">+</button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* --- 4. 실리콘 교체할 곳 선택 --- */}
+        <section className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+          <h2 className="text-lg font-bold flex items-center gap-2 mb-3">
+            <Eraser className="h-5 w-5 text-teal-600" /> 4. 실리콘 교체할 곳 선택
+          </h2>
+          <div className="space-y-3">
+            {SILICON_AREAS.map((area) => {
+              const Icon = area.icon;
+              return (
+                <div key={area.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-white p-2 rounded-full shadow-sm text-teal-600"><Icon size={20} /></div>
+                    <div>
+                      <div className="font-bold text-gray-800">{area.label}</div>
+                      <div className="text-xs text-gray-500">{area.basePrice.toLocaleString()}원{area.desc && <span className="block text-teal-600">{area.desc}</span>}</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 bg-white px-2 py-1 rounded-lg shadow-sm border border-gray-200">
+                    <button onClick={() => handleQuantityChange(area.id, -1)} className={`w-8 h-8 flex items-center justify-center rounded-full transition ${quantities[area.id] > 0 ? 'text-teal-600 hover:bg-teal-50 font-bold text-lg' : 'text-gray-300'}`}>-</button>
+                    <span className={`w-6 text-center font-bold ${quantities[area.id] > 0 ? 'text-gray-900' : 'text-gray-300'}`}>{quantities[area.id]}</span>
+                    <button onClick={() => handleQuantityChange(area.id, 1)} className="w-8 h-8 flex items-center justify-center text-teal-600 hover:bg-teal-50 rounded-full font-bold text-lg">+</button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* --- 5. 할인 혜택 (리뷰 이벤트) --- */}
+        <section className="bg-indigo-50 p-4 rounded-xl shadow-sm border border-indigo-100">
+          <h2 className="text-lg font-bold flex items-center gap-2 mb-3 text-indigo-900">
+            <Gift className="h-5 w-5 text-indigo-600" /> 5. 할인 혜택 (리뷰 이벤트)
+          </h2>
+          <div className="grid grid-cols-2 gap-3">
+            {REVIEW_EVENTS.map((evt) => (
+              <button 
+                key={evt.id} 
+                onClick={() => toggleReview(evt.id)} 
+                className={`p-3 rounded-lg border-2 transition-all relative overflow-hidden ${selectedReviews.has(evt.id) ? 'border-indigo-500 bg-white shadow-md ring-1 ring-indigo-500' : 'border-gray-200 bg-white/50 text-gray-500 hover:bg-white'}`}
+              >
+                {selectedReviews.has(evt.id) && <div className="absolute top-0 right-0 bg-indigo-500 text-white text-[10px] px-1.5 py-0.5 rounded-bl-lg font-bold">선택됨</div>}
+                <div className="flex flex-col items-center text-center gap-1">
+                  <span className={`font-bold text-sm ${selectedReviews.has(evt.id) ? 'text-indigo-900' : 'text-gray-600'}`}>{evt.label}</span>
+                  <span className={`text-xs font-bold ${selectedReviews.has(evt.id) ? 'text-pink-600' : 'text-gray-400'}`}>-{evt.discount.toLocaleString()}원</span>
+                </div>
+              </button>
+            ))}
+          </div>
+          <p className="text-xs text-indigo-400 mt-2 text-center">※ 중복 선택 가능합니다. 시공 완료 후 꼭 작성해주세요!</p>
+        </section>
+        
+        
+        {/* --- 자주 묻는 질문 (FAQ) --- */}
+        <section className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm mt-6">
+            <h2 className="text-xl font-bold text-teal-700 mb-2 flex items-center gap-2">
+                <HelpCircle className="w-6 h-6 text-teal-600"/> 자주 묻는 질문
+            </h2>
+            <div className="space-y-1">
+                {FAQ_ITEMS.map((item, index) => (
+                    <Accordion key={index} question={item.question} answer={item.answer} />
+                ))}
+            </div>
+        </section>
+
+        
+        {/* 숨고 후기 바로가기 */}
+        <div className="mt-4 pt-4 border-t border-gray-200">
+          <button 
+            onClick={() => window.open(SOOMGO_REVIEW_URL, '_blank')}
+            className="w-full py-3 rounded-xl bg-green-500 text-white font-bold text-base hover:bg-green-600 transition shadow-lg flex items-center justify-center gap-2"
+          >
+            <Star size={20} fill="white" className="text-yellow-300" />
+            숨고 후기 바로가기 (고객 만족도 확인)
+          </button>
+        </div>
       </main>
 
       {/* 하단 고정바 */}
