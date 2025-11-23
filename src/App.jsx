@@ -23,7 +23,7 @@ const GlobalStyles = () => (
 // [1] 현장 유형 설정
 // =================================================================
 const HOUSING_TYPES = [
-  { id: 'new', label: '신축 아파트(입주 전)', multiplier: 1.0 },
+  { id: 'new', label: '신축 아파트', multiplier: 1.0 },
   { id: 'old', label: '구축/거주 중', multiplier: 1.0 },
 ];
 
@@ -53,7 +53,7 @@ const SERVICE_AREAS = [
   { id: 'bathtub_wall', label: '욕조 벽 3면', basePrice: 150000, icon: Bath, unit: '구역' },
   { id: 'master_bath_wall', label: '안방욕실 벽 전체', basePrice: 300000, icon: Bath, unit: '구역' },
   { id: 'common_bath_wall', label: '공용욕실 벽 전체', basePrice: 300000, icon: Bath, unit: '구역' },
-  { id: 'balcony_laundry', label: '베란다/세탁실', basePrice: 150000, icon: LayoutGrid, unit: '개소', desc: '원하는 개수만큼 선택' },
+  { id: 'balcony_laundry', label: '베란다/세탁실', basePrice: 150000, icon: LayoutGrid, unit: '개소', desc: '통베란다는 별도문의' },
   { id: 'kitchen_wall', label: '주방 벽면', basePrice: 150000, icon: Utensils, unit: '구역' },
   { id: 'living_room', label: '거실 바닥', basePrice: 550000, icon: Sofa, unit: '구역', desc: '복도,주방 포함' },
 ];
@@ -390,7 +390,7 @@ export default function GroutEstimatorApp() {
 
     // 추가 비용 발생 가능 요소 (견적서에도 포함 - 요청하신 문구로 수정)
     text += `\n⚠️ [추가 비용 발생 가능 요소]\n`;
-    text += `- 견적은 타일크기 바닥 30x30cm, 벽면 30x60cm 기준이며, 기준보다 작을 경우(조각타일 시공불가)\n`;
+    text += `- 견적은 타일크기 바닥 30x30cm, 벽면 30x60cm 기준이며, 기준보다 작을 경우 견적가 변동(조각타일 시공불가)\n`;
     text += `- 재시공: 셀프 시공 포함 재시공일 경우\n`;
     text += `- 특이 구조: 일반 사이즈 공간이 아닌, 넓거나 특이 구조일 경우\n`;
     
@@ -656,7 +656,7 @@ export default function GroutEstimatorApp() {
               <div className="mt-2 pt-2 border-t border-indigo-400/50 text-center">
                   <p className="text-[11px] font-bold text-yellow-300 bg-indigo-800/30 py-1 px-2 rounded">
                       🚨 견적은 바닥 30x30cm, 벽면 30x60cm 기준이며,<br/>
-                      기준보다 작을 경우(조각타일 시공불가)
+                      기준보다 작을 경우 견적가 변동(조각타일 시공불가)
                   </p>
               </div>
             </div>
