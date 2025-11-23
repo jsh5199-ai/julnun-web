@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { 
   Calculator, Home, Bath, DoorOpen, Utensils, LayoutGrid, 
-  CheckCircle2, Info, Copy, RefreshCw, Phone, Sparkles, Hammer, Sofa, Palette, Crown, Gift, Eraser, Star, Image as ImageIcon, X, ChevronDown, MessageSquare, HelpCircle, Clock
+  CheckCircle2, Info, Copy, RefreshCw, Phone, Sparkles, Hammer, Sofa, Palette, Crown, Gift, Eraser, Star, Image as ImageIcon, X, ChevronDown, MessageSquare, HelpCircle, Check, AlertTriangle, Camera, Clock
 } from 'lucide-react';
 
 // =================================================================
@@ -119,6 +119,7 @@ const Accordion = ({ question, answer }) => {
     );
 };
 
+
 export default function GroutEstimatorApp() {
   const [activeTab, setActiveTab] = useState('calculator');
   const [housingType, setHousingType] = useState('new');
@@ -130,13 +131,15 @@ export default function GroutEstimatorApp() {
   const [quantities, setQuantities] = useState(
     [...SERVICE_AREAS, ...SILICON_AREAS].reduce((acc, area) => ({ ...acc, [area.id]: 0 }), {})
   );
-  
-  const [selectedReviews, setSelectedReviews] = useState(new Set());
+
+  const [selectedReviews, setSelectedReviews] = useState(new Set()); 
   const [showModal, setShowModal] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [visibleImages, setVisibleImages] = useState(6);
 
   const SOOMGO_REVIEW_URL = 'https://www.soomgo.com/profile/users/10755579?tab=review';
+  const KAKAO_CHAT_URL = 'https://pf.kakao.com/_xxxxxxx'; 
+
 
   const handleQuantityChange = (id, delta) => {
     setQuantities(prev => {
@@ -176,6 +179,7 @@ export default function GroutEstimatorApp() {
     const qMasterWall = q['master_bath_wall'] || 0;
     const qCommonWall = q['common_bath_wall'] || 0;
     const qEntrance = q['entrance'] || 0;
+    const qBalconyLaundry = q['balcony_laundry'] || 0; // 베란다 추가
 
     const qBathWallOne = (qMasterWall >= 1 || qCommonWall >= 1);
     const qBathWallTotal = qMasterWall + qCommonWall;
@@ -217,6 +221,15 @@ export default function GroutEstimatorApp() {
         isPackageActive = true;
         labelText = '(50만원 패키지 적용)';
     } 
+
+    // 0-D. 에폭시 60만원 패키지: 욕실 바닥 2곳 (에폭시 전용, 순수 바닥만)
+    else if (selectedMaterial.id === 'kerapoxy' && qBathFloor >= 2 && qBathWallTotal === 0 && qShower === 0 && qBathtub === 0) {
+        total += 600000;
+        q['bathroom_floor'] -= 2;
+        isPackageActive = true;
+        isFreeEntrance = true;
+        labelText = '(60만원 에폭시 패키지 적용)';
+    }
 
     // 1. 에폭시 (고급형) 나머지 패키지
     else if (selectedMaterial.id === 'kerapoxy') {
@@ -293,6 +306,7 @@ export default function GroutEstimatorApp() {
 
     // --- 패키지 로직 끝 / 잔여 항목 계산 시작 ---
     
+    // 모든 항목 (줄눈 + 실리콘)을 순회하며 잔여 수량 계산
     const ALL_AREAS = [...SERVICE_AREAS, ...SILICON_AREAS];
     
     ALL_AREAS.forEach(area => {
@@ -403,7 +417,7 @@ export default function GroutEstimatorApp() {
       });
     }
 
-    // 추가 비용 발생 가능 요소 (견적서에도 포함 - 요청하신 문구로 수정)
+    // 추가 비용 발생 가능 요소 (견적서에도 포함)
     text += `\n⚠️ [추가 비용 발생 가능 요소]\n`;
     text += `- 견적은 타일크기 바닥 30x30cm, 벽면 30x60cm 기준이며, 기준보다 작을 경우(조각타일 시공불가)\n`;
     text += `- 재시공: 셀프 시공 포함 재시공일 경우\n`;
@@ -420,7 +434,7 @@ export default function GroutEstimatorApp() {
 
     text += `\n💰 예상 견적가: ${calculation.price.toLocaleString()}원`;
     if (calculation.label) text += ` ${calculation.label}`;
-    text += `\n\n※ 줄눈의미학 온라인 견적입니다. 정확한 견적을 위해 해당 공간의 사진을 상담원에게 전달해주어야 합니다. 현장 상황에 따라 변동될 수 있습니다.`;
+    text += `\n\n※ 줄눈의미학 온라인 견적입니다. 현장 상황에 따라 변동될 수 있습니다.`;
     return text;
   };
 
@@ -693,13 +707,31 @@ export default function GroutEstimatorApp() {
       </main>
 
       {/* 하단 고정바 */}
-      {activeTab === 'calculator' && (
+      {(activeTab === 'calculator' || activeTab === 'gallery') && (
         <>
-          {calculation.isPackageActive && (
+          {/* AI 관리법 모달 */}
+          {llmInstructions && (
+              <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={() => setLlmInstructions('')}>
+                  <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl p-6" onClick={e => e.stopPropagation()}>
+                      <h3 className="font-bold text-xl mb-3 flex items-center gap-2 text-teal-700"><Clock size={20} /> AI 맞춤 시공 후 관리법</h3>
+                      <div className="max-h-80 overflow-y-auto border border-gray-200 p-3 rounded-lg text-sm bg-gray-50">
+                          <div dangerouslySetInnerHTML={{ __html: llmInstructions.replace(/\n/g, '<br/>') }} />
+                      </div>
+                      <button 
+                          onClick={() => setLlmInstructions('')}
+                          className="mt-4 w-full py-2 rounded-lg bg-teal-600 text-white font-bold hover:bg-teal-700 transition"
+                      >
+                          닫기
+                      </button>
+                  </div>
+              </div>
+          )}
+
+          {calculation.isPackageActive && activeTab === 'calculator' && (
             <div className="fixed bottom-[90px] left-4 right-4 max-w-md mx-auto z-10 animate-bounce-up">
-              <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-3 rounded-lg shadow-lg">
+              <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-3 rounded-lg shadow-lg flex flex-col gap-1">
                 <div className="flex items-start gap-3">
-                  <div className="bg-white/20 p-2 rounded-full flex-shrink-0 mt-1"><Gift className="w-5 h-5 text-yellow-300" /></div>
+                  <div className="bg-white/20 p-1.5 rounded-full flex-shrink-0 mt-1"><Gift className="w-4 h-4 text-yellow-300" /></div>
                   <div className="text-xs flex-1">
                     <div className="font-bold text-yellow-300 mb-0.5">🎉 패키지 혜택 적용중!</div>
                     <div className="space-y-0.5">
@@ -714,7 +746,7 @@ export default function GroutEstimatorApp() {
                 {/* 타일 크기 기준 문구 (보라색 박스 안, 최하단 강조) */}
                 <div className="mt-2 pt-2 border-t border-indigo-400/50 text-center">
                     <p className="text-[11px] font-bold text-yellow-300 bg-indigo-800/30 py-1 px-2 rounded">
-                        🚨 견적은 바닥 30x30cm, 벽면 30x60cm 기준이며,<br/>
+                        🚨 견적은 바닥 30x30cm, 벽면 30x60cm 크기 기준이며,<br/>
                         기준보다 작을 경우(조각타일 시공불가)
                     </p>
                 </div>
@@ -794,7 +826,7 @@ export default function GroutEstimatorApp() {
                   </div>
                 )}
 
-                {/* 추가 비용 발생 가능 요소 (견적서 모달 내) - 문구 수정됨 */}
+                {/* 추가 비용 발생 가능 요소 (견적서 모달 내) */}
                 <div className="space-y-2 border-b pb-4 bg-red-50 p-3 rounded-lg border border-red-100">
                     <p className="text-red-700 text-xs mb-1 font-bold flex items-center gap-1">
                         <Info size={14} /> 추가 비용 발생 가능 요소
