@@ -378,9 +378,20 @@ export default function GroutEstimatorApp() {
     if (selectedMaterial.id === 'poly' && qBathFloor >= 2 && qEntrance >= 1 && qBathWallTotal === 0 && qShower === 0 && qBathtub === 0) {
         total += 300000; q['bathroom_floor'] -= 2; q['entrance'] -= 1; isPackageActive = true; labelText = '30만원 패키지';
     } else if (selectedMaterial.id === 'kerapoxy') {
-        // [수정된 로직] 에폭시 60만원 패키지 (욕실 바닥 2곳, 현관 바닥 1곳)
+        // 에폭시 60만원 패키지 (욕실 바닥 2곳, 현관 바닥 1곳)
         if (qBathFloor >= 2 && qEntrance >= 1) {
-            total += 600000; q['bathroom_floor'] -= 2; q['entrance'] -= 1; isPackageActive = true; isFreeEntrance = true; labelText = '에폭시 60만원 패키지';
+            // New complex logic (from most comprehensive to least)
+            if (qBathWallTotal >= 2) {
+                total += 1400000; q['bathroom_floor'] -= 2; q['entrance'] -= 1; q['master_bath_wall'] = Math.max(0, q['master_bath_wall'] - 1); q['common_bath_wall'] = Math.max(0, q['common_bath_wall'] - 1); isPackageActive = true; isFreeEntrance = true; labelText = '욕실벽전체 2곳 패키지';
+            } else if (qBathWallTotal >= 1) {
+                total += 1000000; q['bathroom_floor'] -= 2; q['entrance'] -= 1; qMasterWall >= 1 ? q['master_bath_wall'] -= 1 : q['common_bath_wall'] -= 1; isPackageActive = true; isFreeEntrance = true; labelText = '욕실벽전체 1곳 패키지';
+            } else if (qShower >= 2 || qBathtub >= 2 || (qShower >= 1 && qBathtub >= 1)) {
+                total += 1000000; q['bathroom_floor'] -= 2; q['shower_booth'] -= Math.min(2, qShower); q['bathtub_wall'] -= Math.min(2, qBathtub); isPackageActive = true; isFreeEntrance = true; labelText = '벽 2곳(샤워/욕조) 패키지';
+            } else if (qShower >= 1 || qBathtub >= 1) {
+                total += 750000; q['bathroom_floor'] -= 2; qShower >= 1 ? q['shower_booth'] -= 1 : q['bathtub_wall'] -= 1; isPackageActive = true; isFreeEntrance = true; labelText = '벽 1곳(샤워/욕조) 패키지';
+            } else {
+                total += 600000; q['bathroom_floor'] -= 2; q['entrance'] -= 1; isPackageActive = true; isFreeEntrance = true; labelText = '에폭시 60만원 패키지';
+            }
         } 
         else if (qBathFloor >= 1 && qBathWallOne && qBathFloor === 1 && qBathWallTotal === 1) {
             total += 750000; q['bathroom_floor'] -= 1; qMasterWall >= 1 ? q['master_bath_wall'] -= 1 : q['common_bath_wall'] -= 1; isPackageActive = true; labelText = '에폭시 75만원 패키지';
@@ -406,12 +417,12 @@ export default function GroutEstimatorApp() {
       else if (qBathFloor >= 2 && qEntrance >= 1) { isPackageActive = true; isFreeEntrance = true; labelText = '현관 무료 혜택'; }
     }
 
-    // --- 3. 잔여 개별 항목 계산 (FREE 서비스 제외) ---
+    // --- 3. 잔여 개별 항목 계산 (FREE 서비스 제외 및 5만원 할인 적용) ---
     [...SERVICE_AREAS, ...SILICON_AREAS].forEach(area => {
         const count = q[area.id] || 0;
         if (count > 0) {
             
-            // [수정된 로직] FREE_SILICON_AREAS는 가격 합산에서 제외
+            // FREE_SILICON_AREAS는 가격 합산에서 제외
             if (isPackageActive && FREE_SILICON_AREAS.includes(area.id)) {
                 return; 
             }
@@ -427,11 +438,19 @@ export default function GroutEstimatorApp() {
 
             // [추가 할인 로직 유지]
             if (isPackageActive) {
-                if (area.id === 'living_room' && selectedMaterial.id === 'poly') price -= 50000 * count;
-                else if (area.id === 'living_room' && selectedMaterial.id === 'kerapoxy') price -= 150000 * count; 
-                else if (area.id === 'balcony_laundry' && selectedMaterial.id === 'poly') price = 100000 * count;
-                else if (area.id === 'silicon_bathtub') price = 50000 * count;
-                else if (area.id === 'silicon_living_baseboard') price = 350000 * count;
+                let discountPerUnit = 0;
+                
+                if (area.id === 'living_room') {
+                    discountPerUnit = (selectedMaterial.id === 'poly' ? 50000 : 150000);
+                } else if (area.id === 'silicon_bathtub') {
+                    discountPerUnit = 30000; 
+                } else if (area.id === 'silicon_living_baseboard') {
+                    discountPerUnit = 50000;
+                } else if (area.id !== 'entrance' && area.id !== 'bathroom_floor') {
+                    discountPerUnit = 50000;
+                }
+                
+                price -= discountPerUnit * count;
             }
             total += price;
         }
@@ -515,7 +534,7 @@ export default function GroutEstimatorApp() {
 
   // --- 렌더링 ---
   return (
-    <div className="min-h-screen pb-44 selection:bg-[#1e3a8a] selection:text-white bg-white">
+    <div className="min-h-screen pb-64 selection:bg-[#1e3a8a] selection:text-white bg-white"> {/* pb-64로 패딩 증가 */}
       <GlobalStyles />
 
       {/* 헤더 */}
@@ -849,7 +868,7 @@ export default function GroutEstimatorApp() {
                     
                     <div className="flex justify-between items-center mb-4">
                         <h3 className="font-bold text-2xl text-[#0f172a] flex items-center gap-2">
-                            <Icon name="shield" size={24} className="text-[#1e3a8a]"/> 정식 견적서
+                            <Icon name="shield" size={24} className="text-[#1e3a8a]"/> 정식 견적서 &gt; 줄눈의미학
                         </h3>
                         <span className="text-xs text-slate-500 font-medium">발행일: {new Date().toLocaleDateString()}</span>
                     </div>
@@ -953,7 +972,8 @@ export default function GroutEstimatorApp() {
                         <div className="bg-slate-100 p-4 rounded-lg border border-slate-200 text-slate-700">
                             <h4 className="font-bold flex items-center gap-2 mb-1 text-red-600"><Icon name="info" size={16}/> 시공 시 유의사항</h4>
                             <ul className="list-disc list-inside text-xs space-y-1 pl-1">
-                                <li>타일 기준: 바닥 30x30cm, 벽면 30x60cm 크기 기준이며, 조각 타일 시공은 불가하며, 크기가 작을 경우 추가 비용이 발생합니다.</li>
+                                <li>타일 크기 기준: 바닥 30x30cm, 벽면 30x60cm 크기 기준입니다.</li>
+                                <li>조각 타일 시공은 불가하며, 크기가 작을 경우 추가 비용이 발생합니다.</li>
                                 <li>재시공(셀프포함)의 경우 1.5~2배의 추가비용이 발생합니다.</li>
                             </ul>
                         </div>
@@ -967,7 +987,6 @@ export default function GroutEstimatorApp() {
                     </div>
                 </div>
 
-                {/* 액션 버튼 (고정 영역) */}
                 <div className="p-6 bg-slate-50 border-t border-slate-200 flex-none">
                     <p className='text-xs text-center text-slate-500 mb-4'>* 위 내용은 이미지로 저장되며, 현장 상황에 따라 변동될 수 있습니다.</p>
                     <div className="grid grid-cols-2 gap-3">
