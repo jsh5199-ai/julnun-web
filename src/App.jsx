@@ -1,11 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import { 
-  Calculator, Home, Bath, DoorOpen, Utensils, LayoutGrid, 
-  CheckCircle2, Info, Copy, RefreshCw, Phone, Sparkles, Hammer, Sofa, Crown, Gift, Eraser, Star, ChevronDown, HelpCircle, X, ArrowRight
+  Home, Bath, DoorOpen, Utensils, LayoutGrid, 
+  CheckCircle2, Info, Copy, RefreshCw, Phone, Sparkles, Hammer, Sofa, Gift, Eraser, Star, ChevronDown, ArrowRight, X
 } from 'lucide-react';
 
 // =================================================================
-// [스타일] Dribbble Style: Soft Shadow & Clean Card
+// [스타일] Dark Mode: Midnight Premium
 // =================================================================
 const GlobalStyles = () => (
   <style>{`
@@ -13,46 +13,45 @@ const GlobalStyles = () => (
     
     body { 
         font-family: "Pretendard Variable", "Pretendard", -apple-system, sans-serif;
-        background-color: #F8F9FA; /* 아주 연한 쿨 그레이 배경 */
-        color: #1F2937;
+        background-color: #09090b; /* Zinc-950: 아주 깊은 어둠 */
+        color: #f4f4f5; /* Zinc-100: 밝은 화이트 텍스트 */
     }
     
-    /* 스무스한 페이드인 애니메이션 */
+    /* 네온 글로우 효과 */
+    .glow-effect { box-shadow: 0 0 20px -5px rgba(45, 212, 191, 0.3); }
+    
+    /* 애니메이션 */
     @keyframes fadeInScale { 
-        from { opacity: 0; transform: scale(0.98) translateY(10px); } 
+        from { opacity: 0; transform: scale(0.96) translateY(10px); } 
         to { opacity: 1; transform: scale(1) translateY(0); } 
     }
+    .animate-card { animation: fadeInScale 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
     
-    .animate-card { animation: fadeInScale 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
-    
-    /* 스크롤바 숨김 */
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-    /* 커스텀 그림자: Dribbble 스타일의 부드러운 그림자 */
-    .shadow-soft { box-shadow: 0 10px 40px -10px rgba(0,0,0,0.06); }
-    .shadow-floating { box-shadow: 0 20px 60px -15px rgba(0,0,0,0.1); }
   `}</style>
 );
 
 // =================================================================
-// [데이터]
+// [데이터] (다크모드용 배지 컬러 수정)
 // =================================================================
 const HOUSING_TYPES = [
-  { id: 'new', label: '신축 입주', multiplier: 1.0, desc: '새 집, 새로운 시작' },
-  { id: 'old', label: '구축/거주 중', multiplier: 1.0, desc: '묵은 때 제거 & 리폼' },
+  { id: 'new', label: '신축 입주', multiplier: 1.0, desc: '새 집, 설레는 시작' },
+  { id: 'old', label: '구축/거주 중', multiplier: 1.0, desc: '오염 제거 및 리폼' },
 ];
 
 const MATERIALS = [
   { 
     id: 'poly', label: 'Standard', subLabel: '폴리아스파틱', priceMod: 1.0, 
-    description: '합리적인 가격, 우수한 탄성과 광택',
-    tags: ['가성비', '탄성우수']
+    description: '우수한 탄성과 광택, 가성비 최고의 선택',
+    tags: ['가성비', '탄성우수'],
+    badgeColor: 'bg-teal-900/50 text-teal-200 border border-teal-800'
   },
   { 
     id: 'kerapoxy', label: 'Premium', subLabel: '케라폭시/에폭시', priceMod: 1.8, 
-    description: '호텔 같은 매트한 질감, 반영구적 수명',
-    tags: ['반영구', '무광매트']
+    description: '호텔 같은 무광 매트 질감, 반영구적 수명',
+    tags: ['반영구', '무광매트'],
+    badgeColor: 'bg-amber-900/50 text-amber-200 border border-amber-800'
   },
 ];
 
@@ -87,21 +86,21 @@ const FAQ_ITEMS = [
 ];
 
 // =================================================================
-// [컴포넌트] 심플 아코디언
+// [컴포넌트] Dark Accordion
 // =================================================================
 const Accordion = ({ question, answer }) => {
     const [isOpen, setIsOpen] = useState(false);
     return (
-        <div className="border-b border-gray-100 last:border-0">
+        <div className="border-b border-zinc-800 last:border-0">
             <button
                 className="flex justify-between items-center w-full py-4 text-left group"
                 onClick={() => setIsOpen(!isOpen)}
             >
-                <span className={`text-[15px] transition-colors ${isOpen ? 'font-bold text-gray-900' : 'font-medium text-gray-500 group-hover:text-gray-800'}`}>{question}</span>
-                <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180 text-black' : ''}`} />
+                <span className={`text-[15px] transition-colors ${isOpen ? 'font-bold text-teal-400' : 'font-medium text-zinc-400 group-hover:text-zinc-200'}`}>{question}</span>
+                <ChevronDown className={`w-4 h-4 text-zinc-600 transition-transform ${isOpen ? 'rotate-180 text-teal-400' : ''}`} />
             </button>
             <div className={`overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-20 opacity-100' : 'max-h-0 opacity-0'}`}>
-                <p className="text-sm text-gray-500 pb-4">{answer}</p>
+                <p className="text-sm text-zinc-500 pb-4">{answer}</p>
             </div>
         </div>
     );
@@ -123,7 +122,7 @@ export default function GroutEstimatorApp() {
   const [selectedReviews, setSelectedReviews] = useState(new Set());
   const [showModal, setShowModal] = useState(false);
 
-  // --- 로직 유지 ---
+  // --- Logic (Unchanged) ---
   const handleQuantityChange = (id, delta) => {
     setQuantities(prev => {
       const nextValue = Math.max(0, prev[id] + delta);
@@ -205,7 +204,7 @@ export default function GroutEstimatorApp() {
     return { price: Math.max(0, Math.floor(total / 1000) * 1000), label: labelText, isPackageActive, isFreeEntrance, discountAmount };
   }, [housingType, material, quantities, selectedReviews]);
 
-  // --- 텍스트 생성 ---
+  // --- Text Gen ---
   const generateQuoteText = () => {
     let text = `[줄눈의미학 견적서]\n\n`;
     text += `■ 현장: ${HOUSING_TYPES.find(h => h.id === housingType).label}\n`;
@@ -237,29 +236,29 @@ export default function GroutEstimatorApp() {
   const hasSelections = Object.values(quantities).some(v => v > 0);
 
   return (
-    <div className="min-h-screen pb-32 font-sans selection:bg-teal-100 selection:text-teal-900">
+    <div className="min-h-screen pb-32 selection:bg-teal-500 selection:text-white">
       <GlobalStyles />
 
-      {/* 헤더: 미니멀 & 클린 */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-[#F8F9FA]/80 backdrop-blur-md">
+      {/* 헤더 */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-[#09090b]/80 backdrop-blur-md border-b border-zinc-800">
         <div className="max-w-md mx-auto px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
-             <div className="bg-black text-white p-1 rounded-md"><Sparkles size={14} fill="white"/></div>
-             <span className="font-bold text-lg tracking-tight">줄눈의미학</span>
+             <div className="bg-teal-500 text-black p-1 rounded-md"><Sparkles size={14} fill="black"/></div>
+             <span className="font-bold text-lg tracking-tight text-white">줄눈의미학</span>
           </div>
-          <button onClick={() => window.location.reload()} className="p-2 rounded-full hover:bg-gray-200 transition">
-            <RefreshCw size={18} className="text-gray-400" />
+          <button onClick={() => window.location.reload()} className="p-2 rounded-full hover:bg-zinc-800 transition">
+            <RefreshCw size={18} className="text-zinc-400" />
           </button>
         </div>
       </header>
 
       <main className="max-w-md mx-auto px-6 pt-20 space-y-10">
         
-        {/* STEP 1: 현장 유형 (카드형 선택) */}
+        {/* STEP 1: 현장 유형 */}
         <section className="animate-card" style={{ animationDelay: '0.1s' }}>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-gray-900">어떤 현장인가요?</h2>
-            <span className="text-xs font-bold text-gray-300 bg-white px-2 py-1 rounded-full border border-gray-100">STEP 1</span>
+            <h2 className="text-xl font-bold text-white">어떤 현장인가요?</h2>
+            <span className="text-[10px] font-bold text-zinc-500 border border-zinc-700 px-2 py-1 rounded-full">STEP 1</span>
           </div>
           <div className="grid grid-cols-2 gap-4">
             {HOUSING_TYPES.map((type) => (
@@ -268,25 +267,25 @@ export default function GroutEstimatorApp() {
                 onClick={() => setHousingType(type.id)}
                 className={`relative flex flex-col items-start p-5 rounded-[24px] transition-all duration-300 ${
                   housingType === type.id 
-                    ? 'bg-white shadow-soft ring-2 ring-black transform scale-[1.02] z-10' 
-                    : 'bg-white border border-transparent hover:bg-gray-50'
+                    ? 'bg-zinc-800 border-2 border-teal-500 glow-effect' 
+                    : 'bg-zinc-900 border border-zinc-800 hover:bg-zinc-800'
                 }`}
               >
-                <div className={`mb-3 p-3 rounded-full ${housingType === type.id ? 'bg-black text-white' : 'bg-gray-100 text-gray-400'}`}>
+                <div className={`mb-3 p-3 rounded-full ${housingType === type.id ? 'bg-teal-500 text-black' : 'bg-zinc-800 text-zinc-500'}`}>
                     {type.id === 'new' ? <Home size={20} /> : <Hammer size={20} />}
                 </div>
-                <div className="font-bold text-base text-gray-900">{type.label}</div>
-                <div className="text-xs text-gray-400 mt-1 text-left leading-tight">{type.desc}</div>
+                <div className={`font-bold text-base ${housingType === type.id ? 'text-white' : 'text-zinc-400'}`}>{type.label}</div>
+                <div className="text-xs text-zinc-500 mt-1 text-left leading-tight">{type.desc}</div>
               </button>
             ))}
           </div>
         </section>
 
-        {/* STEP 2: 재료 선택 (리스트형 카드) */}
+        {/* STEP 2: 재료 선택 */}
         <section className="animate-card" style={{ animationDelay: '0.2s' }}>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-gray-900">재료를 선택하세요</h2>
-            <span className="text-xs font-bold text-gray-300 bg-white px-2 py-1 rounded-full border border-gray-100">STEP 2</span>
+            <h2 className="text-xl font-bold text-white">재료를 선택하세요</h2>
+            <span className="text-[10px] font-bold text-zinc-500 border border-zinc-700 px-2 py-1 rounded-full">STEP 2</span>
           </div>
           <div className="space-y-4">
             {MATERIALS.map((item) => (
@@ -294,37 +293,37 @@ export default function GroutEstimatorApp() {
                 onClick={() => setMaterial(item.id)}
                 className={`group relative overflow-hidden p-6 rounded-[28px] cursor-pointer transition-all duration-300 ${
                   material === item.id 
-                    ? 'bg-white shadow-soft ring-2 ring-black' 
-                    : 'bg-white border border-transparent hover:shadow-sm'
+                    ? 'bg-zinc-800 border-2 border-teal-500 glow-effect' 
+                    : 'bg-zinc-900 border border-zinc-800 hover:bg-zinc-800'
                 }`}
               >
                 <div className="flex justify-between items-start mb-2">
                     <div>
                         <div className="flex items-center gap-2 mb-1">
-                            <span className="font-bold text-lg text-gray-900">{item.label}</span>
-                            {material === item.id && <CheckCircle2 size={16} className="text-teal-500 fill-teal-500" />}
+                            <span className={`font-bold text-lg ${material === item.id ? 'text-white' : 'text-zinc-400'}`}>{item.label}</span>
+                            {material === item.id && <CheckCircle2 size={16} className="text-teal-400 fill-teal-400" />}
                         </div>
-                        <span className="text-sm text-gray-500 font-medium">{item.subLabel}</span>
+                        <span className="text-sm text-zinc-400 font-medium">{item.subLabel}</span>
                     </div>
                     <div className="flex flex-col gap-1 items-end">
                         {item.tags.map(tag => (
-                            <span key={tag} className="text-[10px] bg-gray-100 text-gray-500 px-2 py-1 rounded-full font-bold">{tag}</span>
+                            <span key={tag} className="text-[10px] bg-zinc-950 text-zinc-500 px-2 py-1 rounded-full font-bold border border-zinc-800">{tag}</span>
                         ))}
                     </div>
                 </div>
                 
-                {/* 하위 옵션 (스무스한 확장) */}
-                <div className={`transition-all duration-500 ease-out ${material === item.id ? 'max-h-24 opacity-100 mt-4' : 'max-h-0 opacity-0 overflow-hidden'}`}>
-                    <div className="flex gap-2 p-1 bg-gray-50 rounded-xl">
+                {/* 하위 옵션 */}
+                <div className={`transition-all duration-300 ease-out ${material === item.id ? 'max-h-24 opacity-100 mt-4' : 'max-h-0 opacity-0 overflow-hidden'}`}>
+                    <div className="flex gap-2 p-1 bg-zinc-900 rounded-xl border border-zinc-800">
                     {item.id === 'poly' ? (
                         <>
-                            <button onClick={(e) => {e.stopPropagation(); setPolyOption('pearl');}} className={`flex-1 py-3 text-xs rounded-lg font-bold transition-all ${polyOption === 'pearl' ? 'bg-white text-black shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}>✨ 펄(유광)</button>
-                            <button onClick={(e) => {e.stopPropagation(); setPolyOption('no_pearl');}} className={`flex-1 py-3 text-xs rounded-lg font-bold transition-all ${polyOption === 'no_pearl' ? 'bg-white text-black shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}>☁️ 무펄(무광)</button>
+                            <button onClick={(e) => {e.stopPropagation(); setPolyOption('pearl');}} className={`flex-1 py-3 text-xs rounded-lg font-bold transition-all ${polyOption === 'pearl' ? 'bg-teal-500 text-black shadow-lg' : 'text-zinc-500 hover:text-zinc-300'}`}>✨ 펄(유광)</button>
+                            <button onClick={(e) => {e.stopPropagation(); setPolyOption('no_pearl');}} className={`flex-1 py-3 text-xs rounded-lg font-bold transition-all ${polyOption === 'no_pearl' ? 'bg-teal-500 text-black shadow-lg' : 'text-zinc-500 hover:text-zinc-300'}`}>☁️ 무펄(무광)</button>
                         </>
                     ) : (
                         <>
-                            <button onClick={(e) => {e.stopPropagation(); setEpoxyOption('kerapoxy');}} className={`flex-1 py-3 text-xs rounded-lg font-bold transition-all ${epoxyOption === 'kerapoxy' ? 'bg-white text-black shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}>케라폭시</button>
-                            <button onClick={(e) => {e.stopPropagation(); setEpoxyOption('starlike');}} className={`flex-1 py-3 text-xs rounded-lg font-bold transition-all ${epoxyOption === 'starlike' ? 'bg-white text-black shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}>스타라이크</button>
+                            <button onClick={(e) => {e.stopPropagation(); setEpoxyOption('kerapoxy');}} className={`flex-1 py-3 text-xs rounded-lg font-bold transition-all ${epoxyOption === 'kerapoxy' ? 'bg-amber-500 text-black shadow-lg' : 'text-zinc-500 hover:text-zinc-300'}`}>케라폭시</button>
+                            <button onClick={(e) => {e.stopPropagation(); setEpoxyOption('starlike');}} className={`flex-1 py-3 text-xs rounded-lg font-bold transition-all ${epoxyOption === 'starlike' ? 'bg-amber-500 text-black shadow-lg' : 'text-zinc-500 hover:text-zinc-300'}`}>스타라이크</button>
                         </>
                     )}
                     </div>
@@ -334,59 +333,59 @@ export default function GroutEstimatorApp() {
           </div>
         </section>
 
-        {/* STEP 3: 공간 선택 (깔끔한 리스트 + 카운터) */}
+        {/* STEP 3: 공간 선택 */}
         <section className="animate-card" style={{ animationDelay: '0.3s' }}>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-gray-900">시공 공간</h2>
-            <span className="text-xs font-bold text-gray-300 bg-white px-2 py-1 rounded-full border border-gray-100">STEP 3</span>
+            <h2 className="text-xl font-bold text-white">시공 공간</h2>
+            <span className="text-[10px] font-bold text-zinc-500 border border-zinc-700 px-2 py-1 rounded-full">STEP 3</span>
           </div>
           
-          <div className="bg-white rounded-[32px] p-6 shadow-sm space-y-8">
+          <div className="bg-zinc-900 rounded-[32px] p-6 border border-zinc-800 space-y-8">
             {/* 줄눈 섹션 */}
             <div className="space-y-6">
-                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest pl-1">Grout Area</h3>
+                <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest pl-1">Grout Area</h3>
                 {SERVICE_AREAS.map((area) => (
                     <div key={area.id} className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-400">
+                            <div className="w-10 h-10 rounded-2xl bg-black flex items-center justify-center text-zinc-500 border border-zinc-800">
                                 <area.icon size={20} strokeWidth={1.5} />
                             </div>
                             <div>
-                                <div className="font-bold text-gray-800 text-[15px]">{area.label}</div>
-                                <div className="text-[11px] text-gray-400 font-medium">{area.basePrice.toLocaleString()}원~</div>
+                                <div className="font-bold text-zinc-200 text-[15px]">{area.label}</div>
+                                <div className="text-[11px] text-zinc-500 font-medium">{area.basePrice.toLocaleString()}원~</div>
                             </div>
                         </div>
                         <div className="flex items-center gap-3">
                              <button onClick={() => handleQuantityChange(area.id, -1)} 
-                                className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${quantities[area.id] > 0 ? 'bg-black text-white' : 'bg-gray-100 text-gray-300'}`}>-</button>
-                             <span className={`w-4 text-center text-sm font-bold ${quantities[area.id] > 0 ? 'text-black' : 'text-gray-200'}`}>{quantities[area.id]}</span>
+                                className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${quantities[area.id] > 0 ? 'bg-teal-500 text-black' : 'bg-zinc-800 text-zinc-600'}`}>-</button>
+                             <span className={`w-4 text-center text-sm font-bold ${quantities[area.id] > 0 ? 'text-teal-400' : 'text-zinc-600'}`}>{quantities[area.id]}</span>
                              <button onClick={() => handleQuantityChange(area.id, 1)} 
-                                className="w-8 h-8 rounded-full bg-gray-100 text-gray-600 hover:bg-black hover:text-white transition-all flex items-center justify-center">+</button>
+                                className="w-8 h-8 rounded-full bg-zinc-800 text-zinc-400 hover:bg-teal-500 hover:text-black transition-all flex items-center justify-center">+</button>
                         </div>
                     </div>
                 ))}
             </div>
 
-            <div className="w-full h-px bg-gray-100" />
+            <div className="w-full h-px bg-zinc-800" />
 
             {/* 실리콘 섹션 */}
             <div className="space-y-6">
-                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest pl-1">Silicon Reform</h3>
+                <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest pl-1">Silicon Reform</h3>
                 {SILICON_AREAS.map((area) => (
                     <div key={area.id} className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-2xl bg-orange-50 flex items-center justify-center text-orange-400">
+                            <div className="w-10 h-10 rounded-2xl bg-black flex items-center justify-center text-zinc-500 border border-zinc-800">
                                 <area.icon size={20} strokeWidth={1.5} />
                             </div>
                             <div>
-                                <div className="font-bold text-gray-800 text-[15px]">{area.label}</div>
-                                <div className="text-[11px] text-gray-400 font-medium">{area.basePrice.toLocaleString()}원~</div>
+                                <div className="font-bold text-zinc-200 text-[15px]">{area.label}</div>
+                                <div className="text-[11px] text-zinc-500 font-medium">{area.basePrice.toLocaleString()}원~</div>
                             </div>
                         </div>
                         <div className="flex items-center gap-3">
-                             <button onClick={() => handleQuantityChange(area.id, -1)} className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${quantities[area.id] > 0 ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-300'}`}>-</button>
-                             <span className={`w-4 text-center text-sm font-bold ${quantities[area.id] > 0 ? 'text-orange-600' : 'text-gray-200'}`}>{quantities[area.id]}</span>
-                             <button onClick={() => handleQuantityChange(area.id, 1)} className="w-8 h-8 rounded-full bg-gray-100 text-gray-600 hover:bg-orange-500 hover:text-white transition-all flex items-center justify-center">+</button>
+                             <button onClick={() => handleQuantityChange(area.id, -1)} className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${quantities[area.id] > 0 ? 'bg-amber-600 text-white' : 'bg-zinc-800 text-zinc-600'}`}>-</button>
+                             <span className={`w-4 text-center text-sm font-bold ${quantities[area.id] > 0 ? 'text-amber-500' : 'text-zinc-600'}`}>{quantities[area.id]}</span>
+                             <button onClick={() => handleQuantityChange(area.id, 1)} className="w-8 h-8 rounded-full bg-zinc-800 text-zinc-400 hover:bg-amber-600 hover:text-white transition-all flex items-center justify-center">+</button>
                         </div>
                     </div>
                 ))}
@@ -394,11 +393,11 @@ export default function GroutEstimatorApp() {
           </div>
         </section>
 
-        {/* 할인 혜택 (티켓형 UI) */}
+        {/* 할인 혜택 */}
         <section className="animate-card" style={{ animationDelay: '0.4s' }}>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-gray-900">할인 혜택</h2>
-            <Gift size={20} className="text-teal-500" />
+            <h2 className="text-xl font-bold text-white">할인 혜택</h2>
+            <Gift size={20} className="text-teal-400" />
           </div>
           <div className="grid grid-cols-2 gap-4">
             {REVIEW_EVENTS.map((evt) => (
@@ -407,12 +406,12 @@ export default function GroutEstimatorApp() {
                 onClick={() => toggleReview(evt.id)} 
                 className={`flex flex-col items-center justify-center p-5 rounded-[24px] border transition-all duration-300 ${
                   selectedReviews.has(evt.id) 
-                    ? 'bg-gray-900 border-gray-900 text-white shadow-lg' 
-                    : 'bg-white border-transparent text-gray-400 hover:border-gray-200 shadow-sm'
+                    ? 'bg-zinc-800 border-teal-500/50 text-white shadow-lg' 
+                    : 'bg-zinc-900 border-zinc-800 text-zinc-500 hover:bg-zinc-800'
                 }`}
               >
-                <div className="text-xs font-bold mb-1 opacity-80">{evt.label}</div>
-                <div className={`text-lg font-bold ${selectedReviews.has(evt.id) ? 'text-teal-300' : 'text-gray-300'}`}>-{evt.discount.toLocaleString()}</div>
+                <div className="text-xs font-bold mb-1 opacity-70">{evt.label}</div>
+                <div className={`text-lg font-bold ${selectedReviews.has(evt.id) ? 'text-teal-400' : 'text-zinc-600'}`}>-{evt.discount.toLocaleString()}</div>
               </button>
             ))}
           </div>
@@ -420,84 +419,84 @@ export default function GroutEstimatorApp() {
 
         {/* FAQ */}
         <section className="pb-8">
-             <h2 className="text-xl font-bold text-gray-900 mb-4">자주 묻는 질문</h2>
-             <div className="bg-white rounded-[24px] p-4 shadow-sm">
+             <h2 className="text-xl font-bold text-white mb-4">자주 묻는 질문</h2>
+             <div className="bg-zinc-900 rounded-[24px] p-4 border border-zinc-800">
                 {FAQ_ITEMS.map((item, idx) => <Accordion key={idx} question={item.question} answer={item.answer} />)}
              </div>
         </section>
 
       </main>
 
-      {/* --- Floating Bottom Bar (Dribbble Style) --- */}
+      {/* --- Floating Bottom Bar --- */}
       <div className="fixed bottom-6 left-6 right-6 z-50">
         
-        {/* Toast Notification for Package */}
+        {/* Toast */}
         {calculation.isPackageActive && (
             <div className="absolute bottom-20 left-0 right-0 animate-card">
-                <div className="bg-gray-800/90 backdrop-blur-md text-white px-5 py-3 rounded-2xl shadow-floating flex items-center justify-between">
+                <div className="bg-teal-900/90 backdrop-blur-md text-white px-5 py-3 rounded-2xl shadow-2xl border border-teal-700/50 flex items-center justify-between">
                     <div className="flex flex-col">
-                        <span className="text-teal-300 font-bold text-sm">🎉 {calculation.label} 적용</span>
-                        <span className="text-[10px] text-gray-300">현관 무료 시공 등 혜택 포함</span>
+                        <span className="text-teal-200 font-bold text-sm">🎉 {calculation.label} 적용</span>
+                        <span className="text-[10px] text-teal-400/70">현관 무료 시공 등 혜택 포함</span>
                     </div>
                 </div>
             </div>
         )}
 
-        {/* Main Action Button */}
+        {/* Action Button */}
         <button 
             onClick={() => setShowModal(true)} 
             disabled={!hasSelections}
-            className={`w-full h-16 rounded-[24px] shadow-floating flex items-center justify-between px-6 transition-all transform active:scale-95 ${
+            className={`w-full h-16 rounded-[24px] shadow-2xl flex items-center justify-between px-6 transition-all transform active:scale-95 border ${
                 hasSelections 
-                ? 'bg-black text-white hover:bg-gray-900' 
-                : 'bg-white text-gray-300 cursor-not-allowed'
+                ? 'bg-teal-500 text-black border-teal-400 hover:bg-teal-400' 
+                : 'bg-zinc-800 text-zinc-600 border-zinc-700 cursor-not-allowed'
             }`}
         >
             <div className="flex flex-col items-start">
-                <span className="text-[10px] opacity-60 font-medium">TOTAL ESTIMATE</span>
+                <span className={`text-[10px] font-medium ${hasSelections ? 'text-teal-900/60' : 'text-zinc-500'}`}>TOTAL ESTIMATE</span>
                 <div className="text-xl font-bold flex items-baseline gap-1">
                     {calculation.price.toLocaleString()}
-                    <span className="text-sm font-normal opacity-60">원</span>
+                    <span className={`text-sm font-normal ${hasSelections ? 'text-teal-900/60' : 'text-zinc-600'}`}>원</span>
                 </div>
             </div>
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${hasSelections ? 'bg-teal-500 text-white' : 'bg-gray-100 text-gray-200'}`}>
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${hasSelections ? 'bg-black text-teal-500' : 'bg-zinc-900 text-zinc-700'}`}>
                 <ArrowRight size={20} />
             </div>
         </button>
       </div>
 
-      {/* --- Modal (Modern Clean) --- */}
+      {/* --- Modal (Dark) --- */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4">
-            <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onClick={() => setShowModal(false)} />
-            <div className="relative bg-white w-full max-w-sm rounded-t-[32px] sm:rounded-[32px] shadow-2xl overflow-hidden animate-card max-h-[90vh] flex flex-col">
+            <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowModal(false)} />
+            <div className="relative bg-[#18181b] w-full max-w-sm rounded-t-[32px] sm:rounded-[32px] shadow-2xl overflow-hidden animate-card max-h-[90vh] flex flex-col border border-zinc-800">
                 <div className="p-6 pb-2">
-                    <div className="w-12 h-1 bg-gray-200 rounded-full mx-auto mb-6 sm:hidden" />
+                    <div className="w-12 h-1 bg-zinc-700 rounded-full mx-auto mb-6 sm:hidden" />
                     <div className="flex justify-between items-center mb-6">
-                        <h3 className="font-bold text-2xl text-gray-900">견적 내역</h3>
-                        <button onClick={() => setShowModal(false)} className="bg-gray-100 p-2 rounded-full text-gray-500 hover:bg-gray-200"><X size={20}/></button>
+                        <h3 className="font-bold text-2xl text-white">견적 내역</h3>
+                        <button onClick={() => setShowModal(false)} className="bg-zinc-800 p-2 rounded-full text-zinc-400 hover:text-white"><X size={20}/></button>
                     </div>
                     
                     <div className="space-y-4">
-                        <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-2xl">
-                            <div className="p-2 bg-white rounded-xl shadow-sm"><Home size={20} className="text-gray-700"/></div>
+                        <div className="flex items-center gap-3 p-4 bg-zinc-900 rounded-2xl border border-zinc-800">
+                            <div className="p-2 bg-black rounded-xl border border-zinc-800"><Home size={20} className="text-zinc-400"/></div>
                             <div className="flex-1">
-                                <div className="text-xs text-gray-400 font-bold">TYPE</div>
-                                <div className="font-bold text-gray-900">{HOUSING_TYPES.find(h => h.id === housingType).label}</div>
+                                <div className="text-xs text-zinc-500 font-bold">TYPE</div>
+                                <div className="font-bold text-zinc-200">{HOUSING_TYPES.find(h => h.id === housingType).label}</div>
                             </div>
-                            <div className="flex-1 border-l pl-4 border-gray-200">
-                                <div className="text-xs text-gray-400 font-bold">MATERIAL</div>
-                                <div className="font-bold text-gray-900">{MATERIALS.find(m => m.id === material).label}</div>
+                            <div className="flex-1 border-l pl-4 border-zinc-800">
+                                <div className="text-xs text-zinc-500 font-bold">MATERIAL</div>
+                                <div className="font-bold text-teal-400">{MATERIALS.find(m => m.id === material).label}</div>
                             </div>
                         </div>
 
                         <div className="max-h-[30vh] overflow-y-auto no-scrollbar space-y-3 py-2">
                             {[...SERVICE_AREAS, ...SILICON_AREAS].filter(a => quantities[a.id] > 0).map(area => (
-                                <div key={area.id} className="flex justify-between items-center text-sm p-3 hover:bg-gray-50 rounded-xl transition-colors">
-                                    <span className="text-gray-600 font-medium">{area.label} <span className="text-gray-300 text-xs">x{quantities[area.id]}</span></span>
-                                    <span className="font-bold text-gray-900">
+                                <div key={area.id} className="flex justify-between items-center text-sm p-3 hover:bg-zinc-900 rounded-xl transition-colors border border-transparent hover:border-zinc-800">
+                                    <span className="text-zinc-400 font-medium">{area.label} <span className="text-zinc-600 text-xs">x{quantities[area.id]}</span></span>
+                                    <span className="font-bold text-zinc-200">
                                         {area.id === 'entrance' && calculation.isFreeEntrance 
-                                            ? <span className="text-teal-500">Free</span> 
+                                            ? <span className="text-teal-400">Free</span> 
                                             : `${(area.basePrice * quantities[area.id]).toLocaleString()}`}
                                     </span>
                                 </div>
@@ -506,14 +505,14 @@ export default function GroutEstimatorApp() {
                     </div>
                 </div>
 
-                <div className="p-6 bg-gray-50 border-t border-gray-100 mt-auto">
+                <div className="p-6 bg-zinc-900 border-t border-zinc-800 mt-auto">
                     <div className="flex justify-between items-center mb-6">
-                        <span className="text-gray-500 font-bold">총 합계</span>
-                        <span className="text-3xl font-bold text-gray-900">{calculation.price.toLocaleString()}<span className="text-lg text-gray-400 ml-1">원</span></span>
+                        <span className="text-zinc-500 font-bold">총 합계</span>
+                        <span className="text-3xl font-bold text-white">{calculation.price.toLocaleString()}<span className="text-lg text-zinc-600 ml-1">원</span></span>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
-                        <button onClick={copyToClipboard} className="py-4 rounded-2xl bg-white border border-gray-200 font-bold text-gray-600 shadow-sm hover:bg-gray-50 transition">견적 복사</button>
-                        <button onClick={() => window.location.href = 'tel:010-0000-0000'} className="py-4 rounded-2xl bg-black text-white font-bold hover:bg-gray-800 transition shadow-lg flex items-center justify-center gap-2">
+                        <button onClick={copyToClipboard} className="py-4 rounded-2xl bg-black border border-zinc-800 font-bold text-zinc-400 hover:bg-zinc-900 transition">견적 복사</button>
+                        <button onClick={() => window.location.href = 'tel:010-0000-0000'} className="py-4 rounded-2xl bg-teal-500 text-black font-bold hover:bg-teal-400 transition shadow-lg shadow-teal-500/20 flex items-center justify-center gap-2">
                             <Phone size={18} /> 전화 상담
                         </button>
                     </div>
