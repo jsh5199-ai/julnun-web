@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 
 // =================================================================
-// [0] 아이콘 시스템 (업데이트됨: info 아이콘 등 포함)
+// [0] 아이콘 시스템 (오류 방지용 자체 SVG)
 // =================================================================
 const Icon = ({ name, size = 24, className = "" }) => {
   const icons = {
@@ -129,7 +129,7 @@ const Icon = ({ name, size = 24, className = "" }) => {
 };
 
 // =================================================================
-// [1] 스타일 정의: Navy Theme
+// [1] 스타일 정의: Navy Theme (Pulsate Effect 추가)
 // =================================================================
 const GlobalStyles = () => (
   <style>{`
@@ -138,28 +138,36 @@ const GlobalStyles = () => (
     body { 
         font-family: "Pretendard Variable", "Pretendard", sans-serif;
         background-color: #FFFFFF;
-        color: #1e3a8a; /* Navy */
+        color: #1e3a8a;
         margin: 0;
         padding: 0;
         font-size: 16px;
     }
     
+    /* 애니메이션 */
     @keyframes fadeUp { 
         from { opacity: 0; transform: translateY(10px); } 
         to { opacity: 1; transform: translateY(0); } 
     }
     .animate-enter { animation: fadeUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
     
+    @keyframes pulse-slow { 
+        0%, 100% { opacity: 1; transform: scale(1); } 
+        50% { opacity: 0.95; transform: scale(1.01); }
+    }
+    .animate-pulse-slow { animation: pulse-slow 3s infinite ease-in-out; } 
+    
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+    /* 그림자 */
     .shadow-card { box-shadow: 0 4px 12px rgba(30, 58, 138, 0.08); }
     .shadow-float { box-shadow: 0 -5px 20px -5px rgba(30, 58, 138, 0.15); }
   `}</style>
 );
 
 // =================================================================
-// [2] 데이터
+// [2] 데이터 (장단점 가이드 추가)
 // =================================================================
 const HOUSING_TYPES = [
   { id: 'new', label: '신축 입주', multiplier: 1.0, icon: 'home' },
@@ -179,6 +187,21 @@ const MATERIALS = [
     tags: ['반영구', '무광매트'],
     badgeColor: 'bg-blue-50 text-blue-700'
   },
+];
+
+const MATERIAL_GUIDE = [
+    { 
+        material: '폴리아스파틱', 
+        pros: ['시공 비용이 저렴함', '탄성이 우수하여 크랙(crack)에 강함'], 
+        cons: ['에폭시 대비 수명이 짧음 (5~7년)', '광택이 있어 호불호가 갈림'], 
+        color: 'slate' 
+    },
+    { 
+        material: '에폭시 (케라폭시)', 
+        pros: ['변색/변질 없는 반영구적 수명', '매트하고 고급스러운 마감'], 
+        cons: ['시공 비용이 높음', '경화 시간이 길어 사용까지 오래 걸림'], 
+        color: 'blue' 
+    },
 ];
 
 const SERVICE_AREAS = [
@@ -212,7 +235,7 @@ const FAQ_ITEMS = [
 ];
 
 // =================================================================
-// [3] 컴포넌트
+// [3] 컴포넌트: Accordion
 // =================================================================
 const Accordion = ({ question, answer }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -248,6 +271,9 @@ export default function GroutEstimatorApp() {
   const [selectedReviews, setSelectedReviews] = useState(new Set());
   const [showModal, setShowModal] = useState(false);
 
+  // [NEW STATE] 패키지 토스트 닫힘 여부
+  const [packageToastDismissed, setPackageToastDismissed] = useState(false);
+
   // --- 비즈니스 로직 ---
   const handleQuantityChange = (id, delta) => {
     setQuantities(prev => {
@@ -259,6 +285,8 @@ export default function GroutEstimatorApp() {
       }
       return nextState;
     });
+    // [NEW LOGIC] 항목이 바뀔 때마다 토스트 다시 보여주기
+    setPackageToastDismissed(false);
   };
 
   const toggleReview = (id) => {
@@ -289,6 +317,7 @@ export default function GroutEstimatorApp() {
     const qBathWallOne = (qMasterWall >= 1 || qCommonWall >= 1);
     const qBathWallTotal = qMasterWall + qCommonWall;
 
+    // 패키지 로직
     if (selectedMaterial.id === 'poly' && qBathFloor >= 2 && qEntrance >= 1 && qBathWallTotal === 0 && qShower === 0 && qBathtub === 0) {
         total += 300000; q['bathroom_floor'] -= 2; q['entrance'] -= 1; isPackageActive = true; labelText = '30만원 패키지';
     } else if (selectedMaterial.id === 'kerapoxy' && qBathFloor >= 1 && qBathWallOne && qBathFloor === 1 && qBathWallTotal === 1) {
@@ -373,6 +402,9 @@ export default function GroutEstimatorApp() {
   };
 
   const hasSelections = Object.values(quantities).some(v => v > 0);
+  const showPulse = hasSelections && !showModal;
+  const showPackageBanner = calculation.isPackageActive && !packageToastDismissed;
+
 
   return (
     <div className="min-h-screen pb-44 selection:bg-[#1e3a8a] selection:text-white bg-white">
@@ -437,6 +469,27 @@ export default function GroutEstimatorApp() {
             <h2 className="text-xl font-bold text-[#1e3a8a]">시공 소재</h2>
             <span className="text-xs font-bold text-[#1e3a8a] bg-blue-50 px-3 py-1 rounded-full">STEP 02</span>
           </div>
+
+          {/* [NEW] 소재 장단점 안내 */}
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3 mb-6">
+              {MATERIAL_GUIDE.map((guide, idx) => (
+                  <div key={idx} className="border-b border-slate-200 last:border-0 pb-3 last:pb-0">
+                      <h4 className="font-bold text-sm text-[#1e3a8a] flex items-center gap-2 mb-1">
+                          {guide.material}
+                      </h4>
+                      <div className="flex text-xs">
+                          <div className="w-1/2 pr-2 text-green-700">
+                              <span className="font-bold">장점: </span>{guide.pros.join(', ')}
+                          </div>
+                          <div className="w-1/2 pl-2 border-l border-slate-200 text-red-700">
+                              <span className="font-bold">단점: </span>{guide.cons.join(', ')}
+                          </div>
+                      </div>
+                  </div>
+              ))}
+          </div>
+          
+          {/* 소재 선택 카드 */}
           <div className="space-y-4">
             {MATERIALS.map((item) => (
               <div key={item.id} 
@@ -468,8 +521,8 @@ export default function GroutEstimatorApp() {
                         </>
                     ) : (
                         <>
-                            <button onClick={(e) => {e.stopPropagation(); setEpoxyOption('kerapoxy');}} className={`flex-1 py-3 text-sm rounded-lg font-bold transition-all border ${epoxyOption === 'kerapoxy' ? 'bg-white text-[#1e3a8a] border-white' : 'bg-[#172554] text-slate-300 border-[#172554] hover:bg-[#1e40af]'}`}>케라폭시</button>
-                            <button onClick={(e) => {e.stopPropagation(); setEpoxyOption('starlike');}} className={`flex-1 py-3 text-sm rounded-lg font-bold transition-all border ${epoxyOption === 'starlike' ? 'bg-white text-[#1e3a8a] border-white' : 'bg-[#172554] text-slate-300 border-[#172554] hover:bg-[#1e40af]'}`}>스타라이크</button>
+                            <button onClick={(e) => {e.stopPropagation(); setEpoxyOption('kerapoxy');}} className={`flex-1 py-3 text-sm rounded-lg font-bold transition-all border ${epoxyOption === 'kerapoxy' ? 'bg-white text-[#1e3a8a] border-white' : 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700'}`}>케라폭시</button>
+                            <button onClick={(e) => {e.stopPropagation(); setEpoxyOption('starlike');}} className={`flex-1 py-3 text-sm rounded-lg font-bold transition-all border ${epoxyOption === 'starlike' ? 'bg-white text-[#1e3a8a] border-white' : 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700'}`}>스타라이크</button>
                         </>
                     )}
                     </div>
@@ -552,7 +605,7 @@ export default function GroutEstimatorApp() {
                 onClick={() => toggleReview(evt.id)} 
                 className={`flex flex-col items-center justify-center p-6 rounded-xl border transition-all duration-300 ${
                   selectedReviews.has(evt.id) 
-                    ? 'bg-[#1e3a8a] border-[#1e3a8a] text-white shadow-md' 
+                    ? 'bg-[#1e3a8a] border-[#1e3a8a] text-white shadow-card' 
                     : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300'
                 }`}
               >
@@ -596,20 +649,25 @@ export default function GroutEstimatorApp() {
                 </div>
             )}
 
-            {/* [NEW] 패키지 안내 + 타일 크기 안내 (복원됨) */}
-            {!calculation.isMinCost && calculation.isPackageActive && (
+            {/* [NEW] 패키지 안내 + 타일 크기 안내 (닫기 버튼 추가) */}
+            {showPackageBanner && (
                 <div className="absolute bottom-full left-0 right-0 mb-4 animate-enter mx-auto max-w-md">
                     <div className="bg-[#1e3a8a]/95 backdrop-blur text-white p-4 rounded-xl shadow-lg border border-blue-900">
-                        <div className="flex items-start gap-3 mb-3">
-                            <div className="bg-[#172554] p-2 rounded-lg shrink-0"><Icon name="gift" size={20} /></div>
-                            <div>
-                                <div className="font-bold text-base text-white mb-1">{calculation.label} 적용중!</div>
-                                <ul className="text-xs text-blue-100 space-y-1">
-                                    {calculation.isFreeEntrance && <li>• 현관 바닥 (서비스)</li>}
-                                    <li>• 변기 테두리 / 바닥 테두리 서비스</li>
-                                    <li>• 욕실 젠다이 / 주방 싱크볼 서비스</li>
-                                </ul>
+                        <div className="flex items-start justify-between mb-3">
+                            <div className="flex items-start gap-3">
+                                <div className="bg-[#172554] p-2 rounded-lg shrink-0"><Icon name="gift" size={20} /></div>
+                                <div>
+                                    <div className="font-bold text-base text-white mb-1">{calculation.label} 적용중!</div>
+                                    <ul className="text-xs text-blue-100 space-y-1 pl-1">
+                                        {calculation.isFreeEntrance && <li>• 현관 바닥 (서비스)</li>}
+                                        <li>• 변기 테두리 / 바닥 테두리 서비스</li>
+                                        <li>• 욕실 젠다이 / 주방 싱크볼 서비스</li>
+                                    </ul>
+                                </div>
                             </div>
+                            <button onClick={() => setPackageToastDismissed(true)} className="p-1 rounded-full text-slate-300 hover:text-white bg-transparent transition">
+                                <Icon name="x" size={16} />
+                            </button>
                         </div>
                         <div className="bg-white/10 p-2 rounded-lg flex items-start gap-2">
                             <Icon name="info" size={14} className="mt-0.5 text-yellow-300 shrink-0"/>
@@ -627,7 +685,7 @@ export default function GroutEstimatorApp() {
                 disabled={!hasSelections}
                 className={`w-full h-16 rounded-lg flex items-center justify-between px-6 transition-all ${
                     hasSelections 
-                    ? 'bg-[#1e3a8a] text-white hover:bg-[#1e40af] shadow-sharp' 
+                    ? 'bg-[#1e3a8a] text-white hover:bg-[#1e40af] shadow-sharp animate-pulse-slow' // 펄스 효과 적용
                     : 'bg-slate-100 text-slate-400 cursor-not-allowed'
                 }`}
             >
