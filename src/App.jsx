@@ -8,7 +8,7 @@ const Icon = ({ name, size = 24, className = "" }) => {
   const icons = {
     trophy: (
       <>
-        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6a1.5 1.5 0 0 1 1.5 1.5v3A1.5 1.5 0 0 1 6 9Zm12 0h1.5a2.5 2.5 0 0 0 0-5H18a1.5 1.5 0 0 0-1.5 1.5v3a1.5 1.5 0 0 0 1.5 1.5ZM6 9H4.5A2.5 2.5 0 0 1 2 6.5V6a2 2 0 0 1 2-2h2M18 9h1.5A2.5 2.5 0 0 0 22 6.5V6a2 2 0 0 0-2-2h-2M12 2a2 2 0 0 1 2 2v2H10V4a2 2 0 0 1 2-2ZM8.21 13c.23 2.14 1.68 3.52 3.79 3.52s3.56-1.38 3.79-3.52M12 16.5a6.5 6.5 0 0 1-6.5-6.5v-3h13v3a6.5 6.5 0 0 1-6.5 6.5ZM12 22v-5.5" />
+        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6a1.5 1.5 0 0 1 1.5 1.5v3A1.5 1.5 0 0 1 6 9ZM18 9h1.5a2.5 2.5 0 0 0 0-5H18a1.5 1.5 0 0 0-1.5 1.5v3a1.5 1.5 0 0 0 1.5 1.5ZM6 9H4.5A2.5 2.5 0 0 1 2 6.5V6a2 2 0 0 1 2-2h2M18 9h1.5A2.5 2.5 0 0 0 22 6.5V6a2 2 0 0 0-2-2h-2M12 2a2 2 0 0 1 2 2v2H10V4a2 2 0 0 1 2-2ZM8.21 13c.23 2.14 1.68 3.52 3.79 3.52s3.56-1.38 3.79-3.52M12 16.5a6.5 6.5 0 0 1-6.5-6.5v-3h13v3a6.5 6.5 0 0 1-6.5 6.5ZM12 22v-5.5" />
       </>
     ),
     medal: (
@@ -166,7 +166,11 @@ const GlobalStyles = () => (
     .shadow-float { box-shadow: 0 -5px 20px -5px rgba(30, 58, 138, 0.15); }
     
     /* 이미지 저장 영역 전용 스타일 (흰색 배경 강제) */
-    .quote-canvas-container { background-color: #FFFFFF !important; padding: 24px; border-radius: 10px; }
+    .quote-canvas-container { 
+        background-color: #FFFFFF !important; 
+        padding: 24px; 
+        border-radius: 10px; 
+    }
   `}</style>
 );
 
@@ -305,7 +309,7 @@ export default function GroutEstimatorApp() {
   const [packageToastDismissed, setPackageToastDismissed] = useState(false);
   const [showMaterialGuide, setShowMaterialGuide] = useState(false);
   
-  // [NEW REF] 견적서 캡처용 Ref
+  // [NEW REF] 견적서 캡처용 Ref (견적 내용만 감싸도록 수정됨)
   const quoteRef = useRef(null);
 
   // --- 비즈니스 로직 ---
@@ -828,11 +832,21 @@ export default function GroutEstimatorApp() {
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4">
             <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setShowModal(false)} />
-            {/* [REF 적용] 캡처할 영역 */}
-            <div ref={quoteRef} className="relative bg-white w-full max-w-sm rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden animate-enter max-h-[90vh] flex flex-col">
+            
+            {/* Modal Container: 캡처 영역과 버튼 영역을 분리 */}
+            <div className="relative bg-white w-full max-w-sm rounded-t-2xl sm:rounded-2xl shadow-2xl animate-enter max-h-[90vh] flex flex-col">
                 
-                {/* 캡처를 위한 상단/기본 스타일 (Modal Header 대신 사용) */}
-                <div className="quote-canvas-container"> 
+                {/* 닫기 버튼 (모바일 상단) */}
+                <button 
+                    onClick={() => setShowModal(false)} 
+                    className="absolute top-3 right-3 z-10 p-2 text-slate-400 hover:text-slate-600 transition"
+                >
+                    <Icon name="x" size={24} />
+                </button>
+
+                {/* [REF 적용] 견적서 내용 (스크롤 영역) */}
+                <div ref={quoteRef} className="flex-1 overflow-y-auto no-scrollbar quote-canvas-container"> 
+                    
                     <div className="flex justify-between items-center mb-4">
                         <h3 className="font-bold text-2xl text-[#0f172a] flex items-center gap-2">
                             <Icon name="shield" size={24} className="text-[#1e3a8a]"/> 정식 견적서
@@ -953,13 +967,15 @@ export default function GroutEstimatorApp() {
                     </div>
                 </div>
 
+                {/* 액션 버튼 (고정 영역) */}
                 <div className="p-6 bg-slate-50 border-t border-slate-200 flex-none">
                     <p className='text-xs text-center text-slate-500 mb-4'>* 위 내용은 이미지로 저장되며, 현장 상황에 따라 변동될 수 있습니다.</p>
                     <div className="grid grid-cols-2 gap-3">
                         <button onClick={saveAsImage} className="py-4 rounded-lg bg-[#0f172a] text-white font-bold hover:bg-slate-800 transition flex items-center justify-center gap-2">
                             <Icon name="copy" size={18}/> 이미지 저장
                         </button>
-                        <button onClick={() => window.location.href = 'tel:010-0000-0000'} className="py-4 rounded-lg bg-[#1e3a8a] text-white font-bold hover:bg-[#1e40af] transition flex items-center justify-center gap-2">
+                        {/* 전화번호 변경 적용: 010-7734-6709 */}
+                        <button onClick={() => window.location.href = 'tel:010-7734-6709'} className="py-4 rounded-lg bg-[#1e3a8a] text-white font-bold hover:bg-[#1e40af] transition flex items-center justify-center gap-2">
                             <Icon name="phone" size={18} /> 전화 상담
                         </button>
                     </div>
