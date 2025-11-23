@@ -171,7 +171,7 @@ const GlobalStyles = () => (
 );
 
 // =================================================================
-// [2] 데이터 (에폭시 개별 견적가 수정 적용)
+// [2] 데이터
 // =================================================================
 const HOUSING_TYPES = [
   { id: 'new', label: '신축 입주', multiplier: 1.0, icon: 'home' },
@@ -257,7 +257,6 @@ const REVIEW_EVENTS = [
   { id: 'karrot_review', label: '당근마켓 후기', discount: 10000, icon: 'star' },
 ];
 
-// [수정된 FAQ 데이터]
 const FAQ_ITEMS = [
     { question: "시공 소요 시간은?", answer: "평균 4~6시간, 범위에 따라 길게는 2~3일 일정으로 진행됩니다." },
     { question: "각 소재별 양생기간은?", answer: "폴리아스파틱은 6시간, 에폭시(케라폭시)는 2~3일, 스타라이크 evo는 24시간입니다." },
@@ -907,6 +906,15 @@ export default function GroutEstimatorApp() {
                                 <span>-{calculation.totalReviewDiscount.toLocaleString()}원</span>
                             </div>
                         )}
+                        
+                        {/* 총 할인 금액 */}
+                        <div className="flex justify-between items-center text-base font-bold pt-2 border-t border-slate-100">
+                            <span className="text-red-600">총 할인 금액</span>
+                            <span className="text-red-600">
+                                -{(calculation.fullOriginalPrice - calculation.price).toLocaleString()}원
+                            </span>
+                        </div>
+
                         <div className="flex justify-between items-center pt-2">
                             <span className="text-lg font-bold text-slate-900">최종 결제 금액</span>
                             <span className="text-3xl font-bold text-blue-700">{calculation.price.toLocaleString()}원</span>
