@@ -1,4 +1,5 @@
-import React, { useState, useMemo, useRef } from 'react'; // useRef 추가
+import React, { useState, useMemo, useRef } from 'react';
+import html2canvas from 'html2canvas'; // [필수] 이미지 저장을 위해 필요
 
 // =================================================================
 // [0] 아이콘 시스템 (오류 방지용 자체 SVG)
@@ -385,25 +386,38 @@ export default function GroutEstimatorApp() {
 
   // --- 이미지 저장 함수 (클립보드 대체) ---
   const saveAsImage = async () => {
-    if (!quoteRef.current) return;
+    if (!quoteRef.current) {
+        alert("에러: 견적서 영역을 찾을 수 없습니다.");
+        return;
+    }
 
-    // [중요 안내] 이 주석을 제거하고 html2canvas 코드를 여기에 삽입해야 합니다.
-    alert("이미지 저장 기능을 실행합니다. (html2canvas 라이브러리가 필요합니다.)");
+    // [핵심 로직 활성화]
+    try {
+      const element = quoteRef.current;
+      
+      const originalOverflow = element.style.overflow;
+      element.style.overflow = 'visible';
 
-    /* // 아래 코드는 'html2canvas' 라이브러리 설치 후 활성화해주세요.
-      try {
-        const canvas = await html2canvas(quoteRef.current, { scale: 2, logging: false });
-        const image = canvas.toDataURL('image/png');
-        const link = document.createElement('a');
-        link.href = image;
-        link.download = `줄눈의미학_견적서_${new Date().toISOString().slice(0, 10)}.png`;
-        link.click();
-        alert("견적서 이미지가 성공적으로 저장되었습니다!");
-      } catch (error) {
-        console.error("이미지 저장 중 오류 발생:", error);
-        alert("이미지 저장에 실패했습니다. (콘솔 확인)");
-      }
-    */
+      const canvas = await html2canvas(element, { 
+          scale: 2, // 고해상도 캡처 (선명도 증가)
+          logging: false,
+          useCORS: true,
+      });
+      
+      element.style.overflow = originalOverflow; // 원상 복구
+
+      const image = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.href = image;
+      link.download = `줄눈의미학_견적서_${new Date().toISOString().slice(0, 10)}.png`;
+      link.click();
+      
+      alert("견적서 이미지가 성공적으로 저장되었습니다!");
+      
+    } catch (error) {
+      console.error("이미지 저장 중 오류 발생:", error);
+      alert("이미지 저장에 실패했습니다. (콘솔 확인)");
+    }
   };
 
   const hasSelections = Object.values(quantities).some(v => v > 0);
@@ -475,18 +489,18 @@ export default function GroutEstimatorApp() {
             <span className="text-xs font-bold text-[#1e3a8a] bg-blue-50 px-3 py-1 rounded-full">STEP 02</span>
           </div>
           
-          {/* 소재 정보 확인 버튼 및 가이드 (NEW) */}
+          {/* 소재 정보 확인 버튼 및 가이드 */}
           <div className="mb-4">
               <button 
                   onClick={() => setShowMaterialGuide(!showMaterialGuide)} 
                   className="w-full text-center py-2 text-sm font-semibold rounded-lg text-slate-600 border border-slate-200 bg-white hover:bg-slate-50 transition-colors flex items-center justify-center gap-2"
               >
-                  소재 정보 확인하기 
+                  소재 정보 {showMaterialGuide ? '숨기기' : '확인하기'} 
                   <Icon name="chevronDown" size={16} className={`transition-transform ${showMaterialGuide ? 'rotate-180' : ''}`} />
               </button>
               
               {/* 소재 장단점 섹션 */}
-              <div className className={`overflow-hidden transition-all duration-500 ease-in-out ${showMaterialGuide ? 'max-h-96 opacity-100 pt-4' : 'max-h-0 opacity-0'}`}>
+              <div className={`overflow-hidden transition-all duration-500 ease-in-out ${showMaterialGuide ? 'max-h-96 opacity-100 pt-4' : 'max-h-0 opacity-0'}`}>
                   <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
                       {MATERIAL_GUIDE.map((guide, idx) => (
                           <div key={idx} className="border-b border-slate-200 last:border-0 pb-3 last:pb-0">
@@ -702,7 +716,7 @@ export default function GroutEstimatorApp() {
                 onClick={() => setShowModal(true)} 
                 disabled={!hasSelections}
                 className={`w-full h-16 rounded-lg flex items-center justify-between px-6 transition-all ${
-                    showPulse // 펄스 효과 적용
+                    showPulse 
                     ? 'bg-[#1e3a8a] text-white hover:bg-[#1e40af] shadow-sharp animate-pulse-slow' 
                     : 'bg-slate-100 text-slate-400 cursor-not-allowed'
                 }`}
@@ -725,7 +739,7 @@ export default function GroutEstimatorApp() {
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4">
             <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setShowModal(false)} />
-            {/* [NEW REF] 이미지 캡처를 위해 ref를 적용할 컨테이너 */}
+            {/* [REF 적용] 캡처할 영역 */}
             <div ref={quoteRef} className="relative bg-white w-full max-w-sm rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden animate-enter max-h-[90vh] flex flex-col">
                 
                 <div className="p-6 border-b border-slate-100 flex justify-between items-center">
@@ -809,8 +823,8 @@ export default function GroutEstimatorApp() {
                         <div className="bg-slate-100 p-4 rounded-lg border border-slate-200 text-slate-700">
                             <h4 className="font-bold flex items-center gap-2 mb-1 text-red-600"><Icon name="info" size={16}/> 최종 견적 시 주의사항</h4>
                             <ul className="list-disc list-inside text-xs space-y-1 pl-1">
-                                <li>**타일 기준:** 바닥 300각, 벽 600각 타일 기준이며, 조각 타일 시공은 불가합니다.</li>
-                                <li>**재시공/오염:** 셀프 시공/심한 오염 시 추가 작업비가 발생합니다.</li>
+                                <li>**타일 기준:** 바닥 300각, 벽 600각 타일 기준이며, 조각 타일 시공은 불가하며, 크기가 작을 경우 추가 비용이 발생합니다.</li>
+                                <li>**재시공/오염:** 셀프 시공된 곳이거나 기존 오염도가 심한 곳은 추가 그라인딩 작업비가 발생합니다.</li>
                             </ul>
                         </div>
                     </div>
@@ -823,7 +837,6 @@ export default function GroutEstimatorApp() {
                         <span className="text-3xl font-bold text-slate-900">{calculation.price.toLocaleString()}<span className="text-lg text-slate-500 font-medium ml-1">원</span></span>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
-                        {/* [수정] 이미지 저장 버튼 */}
                         <button onClick={saveAsImage} className="py-4 rounded-lg bg-white border border-slate-300 font-bold text-slate-700 hover:bg-slate-50 transition flex items-center justify-center gap-2">
                             <Icon name="copy" size={18}/> 이미지 저장
                         </button>
