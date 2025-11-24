@@ -33,13 +33,13 @@ const EPOXY_OVERRIDE_PRICES = {
 };
 
 export const SERVICE_AREAS = [
-  { id: 'entrance', label: '현관', basePrice: 100000, icon: 'door', unit: '개소' },
+  { id: 'entrance', label: '현관', basePrice: 50000, icon: 'door', unit: '개소' },
   { id: 'bathroom_floor', label: '욕실 바닥', basePrice: 150000, icon: 'bath', unit: '개소' },
   { id: 'shower_booth', label: '샤워부스 벽', basePrice: 150000, icon: 'bath', unit: '구역' },
   { id: 'bathtub_wall', label: '욕조 벽', basePrice: 150000, icon: 'bath', unit: '구역' },
   { id: 'master_bath_wall', label: '안방욕실 벽 전체', basePrice: 300000, icon: 'bath', unit: '구역' },
   { id: 'common_bath_wall', label: '공용욕실 벽 전체', basePrice: 300000, icon: 'bath', unit: '구역' },
-  { id: 'balcony_laundry', label: '베란다/세탁실', basePrice: 150000, icon: 'layout', unit: '개소' },
+  { id: 'balcony_laundry', label: '베란다/세탁실', basePrice: 120000, icon: 'layout', unit: '개소' },
   { id: 'kitchen_wall', label: '주방 벽면', basePrice: 150000, icon: 'utensils', unit: '구역' },
   { id: 'living_room', label: '거실 바닥', basePrice: 550000, icon: 'home', unit: '구역' },
 ];
@@ -148,7 +148,7 @@ export const calculateEstimate = (quantities, housingTypeId, materialId, selecte
             total += 550000; q['bathroom_floor'] -= 2; q['entrance'] -= 1; isPackageActive = true; isFreeEntrance = true; labelText = '에폭시 바닥 현관 패키지 (55만원)'; 
         }
         else if (qBathFloor >= 2 && qBathWallTotal >= 2) { 
-            total += 1400000; q['bathroom_floor'] -= 2; q['master_bath_wall'] = Math.max(0, q['master_bath_wall'] - 1); q['common_bath_wall'] = Math.max(0, q['common_bath_wall'] - 1); isPackageActive = true; isFreeEntrance = true; labelText = '에폭시 풀패키지 (140만원)'; 
+            total += 1400000; q['bathroom_floor'] -= 2; q['master_bath_wall'] = Math.max(0, q['master_bath_wall'] - 1); q['common_bath_wall'] = Math.max(0, q['common_bath_wall'] - 1); isPackageActive = true; isFreeEntrance = true; labelText = '에폭시 풀패키지 (135만원)'; 
         } 
         else if (qBathFloor >= 2 && qShower >= 1 && qBathtub >= 1) { 
             total += 1050000; q['bathroom_floor'] -= 2; q['shower_booth'] -= 1; q['bathtub_wall'] -= 1; isPackageActive = true; isFreeEntrance = true; labelText = '에폭시 복합 패키지 (105만원)'; 
@@ -163,7 +163,7 @@ export const calculateEstimate = (quantities, housingTypeId, materialId, selecte
             total += 550000; q['bathroom_floor'] -= 1; qShower >= 1 ? q['shower_booth'] -= 1 : q['bathtub_wall'] -= 1; isPackageActive = true; labelText = '에폭시 싱글 패키지 (55만원)'; 
         }
         else if (qBathFloor >= 2) { 
-            total += 550000; q['bathroom_floor'] -= 2; isPackageActive = true; labelText = '에폭시 바닥 더블 패키지 (55만원)'; 
+            total += 550000; q['bathroom_floor'] -= 2; isPackageActive = true; labelText = '에폭시 바닥 더블 패키지 (60만원)'; 
         }
     }
 
