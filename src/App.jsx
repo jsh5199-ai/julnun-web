@@ -229,12 +229,23 @@ const getBasePrice = (id, material) => {
     const area = SERVICE_AREAS.find(a => a.id === id) || SILICON_AREAS.find(a => a.id === id);
     if (!area) return 0;
     
-    // 에폭시(kerapoxy) 선택 시 오버라이드된 가격 적용
+    let basePrice = area.basePrice;
+    
+    // 1. 에폭시(kerapoxy) 선택 시 오버라이드된 가격 적용 (고정가)
     if (material === 'kerapoxy' && EPOXY_OVERRIDE_PRICES[id] !== undefined) {
         return EPOXY_OVERRIDE_PRICES[id]; 
     }
     
-    return area.basePrice;
+    // 2. 에폭시 선택 시 PriceMod 1.8배 적용 (오버라이드 리스트에 없는 일반 항목들)
+    if (material === 'kerapoxy') {
+        // 단, 욕실바닥은 이미 15만으로 설정되어 있으므로, 1.8배가 아닌 35만 적용을 위해 오버라이드 맵에 있었음.
+        // 여기서는 오버라이드 맵에 없는 항목에만 일반 priceMod (1.8)을 곱함.
+        if (EPOXY_OVERRIDE_PRICES[id] === undefined) {
+             basePrice *= 1.8;
+        }
+    }
+    
+    return basePrice;
 };
 
 const SERVICE_AREAS = [
@@ -446,16 +457,6 @@ export default function GroutEstimatorApp() {
         else if (qBathFloor >= 2 && (qShower >= 1 || qBathtub >= 1)) { 
             total += 750000; q['bathroom_floor'] -= 2; qShower >= 1 ? q['shower_booth'] -= 1 : q['bathtub_wall'] -= 1; isPackageActive = true; isFreeEntrance = true; labelText = 'Premium 패키지 B'; 
         }
-    } else { 
-      if (qBathFloor >= 1 && qBathWallOne && qBathFloor === 1 && qBathWallTotal === 1) {
-          total += 500000; q['bathroom_floor'] -= 1; qMasterWall >= 1 ? q['master_bath_wall'] -= 1 : q['common_bath_wall'] -= 1; isPackageActive = true; labelText = '50만원 패키지';
-      } else if (qBathFloor >= 2 && qBathWallTotal >= 2) { 
-          total += 700000; q['bathroom_floor'] -= 2; q['master_bath_wall'] = Math.max(0, q['master_bath_wall'] - 1); q['common_bath_wall'] = Math.max(0, q['common_bath_wall'] - 1); isPackageActive = true; isFreeEntrance = true; labelText = '풀패키지 할인'; 
-      }
-      else if (qBathFloor >= 2 && (qShower >= 1 || qBathtub >= 1)) { 
-          total += 380000; q['bathroom_floor'] -= 2; qShower >= 1 ? q['shower_booth'] -= 1 : q['bathtub_wall'] -= 1; isPackageActive = true; isFreeEntrance = true; labelText = '실속 패키지'; 
-      }
-      else if (qBathFloor >= 2 && qEntrance >= 1) { isPackageActive = true; isFreeEntrance = true; labelText = '현관 무료 혜택'; }
     }
 
     // --- 3. 잔여 개별 항목 계산 (FREE 서비스 제외 및 5만원 할인 적용) ---
@@ -479,12 +480,6 @@ export default function GroutEstimatorApp() {
                 price *= matDetails.priceMod;
             }
 
-            // [NEW LOGIC 1]: 에폭시 현관 시공 시 50,000원 추가 (서비스 가격 외 추가금)
-            if (area.id === 'entrance' && isPackageActive && matDetails.materialId === 'kerapoxy') {
-                total += 50000 * count; // 5만원 추가 (기존 FREE 로직이 price += price를 막았으므로, 여기에 순수 5만원 추가)
-            }
-
-
             // [추가 할인 로직 유지: 5만원 할인 적용]
             if (isPackageActive) {
                 let discountPerUnit = 0;
@@ -502,6 +497,12 @@ export default function GroutEstimatorApp() {
                 
                 price -= discountPerUnit * count;
             }
+
+            // [NEW LOGIC 1]: 에폭시 현관 시공 시 50,000원 추가 (서비스 가격 외 추가금)
+            if (area.id === 'entrance' && isPackageActive && matDetails.materialId === 'kerapoxy') {
+                price += 50000 * count; // 5만원 추가
+            }
+            
             total += price;
         }
     });
@@ -530,7 +531,6 @@ export default function GroutEstimatorApp() {
 
     // 최종적으로 모달에서 surcharge 상태를 표시하기 위한 플래그
     const isEpoxyEntranceSurcharged = isPackageActive && quantities['entrance'] > 0 && areaMaterials['entrance'] === 'kerapoxy';
-
 
     return { 
         price: Math.max(0, Math.floor(total / 1000) * 1000), 
@@ -741,8 +741,7 @@ export default function GroutEstimatorApp() {
             <div className="p-2">
                 {SERVICE_AREAS.map((area) => {
                     const currentMatId = areaMaterials[area.id] || material;
-                    const areaBasePrice = getBasePrice(area.id, currentMatId);
-                    let displayPrice = areaBasePrice;
+                    let displayPrice = getBasePrice(area.id, currentMatId); // Get base/override price
 
                     // [NEW LOGIC FOR UI DISPLAY] 패키지 할인을 반영한 가격으로 즉시 업데이트
                     if (quantities[area.id] > 0 && calculation.isPackageActive) {
@@ -754,21 +753,23 @@ export default function GroutEstimatorApp() {
                         if (area.id === 'living_room') {
                             discountPerUnit = isEpoxy ? 150000 : 50000;
                         } 
-                        // 2. 잔여 항목 5만원 할인
+                        // 2. 실리콘/걸레받이 할인 (욕조 테두리/걸레받이만 해당, 나머지 5만은 일반 항목)
+                        else if (area.id === 'silicon_bathtub') {
+                            discountPerUnit = 30000;
+                        } else if (area.id === 'silicon_living_baseboard') {
+                            discountPerUnit = 50000;
+                        } 
+                        // 3. 잔여 항목 5만원 할인
                         else if (area.id !== 'entrance' && area.id !== 'bathroom_floor') {
                             discountPerUnit = 50000;
                         }
                         
-                        // 3. 에폭시 현관 서비스 추가금 적용 (할인된 가격에 5만원 추가된 가격을 표시해야 함)
+                        // 4. 에폭시 현관 서비스 추가금 적용 
                         if (area.id === 'entrance' && isEpoxy && calculation.isFreeEntrance) {
-                            // 현관은 기본 10만원 (Base Price). 서비스(무료) 상태에서 5만원 추가되므로 최종 표시 가격은 5만원.
-                            // 즉, Base Price (100k) - 50k (implicit discount) + 50k (Epoxy Surcharge) = 100k
-                            // 여기서는 할인 전 가격을 표시하는 것이므로, 100k (Base)를 표시하거나, 아니면 50k만 추가된 금액을 표시해야함
-                            // 최종 견적가가 60만 패키지 내에서는 60만원 + 5만원이므로, 5만원 추가된 가격을 표시하는 것이 합리적임
-                             displayPrice = getBasePrice(area.id, 'kerapoxy'); 
+                            displayPrice = 150000; // 10만원 (Base) + 5만원 (Surcharge)
                         } else {
                             // 일반 항목/할인 적용
-                            displayPrice = Math.max(0, areaBasePrice - discountPerUnit);
+                            displayPrice = Math.max(0, displayPrice - discountPerUnit);
                         }
                     }
 
@@ -783,7 +784,7 @@ export default function GroutEstimatorApp() {
                                 <div className='min-w-0'>
                                     <div className="font-bold text-slate-900 text-lg">{area.label}</div>
                                     <div className="text-sm text-slate-500 font-medium">
-                                        {displayPrice.toLocaleString()}원~
+                                        {Math.round(displayPrice).toLocaleString()}원~ {/* 최종 표시 금액 */}
                                     </div>
                                 </div>
                             </div>
@@ -1028,11 +1029,13 @@ export default function GroutEstimatorApp() {
                                             {area.label} <span className="text-slate-400 text-sm">x{quantities[area.id]} ({materialLabel})</span>
                                         </span>
                                         <span className="font-bold text-slate-900">
-                                            {area.id === 'entrance' && calculation.isFreeEntrance 
-                                                ? <span className="text-[#1e3a8a]">Service (Poly)</span> 
-                                                : isFreeSilicon 
-                                                    ? <span className="text-[#1e3a8a]">Service</span>
-                                                    : `${(getBasePrice(area.id, currentMatId) * quantities[area.id]).toLocaleString()}원` 
+                                            {calculation.isEpoxyEntranceSurcharged && area.id === 'entrance' 
+                                                ? <span className="text-red-600">+50,000원</span> 
+                                                : area.id === 'entrance' && calculation.isFreeEntrance 
+                                                    ? <span className="text-[#1e3a8a]">Service (Poly)</span> 
+                                                    : isFreeSilicon 
+                                                        ? <span className="text-[#1e3a8a]">Service</span>
+                                                        : `${(getBasePrice(area.id, currentMatId) * quantities[area.id]).toLocaleString()}원` 
                                             }
                                         </span>
                                     </div>
@@ -1118,7 +1121,7 @@ export default function GroutEstimatorApp() {
                         <button onClick={saveAsImage} className="py-4 rounded-lg bg-[#0f172a] text-white font-bold hover:bg-slate-800 transition flex items-center justify-center gap-2">
                             <Icon name="copy" size={18}/> 이미지 저장
                         </button>
-                        <button onClick={() => window.location.href = 'tel:010-7734-6709'} className="py-4 rounded-lg bg-[#1e3a8a] text-white font-bold hover:bg-[#1e40af] transition flex items-center justify-center gap-2">
+                        <button onClick={() => setShowModal(false)} className="py-4 rounded-lg bg-[#1e3a8a] text-white font-bold hover:bg-[#1e40af] transition flex items-center justify-center gap-2">
                             <Icon name="phone" size={18} /> 전화 상담
                         </button>
                     </div>
