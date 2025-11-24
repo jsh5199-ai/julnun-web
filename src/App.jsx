@@ -237,9 +237,7 @@ const getBasePrice = (id, material) => {
     }
     
     // 2. 에폭시 선택 시 PriceMod 1.8배 적용 (오버라이드 리스트에 없는 일반 항목들)
-    if (material === 'kerapoxy') {
-        // 단, 욕실바닥은 이미 15만으로 설정되어 있으므로, 1.8배가 아닌 35만 적용을 위해 오버라이드 맵에 있었음.
-        // 여기서는 오버라이드 맵에 없는 항목에만 일반 priceMod (1.8)을 곱함.
+    if (material === 'kerapoxy' && !SILICON_AREAS.some(a => a.id === id)) {
         if (EPOXY_OVERRIDE_PRICES[id] === undefined) {
              basePrice *= 1.8;
         }
@@ -500,7 +498,7 @@ export default function GroutEstimatorApp() {
 
             // [NEW LOGIC 1]: 에폭시 현관 시공 시 50,000원 추가 (서비스 가격 외 추가금)
             if (area.id === 'entrance' && isPackageActive && matDetails.materialId === 'kerapoxy') {
-                price += 50000 * count; // 5만원 추가
+                total += 50000 * count; // 5만원 추가
             }
             
             total += price;
@@ -741,7 +739,7 @@ export default function GroutEstimatorApp() {
             <div className="p-2">
                 {SERVICE_AREAS.map((area) => {
                     const currentMatId = areaMaterials[area.id] || material;
-                    let displayPrice = getBasePrice(area.id, currentMatId); // Get base/override price
+                    let displayPrice = getBasePrice(area.id, currentMatId);
 
                     // [NEW LOGIC FOR UI DISPLAY] 패키지 할인을 반영한 가격으로 즉시 업데이트
                     if (quantities[area.id] > 0 && calculation.isPackageActive) {
@@ -784,7 +782,7 @@ export default function GroutEstimatorApp() {
                                 <div className='min-w-0'>
                                     <div className="font-bold text-slate-900 text-lg">{area.label}</div>
                                     <div className="text-sm text-slate-500 font-medium">
-                                        {Math.round(displayPrice).toLocaleString()}원~ {/* 최종 표시 금액 */}
+                                        {Math.round(displayPrice).toLocaleString()}원~
                                     </div>
                                 </div>
                             </div>
@@ -1121,7 +1119,7 @@ export default function GroutEstimatorApp() {
                         <button onClick={saveAsImage} className="py-4 rounded-lg bg-[#0f172a] text-white font-bold hover:bg-slate-800 transition flex items-center justify-center gap-2">
                             <Icon name="copy" size={18}/> 이미지 저장
                         </button>
-                        <button onClick={() => setShowModal(false)} className="py-4 rounded-lg bg-[#1e3a8a] text-white font-bold hover:bg-[#1e40af] transition flex items-center justify-center gap-2">
+                        <button onClick={() => window.location.href = 'tel:010-7734-6709'} className="py-4 rounded-lg bg-[#1e3a8a] text-white font-bold hover:bg-[#1e40af] transition flex items-center justify-center gap-2">
                             <Icon name="phone" size={18} /> 전화 상담
                         </button>
                     </div>
