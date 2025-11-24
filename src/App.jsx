@@ -176,8 +176,9 @@ const HOUSING_TYPES = [
 ];
 
 const MATERIALS = [
-  { id: 'poly', label: '폴리', subLabel: '폴리아스파틱 (Standard)', priceMod: 1.0, color: 'slate' },
-  { id: 'kerapoxy', label: '에폭시', subLabel: '에폭시 (Premium)', priceMod: 1.8, color: 'blue' },
+  // [수정] subLabel 제거 (UI에서 사용하지 않음)
+  { id: 'poly', label: '폴리', priceMod: 1.0, color: 'slate' },
+  { id: 'kerapoxy', label: '에폭시', priceMod: 1.8, color: 'blue' },
 ];
 
 const MATERIAL_MAP = MATERIALS.reduce((acc, m) => {
@@ -209,7 +210,6 @@ const getBasePrice = (id, materialId) => {
         return EPOXY_OVERRIDE_PRICES[id]; 
     }
     
-    // 폴리 (poly)는 기본 가격 * priceMod (1.0)
     return area.basePrice * material.priceMod;
 };
 
@@ -269,9 +269,7 @@ const Accordion = ({ question, answer }) => {
 // =================================================================
 export default function GroutEstimatorApp() {
   const [housingType, setHousingType] = useState('new');
-  // [수정: 개별 소재 선택] - 기존 material, polyOption, epoxyOption 상태 제거
 
-  // [수정: 개별 소재 선택] - 구역별 개수와 소재를 함께 관리하는 새로운 상태 구조
   const initialSelections = [...SERVICE_AREAS, ...SILICON_AREAS].reduce((acc, area) => {
     acc[area.id] = { count: 0, material: 'poly' }; // 기본 소재는 'poly'
     return acc;
@@ -287,7 +285,7 @@ export default function GroutEstimatorApp() {
 
   // --- 비즈니스 로직 ---
   
-  // [수정: 개별 소재 선택] - 수량 변경 핸들러
+  // [수정] 수량 변경 핸들러
   const handleCountChange = (id, delta) => {
     setAreaSelections(prev => {
         const currentCount = prev[id].count;
@@ -308,10 +306,10 @@ export default function GroutEstimatorApp() {
     setPackageToastDismissed(false);
   };
   
-  // [수정: 개별 소재 선택] - 소재 변경 핸들러 (토글 방식)
-  const handleMaterialToggle = (id) => {
+  // [수정] 소재 선택 핸들러 (클릭 시 해당 소재로 고정)
+  const handleMaterialSelect = (id, newMaterial) => {
     setAreaSelections(prev => {
-        const newMaterial = prev[id].material === 'poly' ? 'kerapoxy' : 'poly';
+        // count가 0인 경우 선택을 막을 수도 있지만, 일단은 상태만 업데이트
         return { 
             ...prev, 
             [id]: { ...prev[id], material: newMaterial } 
@@ -328,10 +326,10 @@ export default function GroutEstimatorApp() {
     });
   };
   
-  // [수정: 개별 소재 선택] - 견적 계산 로직 전체 개편
+  // [수정] 견적 계산 로직은 이전과 동일 (areaSelections 기반)
   const calculation = useMemo(() => {
     const selectedHousing = HOUSING_TYPES.find(h => h.id === housingType);
-    let q = {}; // 구역별 소재별 개수를 담을 임시 객체
+    let q = {};
     let total = 0;
     let labelText = null;
     let isPackageActive = false; 
@@ -389,8 +387,6 @@ export default function GroutEstimatorApp() {
     const qBathWallEpoxyOne = (qEpoxy.masterWall >= 1 || qEpoxy.commonWall >= 1);
     
     // --- 2. 패키지 로직 (할인 적용 시작) ---
-    // [핵심 변경] 폴리 및 에폭시 패키지를 개별적으로 확인하고 적용 (가장 큰 혜택 우선 적용)
-
     // A. Premium (Epoxy) 패키지
     if (epoxyWallTotal >= 2 && qEpoxy.bathFloor >= 2) { 
         total += 1300000; 
@@ -454,7 +450,7 @@ export default function GroutEstimatorApp() {
                 case 'bathtub_wall': return qPoly.bathtub;
                 case 'master_bath_wall': return qPoly.masterWall;
                 case 'common_bath_wall': return qPoly.commonWall;
-                default: return selection.count; // 그 외 구역은 패키지 로직에서 제외
+                default: return selection.count; 
             }
         } else if (selection.material === 'kerapoxy') {
             switch(areaId) {
@@ -479,7 +475,6 @@ export default function GroutEstimatorApp() {
 
         if (initialCount > 0) {
             
-            // [FREE SERVICE] 패키지 적용 시 특정 실리콘 서비스는 FREE (잔여 수량 계산과는 무관)
             if (isPackageActive && FREE_SILICON_AREAS.includes(area.id)) {
                 return; 
             }
@@ -487,12 +482,10 @@ export default function GroutEstimatorApp() {
             let countToPrice = remainingCount;
             let price = getBasePrice(area.id, materialId) * countToPrice * selectedHousing.multiplier;
             
-            // [FREE SERVICE] 현관 무료 혜택 확인
             if (area.id === 'entrance' && isFreeEntrance && initialCount === 1) { 
                 return; 
             }
             
-            // [추가 할인 로직] 패키지 적용 시 기타 구역 추가 할인
             if (isPackageActive) {
                 if (area.id === 'living_room' && materialId === 'poly') price -= 50000 * countToPrice;
                 else if (area.id === 'living_room' && materialId === 'kerapoxy') price -= 150000 * countToPrice; 
@@ -544,7 +537,7 @@ export default function GroutEstimatorApp() {
         priceAfterPackageDiscount: priceAfterPackageDiscount,
         totalReviewDiscount: discountAmount,
         FREE_SILICON_AREAS: FREE_SILICON_AREAS,
-        finalSelectionsList, // 모달에 사용될 최종 목록
+        finalSelectionsList, 
     };
   }, [housingType, areaSelections, selectedReviews]);
 
@@ -643,8 +636,6 @@ export default function GroutEstimatorApp() {
           </div>
         </section>
 
-        {/* [삭제됨] STEP 2: 재료 선택 섹션이 제거되고 STEP 3에 통합됨 */}
-        
         {/* STEP 2: 소재 정보 가이드 (순서 변경) */}
         <section className="animate-enter" style={{ animationDelay: '0.2s' }}>
              <div className="flex items-center justify-between mb-4">
@@ -662,8 +653,6 @@ export default function GroutEstimatorApp() {
                 
                 <div className={`overflow-hidden transition-all duration-500 ease-in-out ${showMaterialGuide ? 'max-h-96 opacity-100 pt-4' : 'max-h-0 opacity-0'}`}>
                     <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
-                        {/* Material Guide Data를 직접 하드코딩하지 않고 필요시 여기에 정의하거나, 원래 데이터를 복구 */}
-                        {/* 현재 로직 상 MATERIAL_GUIDE 데이터가 위에 정의되어 있지 않아 임시로 비워둡니다. */}
                          <p className="text-sm text-slate-500">소재별 장단점 가이드는 데이터 정의가 필요합니다. 현재는 UI만 유지합니다.</p>
                     </div>
                 </div>
@@ -686,6 +675,7 @@ export default function GroutEstimatorApp() {
                     const selection = areaSelections[area.id];
                     const material = MATERIAL_MAP[selection.material];
                     const isActive = selection.count > 0;
+                    // [수정] basePrice는 선택된 material 기준으로 가져오되, UI에서는 (소재명) 문구 삭제
                     const basePrice = getBasePrice(area.id, selection.material);
 
                     return (
@@ -697,7 +687,8 @@ export default function GroutEstimatorApp() {
                                     </div>
                                     <div>
                                         <div className="font-bold text-slate-900 text-lg">{area.label}</div>
-                                        <div className={`text-sm font-medium ${isActive ? 'text-blue-700' : 'text-slate-500'}`}>{basePrice.toLocaleString()}원~ ({material.label})</div>
+                                        {/* [수정] 가격 옆 (소재명) 문구 삭제 */}
+                                        <div className={`text-sm font-medium ${isActive ? 'text-blue-700' : 'text-slate-500'}`}>{basePrice.toLocaleString()}원~</div>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-1 bg-white rounded-md border border-slate-200 p-1 shrink-0">
@@ -709,20 +700,20 @@ export default function GroutEstimatorApp() {
                                 </div>
                             </div>
                             
-                            {/* [추가] 소재 선택 토글 */}
+                            {/* [수정] 소재 선택 버튼 로직 및 문구 수정 */}
                             {isActive && (
                                 <div className='flex justify-end gap-2 mt-2 pt-2 border-t border-slate-100'>
                                     <button
-                                        onClick={() => handleMaterialToggle(area.id)}
+                                        onClick={() => handleMaterialSelect(area.id, 'poly')}
                                         className={`px-3 py-1 rounded-full text-xs font-bold transition-colors border ${selection.material === 'poly' ? 'bg-[#1e3a8a] text-white border-[#1e3a8a]' : 'bg-white text-slate-500 border-slate-300 hover:bg-slate-50'}`}
                                     >
-                                        폴리 (Standard)
+                                        폴리
                                     </button>
                                     <button
-                                        onClick={() => handleMaterialToggle(area.id)}
+                                        onClick={() => handleMaterialSelect(area.id, 'kerapoxy')}
                                         className={`px-3 py-1 rounded-full text-xs font-bold transition-colors border ${selection.material === 'kerapoxy' ? 'bg-[#1e3a8a] text-white border-[#1e3a8a]' : 'bg-white text-slate-500 border-slate-300 hover:bg-slate-50'}`}
                                     >
-                                        에폭시 (Premium)
+                                        에폭시
                                     </button>
                                 </div>
                             )}
@@ -739,6 +730,7 @@ export default function GroutEstimatorApp() {
                     const selection = areaSelections[area.id];
                     const material = MATERIAL_MAP[selection.material];
                     const isActive = selection.count > 0;
+                    // [수정] basePrice는 선택된 material 기준으로 가져오되, UI에서는 (소재명) 문구 삭제
                     const basePrice = getBasePrice(area.id, selection.material);
 
                     return (
@@ -750,7 +742,8 @@ export default function GroutEstimatorApp() {
                                     </div>
                                     <div>
                                         <div className="font-bold text-slate-900 text-lg">{area.label}</div>
-                                        <div className={`text-sm font-medium ${isActive ? 'text-orange-700' : 'text-slate-500'}`}>{basePrice.toLocaleString()}원~ ({material.label})</div>
+                                        {/* [수정] 가격 옆 (소재명) 문구 삭제 */}
+                                        <div className={`text-sm font-medium ${isActive ? 'text-orange-700' : 'text-slate-500'}`}>{basePrice.toLocaleString()}원~</div>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-1 bg-white rounded-md border border-slate-200 p-1 shrink-0">
@@ -762,20 +755,20 @@ export default function GroutEstimatorApp() {
                                 </div>
                             </div>
                             
-                            {/* [추가] 소재 선택 토글 */}
+                            {/* [수정] 소재 선택 버튼 로직 및 문구 수정 (오렌지 색상 유지) */}
                             {isActive && (
                                 <div className='flex justify-end gap-2 mt-2 pt-2 border-t border-slate-100'>
                                     <button
-                                        onClick={() => handleMaterialToggle(area.id)}
+                                        onClick={() => handleMaterialSelect(area.id, 'poly')}
                                         className={`px-3 py-1 rounded-full text-xs font-bold transition-colors border ${selection.material === 'poly' ? 'bg-orange-600 text-white border-orange-600' : 'bg-white text-slate-500 border-slate-300 hover:bg-slate-50'}`}
                                     >
-                                        폴리 (Standard)
+                                        폴리
                                     </button>
                                     <button
-                                        onClick={() => handleMaterialToggle(area.id)}
+                                        onClick={() => handleMaterialSelect(area.id, 'kerapoxy')}
                                         className={`px-3 py-1 rounded-full text-xs font-bold transition-colors border ${selection.material === 'kerapoxy' ? 'bg-orange-600 text-white border-orange-600' : 'bg-white text-slate-500 border-slate-300 hover:bg-slate-50'}`}
                                     >
-                                        에폭시 (Premium)
+                                        에폭시
                                     </button>
                                 </div>
                             )}
@@ -786,7 +779,7 @@ export default function GroutEstimatorApp() {
           </div>
         </section>
 
-        {/* STEP 4: 할인 혜택 (순서 변경) */}
+        {/* STEP 4: 할인 혜택 */}
         <section className="animate-enter" style={{ animationDelay: '0.4s' }}>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-[#1e3a8a]">프로모션</h2>
@@ -816,7 +809,7 @@ export default function GroutEstimatorApp() {
           </div>
         </section>
 
-        {/* STEP 5: FAQ (순서 변경) */}
+        {/* STEP 5: FAQ */}
         <section className="pb-8">
              <h2 className="text-xl font-bold text-[#1e3a8a] mb-5">자주 묻는 질문</h2>
              <div className="bg-white rounded-xl border border-slate-200 px-4">
@@ -918,7 +911,6 @@ export default function GroutEstimatorApp() {
                         </div>
                         <div className="p-2 rounded-lg bg-slate-50 border border-slate-200">
                             <div className="text-sm text-slate-500 font-bold mb-1">총 선택 소재</div>
-                            {/* [수정] 모달 상단에 총 소재 대신 "복합 선택" 표시 */}
                             <div className="font-bold text-slate-900 flex items-center gap-1 text-lg">복합 선택 적용</div>
                         </div>
                     </div>
