@@ -421,7 +421,7 @@ export default function GroutEstimatorApp() {
         } else if (qBathFloor >= 1 && qBathWallOne && qBathFloor === 1 && qBathWallTotal === 1) {
             total += 500000; q['bathroom_floor'] -= 1; qMasterWall >= 1 ? q['master_bath_wall'] -= 1 : q['common_bath_wall'] -= 1; isPackageActive = true; labelText = '50만원 패키지';
         } else if (qBathFloor >= 2 && qBathWallTotal >= 2) { 
-            total += 700000; q['bathroom_floor'] -= 2; q['master_bath_wall'] = Math.max(0, q['master_bath_wall'] - 1); q['common_bath_wall'] = Math.max(0, q['common_bath_wall'] - 1); isPackageActive = true; isFreeEntrance = true; labelText = '풀패키지 할인'; 
+            total += 700000; q['bathroom_floor'] -= 2; q['entrance'] -= 1; q['master_bath_wall'] = Math.max(0, q['master_bath_wall'] - 1); q['common_bath_wall'] = Math.max(0, q['common_bath_wall'] - 1); isPackageActive = true; isFreeEntrance = true; labelText = '풀패키지 할인'; 
         }
         else if (qBathFloor >= 2 && (qShower >= 1 || qBathtub >= 1)) { 
             total += 380000; q['bathroom_floor'] -= 2; qShower >= 1 ? q['shower_booth'] -= 1 : q['bathtub_wall'] -= 1; isPackageActive = true; isFreeEntrance = true; labelText = '실속 패키지'; 
@@ -447,7 +447,7 @@ export default function GroutEstimatorApp() {
             total += 750000; q['bathroom_floor'] -= 1; qMasterWall >= 1 ? q['master_bath_wall'] -= 1 : q['common_bath_wall'] -= 1; isPackageActive = true; labelText = '에폭시 75만원 패키지';
         } 
         else if (qBathFloor >= 2 && qBathWallTotal >= 2) { 
-            total += 1300000; q['bathroom_floor'] -= 2; q['master_bath_wall'] = Math.max(0, q['master_bath_wall'] - 1); q['common_bath_wall'] = Math.max(0, q['common_bath_wall'] - 1); isPackageActive = true; isFreeEntrance = true; labelText = 'Premium 풀패키지'; 
+            total += 1300000; q['bathroom_floor'] -= 2; q['entrance'] -= 1; q['master_bath_wall'] = Math.max(0, q['master_bath_wall'] - 1); q['common_bath_wall'] = Math.max(0, q['common_bath_wall'] - 1); isPackageActive = true; isFreeEntrance = true; labelText = 'Premium 풀패키지'; 
         }
         else if (qBathFloor >= 2 && qShower >= 1 && qBathtub >= 1) { 
             total += 950000; q['bathroom_floor'] -= 2; q['shower_booth'] -= 1; q['bathtub_wall'] -= 1; isPackageActive = true; isFreeEntrance = true; labelText = 'Premium 패키지 A'; 
@@ -1098,7 +1098,7 @@ export default function GroutEstimatorApp() {
                         <div className="bg-slate-100 p-4 rounded-lg border border-slate-200 text-slate-700">
                             <h4 className="font-bold flex items-center gap-2 mb-1 text-red-600"><Icon name="info" size={16}/> 시공 시 유의사항</h4>
                             <ul className="list-disc list-inside text-xs space-y-1 pl-1">
-                                <li>타일 크기 기준: 바닥 30x30cm, 벽면 30x60cm 크기 기준입니다.</li>
+                                <li>타일 기준: 바닥 30x30cm, 벽면 30x60cm 크기 기준입니다.</li>
                                 <li>조각 타일 시공은 불가하며, 크기가 작을 경우 추가 비용이 발생합니다.</li>
                                 <li>재시공(셀프포함)의 경우 1.5~2배의 추가비용이 발생합니다.</li>
                             </ul>
