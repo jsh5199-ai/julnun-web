@@ -364,8 +364,7 @@ export default function GroutEstimatorApp() {
   
   const calculation = useMemo(() => {
     const selectedHousing = HOUSING_TYPES.find(h => h.id === housingType);
-    // [WARNING]: 패키지 로직은 primaryMatId를 사용하도록 수정됨
-    const selectedMaterial = MATERIALS.find(m => m.id === material); 
+    const selectedMaterial = MATERIALS.find(m => m.id === material);
     let q = { ...quantities };
     let total = 0; // Price after itemization/packages, before review discount
     let labelText = null;
@@ -402,7 +401,7 @@ export default function GroutEstimatorApp() {
     const qEntrance = q['entrance'] || 0;
     const qBathWallOne = (qMasterWall >= 1 || qCommonWall >= 1);
     const qBathWallTotal = qMasterWall + qCommonWall;
-    
+
     // [NEW LOGIC] 패키지 결정 기준 (욕실 바닥 소재)
     const packageMaterialId = areaMaterials['bathroom_floor'] || material;
 
@@ -447,6 +446,16 @@ export default function GroutEstimatorApp() {
         else if (qBathFloor >= 2 && (qShower >= 1 || qBathtub >= 1)) { 
             total += 750000; q['bathroom_floor'] -= 2; qShower >= 1 ? q['shower_booth'] -= 1 : q['bathtub_wall'] -= 1; isPackageActive = true; isFreeEntrance = true; labelText = 'Premium 패키지 B'; 
         }
+    } else { 
+      if (qBathFloor >= 1 && qBathWallOne && qBathFloor === 1 && qBathWallTotal === 1) {
+          total += 500000; q['bathroom_floor'] -= 1; qMasterWall >= 1 ? q['master_bath_wall'] -= 1 : q['common_bath_wall'] -= 1; isPackageActive = true; labelText = '50만원 패키지';
+      } else if (qBathFloor >= 2 && qBathWallTotal >= 2) { 
+          total += 700000; q['bathroom_floor'] -= 2; q['master_bath_wall'] = Math.max(0, q['master_bath_wall'] - 1); q['common_bath_wall'] = Math.max(0, q['common_bath_wall'] - 1); isPackageActive = true; isFreeEntrance = true; labelText = '풀패키지 할인'; 
+      }
+      else if (qBathFloor >= 2 && (qShower >= 1 || qBathtub >= 1)) { 
+          total += 380000; q['bathroom_floor'] -= 2; qShower >= 1 ? q['shower_booth'] -= 1 : q['bathtub_wall'] -= 1; isPackageActive = true; isFreeEntrance = true; labelText = '실속 패키지'; 
+      }
+      else if (qBathFloor >= 2 && qEntrance >= 1) { isPackageActive = true; isFreeEntrance = true; labelText = '현관 무료 혜택'; }
     }
 
     // --- 3. 잔여 개별 항목 계산 (FREE 서비스 제외 및 5만원 할인 적용) ---
@@ -469,6 +478,12 @@ export default function GroutEstimatorApp() {
             if (matDetails.materialId === 'poly' && !EPOXY_OVERRIDE_PRICES[area.id]) {
                 price *= matDetails.priceMod;
             }
+
+            // [NEW LOGIC 1]: 에폭시 현관 시공 시 50,000원 추가 (서비스 가격 외 추가금)
+            if (area.id === 'entrance' && isPackageActive && matDetails.materialId === 'kerapoxy') {
+                total += 50000 * count; // 5만원 추가 (기존 FREE 로직이 price += price를 막았으므로, 여기에 순수 5만원 추가)
+            }
+
 
             // [추가 할인 로직 유지: 5만원 할인 적용]
             if (isPackageActive) {
@@ -513,6 +528,10 @@ export default function GroutEstimatorApp() {
         total -= discountAmount;
     }
 
+    // 최종적으로 모달에서 surcharge 상태를 표시하기 위한 플래그
+    const isEpoxyEntranceSurcharged = isPackageActive && quantities['entrance'] > 0 && areaMaterials['entrance'] === 'kerapoxy';
+
+
     return { 
         price: Math.max(0, Math.floor(total / 1000) * 1000), 
         label: labelText, 
@@ -524,6 +543,7 @@ export default function GroutEstimatorApp() {
         priceAfterPackageDiscount: priceAfterPackageDiscount,
         totalReviewDiscount: discountAmount,
         FREE_SILICON_AREAS: FREE_SILICON_AREAS,
+        isEpoxyEntranceSurcharged: isEpoxyEntranceSurcharged,
     };
   }, [housingType, material, quantities, selectedReviews, areaMaterials]); 
 
@@ -719,7 +739,40 @@ export default function GroutEstimatorApp() {
                 <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2"><Icon name="layout" size={16}/> 줄눈 시공 범위</h3>
             </div>
             <div className="p-2">
-                {SERVICE_AREAS.map((area) => (
+                {SERVICE_AREAS.map((area) => {
+                    const currentMatId = areaMaterials[area.id] || material;
+                    const areaBasePrice = getBasePrice(area.id, currentMatId);
+                    let displayPrice = areaBasePrice;
+
+                    // [NEW LOGIC FOR UI DISPLAY] 패키지 할인을 반영한 가격으로 즉시 업데이트
+                    if (quantities[area.id] > 0 && calculation.isPackageActive) {
+                        
+                        let discountPerUnit = 0;
+                        const isEpoxy = currentMatId === 'kerapoxy';
+
+                        // 1. 거실 바닥 할인
+                        if (area.id === 'living_room') {
+                            discountPerUnit = isEpoxy ? 150000 : 50000;
+                        } 
+                        // 2. 잔여 항목 5만원 할인
+                        else if (area.id !== 'entrance' && area.id !== 'bathroom_floor') {
+                            discountPerUnit = 50000;
+                        }
+                        
+                        // 3. 에폭시 현관 서비스 추가금 적용 (할인된 가격에 5만원 추가된 가격을 표시해야 함)
+                        if (area.id === 'entrance' && isEpoxy && calculation.isFreeEntrance) {
+                            // 현관은 기본 10만원 (Base Price). 서비스(무료) 상태에서 5만원 추가되므로 최종 표시 가격은 5만원.
+                            // 즉, Base Price (100k) - 50k (implicit discount) + 50k (Epoxy Surcharge) = 100k
+                            // 여기서는 할인 전 가격을 표시하는 것이므로, 100k (Base)를 표시하거나, 아니면 50k만 추가된 금액을 표시해야함
+                            // 최종 견적가가 60만 패키지 내에서는 60만원 + 5만원이므로, 5만원 추가된 가격을 표시하는 것이 합리적임
+                             displayPrice = getBasePrice(area.id, 'kerapoxy'); 
+                        } else {
+                            // 일반 항목/할인 적용
+                            displayPrice = Math.max(0, areaBasePrice - discountPerUnit);
+                        }
+                    }
+
+                    return (
                     <div key={area.id} className={`flex flex-col p-4 rounded-lg transition-colors ${quantities[area.id] > 0 ? 'bg-blue-50/50' : 'hover:bg-slate-50'}`}>
                         {/* ROW 1: 라벨, 가격, 수량 */}
                         <div className="flex items-center justify-between w-full">
@@ -730,7 +783,7 @@ export default function GroutEstimatorApp() {
                                 <div className='min-w-0'>
                                     <div className="font-bold text-slate-900 text-lg">{area.label}</div>
                                     <div className="text-sm text-slate-500 font-medium">
-                                        {getBasePrice(area.id, areaMaterials[area.id] || material).toLocaleString()}원~
+                                        {displayPrice.toLocaleString()}원~
                                     </div>
                                 </div>
                             </div>
@@ -773,7 +826,7 @@ export default function GroutEstimatorApp() {
                              </button>
                         </div>
                     </div>
-                ))}
+                );})}
             </div>
 
             <div className="p-4 bg-slate-50 border-b border-slate-200 border-t">
