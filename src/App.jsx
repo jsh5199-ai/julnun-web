@@ -2,7 +2,7 @@ import React, { useState, useMemo, useRef } from 'react';
 import html2canvas from 'html2canvas';
 
 // =================================================================
-// [0] 아이콘 시스템 (오류 방지용 자체 SVG)
+// [0] 아이콘 시스템
 // =================================================================
 const Icon = ({ name, size = 24, className = "" }) => {
   const icons = {
@@ -191,7 +191,7 @@ const MATERIALS = [
   },
   { 
     id: 'kerapoxy', label: 'Premium', subLabel: '에폭시', priceMod: 1.8, 
-    description: '매트한 질감과 반영구적 내구성, 호텔급 마감',
+    description: '매트한 질감과 반영구적 내구성',
     tags: ['반영구', '무광매트'],
     badgeColor: 'bg-blue-50 text-blue-700'
   },
@@ -529,7 +529,7 @@ export default function GroutEstimatorApp() {
 
     // 최종적으로 모달에서 surcharge 상태를 표시하기 위한 플래그
     const isEpoxyEntranceSurcharged = isPackageActive && quantities['entrance'] > 0 && areaMaterials['entrance'] === 'kerapoxy';
-    const epoxyEntranceSurchargeAmount = isEpoxyEntranceSurcharged ? 70000 * quantities['entrance'] : 0; // [FIXED] 7만원 * 개소
+    const epoxyEntranceSurchargeAmount = isEpoxyEntranceSurcharged ? 70000 * quantities['entrance'] : 0; 
 
     return { 
         price: Math.max(0, Math.floor(total / 1000) * 1000), 
@@ -761,7 +761,6 @@ export default function GroutEstimatorApp() {
                         } 
                         // 3. 잔여 항목 5만원 할인 (주방벽면 포함)
                         else if (area.id !== 'entrance' && area.id !== 'bathroom_floor') {
-                             // Note: Kitchen Wall is 250k fixed (override) but still gets the 50k discount in the total calculation logic.
                             discountPerUnit = 50000;
                         }
                         
@@ -785,7 +784,7 @@ export default function GroutEstimatorApp() {
                                 <div className='min-w-0'>
                                     <div className="font-bold text-slate-900 text-lg">{area.label}</div>
                                     <div className="text-sm text-slate-500 font-medium">
-                                        {Math.round(getBasePrice(area.id, currentMatId)).toLocaleString()}원~ {/* [FIX] ONLY show raw base price to reflect 250k/150k fixed price */}
+                                        {Math.round(displayPrice).toLocaleString()}원~
                                     </div>
                                 </div>
                             </div>
@@ -1088,7 +1087,7 @@ export default function GroutEstimatorApp() {
                         
                         {calculation.isPackageActive && !calculation.isMinCost && (
                             <div className="bg-blue-50 p-4 rounded-lg space-y-2 text-sm border border-blue-100">
-                                <h4 className="text-[#1e3a8a] font-bold flex items-center gap-2"><Icon name="gift" size={16}/> 패키지 서비스 (FREE)</h4>
+                                <h4 className="font-bold flex items-center gap-2"><Icon name="gift" size={16}/> 패키지 서비스 (FREE)</h4>
                                 <ul className="list-disc list-inside text-slate-700 space-y-1 pl-1">
                                     <li>현관 바닥 시공 (폴리아스파틱)</li>
                                     <li>변기 테두리, 욕실 바닥 테두리</li>
