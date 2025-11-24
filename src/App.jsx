@@ -115,7 +115,7 @@ const Icon = ({ name, size = 24, className = "" }) => {
     <svg 
       xmlns="http://www.w3.org/2000/svg" 
       width={size} 
-      height={size} 
+      height={height} 
       viewBox="0 0 24 24" 
       fill="none" 
       stroke="currentColor" 
@@ -731,6 +731,7 @@ export default function GroutEstimatorApp() {
                                 </div>
                             </div>
                             
+                            {/* [핵심 수정 부분] 수량 조절 버튼 */}
                             <div className="flex items-center gap-1 bg-white rounded-md border border-slate-200 p-1 flex-shrink-0">
                                 <button onClick={() => handleQuantityChange(area.id, -1)} 
                                     className={`w-9 h-9 rounded-md flex items-center justify-center transition-all ${quantities[area.id] > 0 ? 'text-[#1e3a8a] hover:bg-blue-50' : 'text-slate-300'}`}><Icon name="x" size={14} className="rotate-45" /></button>
