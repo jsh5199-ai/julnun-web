@@ -115,7 +115,7 @@ const Icon = ({ name, size = 24, className = "" }) => {
     <svg 
       xmlns="http://www.w3.org/2000/svg" 
       width={size} 
-      height={height} 
+      height={size} 
       viewBox="0 0 24 24" 
       fill="none" 
       stroke="currentColor" 
@@ -386,7 +386,7 @@ export default function GroutEstimatorApp() {
             
             // 폴리아스파틱 (poly) 선택 시에만 priceMod (1.0)을 곱하고, 에폭시는 getBasePrice에서 이미 가격이 설정됨
             if (matDetails.materialId === 'poly' && !EPOXY_OVERRIDE_PRICES[area.id]) {
-                price *= matDetails.priceMod;
+                price *= selectedMaterial.priceMod;
             }
             
             originalTotal += price;
