@@ -238,8 +238,8 @@ const getBasePrice = (id, material) => {
 };
 
 const SERVICE_AREAS = [
-  { id: 'entrance', label: '현관', basePrice: 100000, icon: 'door', unit: '개소' }, // 100000
-  { id: 'bathroom_floor', label: '욕실 바닥', basePrice: 150000, icon: 'bath', unit: '개소' }, // 150000
+  { id: 'entrance', label: '현관', basePrice: 100000, icon: 'door', unit: '개소' }, 
+  { id: 'bathroom_floor', label: '욕실 바닥', basePrice: 150000, icon: 'bath', unit: '개소' }, 
   { id: 'shower_booth', label: '샤워부스 벽', basePrice: 150000, icon: 'bath', unit: '구역' },
   { id: 'bathtub_wall', label: '욕조 벽', basePrice: 150000, icon: 'bath', unit: '구역' },
   { id: 'master_bath_wall', label: '안방욕실 벽 전체', basePrice: 300000, icon: 'bath', unit: '구역' },
@@ -294,10 +294,15 @@ const Accordion = ({ question, answer }) => {
 // =================================================================
 export default function GroutEstimatorApp() {
   const [housingType, setHousingType] = useState('new');
-  const [material, setMaterial] = useState('poly');
+  const [material, setMaterial] = useState('poly'); // Global material (Fallback/Default)
   const [polyOption, setPolyOption] = useState('pearl');
   const [epoxyOption, setEpoxyOption] = useState('kerapoxy');
   
+  // [NEW STATE] areaMaterials: 영역별 소재를 저장하는 새로운 상태
+  const [areaMaterials, setAreaMaterials] = useState(
+    [...SERVICE_AREAS, ...SILICON_AREAS].reduce((acc, area) => ({ ...acc, [area.id]: 'poly' }), {})
+  );
+
   const [quantities, setQuantities] = useState(
     [...SERVICE_AREAS, ...SILICON_AREAS].reduce((acc, area) => ({ ...acc, [area.id]: 0 }), {})
   );
@@ -312,6 +317,17 @@ export default function GroutEstimatorApp() {
   // [NEW REF] 견적서 캡처용 Ref
   const quoteRef = useRef(null);
 
+  // [NEW HELPER] 특정 영역의 실제 소재 ID와 가격 계수를 반환
+  const getAreaMaterialDetails = (areaId) => {
+      const matId = areaMaterials[areaId] || material; // 영역별 선택 or 글로벌 폴백
+      const matDetails = MATERIALS.find(m => m.id === matId);
+      return { 
+          materialId: matId,
+          priceMod: matDetails ? matDetails.priceMod : 1.0,
+      };
+  };
+
+
   // --- 비즈니스 로직 ---
   const handleQuantityChange = (id, delta) => {
     setQuantities(prev => {
@@ -324,6 +340,11 @@ export default function GroutEstimatorApp() {
       return nextState;
     });
     setPackageToastDismissed(false);
+  };
+  
+  // [NEW HANDLER] 영역별 소재 변경 핸들러
+  const handleMaterialChange = (areaId, newMaterialId) => {
+    setAreaMaterials(prev => ({ ...prev, [areaId]: newMaterialId }));
   };
 
   const toggleReview = (id) => {
@@ -354,11 +375,12 @@ export default function GroutEstimatorApp() {
     allAreasCombined.forEach(area => {
         const count = quantities[area.id] || 0;
         if (count > 0) {
-            let price = getBasePrice(area.id, material) * count * selectedHousing.multiplier;
+            const matDetails = getAreaMaterialDetails(area.id); // 영역별 소재 정보 가져오기
+            let price = getBasePrice(area.id, matDetails.materialId) * count * selectedHousing.multiplier;
             
             // 폴리아스파틱 (poly) 선택 시에만 priceMod (1.0)을 곱하고, 에폭시는 getBasePrice에서 이미 가격이 설정됨
-            if (material === 'poly' && !EPOXY_OVERRIDE_PRICES[area.id]) {
-                price *= selectedMaterial.priceMod;
+            if (matDetails.materialId === 'poly' && !EPOXY_OVERRIDE_PRICES[area.id]) {
+                price *= matDetails.priceMod;
             }
             
             originalTotal += price;
@@ -378,9 +400,8 @@ export default function GroutEstimatorApp() {
     if (selectedMaterial.id === 'poly' && qBathFloor >= 2 && qEntrance >= 1 && qBathWallTotal === 0 && qShower === 0 && qBathtub === 0) {
         total += 300000; q['bathroom_floor'] -= 2; q['entrance'] -= 1; isPackageActive = true; labelText = '30만원 패키지';
     } else if (selectedMaterial.id === 'kerapoxy') {
-        // 에폭시 60만원 패키지 (욕실 바닥 2곳, 현관 바닥 1곳)
+        // 에폭시 패키지 로직 (가장 복합한 로직)
         if (qBathFloor >= 2 && qEntrance >= 1) {
-            // New complex logic (from most comprehensive to least)
             if (qBathWallTotal >= 2) {
                 total += 1400000; q['bathroom_floor'] -= 2; q['entrance'] -= 1; q['master_bath_wall'] = Math.max(0, q['master_bath_wall'] - 1); q['common_bath_wall'] = Math.max(0, q['common_bath_wall'] - 1); isPackageActive = true; isFreeEntrance = true; labelText = '욕실벽전체 2곳 패키지';
             } else if (qBathWallTotal >= 1) {
@@ -422,31 +443,34 @@ export default function GroutEstimatorApp() {
         const count = q[area.id] || 0;
         if (count > 0) {
             
+            const matDetails = getAreaMaterialDetails(area.id); // 영역별 소재 정보
+            
             // FREE_SILICON_AREAS는 가격 합산에서 제외
             if (isPackageActive && FREE_SILICON_AREAS.includes(area.id)) {
                 return; 
             }
             
-            let price = getBasePrice(area.id, material) * count * selectedHousing.multiplier;
+            let price = getBasePrice(area.id, matDetails.materialId) * count * selectedHousing.multiplier;
             
             if (area.id === 'entrance' && isFreeEntrance) return;
             
             // 폴리아스파틱 (poly) 선택 시에만 priceMod 적용 (에폭시는 getBasePrice에서 이미 가격 설정됨)
-            if (material === 'poly' && !EPOXY_OVERRIDE_PRICES[area.id]) {
-                price *= selectedMaterial.priceMod;
+            if (matDetails.materialId === 'poly' && !EPOXY_OVERRIDE_PRICES[area.id]) {
+                price *= matDetails.priceMod;
             }
 
-            // [추가 할인 로직 유지]
+            // [추가 할인 로직 유지: 5만원 할인 적용]
             if (isPackageActive) {
                 let discountPerUnit = 0;
                 
                 if (area.id === 'living_room') {
-                    discountPerUnit = (selectedMaterial.id === 'poly' ? 50000 : 150000);
+                    discountPerUnit = (matDetails.materialId === 'poly' ? 50000 : 150000); // 50k or 150k 할인
                 } else if (area.id === 'silicon_bathtub') {
-                    discountPerUnit = 30000; 
+                    discountPerUnit = 30000; // 8만 -> 5만
                 } else if (area.id === 'silicon_living_baseboard') {
-                    discountPerUnit = 50000;
+                    discountPerUnit = 50000; // 40만 -> 35만
                 } else if (area.id !== 'entrance' && area.id !== 'bathroom_floor') {
+                    // 패키지에 명시적으로 포함되지 않은 나머지 항목들 (베란다, 주방 상판 실리콘 등)에 5만원 할인
                     discountPerUnit = 50000;
                 }
                 
@@ -490,7 +514,7 @@ export default function GroutEstimatorApp() {
         totalReviewDiscount: discountAmount,
         FREE_SILICON_AREAS: FREE_SILICON_AREAS,
     };
-  }, [housingType, material, quantities, selectedReviews]);
+  }, [housingType, material, quantities, selectedReviews, areaMaterials]); // areaMaterials 의존성 추가
 
   // --- 이미지 저장 함수 (클립보드 대체) ---
   const saveAsImage = async () => {
@@ -534,7 +558,7 @@ export default function GroutEstimatorApp() {
 
   // --- 렌더링 ---
   return (
-    <div className="min-h-screen pb-64 selection:bg-[#1e3a8a] selection:text-white bg-white"> {/* pb-64로 패딩 증가 */}
+    <div className="min-h-screen pb-64 selection:bg-[#1e3a8a] selection:text-white bg-white">
       <GlobalStyles />
 
       {/* 헤더 */}
@@ -690,14 +714,27 @@ export default function GroutEstimatorApp() {
                             <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${quantities[area.id] > 0 ? 'bg-blue-100 text-[#1e3a8a]' : 'bg-slate-100 text-slate-400'}`}>
                                 <Icon name={area.icon} size={24} />
                             </div>
-                            <div>
+                            <div className='flex-1'>
                                 <div className="font-bold text-slate-900 text-lg">{area.label}</div>
                                 <div className="text-sm text-slate-500 font-medium">
                                     {getBasePrice(area.id, material).toLocaleString()}원~
                                 </div>
                             </div>
                         </div>
+                        
+                        {/* [NEW UI] 영역별 소재 및 수량 선택 */}
                         <div className="flex items-center gap-1 bg-white rounded-md border border-slate-200 p-1">
+                             {/* 소재 선택 드롭다운 (Poly vs Epoxy) */}
+                             <select
+                                className='p-1 border border-slate-300 rounded-md text-xs bg-white text-slate-800 mr-2'
+                                value={areaMaterials[area.id] || material}
+                                onChange={(e) => handleMaterialChange(area.id, e.target.value)}
+                                disabled={quantities[area.id] === 0}
+                             >
+                                <option value="poly">폴리</option>
+                                <option value="kerapoxy">에폭시</option>
+                             </select>
+                             
                              <button onClick={() => handleQuantityChange(area.id, -1)} 
                                 className={`w-9 h-9 rounded-md flex items-center justify-center transition-all ${quantities[area.id] > 0 ? 'text-[#1e3a8a] hover:bg-blue-50' : 'text-slate-300'}`}><Icon name="x" size={14} className="rotate-45" /></button>
                              <span className={`w-8 text-center text-lg font-bold ${quantities[area.id] > 0 ? 'text-[#1e3a8a]' : 'text-slate-300'}`}>{quantities[area.id]}</span>
@@ -718,12 +755,24 @@ export default function GroutEstimatorApp() {
                             <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${quantities[area.id] > 0 ? 'bg-orange-100 text-orange-700' : 'bg-slate-100 text-slate-400'}`}>
                                 <Icon name={area.icon} size={24} />
                             </div>
-                            <div>
+                            <div className='flex-1'>
                                 <div className="font-bold text-slate-900 text-lg">{area.label}</div>
                                 <div className="text-sm text-slate-500 font-medium">{area.basePrice.toLocaleString()}원~</div>
                             </div>
                         </div>
+                         {/* [NEW UI] 영역별 소재 및 수량 선택 */}
                         <div className="flex items-center gap-1 bg-white rounded-md border border-slate-200 p-1">
+                             {/* 소재 선택 드롭다운 (Poly vs Epoxy) */}
+                             <select
+                                className='p-1 border border-slate-300 rounded-md text-xs bg-white text-slate-800 mr-2'
+                                value={areaMaterials[area.id] || material}
+                                onChange={(e) => handleMaterialChange(area.id, e.target.value)}
+                                disabled={quantities[area.id] === 0}
+                             >
+                                <option value="poly">폴리</option>
+                                <option value="kerapoxy">에폭시</option>
+                             </select>
+                            
                              <button onClick={() => handleQuantityChange(area.id, -1)} className={`w-9 h-9 rounded-md flex items-center justify-center transition-all ${quantities[area.id] > 0 ? 'text-orange-700 hover:bg-orange-50' : 'text-slate-300'}`}><Icon name="x" size={14} className="rotate-45" /></button>
                              <span className={`w-8 text-center text-lg font-bold ${quantities[area.id] > 0 ? 'text-orange-900' : 'text-slate-300'}`}>{quantities[area.id]}</span>
                              <button onClick={() => handleQuantityChange(area.id, 1)} className="w-9 h-9 rounded-md text-slate-700 hover:bg-slate-100 transition-all flex items-center justify-center"><Icon name="x" size={14} /></button>
@@ -868,7 +917,7 @@ export default function GroutEstimatorApp() {
                     
                     <div className="flex justify-between items-center mb-4">
                         <h3 className="font-bold text-2xl text-[#0f172a] flex items-center gap-2">
-                            <Icon name="shield" size={24} className="text-[#1e3a8a]"/> 줄눈의미학
+                            <Icon name="shield" size={24} className="text-[#1e3a8a]"/> 정식 견적서 &gt; 줄눈의미학
                         </h3>
                         <span className="text-xs text-slate-500 font-medium">발행일: {new Date().toLocaleDateString()}</span>
                     </div>
@@ -973,7 +1022,7 @@ export default function GroutEstimatorApp() {
                             <h4 className="font-bold flex items-center gap-2 mb-1 text-red-600"><Icon name="info" size={16}/> 시공 시 유의사항</h4>
                             <ul className="list-disc list-inside text-xs space-y-1 pl-1">
                                 <li>타일 크기 기준: 바닥 30x30cm, 벽면 30x60cm 크기 기준입니다.</li>
-                                <li>조각 타일 시공불가, 크기가 기준보다 작을 경우 추가비용이 발생</li>
+                                <li>조각 타일 시공은 불가하며, 크기가 작을 경우 추가 비용이 발생합니다.</li>
                                 <li>재시공(셀프포함)의 경우 1.5~2배의 추가비용이 발생합니다.</li>
                             </ul>
                         </div>
