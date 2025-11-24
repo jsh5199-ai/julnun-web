@@ -1,3 +1,8 @@
+// quoteLogic.jsx 파일의 제일 윗부분에 추가하세요!
+import React from 'react'; 
+
+// [1] 상수 데이터 ... (아래 코드는 그대로 둠)
+
 // quoteLogic.jsx
 
 // ... (상단 데이터 부분은 그대로 유지) ...
