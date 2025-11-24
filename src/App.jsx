@@ -432,7 +432,7 @@ export default function GroutEstimatorApp() {
         if (qBathFloor >= 2 && qEntrance >= 1) {
             // New complex logic (from most comprehensive to least)
             if (qBathWallTotal >= 2) {
-                total += 1100000; q['bathroom_floor'] -= 2; q['entrance'] -= 1; q['master_bath_wall'] = Math.max(0, q['master_bath_wall'] - 1); q['common_bath_wall'] = Math.max(0, q['common_bath_wall'] - 1); isPackageActive = true; isFreeEntrance = true; labelText = '욕실벽전체 2곳 패키지'; // **[FIXED PRICE] 1.1M**
+                total += 1100000; q['bathroom_floor'] -= 2; q['entrance'] -= 1; q['master_bath_wall'] = Math.max(0, q['master_bath_wall'] - 1); q['common_bath_wall'] = Math.max(0, q['common_bath_wall'] - 1); isPackageActive = true; isFreeEntrance = true; labelText = '욕실벽전체 2곳 패키지'; 
             } else if (qBathWallTotal >= 1) {
                 total += 1000000; q['bathroom_floor'] -= 2; q['entrance'] -= 1; qMasterWall >= 1 ? q['master_bath_wall'] -= 1 : q['common_bath_wall'] -= 1; isPackageActive = true; isFreeEntrance = true; labelText = '욕실벽전체 1곳 패키지';
             } else if (qShower >= 2 || qBathtub >= 2 || (qShower >= 1 && qBathtub >= 1)) {
@@ -495,8 +495,8 @@ export default function GroutEstimatorApp() {
                 
                 price -= discountPerUnit * count;
             }
-            
-            // [수정된 로직 1]: 에폭시 현관 시공 시 70,000원 추가 (서비스 가격 외 추가금) - 최종 total에 합산
+
+            // [수정된 로직 1]: 에폭시 현관 시공 시 70,000원 추가 (서비스 가격 외 추가금)
             if (area.id === 'entrance' && isPackageActive && matDetails.materialId === 'kerapoxy') {
                 total += 70000 * count; // 7만원 추가
             } else {
@@ -529,7 +529,7 @@ export default function GroutEstimatorApp() {
 
     // 최종적으로 모달에서 surcharge 상태를 표시하기 위한 플래그
     const isEpoxyEntranceSurcharged = isPackageActive && quantities['entrance'] > 0 && areaMaterials['entrance'] === 'kerapoxy';
-    const epoxyEntranceSurchargeAmount = isEpoxyEntranceSurcharged ? 70000 : 0; 
+    const epoxyEntranceSurchargeAmount = isEpoxyEntranceSurcharged ? 70000 * quantities['entrance'] : 0; // [FIXED] 7만원 * 개소
 
     return { 
         price: Math.max(0, Math.floor(total / 1000) * 1000), 
@@ -759,8 +759,9 @@ export default function GroutEstimatorApp() {
                         } else if (area.id === 'silicon_living_baseboard') {
                             discountPerUnit = 50000;
                         } 
-                        // 3. 잔여 항목 5만원 할인
+                        // 3. 잔여 항목 5만원 할인 (주방벽면 포함)
                         else if (area.id !== 'entrance' && area.id !== 'bathroom_floor') {
+                             // Note: Kitchen Wall is 250k fixed (override) but still gets the 50k discount in the total calculation logic.
                             discountPerUnit = 50000;
                         }
                         
@@ -784,7 +785,7 @@ export default function GroutEstimatorApp() {
                                 <div className='min-w-0'>
                                     <div className="font-bold text-slate-900 text-lg">{area.label}</div>
                                     <div className="text-sm text-slate-500 font-medium">
-                                        {Math.round(displayPrice).toLocaleString()}원~
+                                        {Math.round(getBasePrice(area.id, currentMatId)).toLocaleString()}원~ {/* [FIX] ONLY show raw base price to reflect 250k/150k fixed price */}
                                     </div>
                                 </div>
                             </div>
