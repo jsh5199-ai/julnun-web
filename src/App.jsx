@@ -220,7 +220,7 @@ const EPOXY_OVERRIDE_PRICES = {
     'master_bath_wall': 550000,
     'common_bath_wall': 550000,
     'balcony_laundry': 300000,
-    'kitchen_wall': 250000, 
+    'kitchen_wall': 250000, // [수정됨] 주방 벽면 에폭시 가격 25만원
     'living_room': 1100000,
     'entrance': 100000, 
 };
@@ -432,7 +432,7 @@ export default function GroutEstimatorApp() {
         if (qBathFloor >= 2 && qEntrance >= 1) {
             // New complex logic (from most comprehensive to least)
             if (qBathWallTotal >= 2) {
-                total += 1100000; q['bathroom_floor'] -= 2; q['entrance'] -= 1; q['master_bath_wall'] = Math.max(0, q['master_bath_wall'] - 1); q['common_bath_wall'] = Math.max(0, q['common_bath_wall'] - 1); isPackageActive = true; isFreeEntrance = true; labelText = '욕실벽전체 2곳 패키지';
+                total += 1100000; q['bathroom_floor'] -= 2; q['entrance'] -= 1; q['master_bath_wall'] = Math.max(0, q['master_bath_wall'] - 1); q['common_bath_wall'] = Math.max(0, q['common_bath_wall'] - 1); isPackageActive = true; isFreeEntrance = true; labelText = '욕실벽전체 2곳 패키지'; // **[FIXED PRICE] 1.1M**
             } else if (qBathWallTotal >= 1) {
                 total += 1000000; q['bathroom_floor'] -= 2; q['entrance'] -= 1; qMasterWall >= 1 ? q['master_bath_wall'] -= 1 : q['common_bath_wall'] -= 1; isPackageActive = true; isFreeEntrance = true; labelText = '욕실벽전체 1곳 패키지';
             } else if (qShower >= 2 || qBathtub >= 2 || (qShower >= 1 && qBathtub >= 1)) {
