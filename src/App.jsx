@@ -220,7 +220,7 @@ const EPOXY_OVERRIDE_PRICES = {
     'master_bath_wall': 550000,
     'common_bath_wall': 550000,
     'balcony_laundry': 300000,
-    'kitchen_wall': 250000, // [수정됨] 주방 벽면 에폭시 가격 25만원
+    'kitchen_wall': 250000, // [고정] 주방 벽면 에폭시 가격 25만원
     'living_room': 1100000,
     'entrance': 100000, 
 };
@@ -254,7 +254,7 @@ const SERVICE_AREAS = [
   { id: 'master_bath_wall', label: '안방욕실 벽 전체', basePrice: 300000, icon: 'bath', unit: '구역' },
   { id: 'common_bath_wall', label: '공용욕실 벽 전체', basePrice: 300000, icon: 'bath', unit: '구역' },
   { id: 'balcony_laundry', label: '베란다/세탁실', basePrice: 150000, icon: 'layout', unit: '개소' },
-  { id: 'kitchen_wall', label: '주방 벽면', basePrice: 150000, icon: 'utensils', unit: '구역' },
+  { id: 'kitchen_wall', label: '주방 벽면', basePrice: 150000, icon: 'utensils', unit: '구역' }, // 폴리 15만원
   { id: 'living_room', label: '거실 바닥', basePrice: 550000, icon: 'home', unit: '구역' },
 ];
 
@@ -495,13 +495,13 @@ export default function GroutEstimatorApp() {
                 
                 price -= discountPerUnit * count;
             }
-
-            // [수정된 로직 1]: 에폭시 현관 시공 시 70,000원 추가 (서비스 가격 외 추가금)
+            
+            // [수정된 로직 1]: 에폭시 현관 시공 시 70,000원 추가 (서비스 가격 외 추가금) - 최종 total에 합산
             if (area.id === 'entrance' && isPackageActive && matDetails.materialId === 'kerapoxy') {
                 total += 70000 * count; // 7만원 추가
+            } else {
+                total += price;
             }
-            
-            total += price;
         }
     });
 
