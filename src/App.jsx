@@ -1,56 +1,16 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react'; // useEffect 추가
 import html2canvas from 'html2canvas';
 import { 
     HOUSING_TYPES, MATERIALS, MATERIAL_GUIDE, SERVICE_AREAS, SILICON_AREAS, 
     REVIEW_EVENTS, FAQ_ITEMS, ICON_PATHS, getBasePrice, calculateEstimate 
 } from './quoteLogic';
 
-// [아이콘 컴포넌트]
-const Icon = ({ name, size = 24, className = "" }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      {ICON_PATHS[name] || <circle cx="12" cy="12" r="10" />}
-    </svg>
-);
+// ... (Icon, GlobalStyles, Accordion 컴포넌트는 기존과 동일하므로 생략 - 그대로 두세요) ...
+// 위쪽 Icon, GlobalStyles, Accordion 코드는 지우지 마세요!
 
-// [스타일 정의]
-const GlobalStyles = () => (
-  <style>{`
-    @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css");
-    body { font-family: "Pretendard Variable", "Pretendard", sans-serif; background-color: #FFFFFF; color: #1e3a8a; margin: 0; padding: 0; font-size: 16px; }
-    @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    .animate-enter { animation: fadeUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-    @keyframes pulse-slow { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
-    .animate-pulse-slow { animation: pulse-slow 3s infinite ease-in-out; } 
-    .no-scrollbar::-webkit-scrollbar { display: none; } .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    .shadow-card { box-shadow: 0 4px 12px rgba(30, 58, 138, 0.08); }
-    .shadow-float { box-shadow: 0 -5px 20px -5px rgba(30, 58, 138, 0.15); }
-    /* 모달 내부 스크롤 영역 스타일 */
-    .quote-canvas-container { background-color: #FFFFFF !important; padding: 24px; border-radius: 10px; }
-  `}</style>
-);
-
-// [아코디언 컴포넌트]
-const Accordion = ({ question, answer }) => {
-    const [isOpen, setIsOpen] = useState(false);
-    return (
-        <div className="border-b border-slate-100 last:border-0">
-            <button className="flex justify-between items-center w-full py-5 text-left group" onClick={() => setIsOpen(!isOpen)}>
-                <span className={`text-base transition-colors ${isOpen ? 'font-bold text-[#1e3a8a]' : 'font-medium text-slate-600 group-hover:text-[#1e3a8a]'}`}>{question}</span>
-                <Icon name="chevronDown" className={`text-slate-400 transition-transform ${isOpen ? 'rotate-180 text-[#1e3a8a]' : ''}`} size={18} />
-            </button>
-            <div className={`overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-24 opacity-100' : 'max-h-0 opacity-0'}`}>
-                <p className="text-sm text-slate-500 pb-5 leading-relaxed">{answer}</p>
-            </div>
-        </div>
-    );
-};
-
-// =================================================================
-// [메인 앱]
-// =================================================================
 export default function GroutEstimatorApp() {
   const [housingType, setHousingType] = useState('new');
-  const [material, setMaterial] = useState('poly');
+  const [material, setMaterial] = useState('poly'); // 메인 소재
   const [polyOption, setPolyOption] = useState('pearl');
   const [epoxyOption, setEpoxyOption] = useState('kerapoxy');
   
@@ -58,11 +18,31 @@ export default function GroutEstimatorApp() {
     [...SERVICE_AREAS, ...SILICON_AREAS].reduce((acc, area) => ({ ...acc, [area.id]: 0 }), {})
   );
   
+  // [NEW] 각 구역별 개별 소재 상태
+  const [itemMaterials, setItemMaterials] = useState({});
+
   const [selectedReviews, setSelectedReviews] = useState(new Set());
   const [showModal, setShowModal] = useState(false);
   const [packageToastDismissed, setPackageToastDismissed] = useState(false);
   const [showMaterialGuide, setShowMaterialGuide] = useState(false);
   const quoteRef = useRef(null);
+
+  // [NEW] 메인 소재(material)가 바뀌면, 모든 구역의 소재를 메인 소재로 초기화
+  useEffect(() => {
+      const initialMaterials = {};
+      [...SERVICE_AREAS, ...SILICON_AREAS].forEach(area => {
+          initialMaterials[area.id] = material;
+      });
+      setItemMaterials(initialMaterials);
+  }, [material]);
+
+  // [NEW] 특정 구역의 소재만 변경하는 함수
+  const handleItemMaterialChange = (id, newMaterial) => {
+      setItemMaterials(prev => ({
+          ...prev,
+          [id]: newMaterial
+      }));
+  };
 
   const handleQuantityChange = (id, delta) => {
     setQuantities(prev => {
@@ -84,11 +64,12 @@ export default function GroutEstimatorApp() {
     });
   };
   
-  // 복잡한 로직은 외부 함수(calculateEstimate)로 위임
+  // [수정] itemMaterials를 계산 로직에 전달
   const calculation = useMemo(() => {
-    return calculateEstimate(quantities, housingType, material, selectedReviews);
-  }, [housingType, material, quantities, selectedReviews]);
+    return calculateEstimate(quantities, housingType, material, selectedReviews, itemMaterials);
+  }, [housingType, material, quantities, selectedReviews, itemMaterials]);
 
+  // ... (saveAsImage, hasSelections 등 기존 함수 유지) ...
   const saveAsImage = async () => {
     if (!quoteRef.current) return alert("에러: 견적서 영역을 찾을 수 없습니다.");
     try {
@@ -116,7 +97,7 @@ export default function GroutEstimatorApp() {
   return (
     <div className="min-h-screen pb-44 selection:bg-[#1e3a8a] selection:text-white bg-white">
       <GlobalStyles />
-      {/* 헤더 */}
+      {/* ... (헤더, 상단 배너, STEP 1, STEP 2는 기존 코드 그대로 사용) ... */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-100">
         <div className="max-w-md mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -130,7 +111,11 @@ export default function GroutEstimatorApp() {
       </header>
 
       <main className="max-w-md mx-auto px-6 pt-24 space-y-10">
-        {/* 상단 홍보 배너 */}
+        {/* 상단 배너, STEP 1, STEP 2 코드는 길이상 생략하지만, 반드시 기존 코드를 그대로 두세요! */}
+        {/* ... STEP 1, STEP 2 ... */}
+        
+        {/* (편의를 위해 STEP 1, 2가 있다고 가정하고 STEP 3만 보여드립니다. 실제 파일엔 다 있어야 합니다!) */}
+        {/* ... 기존 STEP 1, 2 코드 ... */}
         <div className="animate-enter bg-slate-50 border border-slate-200 rounded-xl p-5 flex flex-col gap-2">
             <div className="flex items-center gap-2 text-[#1e3a8a] font-bold text-lg">
                 <Icon name="trophy" size={20} className="text-[#1e3a8a]" /> 숨고 리뷰/평점 1등 업체
@@ -140,7 +125,6 @@ export default function GroutEstimatorApp() {
             </div>
         </div>
 
-        {/* STEP 1: 현장 유형 */}
         <section className="animate-enter" style={{ animationDelay: '0.1s' }}>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-[#1e3a8a]">현장 유형</h2>
@@ -156,7 +140,6 @@ export default function GroutEstimatorApp() {
           </div>
         </section>
 
-        {/* STEP 2: 재료 선택 */}
         <section className="animate-enter" style={{ animationDelay: '0.2s' }}>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-[#1e3a8a]">시공 소재</h2>
@@ -214,7 +197,7 @@ export default function GroutEstimatorApp() {
           </div>
         </section>
 
-        {/* STEP 3: 공간 선택 */}
+        {/* STEP 3: 공간 선택 (여기서 개별 소재 변경 UI 추가됨) */}
         <section className="animate-enter" style={{ animationDelay: '0.3s' }}>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-[#1e3a8a]">시공 구역</h2>
@@ -226,19 +209,28 @@ export default function GroutEstimatorApp() {
             </div>
             <div className="p-2">
                 {SERVICE_AREAS.map((area) => (
-                    <div key={area.id} className={`flex items-center justify-between p-4 rounded-lg transition-colors ${quantities[area.id] > 0 ? 'bg-blue-50/50' : 'hover:bg-slate-50'}`}>
-                        <div className="flex items-center gap-4">
-                            <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${quantities[area.id] > 0 ? 'bg-blue-100 text-[#1e3a8a]' : 'bg-slate-100 text-slate-400'}`}><Icon name={area.icon} size={24} /></div>
-                            <div>
-                                <div className="font-bold text-slate-900 text-lg">{area.label}</div>
-                                <div className="text-sm text-slate-500 font-medium">{getBasePrice(area.id, material).toLocaleString()}원~</div>
+                    <div key={area.id} className={`flex flex-col p-4 rounded-lg transition-colors ${quantities[area.id] > 0 ? 'bg-blue-50/50' : 'hover:bg-slate-50'}`}>
+                        <div className="flex items-center justify-between w-full mb-2">
+                            <div className="flex items-center gap-4">
+                                <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${quantities[area.id] > 0 ? 'bg-blue-100 text-[#1e3a8a]' : 'bg-slate-100 text-slate-400'}`}><Icon name={area.icon} size={24} /></div>
+                                <div>
+                                    <div className="font-bold text-slate-900 text-lg">{area.label}</div>
+                                    <div className="text-sm text-slate-500 font-medium">{getBasePrice(area.id, itemMaterials[area.id] || material).toLocaleString()}원~</div>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-1 bg-white rounded-md border border-slate-200 p-1">
+                                 <button onClick={() => handleQuantityChange(area.id, -1)} className={`w-9 h-9 rounded-md flex items-center justify-center transition-all ${quantities[area.id] > 0 ? 'text-[#1e3a8a] hover:bg-blue-50' : 'text-slate-300'}`}><Icon name="x" size={14} className="rotate-45" /></button>
+                                 <span className={`w-8 text-center text-lg font-bold ${quantities[area.id] > 0 ? 'text-[#1e3a8a]' : 'text-slate-300'}`}>{quantities[area.id]}</span>
+                                 <button onClick={() => handleQuantityChange(area.id, 1)} className="w-9 h-9 rounded-md text-slate-700 hover:bg-slate-100 transition-all flex items-center justify-center"><Icon name="x" size={14} /></button>
                             </div>
                         </div>
-                        <div className="flex items-center gap-1 bg-white rounded-md border border-slate-200 p-1">
-                             <button onClick={() => handleQuantityChange(area.id, -1)} className={`w-9 h-9 rounded-md flex items-center justify-center transition-all ${quantities[area.id] > 0 ? 'text-[#1e3a8a] hover:bg-blue-50' : 'text-slate-300'}`}><Icon name="x" size={14} className="rotate-45" /></button>
-                             <span className={`w-8 text-center text-lg font-bold ${quantities[area.id] > 0 ? 'text-[#1e3a8a]' : 'text-slate-300'}`}>{quantities[area.id]}</span>
-                             <button onClick={() => handleQuantityChange(area.id, 1)} className="w-9 h-9 rounded-md text-slate-700 hover:bg-slate-100 transition-all flex items-center justify-center"><Icon name="x" size={14} /></button>
-                        </div>
+                        {/* [NEW] 개별 소재 변경 버튼 (수량이 1 이상일 때만 보임) */}
+                        {quantities[area.id] > 0 && (
+                            <div className="flex gap-1 pl-16 mt-1">
+                                <button onClick={() => handleItemMaterialChange(area.id, 'poly')} className={`text-xs px-2 py-1 rounded border ${itemMaterials[area.id] === 'poly' ? 'bg-slate-700 text-white border-slate-700' : 'bg-white text-slate-400 border-slate-200'}`}>폴리</button>
+                                <button onClick={() => handleItemMaterialChange(area.id, 'kerapoxy')} className={`text-xs px-2 py-1 rounded border ${itemMaterials[area.id] === 'kerapoxy' ? 'bg-[#1e3a8a] text-white border-[#1e3a8a]' : 'bg-white text-slate-400 border-slate-200'}`}>에폭시</button>
+                            </div>
+                        )}
                     </div>
                 ))}
             </div>
@@ -246,6 +238,7 @@ export default function GroutEstimatorApp() {
                 <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2"><Icon name="eraser" size={16}/> 실리콘 오염방지</h3>
             </div>
             <div className="p-2">
+                {/* 실리콘 오염방지는 소재 변경 불필요하므로 기존 코드 유지 */}
                 {SILICON_AREAS.map((area) => (
                     <div key={area.id} className={`flex items-center justify-between p-4 rounded-lg transition-colors ${quantities[area.id] > 0 ? 'bg-orange-50/50' : 'hover:bg-slate-50'}`}>
                         <div className="flex items-center gap-4">
@@ -266,7 +259,7 @@ export default function GroutEstimatorApp() {
           </div>
         </section>
 
-        {/* 할인 혜택 */}
+        {/* 할인 혜택, FAQ 등 기존 코드 유지 */}
         <section className="animate-enter" style={{ animationDelay: '0.4s' }}>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-[#1e3a8a]">프로모션</h2>
@@ -286,7 +279,6 @@ export default function GroutEstimatorApp() {
           <div className="text-center mt-4"><p className="text-sm text-rose-500 font-bold bg-rose-50 inline-block px-4 py-2 rounded-lg">※ 서비스 이용 후 꼭! 작성해주세요</p></div>
         </section>
 
-        {/* FAQ */}
         <section className="pb-8">
              <h2 className="text-xl font-bold text-[#1e3a8a] mb-5">자주 묻는 질문</h2>
              <div className="bg-white rounded-xl border border-slate-200 px-4">
@@ -295,7 +287,12 @@ export default function GroutEstimatorApp() {
         </section>
       </main>
 
-      {/* --- Floating Bottom Bar --- */}
+      {/* Floating Bar 및 Modal 코드 (기존 유지) */}
+      {/* ... (Floating Bar & Modal 코드는 이전 답변의 최신 버전 그대로 사용) ... */}
+      {/* 중요: Modal 안의 내용도 itemMaterials 정보를 반영해야 하지만, 
+          현재 calculateEstimate 함수가 이미 가격에 반영했으므로 
+          '선택 내역' 텍스트에만 소재 표시를 추가하면 됩니다. */}
+      
       <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-200 p-4 pb-8 shadow-float">
         <div className="max-w-md mx-auto relative">
             {calculation.isMinCost && (
@@ -340,7 +337,6 @@ export default function GroutEstimatorApp() {
         </div>
       </div>
 
-      {/* --- Modal (디자인 개선 적용 완료) --- */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4">
             <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setShowModal(false)} />
@@ -356,7 +352,7 @@ export default function GroutEstimatorApp() {
                             <div className="font-bold text-slate-900 flex items-center gap-1 text-base">{HOUSING_TYPES.find(h => h.id === housingType).label}</div>
                         </div>
                         <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                            <div className="text-xs text-slate-500 font-bold mb-1 uppercase tracking-wider">시공 소재</div>
+                            <div className="text-xs text-slate-500 font-bold mb-1 uppercase tracking-wider">메인 소재</div>
                             <div className="font-bold text-slate-900 flex items-center gap-1 text-base">{MATERIALS.find(m => m.id === material).label}</div>
                         </div>
                     </div>
@@ -365,18 +361,27 @@ export default function GroutEstimatorApp() {
                         <div className="space-y-2 border-t border-slate-100 pt-3">
                             {[...SERVICE_AREAS, ...SILICON_AREAS].filter(a => quantities[a.id] > 0).map(area => {
                                 const isFreeSilicon = calculation.isPackageActive && calculation.FREE_SILICON_AREAS.includes(area.id);
+                                const currentItemMaterial = itemMaterials[area.id] || material; // 개별 소재 확인
                                 return (
                                     <div key={area.id} className="flex justify-between items-center text-sm py-1">
-                                        <span className="text-slate-700 font-medium flex items-center gap-2">
-                                            <Icon name={area.icon} size={16} className="text-slate-400"/>
-                                            {area.label} <span className="text-slate-400 text-xs bg-slate-100 px-1.5 py-0.5 rounded">x{quantities[area.id]}</span>
-                                        </span>
+                                        <div className="flex flex-col">
+                                            <span className="text-slate-700 font-medium flex items-center gap-2">
+                                                <Icon name={area.icon} size={16} className="text-slate-400"/>
+                                                {area.label} <span className="text-slate-400 text-xs bg-slate-100 px-1.5 py-0.5 rounded">x{quantities[area.id]}</span>
+                                            </span>
+                                            {/* 소재가 메인과 다를 경우 표시 */}
+                                            {currentItemMaterial !== material && !isFreeSilicon && area.id !== 'entrance' && (
+                                                <span className="text-[10px] text-slate-400 pl-6">
+                                                    ({currentItemMaterial === 'poly' ? '폴리' : '에폭시'} 적용)
+                                                </span>
+                                            )}
+                                        </div>
                                         <span className="font-bold text-slate-900">
                                             {area.id === 'entrance' && calculation.isFreeEntrance 
                                                 ? <span className="text-[#1e3a8a] text-xs bg-blue-50 px-2 py-1 rounded-full">Service (Poly)</span> 
                                                 : isFreeSilicon 
                                                     ? <span className="text-[#1e3a8a] text-xs bg-blue-50 px-2 py-1 rounded-full">Service</span>
-                                                    : `${(getBasePrice(area.id, material) * quantities[area.id]).toLocaleString()}원`
+                                                    : `${(getBasePrice(area.id, currentItemMaterial) * quantities[area.id]).toLocaleString()}원`
                                             }
                                         </span>
                                     </div>
@@ -392,7 +397,6 @@ export default function GroutEstimatorApp() {
                     <div className="space-y-3 pt-5">
                         {calculation.isPackageActive && !calculation.isMinCost && (<div className="bg-blue-50 p-4 rounded-lg space-y-2 text-xs border border-blue-100"><h4 className="text-[#1e3a8a] font-bold flex items-center gap-1.5 text-sm"><Icon name="gift" size={16}/> 패키지 서비스 (FREE)</h4><ul className="list-disc list-inside text-slate-700 space-y-1 pl-1"><li>현관 바닥 시공 (폴리아스파틱)</li><li>변기 테두리 / 바닥 테두리 서비스</li>{calculation.FREE_SILICON_AREAS.includes('silicon_sink') && <li>욕실 젠다이/세면대 실리콘 오염방지</li>}</ul></div>)}
                         
-                        {/* [수정된 부분] 시공 시 유의사항 디자인 개선 */}
                         <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-slate-700">
                             <h4 className="font-bold flex items-center gap-2 mb-3 text-slate-900 text-sm">
                                 <Icon name="info" className="text-rose-500" size={18}/> 
