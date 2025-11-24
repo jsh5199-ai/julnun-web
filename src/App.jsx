@@ -364,7 +364,8 @@ export default function GroutEstimatorApp() {
   
   const calculation = useMemo(() => {
     const selectedHousing = HOUSING_TYPES.find(h => h.id === housingType);
-    const selectedMaterial = MATERIALS.find(m => m.id === material);
+    // [WARNING]: 패키지 로직은 primaryMatId를 사용하도록 수정됨
+    const selectedMaterial = MATERIALS.find(m => m.id === material); 
     let q = { ...quantities };
     let total = 0; // Price after itemization/packages, before review discount
     let labelText = null;
@@ -386,7 +387,7 @@ export default function GroutEstimatorApp() {
             
             // 폴리아스파틱 (poly) 선택 시에만 priceMod (1.0)을 곱하고, 에폭시는 getBasePrice에서 이미 가격이 설정됨
             if (matDetails.materialId === 'poly' && !EPOXY_OVERRIDE_PRICES[area.id]) {
-                price *= selectedMaterial.priceMod;
+                price *= matDetails.priceMod;
             }
             
             originalTotal += price;
@@ -401,11 +402,24 @@ export default function GroutEstimatorApp() {
     const qEntrance = q['entrance'] || 0;
     const qBathWallOne = (qMasterWall >= 1 || qCommonWall >= 1);
     const qBathWallTotal = qMasterWall + qCommonWall;
+    
+    // [NEW LOGIC] 패키지 결정 기준 (욕실 바닥 소재)
+    const packageMaterialId = areaMaterials['bathroom_floor'] || material;
 
     // --- 2. 패키지 로직 (할인 적용 시작) ---
-    if (selectedMaterial.id === 'poly' && qBathFloor >= 2 && qEntrance >= 1 && qBathWallTotal === 0 && qShower === 0 && qBathtub === 0) {
-        total += 300000; q['bathroom_floor'] -= 2; q['entrance'] -= 1; isPackageActive = true; labelText = '30만원 패키지';
-    } else if (selectedMaterial.id === 'kerapoxy') {
+    if (packageMaterialId === 'poly') {
+        if (qBathFloor >= 2 && qEntrance >= 1 && qBathWallTotal === 0 && qShower === 0 && qBathtub === 0) {
+            total += 300000; q['bathroom_floor'] -= 2; q['entrance'] -= 1; isPackageActive = true; labelText = '30만원 패키지';
+        } else if (qBathFloor >= 1 && qBathWallOne && qBathFloor === 1 && qBathWallTotal === 1) {
+            total += 500000; q['bathroom_floor'] -= 1; qMasterWall >= 1 ? q['master_bath_wall'] -= 1 : q['common_bath_wall'] -= 1; isPackageActive = true; labelText = '50만원 패키지';
+        } else if (qBathFloor >= 2 && qBathWallTotal >= 2) { 
+            total += 700000; q['bathroom_floor'] -= 2; q['master_bath_wall'] = Math.max(0, q['master_bath_wall'] - 1); q['common_bath_wall'] = Math.max(0, q['common_bath_wall'] - 1); isPackageActive = true; isFreeEntrance = true; labelText = '풀패키지 할인'; 
+        }
+        else if (qBathFloor >= 2 && (qShower >= 1 || qBathtub >= 1)) { 
+            total += 380000; q['bathroom_floor'] -= 2; qShower >= 1 ? q['shower_booth'] -= 1 : q['bathtub_wall'] -= 1; isPackageActive = true; isFreeEntrance = true; labelText = '실속 패키지'; 
+        }
+        else if (qBathFloor >= 2 && qEntrance >= 1) { isPackageActive = true; isFreeEntrance = true; labelText = '현관 무료 혜택'; }
+    } else if (packageMaterialId === 'kerapoxy') {
         // 에폭시 60만원 패키지 (욕실 바닥 2곳, 현관 바닥 1곳)
         if (qBathFloor >= 2 && qEntrance >= 1) {
             // New complex logic (from most comprehensive to least)
@@ -433,16 +447,6 @@ export default function GroutEstimatorApp() {
         else if (qBathFloor >= 2 && (qShower >= 1 || qBathtub >= 1)) { 
             total += 750000; q['bathroom_floor'] -= 2; qShower >= 1 ? q['shower_booth'] -= 1 : q['bathtub_wall'] -= 1; isPackageActive = true; isFreeEntrance = true; labelText = 'Premium 패키지 B'; 
         }
-    } else { 
-      if (qBathFloor >= 1 && qBathWallOne && qBathFloor === 1 && qBathWallTotal === 1) {
-          total += 500000; q['bathroom_floor'] -= 1; qMasterWall >= 1 ? q['master_bath_wall'] -= 1 : q['common_bath_wall'] -= 1; isPackageActive = true; labelText = '50만원 패키지';
-      } else if (qBathFloor >= 2 && qBathWallTotal >= 2) { 
-          total += 700000; q['bathroom_floor'] -= 2; q['master_bath_wall'] = Math.max(0, q['master_bath_wall'] - 1); q['common_bath_wall'] = Math.max(0, q['common_bath_wall'] - 1); isPackageActive = true; isFreeEntrance = true; labelText = '풀패키지 할인'; 
-      }
-      else if (qBathFloor >= 2 && (qShower >= 1 || qBathtub >= 1)) { 
-          total += 380000; q['bathroom_floor'] -= 2; qShower >= 1 ? q['shower_booth'] -= 1 : q['bathtub_wall'] -= 1; isPackageActive = true; isFreeEntrance = true; labelText = '실속 패키지'; 
-      }
-      else if (qBathFloor >= 2 && qEntrance >= 1) { isPackageActive = true; isFreeEntrance = true; labelText = '현관 무료 혜택'; }
     }
 
     // --- 3. 잔여 개별 항목 계산 (FREE 서비스 제외 및 5만원 할인 적용) ---
@@ -946,7 +950,7 @@ export default function GroutEstimatorApp() {
                         <div className="p-2 rounded-lg bg-slate-50 border border-slate-200">
                             <div className="text-sm text-slate-500 font-bold mb-1">시공 소재</div>
                             <div className="font-bold text-slate-900 flex items-center gap-1 text-lg">
-                                {/* [수정된 로직] 소재명 상세 표기 */}
+                                {/* 소재명 상세 표기 */}
                                 {material === 'poly' ? (
                                     '폴리아스파틱'
                                 ) : (
