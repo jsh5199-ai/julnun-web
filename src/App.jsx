@@ -385,10 +385,20 @@ export default function GroutEstimatorApp() {
       }
       else if (qBathFloor >= 2 && qEntrance >= 1) { isPackageActive = true; isFreeEntrance = true; labelText = '현관 무료 혜택'; }
     } else if (selectedMaterial.id === 'kerapoxy') {
-        // [NEW] 에폭시 패키지 로직 (가장 큰 할인부터 적용)
+        // [수정/추가된 에폭시 패키지 로직]
         
+        // [NEW - 0 순위] 욕실 바닥 2곳 + 현관 1곳 = 55만원
+        // 현관 포함 시 55만원으로 계산되도록 최우선 순위로 설정.
+        if (qBathFloor >= 2 && qEntrance >= 1 && qBathWallTotal === 0 && qShower === 0 && qBathtub === 0) { 
+            total += 550000; 
+            q['bathroom_floor'] -= 2; 
+            q['entrance'] -= 1; 
+            isPackageActive = true; 
+            isFreeEntrance = true;
+            labelText = '에폭시 바닥 현관 패키지 (55만원)'; 
+        }
         // 1. 욕실바닥 2곳, 욕실벽면 전체 2곳 140만원
-        if (qBathFloor >= 2 && qBathWallTotal >= 2) { 
+        else if (qBathFloor >= 2 && qBathWallTotal >= 2) { 
             total += 1400000; 
             q['bathroom_floor'] -= 2; 
             q['master_bath_wall'] = Math.max(0, q['master_bath_wall'] - 1); 
@@ -431,6 +441,13 @@ export default function GroutEstimatorApp() {
             qShower >= 1 ? q['shower_booth'] -= 1 : q['bathtub_wall'] -= 1; 
             isPackageActive = true; 
             labelText = '에폭시 싱글 패키지 (55만원)'; 
+        }
+        // 6. [추가된 부분] 욕실바닥 2곳 55만원 (현관 선택 안 했을 경우)
+        else if (qBathFloor >= 2) { 
+            total += 550000; 
+            q['bathroom_floor'] -= 2; 
+            isPackageActive = true; 
+            labelText = '에폭시 바닥 더블 패키지 (55만원)'; 
         }
     }
 
@@ -592,6 +609,7 @@ export default function GroutEstimatorApp() {
                 <div className="font-bold text-lg">{type.label}</div>
               </button>
             ))}
+            
           </div>
         </section>
 
