@@ -220,7 +220,7 @@ const EPOXY_OVERRIDE_PRICES = {
     'master_bath_wall': 550000,
     'common_bath_wall': 550000,
     'balcony_laundry': 300000,
-    'kitchen_wall': 300000,
+    'kitchen_wall': 250000, // [수정됨] 주방 벽면 에폭시 가격 25만원으로 고정
     'living_room': 1100000,
     'entrance': 100000, 
 };
@@ -254,7 +254,7 @@ const SERVICE_AREAS = [
   { id: 'master_bath_wall', label: '안방욕실 벽 전체', basePrice: 300000, icon: 'bath', unit: '구역' },
   { id: 'common_bath_wall', label: '공용욕실 벽 전체', basePrice: 300000, icon: 'bath', unit: '구역' },
   { id: 'balcony_laundry', label: '베란다/세탁실', basePrice: 150000, icon: 'layout', unit: '개소' },
-  { id: 'kitchen_wall', label: '주방 벽면', basePrice: 150000, icon: 'utensils', unit: '구역' },
+  { id: 'kitchen_wall', label: '주방 벽면', basePrice: 150000, icon: 'utensils', unit: '구역' }, // [수정됨] 폴리 가격은 15만원
   { id: 'living_room', label: '거실 바닥', basePrice: 550000, icon: 'home', unit: '구역' },
 ];
 
@@ -496,9 +496,9 @@ export default function GroutEstimatorApp() {
                 price -= discountPerUnit * count;
             }
 
-            // [NEW LOGIC 1]: 에폭시 현관 시공 시 50,000원 추가 (서비스 가격 외 추가금)
+            // [수정된 로직 1]: 에폭시 현관 시공 시 70,000원 추가 (서비스 가격 외 추가금)
             if (area.id === 'entrance' && isPackageActive && matDetails.materialId === 'kerapoxy') {
-                total += 50000 * count; // 5만원 추가
+                total += 70000 * count; // 7만원 추가
             }
             
             total += price;
@@ -528,7 +528,9 @@ export default function GroutEstimatorApp() {
     }
 
     // 최종적으로 모달에서 surcharge 상태를 표시하기 위한 플래그
+    // [수정된 로직 2]: 현관 에폭시 추가금 7만원 표시를 위한 로직
     const isEpoxyEntranceSurcharged = isPackageActive && quantities['entrance'] > 0 && areaMaterials['entrance'] === 'kerapoxy';
+    const epoxyEntranceSurchargeAmount = isEpoxyEntranceSurcharged ? 70000 : 0; // 7만원 추가금
 
     return { 
         price: Math.max(0, Math.floor(total / 1000) * 1000), 
@@ -542,6 +544,7 @@ export default function GroutEstimatorApp() {
         totalReviewDiscount: discountAmount,
         FREE_SILICON_AREAS: FREE_SILICON_AREAS,
         isEpoxyEntranceSurcharged: isEpoxyEntranceSurcharged,
+        epoxyEntranceSurchargeAmount: epoxyEntranceSurchargeAmount, // 추가금액 반환
     };
   }, [housingType, material, quantities, selectedReviews, areaMaterials]); 
 
@@ -764,7 +767,7 @@ export default function GroutEstimatorApp() {
                         
                         // 4. 에폭시 현관 서비스 추가금 적용 
                         if (area.id === 'entrance' && isEpoxy && calculation.isFreeEntrance) {
-                            displayPrice = 150000; // 10만원 (Base) + 5만원 (Surcharge)
+                            displayPrice = 100000 + 70000; // [수정됨] 10만원 (Base) + 7만원 (Surcharge)
                         } else {
                             // 일반 항목/할인 적용
                             displayPrice = Math.max(0, displayPrice - discountPerUnit);
@@ -925,7 +928,6 @@ export default function GroutEstimatorApp() {
                                         {/* 현관 서비스 소재 명시 */}
                                         {calculation.isFreeEntrance && <li>• 현관 바닥 시공 (서비스 - 폴리아스파틱)</li>}
                                         <li>• 변기 테두리 / 바닥 테두리 서비스</li>
-                                        {/* 주방 상판은 유료화 되었으므로 제거됨 */}
                                         {calculation.FREE_SILICON_AREAS.includes('silicon_sink') && <li>• 욕실 젠다이/세면대 실리콘 리폼</li>}
                                     </ul>
                                 </div>
@@ -1028,7 +1030,7 @@ export default function GroutEstimatorApp() {
                                         </span>
                                         <span className="font-bold text-slate-900">
                                             {calculation.isEpoxyEntranceSurcharged && area.id === 'entrance' 
-                                                ? <span className="text-red-600">+50,000원</span> 
+                                                ? <span className="text-red-600">+{calculation.epoxyEntranceSurchargeAmount.toLocaleString()}원</span> // [수정됨] 7만원 추가금 표시
                                                 : area.id === 'entrance' && calculation.isFreeEntrance 
                                                     ? <span className="text-[#1e3a8a]">Service (Poly)</span> 
                                                     : isFreeSilicon 
