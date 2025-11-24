@@ -742,19 +742,27 @@ export default function GroutEstimatorApp() {
 
                         {/* ROW 2: 소재 선택 버튼 */}
                         <div className="flex justify-start gap-2 pt-2">
-                             {/* 폴리 버튼 */}
+                             {/* 폴리 버튼 - 시인성 강화 (네이비 배경 + 그림자) */}
                              <button 
                                 onClick={() => handleMaterialChange(area.id, 'poly')}
                                 disabled={quantities[area.id] === 0}
-                                className={`px-3 py-1.5 text-xs rounded-lg font-bold transition-all ${areaMaterials[area.id] === 'poly' && quantities[area.id] > 0 ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+                                className={`px-3 py-1.5 text-xs rounded-lg font-bold transition-all ${
+                                    areaMaterials[area.id] === 'poly' && quantities[area.id] > 0 
+                                    ? 'bg-[#1e3a8a] text-white shadow-md' 
+                                    : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                                }`}
                              >
                                 폴리
                              </button>
-                             {/* 에폭시 버튼 */}
+                             {/* 에폭시 버튼 - 시인성 강화 (네이비 배경 + 그림자) */}
                              <button 
                                 onClick={() => handleMaterialChange(area.id, 'kerapoxy')}
                                 disabled={quantities[area.id] === 0}
-                                className={`px-3 py-1.5 text-xs rounded-lg font-bold transition-all ${areaMaterials[area.id] === 'kerapoxy' && quantities[area.id] > 0 ? 'bg-[#1e3a8a] text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+                                className={`px-3 py-1.5 text-xs rounded-lg font-bold transition-all ${
+                                    areaMaterials[area.id] === 'kerapoxy' && quantities[area.id] > 0 
+                                    ? 'bg-[#1e3a8a] text-white shadow-md' 
+                                    : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                                }`}
                              >
                                 에폭시
                              </button>
