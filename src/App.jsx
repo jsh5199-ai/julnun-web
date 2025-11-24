@@ -437,7 +437,7 @@ export default function GroutEstimatorApp() {
               <p className='text-[10px] text-center text-slate-400 mb-3'>* 위 내용은 이미지로 저장되며, 현장 상황에 따라 변동될 수 있습니다.</p>
               <div className="grid grid-cols-2 gap-3">
                 <button onClick={saveAsImage} className="py-3.5 rounded-lg bg-[#0f172a] text-white font-bold hover:bg-slate-800 transition flex items-center justify-center gap-2 text-sm"><Icon name="copy" size={18}/> 이미지 저장</button>
-                <button onClick={() => window.location.href = 'tel:010-0000-0000'} className="py-3.5 rounded-lg bg-[#1e3a8a] text-white font-bold hover:bg-[#1e40af] transition flex items-center justify-center gap-2 text-sm"><Icon name="phone" size={18} /> 전화 상담</button>
+                <button onClick={() => window.location.href = 'tel:010-7734-6709'} className="py-3.5 rounded-lg bg-[#1e3a8a] text-white font-bold hover:bg-[#1e40af] transition flex items-center justify-center gap-2 text-sm"><Icon name="phone" size={18} /> 전화 상담</button>
               </div>
             </div>
           </div>
