@@ -26,11 +26,12 @@ const GlobalStyles = () => (
     .shadow-float { box-shadow: 0 -5px 20px -5px rgba(30, 58, 138, 0.15); }
     
     /* 캡처 대상 요소를 정확히 지정하기 위한 클래스 */
-    .quote-canvas-container { 
+    .quote-capture-area { 
         background-color: #FFFFFF !important; 
         padding: 24px; 
         border-radius: 10px; 
-        overflow-y: auto; 
+        /* overflow-y는 html2canvas가 처리하므로 여기서는 제거 */
+        /* max-height도 캡처 전/후 조작할 것이므로 여기서는 제거 */
     }
   `}</style>
 );
@@ -69,9 +70,8 @@ export default function GroutEstimatorApp() {
   const [packageToastDismissed, setPackageToastDismissed] = useState(false);
   const [showMaterialGuide, setShowMaterialGuide] = useState(false);
   
-  // 모달 자체 Ref는 유지하고, 캡처 대상인 컨텐츠 영역의 Ref를 추가합니다.
-  const quoteModalRef = useRef(null);
-  const quoteContentRef = useRef(null); // 🌟 [추가]: 순수 견적 컨텐츠 영역 Ref
+  // 🌟 [변경]: 캡처 대상 요소를 더욱 명확하게 분리 (모달 콘텐츠만)
+  const quoteContentRef = useRef(null); 
 
   const handleQuantityChange = (id, delta) => {
     setQuantities(prev => {
@@ -97,7 +97,7 @@ export default function GroutEstimatorApp() {
 
   // 🌟 [이미지 저장 기능 수정]: 버튼을 제외하고 컨텐츠만 캡처
   const saveAsImage = async () => {
-    const elementToCapture = quoteContentRef.current; // 🌟 캡처 대상을 순수 컨텐츠 영역으로 변경
+    const elementToCapture = quoteContentRef.current; // 캡처 대상을 순수 컨텐츠 영역으로 변경
     
     if (!elementToCapture) {
         alert("에러: 견적서 영역을 찾을 수 없습니다.");
@@ -105,27 +105,23 @@ export default function GroutEstimatorApp() {
     }
     
     try {
-        // 캡처 전 준비
-        const originalOverflowY = elementToCapture.style.overflowY;
-        const originalMaxHeight = elementToCapture.style.maxHeight;
+        // 캡처 전, 컨텐츠 영역의 스크롤을 맨 위로 이동하고, 높이 제한을 해제하여 전체 내용을 캡처할 준비
+        const originalScrollTop = elementToCapture.scrollTop; // 현재 스크롤 위치 저장
+        elementToCapture.scrollTop = 0; // 맨 위로 이동
 
-        elementToCapture.scrollTop = 0; 
-        elementToCapture.style.overflowY = 'visible'; 
-        elementToCapture.style.maxHeight = 'fit-content'; 
-        
-        // 🌟 html2canvas 옵션 조정: 고해상도 및 배경색 지정
+        // html2canvas 옵션 조정: 고해상도 및 배경색 지정
         const canvas = await html2canvas(elementToCapture, { 
             scale: 3, // 시인성 개선
             logging: false, 
             useCORS: true, 
             backgroundColor: '#FFFFFF', // 명확한 흰색 배경 지정
-            windowHeight: elementToCapture.scrollHeight, // 스크롤 영역 전체를 캡처
-            windowWidth: elementToCapture.scrollWidth, 
+            // windowHeight, windowWidth 대신 elementToCapture의 실제 scrollHeight 사용
+            height: elementToCapture.scrollHeight,
+            width: elementToCapture.scrollWidth,
         });
 
-        // 캡처 후 원본 스타일 복구
-        elementToCapture.style.overflowY = originalOverflowY;
-        elementToCapture.style.maxHeight = originalMaxHeight;
+        // 캡처 후 원본 스크롤 위치 복구
+        elementToCapture.scrollTop = originalScrollTop; 
 
         const image = canvas.toDataURL('image/png');
         const link = document.createElement('a');
@@ -369,10 +365,10 @@ export default function GroutEstimatorApp() {
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4">
             <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setShowModal(false)} />
-            <div ref={quoteModalRef} className="relative bg-white w-full max-w-md rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden animate-enter max-h-[90vh] flex flex-col">
+            <div className="relative bg-white w-full max-w-md rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden animate-enter max-h-[90vh] flex flex-col">
                 
-                {/* 🌟 [수정]: 캡처 대상인 순수 컨텐츠 영역에 Ref 지정 */}
-                <div ref={quoteContentRef} className="flex-1 overflow-y-auto quote-canvas-container"> 
+                {/* 🌟 [수정]: 캡처 대상 요소를 quoteContentRef로 지정하여 버튼 영역과 분리 */}
+                <div ref={quoteContentRef} className="flex-1 overflow-y-auto quote-capture-area"> 
                     
                     {/* 모달 헤더 (제목 변경) */}
                     <div className="flex justify-between items-center mb-6">
@@ -386,89 +382,4 @@ export default function GroutEstimatorApp() {
                             <div className="text-xs text-slate-500 font-bold mb-1 uppercase tracking-wider">현장 유형</div>
                             <div className="font-bold text-slate-900 flex items-center gap-1 text-base">{HOUSING_TYPES.find(h => h.id === housingType).label}</div>
                         </div>
-                        <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                            <div className="text-xs text-slate-500 font-bold mb-1 uppercase tracking-wider">시공 소재</div>
-                            <div className="font-bold text-slate-900 flex items-center gap-1 text-base">{MATERIALS.find(m => m.id === material).label}</div>
-                        </div>
-                    </div>
-                    
-                    {/* 선택 내역 및 금액 (변경 없음) */}
-                    <div>
-                        <h4 className="text-sm font-bold text-[#1e3a8a] mb-3 flex items-center gap-2 uppercase tracking-wider">선택 내역</h4>
-                        <div className="space-y-2 border-t border-slate-100 pt-3">
-                            {[...SERVICE_AREAS, ...SILICON_AREAS].filter(a => quantities[a.id] > 0).map(area => {
-                                const isFreeSilicon = calculation.isPackageActive && calculation.FREE_SILICON_AREAS.includes(area.id);
-                                return (
-                                    <div key={area.id} className="flex justify-between items-center text-sm py-1">
-                                        <span className="text-slate-700 font-medium flex items-center gap-2">
-                                            <Icon name={area.icon} size={16} className="text-slate-400"/>
-                                            {area.label} <span className="text-slate-400 text-xs bg-slate-100 px-1.5 py-0.5 rounded">x{quantities[area.id]}</span>
-                                        </span>
-                                        <span className="font-bold text-slate-900">
-                                            {area.id === 'entrance' && calculation.isFreeEntrance 
-                                                ? <span className="text-[#1e3a8a] text-xs bg-blue-50 px-2 py-1 rounded-full">Service (Poly)</span> 
-                                                : isFreeSilicon 
-                                                    ? <span className="text-[#1e3a8a] text-xs bg-blue-50 px-2 py-1 rounded-full">Service</span>
-                                                    : `${(getBasePrice(area.id, finalMaterialId) * quantities[area.id]).toLocaleString()}원` 
-                                            }
-                                        </span>
-                                    </div>
-                                )})}
-                        </div>
-                    </div>
-                    
-                    {/* 최종 합계 (변경 없음) */}
-                    <div className="space-y-2 py-5 border-y border-slate-200 mt-6">
-                        <div className="flex justify-between items-center text-sm font-medium text-slate-500"><span>순수 개별 견적 합계</span><span className='line-through text-slate-400'>{calculation.fullOriginalPrice.toLocaleString()}원</span></div>
-                        {(calculation.isPackageActive || calculation.isMinCost) && (<div className="flex justify-between items-center text-sm font-bold text-blue-600"><span>패키지/최소 비용 적용가</span><span>{calculation.priceAfterPackageDiscount.toLocaleString()}원</span></div>)}
-                        {calculation.totalReviewDiscount > 0 && (<div className="flex justify-between items-center text-sm font-bold text-red-500"><span>리뷰 할인</span><span>-{calculation.totalReviewDiscount.toLocaleString()}원</span></div>)}
-                        <div className="flex justify-between items-center pt-3 mt-1 border-t border-dashed border-slate-200"><span className="text-lg font-extrabold text-slate-900">최종 결제 금액</span><span className="text-2xl font-extrabold text-[#1e3a8a]">{calculation.price.toLocaleString()}원</span></div>
-                    </div>
-                    
-                    {/* 패키지 서비스 및 유의사항 (변경 없음) */}
-                    <div className="space-y-3 pt-5">
-                        {calculation.isPackageActive && !calculation.isMinCost && (<div className="bg-blue-50 p-4 rounded-lg space-y-2 text-xs border border-blue-100"><h4 className="text-[#1e3a8a] font-bold flex items-center gap-1.5 text-sm"><Icon name="gift" size={16}/> 패키지 서비스 (FREE)</h4><ul className="list-disc list-inside text-slate-700 space-y-1 pl-1"><li>현관 바닥 시공 (폴리아스파틱)</li><li>변기 테두리 / 바닥 테두리 서비스</li>{calculation.FREE_SILICON_AREAS.includes('silicon_sink') && <li>욕실 젠다이/세면대 실리콘 오염방지</li>}</ul></div>)}
-                        
-                        <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-slate-700">
-                            <h4 className="font-bold flex items-center gap-2 mb-3 text-slate-900 text-sm">
-                                <Icon name="info" className="text-rose-500" size={18}/> 
-                                시공 시 유의사항
-                            </h4>
-                            <ul className="space-y-3 text-xs leading-relaxed">
-                                <li className="flex items-start gap-2.5">
-                                    <span className="w-1 h-1 rounded-full bg-slate-400 mt-1.5 shrink-0"></span>
-                                    <span>
-                                        <span className="font-bold text-slate-900">타일 크기 기준:</span> 바닥 30x30, 벽면 30x60cm 기준
-                                        <br/>
-                                        <span className="text-slate-500 tracking-tight">※ 조각/소형 타일은 현장 상황에 따라 추가비용 발생</span>
-                                    </span>
-                                </li>
-                                <li className="flex items-start gap-2.5">
-                                    <span className="w-1 h-1 rounded-full bg-slate-400 mt-1.5 shrink-0"></span>
-                                    <span>
-                                        <span className="font-bold text-slate-900">재시공(셀프포함):</span> 기존 줄눈 제거 작업 필요 시
-                                        <br/>
-                                        <span className="text-rose-600 font-bold bg-rose-50 px-1 rounded">1.5~2배의 추가 비용</span>이 발생합니다.
-                                    </span>
-                                </li>
-                            </ul>
-                        </div>
-
-                        {calculation.isMinCost && (<div className="bg-rose-50 p-4 rounded-lg border border-rose-100 text-rose-700"><div className="flex items-center gap-2 font-bold mb-1 text-sm"><Icon name="info" size={16}/> 최소 출장비 적용</div><p className="text-xs opacity-90">선택하신 시공 범위가 최소 기준 미만이라, 기본 출장비 20만원이 적용되었습니다.</p></div>)}
-                    </div>
-                </div>
-                
-                {/* 🌟 [수정]: 버튼 영역은 quoteContentRef 밖에 위치하여 캡처에서 제외됨 */}
-                <div className="p-5 bg-slate-50 border-t border-slate-200 flex-none">
-                    <p className='text-[10px] text-center text-slate-400 mb-3'>* 위 내용은 이미지로 저장되며, 현장 상황에 따라 변동될 수 있습니다.</p>
-                    <div className="grid grid-cols-2 gap-3">
-                        <button onClick={saveAsImage} className="py-3.5 rounded-lg bg-[#0f172a] text-white font-bold hover:bg-slate-800 transition flex items-center justify-center gap-2 text-sm"><Icon name="copy" size={18}/> 이미지 저장</button>
-                        <button onClick={() => window.location.href = 'tel:010-0000-0000'} className="py-3.5 rounded-lg bg-[#1e3a8a] text-white font-bold hover:bg-[#1e40af] transition flex items-center justify-center gap-2 text-sm"><Icon name="phone" size={18} /> 전화 상담</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-      )}
-    </div>
-  );
-}
+                        <div className="p-3 rounded-lg bg-slate-50 border border-
