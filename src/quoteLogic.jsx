@@ -93,7 +93,7 @@ export default function GroutEstimatorApp() {
     return calculateEstimate(quantities, housingType, effectiveMaterialId, selectedReviews);
   }, [housingType, material, epoxyOption, quantities, selectedReviews]);
 
-  // ✨ [이미지 저장 기능 수정 및 개선 로직]
+  // 이미지 저장 기능 수정 및 개선 로직
   const saveAsImage = async () => {
     if (!quoteRef.current) {
         alert("에러: 견적서 영역을 찾을 수 없습니다.");
