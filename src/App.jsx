@@ -29,7 +29,7 @@ const GlobalStyles = () => (
   `}</style>
 );
 
-// [아코디언 컴포넌트]
+// [아코디언 컴포넌트] (변경 없음)
 const Accordion = ({ question, answer }) => {
     const [isOpen, setIsOpen] = useState(false);
     return (
@@ -63,17 +63,14 @@ export default function GroutEstimatorApp() {
   const [packageToastDismissed, setPackageToastDismissed] = useState(false);
   const [showMaterialGuide, setShowMaterialGuide] = useState(false);
   
-  // 캡처 문제가 있었던 ref를 원래대로 복원
+  // Ref를 원래대로 복원
   const quoteRef = useRef(null); 
 
   const handleQuantityChange = (id, delta) => {
     setQuantities(prev => {
       const nextValue = Math.max(0, prev[id] + delta);
       const nextState = { ...prev, [id]: nextValue };
-      // 원래 코드는 벽체 선택 시 다른 항목을 초기화하는 로직이 있었으나, 복잡성 때문에 제거된 상태를 유지합니다.
-      // if ((id === 'master_bath_wall' || id === 'common_bath_wall') && delta > 0) {
-      //   nextState['shower_booth'] = 0; nextState['bathtub_wall'] = 0;
-      // }
+      // 복잡성 최소화를 위해 이전 로직 제거 상태 유지
       return nextState;
     });
     setPackageToastDismissed(false);
@@ -89,19 +86,18 @@ export default function GroutEstimatorApp() {
   
   // 복잡한 로직은 외부 함수(calculateEstimate)로 위임
   const calculation = useMemo(() => {
-    // material이 'poly'가 아니면 epoxyOption을 사용하도록 로직 복원
     const effectiveMaterialId = material === 'poly' ? material : epoxyOption;
     return calculateEstimate(quantities, housingType, effectiveMaterialId, selectedReviews);
   }, [housingType, material, epoxyOption, quantities, selectedReviews]);
 
-  // 이미지 저장 로직을 가장 처음 문제 발생 이전 시점으로 복원합니다.
+  // 이미지 저장 로직을 가장 안정적인 초기 상태로 복원
   const saveAsImage = async () => {
     if (!quoteRef.current) return alert("에러: 견적서 영역을 찾을 수 없습니다.");
     try {
       const element = quoteRef.current;
       const originalOverflow = element.style.overflow;
       element.style.overflow = 'visible';
-      // scale을 2로 유지하여 원래의 캡처 방식으로 복원
+      // scale 2로 복원
       const canvas = await html2canvas(element, { scale: 2, logging: false, useCORS: true });
       element.style.overflow = originalOverflow;
       const image = canvas.toDataURL('image/png');
@@ -358,7 +354,7 @@ export default function GroutEstimatorApp() {
           <div ref={quoteRef} className="relative bg-white w-full max-w-md rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden animate-enter max-h-[90vh] flex flex-col">
             <div className="flex-1 overflow-y-auto quote-canvas-container"> 
               <div className="flex justify-between items-center mb-6">
-                {/* 문구 복원: 원래대로 '정식 견적서' */}
+                {/* 문구 복원: '정식 견적서' */}
                 <h3 className="font-bold text-2xl text-[#0f172a] flex items-center gap-2"><Icon name="shield" size={28} className="text-[#1e3a8a]"/> 정식 견적서</h3>
                 <span className="text-xs text-slate-500 font-medium bg-slate-100 px-2 py-1 rounded">발행일: {new Date().toLocaleDateString()}</span>
               </div>
