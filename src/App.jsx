@@ -1,6 +1,5 @@
 import React, { useState, useMemo, useRef } from 'react';
 import html2canvas from 'html2canvas';
-// 방금 만든 파일에서 데이터와 로직을 가져옵니다. (같은 폴더에 있어야 합니다!)
 import { 
     HOUSING_TYPES, MATERIALS, MATERIAL_GUIDE, SERVICE_AREAS, SILICON_AREAS, 
     REVIEW_EVENTS, FAQ_ITEMS, ICON_PATHS, getBasePrice, calculateEstimate 
@@ -85,7 +84,7 @@ export default function GroutEstimatorApp() {
     });
   };
   
-  // 복잡한 로직은 이제 외부 파일(quoteLogic.js)에 있는 함수가 처리합니다.
+  // 복잡한 로직은 외부 함수(calculateEstimate)로 위임
   const calculation = useMemo(() => {
     return calculateEstimate(quantities, housingType, material, selectedReviews);
   }, [housingType, material, quantities, selectedReviews]);
@@ -341,7 +340,7 @@ export default function GroutEstimatorApp() {
         </div>
       </div>
 
-      {/* --- Modal (개선된 디자인) --- */}
+      {/* --- Modal (디자인 개선 적용 완료) --- */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4">
             <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setShowModal(false)} />
@@ -392,7 +391,33 @@ export default function GroutEstimatorApp() {
                     </div>
                     <div className="space-y-3 pt-5">
                         {calculation.isPackageActive && !calculation.isMinCost && (<div className="bg-blue-50 p-4 rounded-lg space-y-2 text-xs border border-blue-100"><h4 className="text-[#1e3a8a] font-bold flex items-center gap-1.5 text-sm"><Icon name="gift" size={16}/> 패키지 서비스 (FREE)</h4><ul className="list-disc list-inside text-slate-700 space-y-1 pl-1"><li>현관 바닥 시공 (폴리아스파틱)</li><li>변기 테두리 / 바닥 테두리 서비스</li>{calculation.FREE_SILICON_AREAS.includes('silicon_sink') && <li>욕실 젠다이/세면대 실리콘 오염방지</li>}</ul></div>)}
-                        <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 text-slate-600"><h4 className="font-bold flex items-center gap-1.5 mb-1.5 text-red-500 text-xs"><Icon name="info" size={14}/> 시공 시 유의사항</h4><ul className="list-disc list-inside text-[11px] space-y-1 pl-1 leading-relaxed"><li>타일 기준: 바닥 30x30cm, 벽면 30x60cm 크기 기준이며, 조각 타일 시공은 불가하며, 크기가 작을 경우 추가 비용이 발생합니다.</li><li>재시공(셀프포함)의 경우 1.5~2배의 추가비용이 발생합니다.</li></ul></div>
+                        
+                        {/* [수정된 부분] 시공 시 유의사항 디자인 개선 */}
+                        <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-slate-700">
+                            <h4 className="font-bold flex items-center gap-2 mb-3 text-slate-900 text-sm">
+                                <Icon name="info" className="text-rose-500" size={18}/> 
+                                시공 시 유의사항
+                            </h4>
+                            <ul className="space-y-3 text-xs leading-relaxed">
+                                <li className="flex items-start gap-2.5">
+                                    <span className="w-1 h-1 rounded-full bg-slate-400 mt-1.5 shrink-0"></span>
+                                    <span>
+                                        <span className="font-bold text-slate-900">타일 크기 기준:</span> 바닥 30x30, 벽면 30x60cm 기준
+                                        <br/>
+                                        <span className="text-slate-500 tracking-tight">※ 조각/소형 타일은 현장 상황에 따라 추가비용 발생</span>
+                                    </span>
+                                </li>
+                                <li className="flex items-start gap-2.5">
+                                    <span className="w-1 h-1 rounded-full bg-slate-400 mt-1.5 shrink-0"></span>
+                                    <span>
+                                        <span className="font-bold text-slate-900">재시공(셀프포함):</span> 기존 줄눈 제거 작업 필요 시
+                                        <br/>
+                                        <span className="text-rose-600 font-bold bg-rose-50 px-1 rounded">1.5~2배의 추가 비용</span>이 발생합니다.
+                                    </span>
+                                </li>
+                            </ul>
+                        </div>
+
                         {calculation.isMinCost && (<div className="bg-rose-50 p-4 rounded-lg border border-rose-100 text-rose-700"><div className="flex items-center gap-2 font-bold mb-1 text-sm"><Icon name="info" size={16}/> 최소 출장비 적용</div><p className="text-xs opacity-90">선택하신 시공 범위가 최소 기준 미만이라, 기본 출장비 20만원이 적용되었습니다.</p></div>)}
                     </div>
                 </div>
