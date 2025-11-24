@@ -87,9 +87,8 @@ export default function GroutEstimatorApp() {
     return calculateEstimate(quantities, housingType, effectiveMaterialId, selectedReviews);
   }, [housingType, material, epoxyOption, quantities, selectedReviews]);
 
-  // ✨ [이미지 저장 기능 수정]
+  // 이미지 저장 기능 수정된 로직
   const saveAsImage = async () => {
-    // 모달이 닫히면 ref.current가 null이 될 수 있으므로, 항상 확인
     if (!quoteRef.current) {
         alert("에러: 견적서 영역을 찾을 수 없습니다.");
         return;
@@ -98,21 +97,17 @@ export default function GroutEstimatorApp() {
     try {
         const element = quoteRef.current;
         
-        // **핵심 수정: 스크롤 영역 문제 해결**
-        // html2canvas가 렌더링을 시작하기 전에 스크롤바를 숨기고 영역을 충분히 확보합니다.
         const originalScroll = element.querySelector('.quote-canvas-container').scrollTop;
-        element.style.overflow = 'visible'; // 컨테이너의 오버플로우를 임시 해제
+        element.style.overflow = 'visible'; 
 
         const canvas = await html2canvas(element, { 
             scale: 2, 
             logging: false, 
             useCORS: true, 
-            // 캡처 전에 스크롤을 맨 위로 이동하여 잘림 방지
             windowHeight: element.scrollHeight,
             windowWidth: element.scrollWidth,
         });
 
-        // 원본 스타일 복구 (스크롤 복구는 불필요하지만 안전을 위해)
         element.style.overflow = 'hidden'; 
         element.querySelector('.quote-canvas-container').scrollTop = originalScroll;
 
@@ -122,7 +117,6 @@ export default function GroutEstimatorApp() {
         link.download = `줄눈의미학_견적서_${new Date().toISOString().slice(0, 10)}.png`;
         link.click();
         
-        // 다운로드 후 모달 닫기
         setShowModal(false);
         alert("견적서 이미지가 성공적으로 저장되었습니다!");
     } catch (error) {
@@ -355,7 +349,6 @@ export default function GroutEstimatorApp() {
                     </div>
                 </div>
             )}
-            {/* [복원된 버튼] 원래대로 setShowModal(true)로 복원 */}
             <button onClick={() => setShowModal(true)} disabled={!hasSelections} className={`w-full h-16 rounded-lg flex items-center justify-between px-6 transition-all ${showPulse ? 'bg-[#1e3a8a] text-white hover:bg-[#1e40af] shadow-sharp animate-pulse-slow' : 'bg-slate-100 text-slate-400 cursor-not-allowed'}`}>
                 <div className="flex flex-col items-start">
                     <span className={`text-xs font-bold tracking-wider uppercase ${hasSelections ? 'text-white/70' : 'text-slate-400'}`}>Total Estimate</span>
@@ -373,7 +366,8 @@ export default function GroutEstimatorApp() {
             <div ref={quoteRef} className="relative bg-white w-full max-w-md rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden animate-enter max-h-[90vh] flex flex-col">
                 <div className="flex-1 overflow-y-auto quote-canvas-container"> 
                     <div className="flex justify-between items-center mb-6">
-                        <h3 className="font-bold text-2xl text-[#0f172a] flex items-center gap-2"><Icon name="shield" size={28} className="text-[#1e3a8a]"/> 정식 견적서</h3>
+                        {/* 🌟 [수정된 부분] 문구 변경 */}
+                        <h3 className="font-bold text-2xl text-[#0f172a] flex items-center gap-2"><Icon name="shield" size={28} className="text-[#1e3a8a]"/> 줄눈의미학</h3>
                         <span className="text-xs text-slate-500 font-medium bg-slate-100 px-2 py-1 rounded">발행일: {new Date().toLocaleDateString()}</span>
                     </div>
                     <div className="grid grid-cols-2 gap-3 border-b border-slate-200 pb-6 mb-6">
@@ -402,7 +396,7 @@ export default function GroutEstimatorApp() {
                                                 ? <span className="text-[#1e3a8a] text-xs bg-blue-50 px-2 py-1 rounded-full">Service (Poly)</span> 
                                                 : isFreeSilicon 
                                                     ? <span className="text-[#1e3a8a] text-xs bg-blue-50 px-2 py-1 rounded-full">Service</span>
-                                                    : `${(getBasePrice(area.id, finalMaterialId) * quantities[area.id]).toLocaleString()}원` // finalMaterialId 사용
+                                                    : `${(getBasePrice(area.id, finalMaterialId) * quantities[area.id]).toLocaleString()}원` 
                                             }
                                         </span>
                                     </div>
@@ -450,7 +444,6 @@ export default function GroutEstimatorApp() {
                 <div className="p-5 bg-slate-50 border-t border-slate-200 flex-none">
                     <p className='text-[10px] text-center text-slate-400 mb-3'>* 위 내용은 이미지로 저장되며, 현장 상황에 따라 변동될 수 있습니다.</p>
                     <div className="grid grid-cols-2 gap-3">
-                        {/* 이미지 저장 버튼 */}
                         <button onClick={saveAsImage} className="py-3.5 rounded-lg bg-[#0f172a] text-white font-bold hover:bg-slate-800 transition flex items-center justify-center gap-2 text-sm"><Icon name="copy" size={18}/> 이미지 저장</button>
                         <button onClick={() => window.location.href = 'tel:010-0000-0000'} className="py-3.5 rounded-lg bg-[#1e3a8a] text-white font-bold hover:bg-[#1e40af] transition flex items-center justify-center gap-2 text-sm"><Icon name="phone" size={18} /> 전화 상담</button>
                     </div>
