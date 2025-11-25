@@ -115,7 +115,7 @@ const PackageToast = ({ isVisible, onClose }) => {
 
     return (
         <div className="fixed bottom-[100px] left-1/2 -translate-x-1/2 z-50 max-w-sm w-11/12">
-            <div className="bg-emerald-700 text-white p-3 rounded-xl shadow-2xl border border-emerald-500 flex items-center justify-between animate-toast">
+            <div className="bg-indigo-700 text-white p-3 rounded-xl shadow-2xl border border-indigo-500 flex items-center justify-between animate-toast">
                 <div className="flex items-center gap-2">
                     <Gift size={18} className='text-amber-300 flex-shrink-0' /> 
                     <div className="text-sm font-bold truncate">
@@ -124,7 +124,7 @@ const PackageToast = ({ isVisible, onClose }) => {
                 </div>
                 <button 
                     onClick={onClose} 
-                    className="text-xs font-extrabold text-amber-300 px-2 py-1 bg-emerald-600 rounded-full hover:bg-emerald-500 transition active:scale-95 flex-shrink-0"
+                    className="text-xs font-extrabold text-amber-300 px-2 py-1 bg-indigo-600 rounded-full hover:bg-indigo-500 transition active:scale-95 flex-shrink-0"
                 >
                     확인하기
                 </button>
@@ -271,7 +271,7 @@ export default function GroutEstimatorApp() {
         q['entrance'] -= 1;
         isPackageActive = true;
         isFreeEntrance = false; 
-        labelText = '(폴리 패키지 1: 30만)';
+        labelText = '(30만원 패키지 적용)';
         packageDiscount = (150000 * 2) + 50000 - 300000;
     }
     // --- 패키지 2: 에폭시 75만원 (욕실바닥1+벽전체1) ---
@@ -282,7 +282,7 @@ export default function GroutEstimatorApp() {
         if (isMaster) q['master_bath_wall'] -= 1;
         else q['common_bath_wall'] -= 1;
         isPackageActive = true;
-        labelText = '(에폭시 패키지 2: 75만)';
+        labelText = '(75만원 에폭시 패키지 적용)';
         packageDiscount = (150000 * selectedMaterial.priceMod) + (300000 * selectedMaterial.priceMod) - 750000;
     }
     // --- 패키지 3: 폴리 50만원 (욕실바닥1+벽전체1) ---
@@ -293,7 +293,7 @@ export default function GroutEstimatorApp() {
         if (isMaster) q['master_bath_wall'] -= 1;
         else q['common_bath_wall'] -= 1;
         isPackageActive = true;
-        labelText = '(폴리 패키지 3: 50만)';
+        labelText = '(50만원 패키지 적용)';
         packageDiscount = (150000 * selectedMaterial.priceMod) + (300000 * selectedMaterial.priceMod) - 500000;
         if(packageDiscount < 0) packageDiscount = 0; 
     }
@@ -311,7 +311,7 @@ export default function GroutEstimatorApp() {
             q['common_bath_wall'] = Math.max(0, q['common_bath_wall'] - 1);
             isPackageActive = true;
             isFreeEntrance = true; 
-            labelText = '(에폭시 풀패키지: 130만)'; 
+            labelText = '(풀패키지 할인 적용)'; 
         }
         else if (qBathFloor >= 2 && qShower >= 1 && qBathtub >= 1) { 
             finalPackagePrice = 950000;
@@ -322,7 +322,7 @@ export default function GroutEstimatorApp() {
             q['bathtub_wall'] -= 1;
             isPackageActive = true;
             isFreeEntrance = true; 
-            labelText = '(에폭시 패키지 4: 95만)';
+            labelText = '(패키지 할인 적용)';
         }
         else if (qBathFloor >= 2 && (qShower >= 1 || qBathtub >= 1)) { 
             finalPackagePrice = 750000;
@@ -333,19 +333,19 @@ export default function GroutEstimatorApp() {
             else q['bathtub_wall'] -= 1;
             isPackageActive = true;
             isFreeEntrance = true; 
-            labelText = '(에폭시 패키지 5: 75만)'; 
+            labelText = '(패키지 할인 적용)'; 
         }
         else if (qBathFloor >= 2 && qEntrance >= 1) { 
             isPackageActive = true;
             isFreeEntrance = true; 
-            labelText = '(에폭시 혜택 적용)';
+            labelText = '(패키지 혜택 적용)';
         }
         else if (qBathFloor === 1) { 
             finalPackagePrice = 350000;
             originalPackagePrice = 150000 * selectedMaterial.priceMod;
             total += finalPackagePrice;
             q['bathroom_floor'] -= 1;
-            labelText = '(에폭시 최소 시공비: 35만)';
+            labelText = '(최소 시공비 적용)';
         }
         if (originalPackagePrice > 0) packageDiscount = originalPackagePrice - finalPackagePrice;
         if(packageDiscount < 0) packageDiscount = 0; 
@@ -363,7 +363,8 @@ export default function GroutEstimatorApp() {
         q['master_bath_wall'] = Math.max(0, q['master_bath_wall'] - 1);
         q['common_bath_wall'] = Math.max(0, q['common_bath_wall'] - 1);
         isPackageActive = true;
-        labelText = '(폴리 풀패키지: 70만)';
+        isFreeEntrance = true;
+        labelText = '(풀패키지 할인 적용)';
       }
       else if (qBathFloor >= 2 && (qShower >= 1 || qBathtub >= 1)) { 
         finalPackagePrice = 380000;
@@ -374,19 +375,19 @@ export default function GroutEstimatorApp() {
         else q['bathtub_wall'] -= 1;
         isPackageActive = true;
         isFreeEntrance = true;
-        labelText = '(폴리 패키지 4: 38만)';
+        labelText = '(패키지 할인 적용)';
       }
       else if (qBathFloor >= 2 && qEntrance >= 1) { 
         isPackageActive = true;
         isFreeEntrance = true;
-        labelText = '(폴리 혜택 적용)';
+        labelText = '(패키지 혜택 적용)';
       }
       else if (qBathFloor === 1) { 
         finalPackagePrice = 200000;
         originalPackagePrice = 150000;
         total += finalPackagePrice;
         q['bathroom_floor'] -= 1;
-        labelText = '(폴리 최소 시공비: 20만)';
+        labelText = '(최소 시공비 적용)';
       }
       if (originalPackagePrice > 0) packageDiscount = originalPackagePrice - finalPackagePrice;
       if(packageDiscount < 0) packageDiscount = 0; 
@@ -527,53 +528,14 @@ export default function GroutEstimatorApp() {
     });
     total -= discountAmount;
     
-    // --- 예상 시공 시간 계산 (요청하신 3단계 기준 적용) ---
+    // 예상 시공 시간 계산 (견적서 모달에서 사용)
     let estimatedHours = 0;
-    
-    if (totalSelectedAreas > 0) {
-        // 벽면 작업 포함 여부 확인
-        let isWallWorkSelected = (
-            q['shower_booth'] > 0 ||
-            q['bathtub_wall'] > 0 ||
-            q['master_bath_wall'] > 0 ||
-            q['common_bath_wall'] > 0 ||
-            q['kitchen_wall'] > 0
-        );
-
-        if (!isWallWorkSelected) {
-            // 1. 바닥만 진행할 경우 (Floor only)
-            // 바닥 영역의 복잡도 계산: 거실은 2점, 기타 바닥은 1점
-            const floorComplexity = 
-                (q['bathroom_floor'] + q['balcony_laundry'] + q['entrance']) +
-                (q['living_room'] * 2) + 
-                q['silicon_living_baseboard'];
-            
-            if (floorComplexity >= 3.5) {
-                 // 바닥만이지만 범위가 넓은 경우 (예: 욕실 2개 바닥 + 베란다 2개)
-                estimatedHours = 6;
-            } else {
-                // 바닥만, 일반적인 범위
-                estimatedHours = 4;
-            }
-
-        } else {
-            // 2. 벽면까지 진행할 경우 (Including walls)
-            // 전체 작업 범위의 복잡도를 계산하여 6시간 또는 8시간으로 분류
-            const totalWorkComplexity = 
-                q['bathroom_floor'] + 
-                (q['master_bath_wall'] + q['common_bath_wall']) * 1.5 + // 벽 전체는 가중치 1.5
-                q['living_room'] * 2 + // 거실 포함
-                q['balcony_laundry'];
-            
-            // Full Package 급의 대형 시공으로 판단되는 경우 (복잡도 6점 이상 또는 거실 바닥 포함)
-            if (totalWorkComplexity >= 6 || q['living_room'] > 0) {
-                estimatedHours = 8; // 범위가 클 경우 (8시간 내외)
-            } else {
-                estimatedHours = 6; // 벽면까지 일반적인 범위 (6시간 내외)
-            }
-        }
-    } else {
-        estimatedHours = 0;
+    if (totalAreaCount > 0) {
+        estimatedHours = 4;
+        estimatedHours += Math.floor(quantities['bathroom_floor'] * 1);
+        estimatedHours += Math.floor((quantities['master_bath_wall'] + quantities['common_bath_wall']) * 1.5);
+        estimatedHours += (quantities['living_room'] > 0 ? 2 : 0);
+        estimatedHours = Math.max(4, Math.min(estimatedHours, 8));
     }
 
 
@@ -593,18 +555,17 @@ export default function GroutEstimatorApp() {
     const packageActiveRef = useRef(calculation.isPackageActive);
 
     useEffect(() => {
-        // [수정된 로직] calculation이 재계산될 때마다 실행
-        const currentIsActive = calculation.isPackageActive;
-        const previousIsActive = packageActiveRef.current;
-
-        if (currentIsActive && !previousIsActive) {
+        if (calculation.isPackageActive && !packageActiveRef.current) {
             // 패키지가 방금 활성화됨
             setShowToast(true);
+        } else if (!calculation.isPackageActive && packageActiveRef.current) {
+            // 패키지가 방금 비활성화됨 (선택 해제)
+            // 토스트는 띄우지 않고 상태만 업데이트
         }
         
         // 현재 패키지 상태를 참조값에 업데이트
-        packageActiveRef.current = currentIsActive;
-    }, [calculation.isPackageActive]); // calculation.isPackageActive가 변경될 때만 의존성 배열에 따라 실행
+        packageActiveRef.current = calculation.isPackageActive;
+    }, [calculation.isPackageActive]);
   
     // 토스트 닫기 핸들러 (PackageToast 컴포넌트에 전달)
     const handleCloseToast = useCallback(() => {
@@ -695,14 +656,14 @@ export default function GroutEstimatorApp() {
     <div className={`min-h-screen bg-gray-50 text-gray-800 font-sans pb-40`}>
       <GlobalStyles />
 
-      {/* 헤더: 짙은 네이비 -> 다크 그린 계열로 변경 */}
-      <header className="bg-emerald-800 text-white sticky top-0 z-20 shadow-xl">
+      {/* 헤더: 짙은 네이비 배경 (프리미엄) */}
+      <header className="bg-indigo-900 text-white sticky top-0 z-20 shadow-xl">
         <div className="p-4 flex items-center justify-between max-w-md mx-auto">
           <div className="flex items-center gap-2">
             <TrendingUp className="h-6 w-6 text-amber-400" />
             <h1 className="text-xl font-extrabold text-gray-50 tracking-wide">줄눈의미학</h1>
           </div>
-          <button onClick={() => window.location.reload()} className="text-xs bg-emerald-700 px-3 py-1 rounded-full text-emerald-300 hover:bg-emerald-600 transition active:scale-95 shadow-md">
+          <button onClick={() => window.location.reload()} className="text-xs bg-indigo-800 px-3 py-1 rounded-full text-indigo-300 hover:bg-indigo-700 transition active:scale-95 shadow-md">
             <RefreshCw size={12} className="inline mr-1" /> 초기화
           </button>
         </div>
@@ -712,7 +673,7 @@ export default function GroutEstimatorApp() {
       <div className="bg-white py-3 border-b border-gray-100 shadow-md">
         <div className="max-w-md mx-auto px-4 flex justify-around text-center">
             <p className="flex items-center text-xs font-semibold text-gray-700 gap-1"><Trophy size={14} className="text-amber-500" /> 업계 최고 평점</p>
-            <p className="flex items-center text-xs font-semibold text-gray-700 gap-1"><CheckCircle2 size={14} className="text-emerald-600" /> 최대 5년 A/S</p>
+            <p className="flex items-center text-xs font-semibold text-gray-700 gap-1"><CheckCircle2 size={14} className="text-indigo-600" /> 최대 5년 A/S</p>
             <p className="flex items-center text-xs font-semibold text-gray-700 gap-1"><Zap size={14} className="text-sky-500" /> 책임 시공 보증</p>
         </div>
         
@@ -724,7 +685,7 @@ export default function GroutEstimatorApp() {
         {/* --- 1. 현장 유형 섹션 (유지) --- */}
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
-            <Home className="h-5 w-5 text-emerald-600" /> 1. 현장 유형을 선택하세요
+            <Home className="h-5 w-5 text-indigo-600" /> 1. 현장 유형을 선택하세요
           </h2>
           <div className="grid grid-cols-2 gap-3">
             {HOUSING_TYPES.map((type) => (
@@ -734,7 +695,7 @@ export default function GroutEstimatorApp() {
                 className={`p-4 rounded-lg border-2 text-center transition-all duration-200 selection-box active:scale-[0.99] ${
                   housingType === type.id 
                     ? 'selection-selected font-bold text-indigo-900' 
-                    : 'border-gray-300 bg-white text-gray-600 hover:border-emerald-400'
+                    : 'border-gray-300 bg-white text-gray-600 hover:border-indigo-400'
                 }`}
               >
                 <div className="text-base font-semibold">{type.label}</div>
@@ -746,17 +707,17 @@ export default function GroutEstimatorApp() {
         {/* --- 2. 시공 재료 선택 (상세 비교 버튼) --- */}
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-150">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
-            <Hammer className="h-5 w-5 text-emerald-600" /> 2. 줄눈소재 선택
+            <Hammer className="h-5 w-5 text-indigo-600" /> 2. 줄눈소재 선택
           </h2 >
           <div className="space-y-4">
             {MATERIALS.map((item) => (
               <div key={item.id} className="animate-fade-in">
-                <div onClick={() => setMaterial(item.id)} className={`flex items-center p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 selection-box active:scale-[0.99] ${item.id === material ? 'selection-selected shadow-md' : 'border-gray-300 bg-white hover:border-emerald-400'}`}>
+                <div onClick={() => setMaterial(item.id)} className={`flex items-center p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 selection-box active:scale-[0.99] ${item.id === material ? 'selection-selected shadow-md' : 'border-gray-300 bg-white hover:border-indigo-400'}`}>
                   <div className="flex-1">
                     <div className="flex justify-between items-center">
                       <div className='flex items-center gap-3'>
-                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mr-2 transition ${item.id === material ? 'border-emerald-600' : 'border-gray-400'}`}>
-                          {item.id === material && <CheckCircle2 size={12} className="text-emerald-600" />}
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mr-2 transition ${item.id === material ? 'border-blue-600' : 'border-gray-400'}`}>
+                          {item.id === material && <CheckCircle2 size={12} className="text-blue-600" />}
                         </div>
                         <span className="font-bold text-gray-800">{item.label}</span>
                       </div>
@@ -769,10 +730,10 @@ export default function GroutEstimatorApp() {
                 </div>
                 {item.id === 'poly' && item.id === material && (
                   <div className="mt-2 ml-6 pl-4 border-l-2 border-blue-300 space-y-2 animate-slide-down bg-gray-50/50 p-3 rounded-md">
-                    <div className="text-xs font-bold text-emerald-700 flex items-center gap-1"><Palette size={12} /> 옵션 선택 (펄 유무)</div>
+                    <div className="text-xs font-bold text-indigo-700 flex items-center gap-1"><Palette size={12} /> 옵션 선택 (펄 유무)</div>
                     <div className="flex gap-2">
-                      <button onClick={() => setPolyOption('pearl')} className={`flex-1 py-2 text-sm rounded-md border transition-all ${polyOption === 'pearl' ? 'bg-emerald-600 text-white border-emerald-600 font-bold shadow-md' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-100'}`}>펄</button>
-                      <button onClick={() => setPolyOption('no_pearl')} className={`flex-1 py-2 text-sm rounded-md border transition-all ${polyOption === 'no_pearl' ? 'bg-emerald-600 text-white border-emerald-600 font-bold shadow-md' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-100'}`}>무펄</button>
+                      <button onClick={() => setPolyOption('pearl')} className={`flex-1 py-2 text-sm rounded-md border transition-all ${polyOption === 'pearl' ? 'bg-indigo-600 text-white border-indigo-600 font-bold shadow-md' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-100'}`}>펄</button>
+                      <button onClick={() => setPolyOption('no_pearl')} className={`flex-1 py-2 text-sm rounded-md border transition-all ${polyOption === 'no_pearl' ? 'bg-indigo-600 text-white border-indigo-600 font-bold shadow-md' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-100'}`}>무펄</button>
                     </div>
                   </div>
                 )}
@@ -792,7 +753,7 @@ export default function GroutEstimatorApp() {
           <div className="mt-5 pt-3 border-t border-gray-100 flex justify-center">
               <button 
                   onClick={() => setShowMaterialModal(true)} 
-                  className="w-full py-3 bg-emerald-50 text-emerald-700 rounded-lg font-extrabold text-sm hover:bg-emerald-100 transition shadow-md flex items-center justify-center gap-2 active:scale-[0.99]"
+                  className="w-full py-3 bg-indigo-50 text-indigo-700 rounded-lg font-extrabold text-sm hover:bg-indigo-100 transition shadow-md flex items-center justify-center gap-2 active:scale-[0.99]"
               >
                   <Info size={16} className='text-amber-500' fill='currentColor'/> 소재 양생기간 확인하기
               </button>
@@ -803,7 +764,7 @@ export default function GroutEstimatorApp() {
         {/* --- 3. 원하는 시공범위를 선택해주세요 (유지) --- */}
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-300">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
-            <Calculator className="h-5 w-5 text-emerald-600" /> 3. 시공 범위 선택
+            <Calculator className="h-5 w-5 text-indigo-600" /> 3. 시공 범위 선택
           </h2 >
           <div className="space-y-3">
             {SERVICE_AREAS.map((area) => {
@@ -812,10 +773,10 @@ export default function GroutEstimatorApp() {
               return (
                 <div key={area.id} className={`flex items-center justify-between p-3 rounded-lg border transition duration-150 ${isSelected ? 'bg-blue-50 border-blue-400' : 'bg-gray-50 border-gray-200 hover:bg-gray-100'}`}>
                   <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-full shadow-sm ${isSelected ? 'bg-blue-600 text-white' : 'bg-gray-200 text-emerald-600'}`}><Icon size={18} /></div>
+                    <div className={`p-2 rounded-full shadow-sm ${isSelected ? 'bg-blue-600 text-white' : 'bg-gray-200 text-indigo-600'}`}><Icon size={18} /></div>
                     <div>
                       <div className="font-semibold text-gray-800">{area.label}</div>
-                      <div className="text-xs text-gray-500">기본 {area.basePrice.toLocaleString()}원~{area.desc && <span className="block text-emerald-600">{area.desc}</span>}</div>
+                      <div className="text-xs text-gray-500">기본 {area.basePrice.toLocaleString()}원~{area.desc && <span className="block text-indigo-600">{area.desc}</span>}</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-1 bg-white px-1 py-1 rounded-full shadow-md border border-gray-200">
@@ -832,7 +793,7 @@ export default function GroutEstimatorApp() {
         {/* --- 4. 실리콘 교체할 곳 선택 (유지) --- */}
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-450">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
-            <Eraser className="h-5 w-5 text-emerald-600" /> 4. 추가 시공 (실리콘/리폼)
+            <Eraser className="h-5 w-5 text-indigo-600" /> 4. 추가 시공 (실리콘/리폼)
           </h2 >
           <div className="space-y-3">
             {SILICON_AREAS.map((area) => {
@@ -861,7 +822,7 @@ export default function GroutEstimatorApp() {
         {/* --- 자주 묻는 질문 (FAQ) (유지) --- */}
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 mt-6 animate-fade-in delay-750">
             <h2 className="text-lg font-extrabold text-gray-800 mb-2 flex items-center gap-2 border-b pb-2">
-                <HelpCircle className="h-5 w-5 text-emerald-600"/> 고객 지원 센터
+                <HelpCircle className="h-5 w-5 text-indigo-600"/> 고객 지원 센터
             </h2 >
           <div className="space-y-1">
                 {FAQ_ITEMS.map((item, index) => (
@@ -889,7 +850,7 @@ export default function GroutEstimatorApp() {
         <PackageToast isVisible={showToast} onClose={handleCloseToast} />
 
         {/* ★★★ 최종 견적 하단 바 (최고의 디자인 적용) ★★★ */}
-        <div className="fixed bottom-0 left-0 right-0 bg-emerald-800 shadow-2xl safe-area-bottom z-20">
+        <div className="fixed bottom-0 left-0 right-0 bg-indigo-900 shadow-2xl safe-area-bottom z-20">
             <div className="max-w-md mx-auto p-4 flex flex-col gap-2"> 
                 
                 {/* 1. 금액 및 정보 영역 (수평 배치) */}
@@ -897,7 +858,7 @@ export default function GroutEstimatorApp() {
                     
                     {/* 좌측: 금액 정보 */}
                     <div className='flex items-center gap-2'>
-                        <span className='text-sm font-semibold text-emerald-300'>총 예상 견적</span>
+                        <span className='text-sm font-semibold text-indigo-300'>총 예상 견적</span>
                         {/* 금액 (가장 강조) */}
                         <div className="flex items-end gap-1">
                             <span className="text-3xl font-extrabold text-amber-400">{calculation.price.toLocaleString()}</span>
@@ -908,11 +869,11 @@ export default function GroutEstimatorApp() {
                     {/* 우측: 보조 정보/패키지 라벨 */}
                     <div className='flex flex-col items-end'>
                         {calculation.label && (
-                             <div className="text-xs font-bold text-yellow-300 mb-0.5 whitespace-nowrap">
+                             <div className="text-xs font-bold text-green-400 mb-0.5 whitespace-nowrap">
                                 <Crown size={12} className='inline mr-1'/> {calculation.label}
                             </div>
                         )}
-                         <div className="text-xs font-medium text-emerald-300 flex items-center gap-1">
+                         <div className="text-xs font-medium text-indigo-400 flex items-center gap-1">
                             <Clock size={12} /> 약 {calculation.estimatedHours}시간 소요
                         </div>
                     </div>
@@ -927,7 +888,7 @@ export default function GroutEstimatorApp() {
                     disabled={!hasSelections} 
                     className={`w-full py-3 rounded-xl font-extrabold text-lg transition-all 
                         ${hasSelections 
-                            ? 'bg-amber-500 text-gray-900 hover:bg-amber-600 active:bg-amber-700 shadow-md' 
+                            ? 'bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 shadow-md' 
                             : 'bg-gray-600 text-gray-400 cursor-not-allowed'
                         }
                     `}
@@ -942,7 +903,7 @@ export default function GroutEstimatorApp() {
       {showModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-fade-in">
           <div className="bg-white w-full max-w-sm rounded-xl shadow-2xl overflow-hidden animate-slide-down border border-gray-200">
-            <div className="bg-emerald-700 p-4 text-white flex justify-between items-center">
+            <div className="bg-indigo-700 p-4 text-white flex justify-between items-center">
               <h3 className="font-extrabold text-lg flex items-center gap-2"><CheckCircle2 className="h-5 w-5 text-amber-400" /> 견적서 (이미지 저장용)</h3>
               <button onClick={() => setShowModal(false)} className="text-white/80 hover:text-white transition active:scale-95">
                 <X size={20} />
@@ -951,11 +912,11 @@ export default function GroutEstimatorApp() {
             
             {/* ★★★ 캡처 전용 견적서 양식 (원가 비교 적용) ★★★ */}
             <div className="p-5 text-gray-800 bg-white overflow-y-auto max-h-[70vh]"> 
-              <div ref={quoteRef} id="quote-content" className="border-4 border-emerald-700 rounded-lg p-5 space-y-3 mx-auto" style={{ width: '320px' }}>
+              <div ref={quoteRef} id="quote-content" className="border-4 border-indigo-700 rounded-lg p-5 space-y-3 mx-auto" style={{ width: '320px' }}>
                 
                 {/* 헤더 및 로고 영역 */}
                 <div className="flex flex-col items-center border-b border-gray-300 pb-3 mb-3">
-                    <h1 className='text-xl font-extrabold text-emerald-800 text-center'>줄눈의미학 예상 견적서</h1>
+                    <h1 className='text-xl font-extrabold text-indigo-800 text-center'>줄눈의미학 예상 견적서</h1>
                     <p className='text-xs text-gray-500 mt-1 text-center'>Final Quotation Summary</p>
                 </div>
 
@@ -967,7 +928,7 @@ export default function GroutEstimatorApp() {
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="font-semibold flex-shrink-0 pr-2">시공 재료</span> 
-                      <span className="font-bold text-emerald-600 text-right flex-shrink-0">
+                      <span className="font-bold text-indigo-600 text-right flex-shrink-0">
                         {selectedMaterialData.label} ({material === 'poly' ? (polyOption === 'pearl' ? '펄' : '무펄') : (epoxyOption === 'kerapoxy' ? '케라폭시' : '스타라이크')})
                       </span>
                     </div>
@@ -1019,7 +980,7 @@ export default function GroutEstimatorApp() {
                                     </span>
                                     
                                     {/* 원가 또는 최종 적용 가격 */}
-                                    <span className={`text-right w-2/5 font-bold text-sm ${isDiscounted ? 'text-gray-400 line-through' : 'text-emerald-600'}`}>
+                                    <span className={`text-right w-2/5 font-bold text-sm ${isDiscounted ? 'text-gray-400 line-through' : 'text-blue-600'}`}>
                                         {item.originalPrice.toLocaleString()}원
                                     </span>
                                 </div>
@@ -1030,7 +991,7 @@ export default function GroutEstimatorApp() {
                                         <span className='font-normal'>
                                             {item.isFreeService ? '🎁 무료 서비스 적용' : '✨ 할인가 적용'}
                                         </span>
-                                        <span className="font-semibold text-emerald-600">
+                                        <span className="font-semibold text-blue-600">
                                             {finalPriceText}
                                         </span>
                                     </div>
@@ -1062,7 +1023,7 @@ export default function GroutEstimatorApp() {
                     <div className="flex justify-between items-end">
                         <span className="font-extrabold text-lg text-gray-900">총액</span>
                         <div className="text-right">
-                            <span className="text-3xl font-extrabold text-emerald-600">{calculation.price.toLocaleString()}원</span>
+                            <span className="text-3xl font-extrabold text-blue-600">{calculation.price.toLocaleString()}원</span>
                             {calculation.label && <div className="text-xs text-red-600 font-bold mt-1">{calculation.label}</div>}
                         </div>
                     </div>
@@ -1099,10 +1060,10 @@ export default function GroutEstimatorApp() {
                             
                             const baseClasses = "w-full py-3 rounded-xl transition font-extrabold text-white text-sm active:scale-[0.98] shadow-lg flex items-center justify-center gap-2 relative overflow-hidden";
                             
-                            // 네이비 -> 에메랄드 계열 색상 테마 적용
+                            // 네이비 계열 색상 테마 적용 (디자인 통일)
                             const buttonClasses = isApplied
                                 ? "bg-gray-700 shadow-gray-400/50 hover:bg-gray-800" // 적용된 상태
-                                : "bg-emerald-600 shadow-emerald-400/50 hover:bg-emerald-700"; // 미적용 상태 (기본값 디자인)
+                                : "bg-indigo-600 shadow-indigo-400/50 hover:bg-indigo-700"; // 미적용 상태 (기본값 디자인)
                             
                             const animationClass = 'shine-effect'; 
 
@@ -1131,7 +1092,7 @@ export default function GroutEstimatorApp() {
                         <ImageIcon size={16} /> <span>견적 이미지 저장</span>
                     </button>
                     {/* 버튼 내부 정렬 수정 */}
-                    <button onClick={() => window.location.href = `tel:${PHONE_NUMBER}`} className="flex items-center justify-center gap-1 bg-emerald-600 text-white py-3 rounded-lg font-bold hover:bg-emerald-700 transition shadow-md text-sm active:scale-95 col-span-1">
+                    <button onClick={() => window.location.href = `tel:${PHONE_NUMBER}`} className="flex items-center justify-center gap-1 bg-indigo-600 text-white py-3 rounded-lg font-bold hover:bg-indigo-700 transition shadow-md text-sm active:scale-95 col-span-1">
                         <Phone size={16} /> <span>전화 상담</span>
                     </button>
                 </div>
