@@ -161,11 +161,17 @@ export default function GroutEstimatorApp() {
   const [selectedReviews, setSelectedReviews] = useState(new Set());
   const [showModal, setShowModal] = useState(false);
   const [showMaterialModal, setShowMaterialModal] = useState(false); 
+  const [showPackageInfo, setShowPackageInfo] = useState(true); // 👈 새 상태 추가
 
   const quoteRef = useRef(null); 
 
   const SOOMGO_REVIEW_URL = 'https://www.soomgo.com/profile/users/10755579?tab=review';
   const PHONE_NUMBER = '010-7734-6709';
+
+  // 👈 패키지 정보 창 닫기 핸들러 추가
+  const handleClosePackageInfo = () => {
+      setShowPackageInfo(false);
+  };
 
   // --- calculation 로직 (원가 추적 기능 통합) ---
   const handleQuantityChange = (id, delta) => {
@@ -214,7 +220,6 @@ export default function GroutEstimatorApp() {
     const itemizedPrices = [];
 
     // --- 패키지 로직 (패키지 가격을 결정하고 해당 항목 카운트 임시 차감) ---
-    // (이 로직은 가격 결정 및 itemizedPrices 계산 전에 실행되어야 함)
     
     // --- 패키지 1: 폴리 30만원 (욕실2+현관1) ---
     if (selectedMaterial.id === 'poly' && qBathFloor >= 2 && qEntrance >= 1 && qBathWallTotal === 0 && qShower === 0 && qBathtub === 0) {
@@ -362,7 +367,6 @@ export default function GroutEstimatorApp() {
 
 
     // --- 잔여 항목 및 패키지 포함 항목 모두 계산 ---
-    // 주의: q는 이미 패키지 항목의 일부 카운트가 차감된 상태임.
     ALL_AREAS.forEach(area => {
         const initialCount = quantities[area.id] || 0; // 사용자가 선택한 원본 수량
         
@@ -377,110 +381,85 @@ export default function GroutEstimatorApp() {
         // 원가 (할인 및 패키지 적용 전)
         let itemOriginalTotal = originalBasePrice * initialCount * currentMod * selectedHousing.multiplier;
         
-        // 최종 계산 가격
-        let itemCalculatedTotal = 0;
-        let itemDiscountTotal = 0;
-
-        // 1. 패키지로 묶여서 나간 수량 (initialCount - count) 처리
-        const packageCount = initialCount - count;
-        if (packageCount > 0) {
-            
-            // 패키지 가격은 이미 total에 합산되었으므로, 여기서는 해당 항목을 "포함"된 것으로 표시만 함
-            // 단, 현관(entrance)은 isFreeEntrance 로직으로 처리해야 함.
-            
-            // 현관 무료 서비스 (isFreeEntrance는 패키지 종류에 따라 현관이 0이 되지 않았어도 무료 처리되는 경우가 있음)
-            if (area.id === 'entrance' && isFreeEntrance) {
-                itemCalculatedTotal = 0;
-                itemDiscountTotal = itemOriginalTotal;
-            } else if (packageCount > 0 && area.id === 'bathroom_floor') {
-                // 욕실 바닥은 패키지 가격에 이미 포함되어 할인됨.
-                // 이 부분을 개별 항목으로 분리해서 보여주기 어려우므로, 
-                // 패키지 가격이 결정된 경우 해당 항목은 "패키지 포함"으로 표시하고 가격은 0으로 처리.
-                // (단, 이 방식은 itemizedPrices에서 패키지 가격과 겹치는 문제가 발생)
-
-                // -> ★해결: itemizedPrices에는 패키지에 포함된 항목 *전체*를 넣고,
-                //           할인된 금액을 discount 필드에 몰아넣어 표시한다.
-                //           total에는 itemCalculatedTotal만 더한다. (현재 로직에서는 이미 total에 패키지 금액이 들어있음)
-            } else {
-                // 패키지 외의 남은 항목들에 대한 계산은 아래에서 처리
-            }
-        }
-        
-        // 2. 남은 수량 (count)에 대한 계산
-        
         let remainingOriginalPrice = originalBasePrice * count * currentMod * selectedHousing.multiplier;
         let remainingCalculatedPrice = remainingOriginalPrice;
         let remainingDiscount = 0;
 
-        if (area.id === 'entrance' && isFreeEntrance) {
-            remainingCalculatedPrice = 0;
-            remainingDiscount = remainingOriginalPrice;
-        } else {
-            if (area.id === 'living_room' && isPackageActive) {
-                let fixedDiscount = (selectedMaterial.id === 'poly' ? 50000 : 150000) * count;
-                remainingCalculatedPrice = Math.max(0, remainingCalculatedPrice - fixedDiscount);
-                remainingDiscount = fixedDiscount;
-            } 
-            else if (area.id === 'balcony_laundry' && isPackageActive) {
-                if (selectedMaterial.id === 'poly') { 
-                    let fixedPrice = 100000 * count;
-                    remainingDiscount = remainingOriginalPrice - fixedPrice;
-                    remainingCalculatedPrice = fixedPrice;
-                }
-            }
-            else if (area.id === 'silicon_bathtub' && isPackageActive) { 
-                let fixedPrice = 50000 * count;
-                remainingDiscount = remainingOriginalPrice - fixedPrice;
-                remainingCalculatedPrice = fixedPrice;
-            }
-            else if (area.id === 'silicon_living_baseboard' && isPackageActive) { 
-                let fixedPrice = 350000 * count;
-                remainingDiscount = remainingOriginalPrice - fixedPrice;
-                remainingCalculatedPrice = fixedPrice;
-            }
-            
-            total += remainingCalculatedPrice;
-        }
-
-        // --- itemizedPrices에 항목 추가 (패키지 포함 항목도 추가) ---
-        // 전체 수량 (initialCount)을 기준으로 항목을 표시
-        // 가격은 initialCount에 대한 최종 적용 가격을 합산하여 표시.
-        
         let finalCalculatedPrice = 0;
         let finalDiscount = 0;
         let isFreeServiceItem = false;
+        let packageCount = initialCount - count; // 패키지에 포함되어 빠진 수량
 
+        // 1. 현관 무료 서비스 처리
         if (area.id === 'entrance' && isFreeEntrance) {
              finalCalculatedPrice = 0;
              finalDiscount = itemOriginalTotal;
              isFreeServiceItem = true;
-        } else if (packageCount > 0 && ['bathroom_floor', 'master_bath_wall', 'common_bath_wall'].includes(area.id)) {
-            // 핵심 패키지 항목: 전체 가격을 패키지 가격 안에 녹여서 처리했으므로, 
-            // 여기서는 원가만 표시하고 최종 가격은 0으로 설정하며, 할인은 '패키지 할인' 항목으로 따로 표시됨.
-            // 단, itemOriginalTotal을 1000원 단위로 처리해야 함.
-            finalCalculatedPrice = 0;
-            finalDiscount = 0; // 할인금액은 package_discount에 포함됨
+             total += finalCalculatedPrice; // 이미 total에 포함되지 않았으므로 0을 더함
+        } else if (packageCount > 0 && ['bathroom_floor', 'master_bath_wall', 'common_bath_wall', 'shower_booth', 'bathtub_wall'].includes(area.id)) {
+            // 2. 핵심 패키지 항목 처리 (욕실바닥/벽 전체/샤워/욕조): 가격은 package_discount에 녹이고, 항목 자체의 최종가격은 0 또는 남은 수량 가격
+            
+            // 패키지에 포함되어 빠진 부분의 원가
+            const packageOriginalPrice = (originalBasePrice * packageCount * currentMod * selectedHousing.multiplier);
+            
+            if (count === 0) {
+                // 전체가 패키지에 포함됨
+                finalCalculatedPrice = 0;
+                finalDiscount = 0; // 실제 할인은 package_discount에 반영
+            } else {
+                // 일부가 패키지에 포함되고, 남은 수량이 있음
+                // 남은 수량은 아래 일반 할인 로직을 따라감
+                
+                // 남은 수량(count)에 대한 일반 할인 적용 (있을 경우)
+                if (area.id === 'living_room' && isPackageActive) {
+                    let fixedDiscount = (selectedMaterial.id === 'poly' ? 50000 : 150000) * count;
+                    remainingCalculatedPrice = Math.max(0, remainingCalculatedPrice - fixedDiscount);
+                    remainingDiscount = fixedDiscount;
+                } 
+                
+                finalCalculatedPrice = Math.floor(remainingCalculatedPrice / 1000) * 1000;
+                finalDiscount = Math.floor(remainingDiscount / 1000) * 1000;
+                total += finalCalculatedPrice;
+            }
+
         } else {
-            // 패키지 할인/일반 할인이 적용된 최종 남은 항목들
+            // 3. 일반 항목 또는 기타 패키지 할인이 적용되는 항목 처리
+            
+            if (area.id === 'living_room' && isPackageActive) {
+                let fixedDiscount = (selectedMaterial.id === 'poly' ? 50000 : 150000) * initialCount; // 전체 수량에 할인 적용
+                remainingCalculatedPrice = Math.max(0, itemOriginalTotal - fixedDiscount);
+                remainingDiscount = fixedDiscount;
+            } 
+            else if (area.id === 'balcony_laundry' && isPackageActive) {
+                if (selectedMaterial.id === 'poly') { 
+                    let fixedPrice = 100000 * initialCount;
+                    remainingDiscount = itemOriginalTotal - fixedPrice;
+                    remainingCalculatedPrice = fixedPrice;
+                }
+            }
+            else if (area.id === 'silicon_bathtub' && isPackageActive) { 
+                let fixedPrice = 50000 * initialCount;
+                remainingDiscount = itemOriginalTotal - fixedPrice;
+                remainingCalculatedPrice = fixedPrice;
+            }
+            else if (area.id === 'silicon_living_baseboard' && isPackageActive) { 
+                let fixedPrice = 350000 * initialCount;
+                remainingDiscount = itemOriginalTotal - fixedPrice;
+                remainingCalculatedPrice = fixedPrice;
+            }
+            
             finalCalculatedPrice = Math.floor(remainingCalculatedPrice / 1000) * 1000;
             finalDiscount = Math.floor(remainingDiscount / 1000) * 1000;
-            
-            // 패키지 항목으로 나갔던 부분의 금액을 원가에서 빼야 함
-            itemOriginalTotal = Math.floor((itemOriginalTotal) / 1000) * 1000;
-            
-            // 최종 할인가 재조정
-            if (!isPackageActive) {
-                finalDiscount = finalDiscount;
-            }
+            total += finalCalculatedPrice;
         }
-        
+
+
         // 최종적으로 견적서에 표시될 가격
         itemizedPrices.push({
             id: area.id,
             label: area.label,
             quantity: initialCount,
             unit: area.unit,
-            // 견적서에는 할인 적용 전 총 원가를 표시 (단, 1000원 단위로 반올림/내림)
             originalPrice: Math.floor(itemOriginalTotal / 1000) * 1000, 
             calculatedPrice: finalCalculatedPrice,
             discount: finalDiscount,
@@ -847,18 +826,27 @@ export default function GroutEstimatorApp() {
             className="w-full py-3 rounded-lg bg-amber-500 text-gray-900 font-bold text-base hover:bg-amber-600 transition shadow-lg flex items-center justify-center gap-2 active:scale-95"
           >
             <Star size={20} fill="currentColor" className="text-white" />
-            고객 만족도 확인 (숨고 평점 5.0+)
+            고객 만족도 확인 (숨고 평점 4.9+)
           </button>
         </div>
       </main>
 
-      {/* 하단 고정바 (유지) */}
+      {/* 하단 고정바 */}
       <>
-        {/* 패키지 혜택 바: 전문적인 색상 조합 */}
-        {calculation.isPackageActive && (
+        {/* 패키지 혜택 바: 닫기 버튼 추가 */}
+        {calculation.isPackageActive && showPackageInfo && (
           <div className="fixed bottom-[110px] left-4 right-4 max-w-md mx-auto z-10">
             <div className="bg-gray-700 text-white p-4 rounded-lg shadow-2xl border border-gray-500 animate-[professionalPulse_2s_infinite]">
-              <div className="flex items-start gap-3">
+              
+              {/* 닫기 버튼 */}
+              <button 
+                  onClick={handleClosePackageInfo} 
+                  className="absolute top-2 right-2 p-1 text-gray-400 hover:text-white transition active:scale-95 rounded-full bg-gray-600/50"
+              >
+                  <X size={16} />
+              </button>
+              
+              <div className="flex items-start gap-3 pr-6">
                 <div className="bg-white/20 p-2 rounded-full flex-shrink-0 mt-1"><Zap className="w-5 h-5 text-amber-300" /></div>
                 <div className="text-sm flex-1">
                   <div className="font-extrabold text-amber-300 mb-1">🎉 프리미엄 패키지 적용 중!</div>
