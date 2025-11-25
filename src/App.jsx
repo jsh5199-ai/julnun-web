@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 
 // =================================================================
-// [스타일] 애니메이션 정의 (세련된 느낌 유지)
+// [스타일] 애니메이션 정의 (대기업 스타일)
 // =================================================================
 const GlobalStyles = () => (
   <style>{`
@@ -34,7 +34,7 @@ const GlobalStyles = () => (
 );
 
 // =================================================================
-// [데이터] (변화 없음)
+// [데이터] (유지)
 // =================================================================
 const HOUSING_TYPES = [
   { id: 'new', label: '신축 아파트(입주 전)', multiplier: 1.0 },
@@ -45,12 +45,12 @@ const MATERIALS = [
   { 
     id: 'poly', label: '폴리아스파틱', priceMod: 1.0, 
     description: '탄성과 광택이 우수하며 가성비가 좋습니다.',
-    badge: '일반', badgeColor: 'bg-gray-200 text-gray-700' // 무채색 뱃지
+    badge: '일반', badgeColor: 'bg-gray-200 text-gray-700'
   },
   { 
     id: 'kerapoxy', label: '에폭시(무광/무펄)', priceMod: 1.8, 
     description: '내구성이 뛰어나고 매트한 질감.',
-    badge: '프리미엄', badgeColor: 'bg-amber-100 text-amber-800' // 골드 강조색
+    badge: '프리미엄', badgeColor: 'bg-amber-100 text-amber-800'
   },
 ];
 
@@ -87,7 +87,7 @@ const FAQ_ITEMS = [
 ];
 
 // =================================================================
-// [컴포넌트] Accordion (대기업 스타일의 깔끔한 디자인)
+// [컴포넌트] Accordion (유지)
 // =================================================================
 const Accordion = ({ question, answer }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -108,7 +108,7 @@ const Accordion = ({ question, answer }) => {
 };
 
 // =================================================================
-// [컴포넌트] 재료 상세 비교 모달 (대기업 스타일)
+// [컴포넌트] 재료 상세 비교 모달 (유지)
 // =================================================================
 const MaterialDetailModal = ({ onClose }) => (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-fade-in">
@@ -146,7 +146,7 @@ const MaterialDetailModal = ({ onClose }) => (
                 </table>
             </div>
             <div className="p-4 bg-gray-50 border-t border-gray-200">
-                <button onClick={onClose} className="w-full py-3 bg-indigo-600 text-white rounded-lg font-bold hover:bg-indigo-700 transition active:scale-95">닫기</button>
+                <button onClick={onClose} className="w-full py-3 bg-indigo-600 text-white rounded-lg font-bold hover:bg-indigo-700 transition active:scale-95">확인</button>
             </div>
         </div>
     </div>
@@ -166,10 +166,11 @@ export default function GroutEstimatorApp() {
   const [showMaterialModal, setShowMaterialModal] = useState(false); 
 
   const SOOMGO_REVIEW_URL = 'https://www.soomgo.com/profile/users/10755579?tab=review';
-  const KAKAO_CONSULT_URL = 'https://pf.kakao.com/_qWxas/chat'; 
+  // ★★★ 요청하신 개인 오픈채팅 주소로 변경 ★★★
+  const KAKAO_CONSULT_URL = 'https://open.kakao.com/o/sS9CwE3h'; 
   const PHONE_NUMBER = '010-7734-6709';
 
-  // --- 기존 로직 (handleQuantityChange, toggleReview, calculation, generateQuoteText, copyToClipboard) 유지 ---
+  // --- 로직 (handleQuantityChange, toggleReview, calculation, generateQuoteText, copyToClipboard) 유지 ---
 
   const handleQuantityChange = (id, delta) => {
     setQuantities(prev => {
@@ -346,7 +347,7 @@ export default function GroutEstimatorApp() {
     });
     total -= discountAmount;
     
-    // 예상 시공 시간 계산
+    // 예상 시공 시간 계산 (유지)
     let estimatedHours = 0;
     if (totalAreaCount > 0) {
         estimatedHours = 4;
@@ -368,7 +369,7 @@ export default function GroutEstimatorApp() {
 
   }, [housingType, material, quantities, selectedReviews]);
 
-  // 견적서 생성 로직
+  // 견적서 생성 로직 (유지)
   const generateQuoteText = () => {
     const selectedMaterialData = MATERIALS.find(m => m.id === material);
     const housingLabel = HOUSING_TYPES.find(h => h.id === housingType).label;
@@ -464,7 +465,7 @@ export default function GroutEstimatorApp() {
 
 
   return (
-    // 배경색: 대기업 느낌으로 '화이트/아이보리' 계열로 변경
+    // 배경색: 대기업 느낌으로 '화이트/아이보리' 계열
     <div className={`min-h-screen bg-gray-50 text-gray-800 font-sans ${calculation.isPackageActive ? 'pb-48' : 'pb-28'}`}>
       <GlobalStyles />
 
@@ -481,7 +482,7 @@ export default function GroutEstimatorApp() {
         </div>
       </header>
 
-      {/* --- 브랜드 핵심 가치 슬로건 (대기업 스타일로 변경) --- */}
+      {/* --- 브랜드 핵심 가치 슬로건 (유지) --- */}
       <div className="bg-white py-3 border-b border-gray-100 shadow-md">
         <div className="max-w-md mx-auto px-4 flex justify-around text-center">
             <p className="flex items-center text-xs font-semibold text-gray-700 gap-1"><Trophy size={14} className="text-amber-500" /> 업계 최고 평점</p>
@@ -493,7 +494,7 @@ export default function GroutEstimatorApp() {
 
       <main className="max-w-md mx-auto p-4 space-y-6">
         
-        {/* --- 1. 현장 유형 섹션 (깔끔한 카드 디자인) --- */}
+        {/* --- 1. 현장 유형 섹션 --- */}
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
             <Home className="h-5 w-5 text-indigo-600" /> 1. 현장 유형을 선택하세요
@@ -643,7 +644,7 @@ export default function GroutEstimatorApp() {
           <p className="text-xs text-gray-500 mt-3 text-center">※ 중복 선택 가능합니다. 시공 완료 후 꼭 작성해주세요!</p>
         </section>
         
-        {/* --- 재료 상세 비교 버튼 --- */}
+        {/* --- 재료 상세 비교 버튼 (유지) --- */}
         <div className="flex justify-center pt-2">
             <button 
                 onClick={() => setShowMaterialModal(true)} 
