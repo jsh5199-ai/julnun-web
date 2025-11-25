@@ -170,8 +170,6 @@ export default function GroutEstimatorApp() {
   const KAKAO_CONSULT_URL = 'https://open.kakao.com/o/sS9CwE3h'; 
   const PHONE_NUMBER = '010-7734-6709';
 
-  // --- 로직 (handleQuantityChange, toggleReview, calculation, generateQuoteText, copyToClipboard) 유지 ---
-
   const handleQuantityChange = (id, delta) => {
     setQuantities(prev => {
       const nextValue = Math.max(0, prev[id] + delta);
@@ -431,12 +429,13 @@ export default function GroutEstimatorApp() {
     return text;
   };
 
+  // 클립보드 복사 로직 (유지)
   const copyToClipboard = async () => {
     const text = generateQuoteText();
     
     try {
         await navigator.clipboard.writeText(text);
-        alert("견적서가 복사되었습니다! 카카오톡 상담 시 붙여넣기 해주세요.");
+        // alert("견적서가 복사되었습니다! 카카오톡 상담 시 붙여넣기 해주세요."); // 모달 내에서 사용되므로 alert 제거
         return true;
     } catch (err) {
         const textArea = document.createElement("textarea");
@@ -448,7 +447,7 @@ export default function GroutEstimatorApp() {
         textArea.select();
         try {
             document.execCommand('copy');
-            alert("견적서가 복사되었습니다! 카카오톡 상담 시 붙여넣기 해주세요.");
+            // alert("견적서가 복사되었습니다! 카카오톡 상담 시 붙여넣기 해주세요."); // 모달 내에서 사용되므로 alert 제거
             return true;
         } catch (err) {
             console.error('Unable to copy', err);
@@ -456,6 +455,34 @@ export default function GroutEstimatorApp() {
             return false;
         }
         document.body.removeChild(textArea);
+    }
+  };
+  
+  // 견적서 복사 후 카카오톡 이동 처리 함수 (새로 정의)
+  const handleKakaoConsult = async () => {
+    const copied = await copyToClipboard();
+    
+    if (copied) {
+        // 복사 성공 시 카카오톡 상담으로 이동
+        setShowModal(false); // 모달 닫기
+        setTimeout(() => {
+            window.open(KAKAO_CONSULT_URL, '_blank');
+        }, 100); // 팝업 차단 방지를 위해 약간 딜레이
+    }
+  };
+
+  // 하단 바의 메인 버튼 액션 (모달 열기 대신 복사 후 카톡으로 바로 이동)
+  const handleMainAction = async () => {
+    if (!hasSelections) return;
+    
+    const copied = await copyToClipboard();
+    
+    if (copied) {
+        // 복사 성공 시 알림 띄우고 카카오톡 상담으로 이동
+        alert("견적서가 복사되었습니다! 카카오톡 상담 창으로 이동합니다.");
+        setTimeout(() => {
+            window.open(KAKAO_CONSULT_URL, '_blank');
+        }, 100); 
     }
   };
 
@@ -719,13 +746,18 @@ export default function GroutEstimatorApp() {
                 {calculation.label && <div className="text-xs font-bold text-red-600 mb-1 animate-pulse">{calculation.label}</div>}
               </div>
             </div>
-            {/* 견적서 보기 버튼: 메인 액션 버튼은 신뢰감을 주는 블루 계열로 */}
-            <button onClick={() => setShowModal(true)} disabled={!hasSelections} className={`px-7 py-4 rounded-lg font-extrabold text-white shadow-xl transition-all ${hasSelections ? 'bg-blue-600 hover:bg-blue-700 active:scale-[0.98] shadow-blue-500/50' : 'bg-gray-300 text-gray-500 cursor-not-allowed shadow-none'}`}>견적서 보기</button>
+            {/* 메인 버튼: 견적서 복사 후 카카오톡으로 바로 이동 */}
+            <button onClick={handleMainAction} disabled={!hasSelections} className={`px-7 py-4 rounded-lg font-extrabold text-white shadow-xl transition-all ${hasSelections ? 'bg-blue-600 hover:bg-blue-700 active:scale-[0.98] shadow-blue-500/50' : 'bg-gray-300 text-gray-500 cursor-not-allowed shadow-none'}`}>
+                견적 복사 & 카톡 상담
+            </button>
           </div>
         </div>
       </>
 
-      {/* 견적서 모달 */}
+      {/* 견적서 모달 (재정의: 모달을 띄우는 대신, 복사 후 카톡으로 바로 이동하도록 액션을 변경했기 때문에,
+                       이 모달은 이제 사용되지 않지만, 기존 코드를 재사용하여 견적서 보기 기능을 유지합니다.) 
+                       -> 모달의 '카카오톡 상담' 버튼도 이제 handleKakaoConsult를 호출하도록 수정합니다.
+      */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-fade-in">
           <div className="bg-white w-full max-w-sm rounded-xl shadow-2xl overflow-hidden animate-slide-down border border-gray-200">
@@ -787,8 +819,9 @@ export default function GroutEstimatorApp() {
                 <p className='text-sm font-semibold text-center text-red-500 mb-3 flex items-center justify-center gap-1'><Info size={16}/> 전문가 상담 시 **현장 사진 2~3장**이 필수입니다.</p>
                <div className='grid grid-cols-2 gap-3'>
                     <button onClick={copyToClipboard} className="flex items-center justify-center gap-1 bg-white border border-gray-300 text-gray-700 py-3 rounded-lg font-bold hover:bg-gray-100 transition text-sm active:scale-95 shadow-md"><Copy size={16} />견적서 복사</button>
-                    <button onClick={() => window.open(KAKAO_CONSULT_URL, '_blank')} className="flex items-center justify-center gap-1 bg-yellow-400 text-gray-900 py-3 rounded-lg font-bold hover:bg-yellow-500 transition shadow-md text-sm active:scale-95">
-                        카카오톡 상담
+                    {/* ★★★ 복사 후 카카오톡 이동 함수 연결 ★★★ */}
+                    <button onClick={handleKakaoConsult} className="flex items-center justify-center gap-1 bg-yellow-400 text-gray-900 py-3 rounded-lg font-bold hover:bg-yellow-500 transition shadow-md text-sm active:scale-95">
+                        카카오톡 상담 & 이동
                     </button>
                     <button onClick={() => window.location.href = `tel:${PHONE_NUMBER}`} className="flex items-center justify-center gap-1 bg-indigo-600 text-white py-3 rounded-lg font-bold hover:bg-indigo-700 transition shadow-md text-sm active:scale-95 col-span-2">
                         <Phone size={16} /> 전화 상담 ({PHONE_NUMBER})
