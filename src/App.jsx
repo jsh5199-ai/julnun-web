@@ -5,12 +5,9 @@ import {
     REVIEW_EVENTS, FAQ_ITEMS, ICON_PATHS, getBasePrice, calculateEstimate 
 } from './quoteLogic';
 
-// ***************************************************************
-// [수정] Icon 컴포넌트를 가장 안정적이고 원래의 형태로 복구합니다.
-// ***************************************************************
+// [아이콘 컴포넌트] (안정화된 버전)
 const Icon = ({ name, size = 24, className = "" }) => (
     <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      {/* ICON_PATHS[name]이 있으면 path를, 없으면 기본 원을 그립니다. */}
       {ICON_PATHS[name] ? <path d={ICON_PATHS[name]} /> : <circle cx="12" cy="12" r="10" />}
     </svg>
 );
