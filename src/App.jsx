@@ -120,7 +120,7 @@ const PackageToast = ({ isVisible, onClose }) => {
                 <div className="flex items-center gap-2">
                     <Gift size={18} className='text-white flex-shrink-0' /> 
                     <div className="text-sm font-bold truncate">
-                        🎉 패키지 할인이 적용되었습니다!
+                        패키지 할인이 적용되었습니다!
                     </div>
                 </div>
                 {/* "확인하기" 버튼을 노란색으로 변경 */}
