@@ -6,11 +6,15 @@ import {
 
 // =================================================================
 // [가상 라이브러리 함수 정의 - 실제 환경에서는 'html2canvas' 설치 후 사용]
-// 캔버스에 배경색을 명확히 지정하여 흰색 화면 문제를 방지하는 로직을 시뮬레이션합니다.
 // =================================================================
+const delay = ms => new Promise(res => setTimeout(res, ms)); // ★ 딜레이 함수 추가
+
 const simulateHtmlToCanvas = async (node, options) => {
     // 이 함수를 실제 html2canvas(node, options) 호출로 대체해야 합니다.
     
+    // 비동기 렌더링 완료 대기 (중요)
+    await delay(100); 
+
     const canvas = document.createElement('canvas');
     const scale = options.scale || 1;
     
@@ -24,7 +28,7 @@ const simulateHtmlToCanvas = async (node, options) => {
     ctx.fillStyle = options.backgroundColor || '#FFFFFF';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
-    // 이 시점에서 html2canvas가 DOM 내용을 캔버스에 그립니다. (시뮬레이션에서는 생략)
+    // 이 시점에서 html2canvas가 DOM 내용을 캔버스에 그립니다.
     
     return canvas;
 };
@@ -485,12 +489,13 @@ export default function GroutEstimatorApp() {
     }
     
     try {
-        // 1. 캡처 옵션 설정 (흰색 배경 명시, 고해상도 설정)
+        // 1. 캡처 전 렌더링 안정화 대기 (백색화 방지 핵심)
+        await delay(100); 
+
         const options = {
-            backgroundColor: '#FFFFFF', 
-            scale: 2, 
+            backgroundColor: '#FFFFFF', // 흰색 배경 명시 
+            scale: 2, // 고해상도 캡처
             useCORS: true, 
-            // 캡처 영역을 정확히 지정하고 스크롤을 무시하도록 설정
             windowHeight: node.offsetHeight, 
             windowWidth: node.offsetWidth,
         };
@@ -501,17 +506,25 @@ export default function GroutEstimatorApp() {
         const dataUrl = canvas.toDataURL('image/png', 1.0);
         const filename = '줄눈의미학_견적서_' + new Date().getTime();
         
-        // 3. 다운로드 링크 생성 및 클릭 (모바일 갤러리 저장 유도)
-        const link = document.createElement('a');
-        link.download = filename + '.png';
-        link.href = dataUrl;
+        // 3. 다운로드 링크 생성 및 클릭 (Blob 다운로드 방식 시뮬레이션으로 변경)
         
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-        alert("이미지 저장이 완료되었습니다! (갤러리 또는 다운로드 폴더 확인)");
-        setShowModal(false); 
+        // Blob 생성 및 다운로드 방식 (안정성 향상)
+        canvas.toBlob((blob) => {
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.download = filename + '.png';
+            link.href = url;
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            URL.revokeObjectURL(url); // 메모리 해제
+            
+            alert("이미지 저장이 완료되었습니다! (갤러리 또는 다운로드 폴더 확인)");
+            setShowModal(false); 
+        }, 'image/png');
+
 
     } catch (error) {
         console.error("이미지 저장 실패:", error);
@@ -579,7 +592,7 @@ export default function GroutEstimatorApp() {
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-150">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
             <Hammer className="h-5 w-5 text-indigo-600" /> 2. 시공 재료 선택
-          </h2>
+          </h2 >
           <div className="space-y-4">
             {MATERIALS.map((item) => (
               <div key={item.id} className="animate-fade-in">
@@ -626,7 +639,7 @@ export default function GroutEstimatorApp() {
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-300">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
             <Calculator className="h-5 w-5 text-indigo-600" /> 3. 시공 범위 설정 (줄눈)
-          </h2>
+          </h2 >
           <div className="space-y-3">
             {SERVICE_AREAS.map((area) => {
               const Icon = area.icon;
@@ -655,7 +668,7 @@ export default function GroutEstimatorApp() {
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-450">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
             <Eraser className="h-5 w-5 text-indigo-600" /> 4. 추가 시공 (실리콘/리폼)
-          </h2>
+          </h2 >
           <div className="space-y-3">
             {SILICON_AREAS.map((area) => {
               const Icon = area.icon;
@@ -684,7 +697,7 @@ export default function GroutEstimatorApp() {
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-600">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
             <Gift className="h-5 w-5 text-indigo-600" /> 5. 할인 이벤트
-          </h2>
+          </h2 >
           <div className="grid grid-cols-2 gap-3">
             {REVIEW_EVENTS.map((evt) => (
               <button 
@@ -715,7 +728,7 @@ export default function GroutEstimatorApp() {
 
         {/* --- 자주 묻는 질문 (FAQ) --- */}
         <section className="bg-white p-5 rounded-xl border border-gray-100 shadow-lg mt-6 animate-fade-in delay-750">
-            <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
+            <h2 className="text-lg font-extrabold text-gray-800 mb-2 flex items-center gap-2 border-b pb-2">
                 <HelpCircle className="h-5 w-5 text-indigo-600"/> 고객 지원 센터
             </h2>
             <div className="space-y-1">
@@ -798,7 +811,7 @@ export default function GroutEstimatorApp() {
             
             {/* ★★★ 캡처 전용 견적서 양식 (안정화된 구조) ★★★ */}
             <div className="p-5 text-gray-800 bg-white overflow-y-auto max-h-[70vh]"> 
-              <div ref={quoteRef} id="quote-content" className="border-4 border-indigo-700 rounded-lg p-5 space-y-4 mx-auto" style={{ width: '320px' }}> {/* 명시적 너비 지정 */}
+              <div ref={quoteRef} id="quote-content" className="border-4 border-indigo-700 rounded-lg p-5 space-y-4 mx-auto" style={{ width: '320px' }}>
                 
                 {/* 헤더 및 로고 영역 */}
                 <div className="flex flex-col items-center border-b border-gray-300 pb-3 mb-3">
@@ -810,10 +823,10 @@ export default function GroutEstimatorApp() {
                 <div className="space-y-2 border-b border-gray-200 pb-3">
                     <div className="flex justify-between text-sm">
                       <span className="font-semibold flex-shrink-0">현장 유형</span>
-                      <span className='text-right'>{HOUSING_TYPES.find(h => h.id === housingType).label}</span>
+                      <span className='text-right flex-shrink-0'>{HOUSING_TYPES.find(h => h.id === housingType).label}</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      {/* 텍스트 밀림 방지를 위해 오른쪽 텍스트에만 flex-shrink-0 적용 */}
+                      {/* 텍스트 밀림 방지: 오른쪽 값에 flex-shrink-0 강제 적용 */}
                       <span className="font-semibold flex-shrink-0 pr-2">시공 재료</span> 
                       <span className="font-bold text-indigo-600 text-right flex-shrink-0">
                         {selectedMaterialData.label} ({material === 'poly' ? (polyOption === 'pearl' ? '펄' : '무펄') : (epoxyOption === 'kerapoxy' ? '케라폭시' : '스타라이크')})
@@ -830,7 +843,7 @@ export default function GroutEstimatorApp() {
                     <p className="font-extrabold text-gray-800 flex items-center gap-1"><Calculator size={14}/> 시공 범위</p>
                     {SERVICE_AREAS.map(area => quantities[area.id] > 0 ? (
                         <div key={area.id} className="flex justify-between text-gray-600 pl-3">
-                            {/* 내용 영역을 75% 너비로 제한하고, 수량 영역은 밀리지 않도록 설정 */}
+                            {/* 내용 영역은 75% 너비로 제한하여 텍스트 겹침 방지 */}
                             <span className='w-3/4'>- {area.label} <span className="text-gray-400 text-xs">x {quantities[area.id]}</span></span>
                             {area.id === 'entrance' && calculation.isFreeEntrance && <span className='text-blue-500 flex-shrink-0'>[패키지 서비스]</span>}
                         </div>
@@ -894,7 +907,7 @@ export default function GroutEstimatorApp() {
                     <button onClick={handleImageSave} className="flex items-center justify-center gap-1 bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition text-sm active:scale-95 shadow-md">
                         <ImageIcon size={16} /> 견적 이미지 저장
                     </button>
-                    {/* 전화 상담 버튼 문구 수정 */}
+                    {/* 전화 상담 버튼 문구 수정 (연락처 삭제) */}
                     <button onClick={() => window.location.href = `tel:${PHONE_NUMBER}`} className="flex items-center justify-center gap-1 bg-indigo-600 text-white py-3 rounded-lg font-bold hover:bg-indigo-700 transition shadow-md text-sm active:scale-95 col-span-1">
                         <Phone size={16} /> 전화 상담
                     </button>
