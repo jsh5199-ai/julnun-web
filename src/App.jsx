@@ -99,7 +99,7 @@ const FAQ_ITEMS = [
 ];
 
 // =================================================================
-// [컴포넌트] PackageToast (위치 및 색상 유지)
+// [컴포넌트] PackageToast (유지)
 // =================================================================
 const PackageToast = ({ isVisible, onClose }) => {
     useEffect(() => {
@@ -135,7 +135,7 @@ const PackageToast = ({ isVisible, onClose }) => {
 };
 
 // =================================================================
-// [컴포넌트] Accordion & MaterialDetailModal (색상 유지)
+// [컴포넌트] Accordion & MaterialDetailModal (유지)
 // =================================================================
 const Accordion = ({ question, answer }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -840,11 +840,11 @@ export default function GroutEstimatorApp() {
         {/* PackageToast 위치 수정 완료 */}
         <PackageToast isVisible={showToast} onClose={handleCloseToast} />
 
-        {/* 최종 견적 하단 바 (리뷰 버튼 위치 수정 및 시인성 개선) */}
+        {/* 최종 견적 하단 바 (리뷰 버튼 하단바에서 제거) */}
         <div className="fixed bottom-0 left-0 right-0 bg-indigo-900 shadow-2xl safe-area-bottom z-20">
             <div className="max-w-md mx-auto p-4 flex flex-col gap-2"> 
                 
-                {/* 1. 금액 및 정보 영역 (리뷰 버튼 포함) */}
+                {/* 1. 금액 및 정보 영역 */}
                 <div className='flex items-center justify-between w-full text-white'> 
                     
                     {/* 좌측: 금액 정보 (총 예상 견적 문구 화이트 강조) */}
@@ -857,7 +857,7 @@ export default function GroutEstimatorApp() {
                         </div>
                     </div>
                     
-                    {/* 우측: 패키지 라벨만 표시 (하단바로 리뷰 버튼 이동 완료) */}
+                    {/* 우측: 패키지 라벨만 표시 (리뷰 버튼은 모달로 이동) */}
                     <div className='flex flex-col items-end'>
                         {/* A. 패키지 적용 라벨 (패키지 적용 시 우선 표시) */}
                         {calculation.label && (
@@ -865,7 +865,6 @@ export default function GroutEstimatorApp() {
                                  <Crown size={12} className='inline mr-1'/> {calculation.label}
                              </div>
                         )}
-                        {/* 리뷰 버튼은 모달로 이동 */}
                     </div>
                 </div>
 
@@ -1025,7 +1024,7 @@ export default function GroutEstimatorApp() {
             
             {/* ⭐️ [견적서 모달 하단 컨트롤 영역] ⭐️ */}
             <div className="p-4 bg-gray-50 border-t border-gray-200">
-                {/* 1. 숨고 리뷰 이벤트 버튼 (문구 삭제 위치에 배치) */}
+                {/* 1. 숨고 리뷰 이벤트 버튼 (문구 삭제 위치에 배치, 색상 및 테두리 수정) */}
                 {soomgoReviewEvent && (
                     <div className='mb-3'>
                         {(() => {
@@ -1034,15 +1033,19 @@ export default function GroutEstimatorApp() {
                             const discountAmount = evt.discount.toLocaleString();
                             const Icon = isApplied ? CheckCircle2 : Sparkles;
 
-                            const baseClasses = "w-full py-3 rounded-xl transition font-extrabold text-sm active:scale-[0.98] shadow-lg flex items-center justify-center gap-2 relative overflow-hidden";
+                            const baseClasses = "w-full py-3 rounded-xl transition font-extrabold text-sm active:scale-[0.98] shadow-lg flex items-center justify-center gap-2 relative overflow-hidden border-2";
                             
-                            // 버튼 색상: 미적용 시 짙은 네이비 (메인 CTA와 대비)
-                            const buttonClasses = isApplied
-                                ? "bg-gray-700 text-white hover:bg-gray-800" 
-                                : "bg-indigo-700 text-white hover:bg-indigo-800"; 
+                            // 배경색 네이비로 고정
+                            const fixedBgClasses = "bg-indigo-700 text-white hover:bg-indigo-800"; 
+                            
+                            // 테두리 및 아이콘 색상 설정
+                            const borderClasses = isApplied
+                                ? "border-amber-400" // 적용 시 노란색 테두리
+                                : "border-indigo-700"; // 미적용 시 배경색과 동일한 네이비 테두리
+                                
+                            const iconColorClass = 'text-white'; // 아이콘 흰색 고정
 
                             const animationClass = isApplied ? '' : 'shine-effect'; 
-                            const iconColorClass = isApplied ? 'text-white' : 'text-white'; 
 
                             const labelText = isApplied 
                                 ? `✅ 할인 적용 취소하기 (총액 +${discountAmount}원)` 
@@ -1051,7 +1054,7 @@ export default function GroutEstimatorApp() {
                             return (
                                 <button
                                     onClick={() => toggleReview(evt.id)}
-                                    className={`${baseClasses} ${buttonClasses} ${animationClass}`}
+                                    className={`${baseClasses} ${fixedBgClasses} ${borderClasses} ${animationClass}`}
                                 >
                                     <Icon size={18} fill="currentColor" className={iconColorClass}/>
                                     <span>{labelText}</span>
@@ -1061,7 +1064,7 @@ export default function GroutEstimatorApp() {
                     </div>
                 )}
                 
-                {/* 기존의 "상담 시 현장사진이 있으면 큰 도움이 됩니다.." 문구 삭제 */}
+                {/* 기존의 "상담 시 현장사진이 있으면 큰 도움이 됩니다.." 문구 삭제됨 */}
                 
                 <div className='grid grid-cols-2 gap-3'>
                     {/* 버튼 내부 정렬 수정 */}
