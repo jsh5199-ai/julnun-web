@@ -161,14 +161,13 @@ export default function GroutEstimatorApp() {
   const [selectedReviews, setSelectedReviews] = useState(new Set());
   const [showModal, setShowModal] = useState(false);
   const [showMaterialModal, setShowMaterialModal] = useState(false); 
-  const [showPackageInfo, setShowPackageInfo] = useState(true); // 👈 새 상태 추가
+  const [showPackageInfo, setShowPackageInfo] = useState(true);
 
   const quoteRef = useRef(null); 
 
   const SOOMGO_REVIEW_URL = 'https://www.soomgo.com/profile/users/10755579?tab=review';
   const PHONE_NUMBER = '010-7734-6709';
 
-  // 👈 패키지 정보 창 닫기 핸들러 추가
   const handleClosePackageInfo = () => {
       setShowPackageInfo(false);
   };
@@ -186,14 +185,15 @@ export default function GroutEstimatorApp() {
     });
   };
 
-  const toggleReview = (id) => {
+  // 👈 리뷰 토글 함수 (useCallback으로 최적화)
+  const toggleReview = useCallback((id) => {
     setSelectedReviews(prev => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
       return next;
     });
-  };
+  }, []);
   
   const calculation = useMemo(() => {
     const selectedHousing = HOUSING_TYPES.find(h => h.id === housingType);
@@ -368,11 +368,11 @@ export default function GroutEstimatorApp() {
 
     // --- 잔여 항목 및 패키지 포함 항목 모두 계산 ---
     ALL_AREAS.forEach(area => {
-        const initialCount = quantities[area.id] || 0; // 사용자가 선택한 원본 수량
+        const initialCount = quantities[area.id] || 0;
         
-        if (initialCount === 0) return; // 선택하지 않은 항목은 건너뜀
+        if (initialCount === 0) return;
 
-        const count = q[area.id] || 0; // 패키지 차감 후 남은 수량
+        const count = q[area.id] || 0;
         const originalBasePrice = area.basePrice;
 
         let currentMod = selectedMaterial.priceMod;
@@ -388,29 +388,23 @@ export default function GroutEstimatorApp() {
         let finalCalculatedPrice = 0;
         let finalDiscount = 0;
         let isFreeServiceItem = false;
-        let packageCount = initialCount - count; // 패키지에 포함되어 빠진 수량
+        let packageCount = initialCount - count;
 
         // 1. 현관 무료 서비스 처리
         if (area.id === 'entrance' && isFreeEntrance) {
              finalCalculatedPrice = 0;
              finalDiscount = itemOriginalTotal;
              isFreeServiceItem = true;
-             total += finalCalculatedPrice; // 이미 total에 포함되지 않았으므로 0을 더함
+             total += finalCalculatedPrice;
         } else if (packageCount > 0 && ['bathroom_floor', 'master_bath_wall', 'common_bath_wall', 'shower_booth', 'bathtub_wall'].includes(area.id)) {
-            // 2. 핵심 패키지 항목 처리 (욕실바닥/벽 전체/샤워/욕조): 가격은 package_discount에 녹이고, 항목 자체의 최종가격은 0 또는 남은 수량 가격
-            
-            // 패키지에 포함되어 빠진 부분의 원가
-            const packageOriginalPrice = (originalBasePrice * packageCount * currentMod * selectedHousing.multiplier);
+            // 2. 핵심 패키지 항목 처리 (욕실바닥/벽 전체/샤워/욕조)
             
             if (count === 0) {
                 // 전체가 패키지에 포함됨
                 finalCalculatedPrice = 0;
-                finalDiscount = 0; // 실제 할인은 package_discount에 반영
+                finalDiscount = 0;
             } else {
-                // 일부가 패키지에 포함되고, 남은 수량이 있음
-                // 남은 수량은 아래 일반 할인 로직을 따라감
-                
-                // 남은 수량(count)에 대한 일반 할인 적용 (있을 경우)
+                // 일부가 패키지에 포함되고, 남은 수량은 일반 할인 로직 적용
                 if (area.id === 'living_room' && isPackageActive) {
                     let fixedDiscount = (selectedMaterial.id === 'poly' ? 50000 : 150000) * count;
                     remainingCalculatedPrice = Math.max(0, remainingCalculatedPrice - fixedDiscount);
@@ -426,7 +420,7 @@ export default function GroutEstimatorApp() {
             // 3. 일반 항목 또는 기타 패키지 할인이 적용되는 항목 처리
             
             if (area.id === 'living_room' && isPackageActive) {
-                let fixedDiscount = (selectedMaterial.id === 'poly' ? 50000 : 150000) * initialCount; // 전체 수량에 할인 적용
+                let fixedDiscount = (selectedMaterial.id === 'poly' ? 50000 : 150000) * initialCount;
                 remainingCalculatedPrice = Math.max(0, itemOriginalTotal - fixedDiscount);
                 remainingDiscount = fixedDiscount;
             } 
@@ -464,7 +458,7 @@ export default function GroutEstimatorApp() {
             calculatedPrice: finalCalculatedPrice,
             discount: finalDiscount,
             isFreeService: isFreeServiceItem,
-            isPackageItem: packageCount > 0 && !isFreeServiceItem, // 패키지에 포함되어 수량이 차감되었으면 true
+            isPackageItem: packageCount > 0 && !isFreeServiceItem,
             isDiscount: false,
         });
 
@@ -484,7 +478,7 @@ export default function GroutEstimatorApp() {
             originalPrice: evt.discount,
             calculatedPrice: 0,
             discount: evt.discount,
-            isPackageItem: true,
+            isPackageItem: false,
             isDiscount: true,
         });
       }
@@ -546,7 +540,7 @@ export default function GroutEstimatorApp() {
     }
   };
 
-  // 이미지 저장 로직 (모바일 저장 안정화 적용)
+  // 이미지 저장 로직 (유지)
   const handleImageSave = async () => {
     const node = quoteRef.current;
     if (!node) {
@@ -641,6 +635,7 @@ export default function GroutEstimatorApp() {
             <p className="flex items-center text-xs font-semibold text-gray-700 gap-1"><CheckCircle2 size={14} className="text-indigo-600" /> 최대 5년 A/S</p>
             <p className="flex items-center text-xs font-semibold text-gray-700 gap-1"><Zap size={14} className="text-sky-500" /> 책임 시공 보증</p>
         </div>
+        
       </div>
       {/* ------------------------------------ */}
 
@@ -684,7 +679,7 @@ export default function GroutEstimatorApp() {
                           {item.id === material && <CheckCircle2 size={12} className="text-blue-600" />}
                         </div>
                         <span className="font-bold text-gray-800">{item.label}</span>
-                      </div>
+                    </div>
                       <span className={`text-xs font-bold px-3 py-1 rounded-full ${item.badgeColor}`}>
                         {item.badge}
                       </span>
@@ -929,24 +924,37 @@ export default function GroutEstimatorApp() {
                 {/* 시공 및 할인 내역 */}
                 <div className="space-y-2 text-sm border-b border-gray-200 pb-3">
                     <p className="font-extrabold text-gray-800 flex items-center gap-1"><Calculator size={14}/> 시공 내역 및 가격</p>
-                    
-                    {/* 개별 항목 루프 */}
-                    {calculation.itemizedPrices.map(item => {
-                        // isDiscount 항목은 가격 표시가 다르므로 분리
-                        if (item.isDiscount) {
+
+                    {/* 👈 [수정된 부분]: 숨고 리뷰 이벤트 버튼 영역 */}
+                    {REVIEW_EVENTS.map(evt => {
+                        if (evt.id === 'soomgo_review') {
+                            const isApplied = selectedReviews.has(evt.id);
                             return (
-                                <div key={item.id} className="flex justify-between items-center text-red-600 font-semibold pl-2 pr-1 pt-1 border-b border-gray-100 last:border-b-0">
-                                    <span className={`w-3/5`}>
-                                        <Gift size={12} className='inline mr-1'/> {item.label} 
-                                    </span>
-                                    <span className={`text-right w-2/5`}>
-                                        -{item.originalPrice.toLocaleString()}원
+                                <div key={evt.id} className="flex justify-between items-center pl-2 pr-1 pt-1 border-b border-gray-100">
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            toggleReview(evt.id);
+                                        }}
+                                        className={`w-3/5 text-left transition active:scale-95 text-xs font-bold px-2 py-1 rounded-md flex items-center gap-1 shadow-sm ${isApplied ? 'bg-red-600 text-white' : 'bg-red-100 text-red-600 border border-red-300 hover:bg-red-200'}`}
+                                    >
+                                        <Gift size={12}/> {isApplied ? '할인 적용 완료 (클릭 취소)' : '숨고 리뷰이벤트 적용'}
+                                    </button>
+                                    <span className={`text-right w-2/5 font-bold ${isApplied ? 'text-red-600' : 'text-gray-400'}`}>
+                                        {isApplied ? `-${evt.discount.toLocaleString()}원` : '0원'}
                                     </span>
                                 </div>
                             );
                         }
+                        return null;
+                    })}
+                    {/* 👆 [수정된 부분 끝] */}
+                    
+                    {/* 개별 항목 루프 (시공 내역) */}
+                    {calculation.itemizedPrices
+                        .filter(item => !item.isDiscount) // 할인 항목 제외
+                        .map(item => {
                         
-                        // 일반 시공 항목 (줄눈/실리콘)
                         const isDiscounted = item.discount > 0;
                         const finalPriceText = item.calculatedPrice > 0 ? `${item.calculatedPrice.toLocaleString()}원` : (item.isFreeService ? '무료' : '패키지 포함');
                         
@@ -982,6 +990,20 @@ export default function GroutEstimatorApp() {
                             </div>
                         );
                     })}
+
+                    {/* 👈 [추가된 부분]: 할인 항목 루프 (리뷰 할인 포함) */}
+                    {calculation.itemizedPrices
+                        .filter(item => item.isDiscount && item.id !== 'soomgo_review') // 숨고 리뷰는 위에서 버튼으로 처리했으므로 제외
+                        .map(item => (
+                            <div key={item.id} className="flex justify-between items-center text-red-600 font-semibold pl-2 pr-1 pt-1 border-b border-gray-100 last:border-b-0">
+                                <span className={`w-3/5`}>
+                                    <Gift size={12} className='inline mr-1'/> {item.label} 
+                                </span>
+                                <span className={`text-right w-2/5`}>
+                                    -{item.originalPrice.toLocaleString()}원
+                                </span>
+                            </div>
+                       ))}
                 </div>
 
                 {/* 총 합계 영역 */}
