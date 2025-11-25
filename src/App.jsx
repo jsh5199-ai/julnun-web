@@ -1035,8 +1035,8 @@ export default function GroutEstimatorApp() {
                             // 애니메이션 클래스 제거 (className에 shine-effect를 넣지 않음)
 
                             const labelText = isApplied 
-                                ? `✅ 할인 적용 취소하기 (총액 +${discountAmount}원)` 
-                                : `🎁 숨고 리뷰 약속하고 ${discountAmount}원 할인받기!`;
+                                ? `할인 적용 취소하기 (총액 +${discountAmount}원)` 
+                                : `숨고 리뷰 약속하고 ${discountAmount}원 할인받기!`;
 
                             return (
                                 <button
