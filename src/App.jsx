@@ -6,22 +6,26 @@ import {
 
 // =================================================================
 // [가상 라이브러리 함수 정의 - 실제 환경에서는 'html2canvas' 설치 후 사용]
-// 이 함수를 실제 html2canvas(node, options) 호출로 대체해야 합니다.
+// 캔버스에 배경색을 명확히 지정하여 흰색 화면 문제를 방지하는 로직을 시뮬레이션합니다.
 // =================================================================
 const simulateHtmlToCanvas = async (node, options) => {
-    // 실제 환경: return html2canvas(node, options);
+    // 이 함수를 실제 html2canvas(node, options) 호출로 대체해야 합니다.
     
-    // 시뮬레이션: 내용이 있는 캔버스 반환
     const canvas = document.createElement('canvas');
-    canvas.width = node.offsetWidth;
-    canvas.height = node.offsetHeight;
-    const ctx = canvas.getContext('2d');
+    const scale = options.scale || 1;
     
-    // 흰색 배경 채우기 (백색화면 방지)
+    // 캡처 영역의 실제 크기 사용
+    canvas.width = node.offsetWidth * scale;
+    canvas.height = node.offsetHeight * scale;
+    
+    const ctx = canvas.getContext('2d');
+    ctx.scale(scale, scale);
+    
+    // 흰색 배경 명시적으로 채우기 (백색화 방지 핵심)
     ctx.fillStyle = options.backgroundColor || '#FFFFFF';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
-    // 여기에 캡처된 내용이 그려졌다고 가정 (실제로는 html2canvas가 수행)
+    // 이 시점에서 html2canvas가 DOM 내용을 캔버스에 그립니다. (시뮬레이션에서는 생략)
     
     return canvas;
 };
@@ -29,7 +33,7 @@ const simulateHtmlToCanvas = async (node, options) => {
 
 
 // =================================================================
-// [스타일] (유지)
+// [스타일] 애니메이션 정의 (대기업 스타일)
 // =================================================================
 const GlobalStyles = () => (
   <style>{`
@@ -41,10 +45,11 @@ const GlobalStyles = () => (
     }
     .animate-fade-in { animation: fadeIn 0.5s ease-out; }
     .animate-slide-down { animation: slideDown 0.3s ease-out; }
+    
     .selection-box { transition: all 0.2s ease-in-out; }
     .selection-selected {
-      border: 3px solid #3b82f6; 
-      background-color: #f0f9ff; 
+      border: 3px solid #3b82f6;
+      background-color: #f0f9ff;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
     }
     .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom); }
@@ -60,8 +65,16 @@ const HOUSING_TYPES = [
 ];
 
 const MATERIALS = [
-  { id: 'poly', label: '폴리아스파틱', priceMod: 1.0, description: '탄성과 광택이 우수하며 가성비가 좋습니다.', badge: '일반', badgeColor: 'bg-gray-200 text-gray-700' },
-  { id: 'kerapoxy', label: '에폭시(무광/무펄)', priceMod: 1.8, description: '내구성이 뛰어나고 매트한 질감.', badge: '프리미엄', badgeColor: 'bg-amber-100 text-amber-800' },
+  { 
+    id: 'poly', label: '폴리아스파틱', priceMod: 1.0, 
+    description: '탄성과 광택이 우수하며 가성비가 좋습니다.',
+    badge: '일반', badgeColor: 'bg-gray-200 text-gray-700'
+  },
+  { 
+    id: 'kerapoxy', label: '에폭시(무광/무펄)', priceMod: 1.8, 
+    description: '내구성이 뛰어나고 매트한 질감.',
+    badge: '프리미엄', badgeColor: 'bg-amber-100 text-amber-800'
+  },
 ];
 
 const SERVICE_AREAS = [
@@ -80,7 +93,7 @@ const SILICON_AREAS = [
   { id: 'silicon_bathtub', label: '욕조 테두리 교체', basePrice: 80000, icon: Eraser, unit: '개소', desc: '단독 8만 / 패키지시 5만' },
   { id: 'silicon_sink', label: '세면대+젠다이 교체', basePrice: 30000, icon: Eraser, unit: '개소', desc: '오염된 실리콘 제거 후 재시공' },
   { id: 'silicon_kitchen_line', label: '주방 실리콘오염방지', basePrice: 50000, icon: Eraser, unit: '구역', desc: '음식물 오염 방지' },
-  { id: 'silicon_living_baseboard', label: '거실 걸레받이 실리콘', basePrice: 400000, icon: Sofa, unit: '구역', desc: '단독 40만 / 패키지시 35만' },
+  { id: 'silicon_living_baseboard', basePrice: 400000, icon: Sofa, unit: '구역', desc: '단독 40만 / 패키지시 35만' },
 ];
 
 const REVIEW_EVENTS = [
@@ -175,7 +188,7 @@ export default function GroutEstimatorApp() {
   const quoteRef = useRef(null); 
 
   const SOOMGO_REVIEW_URL = 'https://www.soomgo.com/profile/users/10755579?tab=review';
-  const PHONE_NUMBER = '010-7734-6709'; // 연락처 문구는 버튼에서 제거됨
+  const PHONE_NUMBER = '010-7734-6709';
 
   // --- 로직 (handleQuantityChange, toggleReview, calculation, generateQuoteText, copyToClipboard) 유지 ---
 
@@ -473,20 +486,17 @@ export default function GroutEstimatorApp() {
         return;
     }
     
-    // 로딩 처리 시작 (필요시)
-    
     try {
         // [html2canvas 라이브러리 사용 가정]
         
-        // 1. 캡처 옵션 설정 (흰색 배경 강제 적용, 캡처 해상도 조정)
+        // 1. 캡처 옵션 설정 (흰색 배경 명시, 고해상도 설정)
         const options = {
-            // 실제 구현 시, useCORS: true 옵션으로 외부 이미지 로딩 문제를 해결합니다.
-            backgroundColor: '#FFFFFF', 
+            backgroundColor: '#FFFFFF', // 흰색 배경 명시
             scale: 2, // 고해상도 캡처
+            useCORS: true, // 외부 리소스(로고 등) 허용
         };
 
-        // 2. DOM을 Canvas로 변환 (simulateHtmlToCanvas는 실제 라이브러리 호출을 대체합니다)
-        // const canvas = await html2canvas(node, options); 
+        // 2. DOM을 Canvas로 변환 (시뮬레이션)
         const canvas = await simulateHtmlToCanvas(node, options); 
 
         const dataUrl = canvas.toDataURL('image/png', 1.0);
@@ -509,7 +519,6 @@ export default function GroutEstimatorApp() {
         console.error("이미지 저장 실패:", error);
         alert("이미지 저장 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
     }
-    // 로딩 처리 종료 (필요시)
   };
 
 
@@ -518,7 +527,6 @@ export default function GroutEstimatorApp() {
 
 
   return (
-    // 배경색: 대기업 느낌으로 '화이트/아이보리' 계열
     <div className={`min-h-screen bg-gray-50 text-gray-800 font-sans ${calculation.isPackageActive ? 'pb-48' : 'pb-28'}`}>
       <GlobalStyles />
 
@@ -709,7 +717,7 @@ export default function GroutEstimatorApp() {
 
         {/* --- 자주 묻는 질문 (FAQ) --- */}
         <section className="bg-white p-5 rounded-xl border border-gray-100 shadow-lg mt-6 animate-fade-in delay-750">
-            <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
+            <h2 className="text-lg font-extrabold text-gray-800 mb-2 flex items-center gap-2 border-b pb-2">
                 <HelpCircle className="h-5 w-5 text-indigo-600"/> 고객 지원 센터
             </h2>
             <div className="space-y-1">
