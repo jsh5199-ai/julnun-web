@@ -1,40 +1,14 @@
 import React, { useState, useMemo, useCallback, useRef } from 'react'; 
+import html2canvas from 'html2canvas'; 
 import { 
   Calculator, Home, Bath, DoorOpen, Utensils, LayoutGrid, 
   CheckCircle2, Info, Copy, RefreshCw, Phone, Sparkles, Hammer, Sofa, Palette, Crown, Gift, Eraser, Star, X, ChevronDown, HelpCircle, Zap, TrendingUp, Trophy, Clock, Image as ImageIcon
 } from 'lucide-react';
 
-// =================================================================
-// [가상 라이브러리 함수 정의 - 실제 환경에서는 'html2canvas' 설치 후 사용]
-// =시는 html2canvas 라이브러리를 사용한다고 가정합니다.
-// =================================================================
 const delay = ms => new Promise(res => setTimeout(res, ms)); 
 
-const simulateHtmlToCanvas = async (node, options) => {
-    // 이 함수를 실제 html2canvas(node, options) 호출로 대체해야 합니다.
-    
-    await delay(100); 
-
-    const canvas = document.createElement('canvas');
-    const scale = options.scale || 1;
-    
-    canvas.width = node.offsetWidth * scale;
-    canvas.height = node.offsetHeight * scale;
-    
-    const ctx = canvas.getContext('2d');
-    ctx.scale(scale, scale);
-    
-    // 흰색 배경 명시적으로 채우기 (백색화 방지 핵심)
-    ctx.fillStyle = options.backgroundColor || '#FFFFFF';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    return canvas;
-};
 // =================================================================
-
-
-// =================================================================
-// [스타일] 애니메이션 정의 (대기업 스타일)
+// [스타일] 애니메이션 정의 (유지)
 // =================================================================
 const GlobalStyles = () => (
   <style>{`
@@ -348,8 +322,8 @@ export default function GroutEstimatorApp() {
                 else if (selectedMaterial.id === 'kerapoxy') price -= (150000 * count);
             } 
             else if (area.id === 'balcony_laundry' && isPackageActive) {
-                 if (selectedMaterial.id === 'poly') { price = 100000 * count; } 
-                 else if (selectedMaterial.id === 'kerapoxy') { price = basePrice * count * currentMod * selectedHousing.multiplier; }
+               if (selectedMaterial.id === 'poly') { price = 100000 * count; } 
+               else if (selectedMaterial.id === 'kerapoxy') { price = basePrice * count * currentMod * selectedHousing.multiplier; }
             }
             else if (area.id === 'silicon_bathtub' && isPackageActive) { price = 50000 * count; }
             else if (area.id === 'silicon_living_baseboard' && isPackageActive) { price = 350000 * count; }
@@ -459,6 +433,7 @@ export default function GroutEstimatorApp() {
         await navigator.clipboard.writeText(text);
         return true;
     } catch (err) {
+      // 대체 복사 로직 (iOS 및 구형 브라우저 대응)
         const textArea = document.createElement("textarea");
         textArea.value = text;
         textArea.style.position = 'fixed';
@@ -478,7 +453,7 @@ export default function GroutEstimatorApp() {
     }
   };
 
-  // ★★★ 이미지 저장 로직 (안정화 적용) ★★★
+  // ★★★ 이미지 저장 로직 (모바일 저장 안정화 적용) ★★★
   const handleImageSave = async () => {
     const node = quoteRef.current;
     if (!node) {
@@ -487,56 +462,75 @@ export default function GroutEstimatorApp() {
     }
     
     try {
-        // 1. 캡처 전 렌더링 안정화 대기 (백색화 방지 핵심)
+        // 1. 캡처 전 안정화 대기
         await delay(100); 
 
         const options = {
-            backgroundColor: '#FFFFFF', // 흰색 배경 명시 (핵심)
+            backgroundColor: '#FFFFFF', // 흰색 배경 명시 (백색화 방지)
             scale: 2, // 고해상도 캡처
             useCORS: true, 
             windowHeight: node.offsetHeight, 
             windowWidth: node.offsetWidth,
         };
 
-        // 2. DOM을 Canvas로 변환 (시뮬레이션)
-        const canvas = await simulateHtmlToCanvas(node, options); 
+        // 2. html2canvas로 Canvas 생성
+        const canvas = await html2canvas(node, options); 
 
+        // 3. DataURL 획득
         const dataUrl = canvas.toDataURL('image/png', 1.0);
-        const filename = '줄눈의미학_견적서_' + new Date().getTime();
         
-        // 3. 다운로드 링크 생성 및 클릭 (Blob 다운로드 방식 시뮬레이션)
+        // 4. 새 창에 이미지 및 저장 안내 문구 표시 (모바일 친화적 방식)
+        const windowContent = `
+            <!DOCTYPE html>
+            <html>
+                <head>
+                    <title>줄눈 견적 이미지 저장</title>
+                    <meta name="viewport" content="width=device-width, initial-scale=1">
+                    <style>
+                        /* 사용자 안내 문구가 눈에 잘 띄도록 스타일 적용 */
+                        body { margin: 0; background: #f0f0f0; display: flex; flex-direction: column; align-items: center; padding-top: 70px; }
+                        img { max-width: 95%; height: auto; border: 1px solid #ccc; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+                        .info {
+                            position: fixed; top: 0; left: 0; right: 0; 
+                            background: #d4edda; /* 성공적인 색상 */ 
+                            color: #155724; 
+                            padding: 10px; text-align: center; font-size: 16px; 
+                            font-weight: bold; border-bottom: 2px solid #c3e6cb;
+                            z-index: 1000;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="info">
+                        ✅ 저장을 위해 이미지를 길게(꾹) 눌러 '저장'하세요. (PC는 우클릭)
+                    </div>
+                    <img src="${dataUrl}" alt="줄눈 견적서 이미지"/>
+                </body>
+            </html>
+        `;
+
+        const printWindow = window.open('', '_blank');
+        if (printWindow) {
+            printWindow.document.write(windowContent);
+            printWindow.document.close();
+            // 이미지 저장이 완료되었음을 알림 대신, 새 창이 열렸으므로 모달만 닫음
+            setShowModal(false);
+        } else {
+            alert("팝업 차단이 설정되어 있습니다. 해제 후 다시 시도해주세요.");
+        }
         
-        // Blob 생성 및 다운로드 방식 (안정성 향상)
-        canvas.toBlob((blob) => {
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.download = filename + '.png';
-            link.href = url;
-            
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            URL.revokeObjectURL(url); 
-            
-            alert("이미지 저장이 완료되었습니다! (갤러리 또는 다운로드 폴더 확인)");
-            setShowModal(false); 
-        }, 'image/png');
-
-
     } catch (error) {
-        console.error("이미지 저장 실패:", error);
+        console.error("이미지 캡처 및 저장 실패:", error);
         alert("이미지 저장 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
     }
-  };
-
+};
 
   const hasSelections = Object.values(quantities).some(v => v > 0);
   const selectedMaterialData = MATERIALS.find(m => m.id === material);
 
 
   return (
-    <div className={`min-h-screen bg-gray-50 text-gray-800 font-sans ${calculation.isPackageActive ? 'pb-48' : 'pb-28'}`}>
+    <div className={`min-h-screen bg-gray-50 bg-gray-50 text-gray-800 font-sans ${calculation.isPackageActive ? 'pb-48' : 'pb-28'}`}>
       <GlobalStyles />
 
       {/* 헤더: 짙은 네이비 배경 (프리미엄) */}
@@ -807,7 +801,7 @@ export default function GroutEstimatorApp() {
               </button>
             </div>
             
-            {/* ★★★ 캡처 전용 견적서 양식 (안정화된 구조) ★★★ */}
+            {/* ★★★ 캡처 전용 견적서 양식 ★★★ */}
             <div className="p-5 text-gray-800 bg-white overflow-y-auto max-h-[70vh]"> 
               <div ref={quoteRef} id="quote-content" className="border-4 border-indigo-700 rounded-lg p-5 space-y-4 mx-auto" style={{ width: '320px' }}>
                 
@@ -886,15 +880,15 @@ export default function GroutEstimatorApp() {
                 </div>
 
                 {/* 안내 사항 영역 */}
-                 <div className="mt-4 pt-3 border-t border-gray-200">
-                    <p className='text-xs font-semibold text-red-600 mb-1 flex items-center gap-1'>
-                        <Info size={14}/> 주의 사항
-                    </p>
-                    <ul className='list-disc list-outside text-[11px] text-gray-600 ml-4 space-y-0.5'>
-                        <li>정확한 견적을 위해 **현장 사진 2~3장**이 필수입니다.</li>
-                        <li>견적 기준 타일 크기 외(조각 타일, 특이 구조) 시 추가 비용이 발생할 수 있습니다.</li>
-                    </ul>
-                 </div>
+                   <div className="mt-4 pt-3 border-t border-gray-200">
+                      <p className='text-xs font-semibold text-red-600 mb-1 flex items-center gap-1'>
+                          <Info size={14}/> 주의 사항
+                      </p>
+                      <ul className='list-disc list-outside text-[11px] text-gray-600 ml-4 space-y-0.5'>
+                          <li>정확한 견적을 위해 **현장 사진 2~3장**이 필수입니다.</li>
+                          <li>견적 기준 타일 크기 외(조각 타일, 특이 구조) 시 추가 비용이 발생할 수 있습니다.</li>
+                      </ul>
+                   </div>
               </div>
             </div>
             {/* ★★★ 캡처 영역 끝 ★★★ */}
@@ -902,7 +896,7 @@ export default function GroutEstimatorApp() {
             <div className="p-4 bg-gray-50 border-t border-gray-200">
                 <p className='text-sm font-semibold text-center text-red-500 mb-3 flex items-center justify-center gap-1'><Info size={16}/> 전문가 상담 시 **현장 사진 2~3장**이 필수입니다.</p>
                <div className='grid grid-cols-2 gap-3'>
-                    {/* '이미지 저장' 버튼 연결 */}
+                    {/* '이미지 저장' 버튼 연결 (수정된 handleImageSave 연결) */}
                     <button onClick={handleImageSave} className="flex items-center justify-center gap-1 bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition text-sm active:scale-95 shadow-md">
                         <ImageIcon size={16} /> 견적 이미지 저장
                     </button>
