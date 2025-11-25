@@ -14,18 +14,17 @@ const simulateHtmlToCanvas = async (node, options) => {
     const canvas = document.createElement('canvas');
     const scale = options.scale || 1;
     
-    // 캡처 영역의 실제 크기 사용
     canvas.width = node.offsetWidth * scale;
     canvas.height = node.offsetHeight * scale;
     
     const ctx = canvas.getContext('2d');
     ctx.scale(scale, scale);
     
-    // 흰색 배경 명시적으로 채우기 (백색화 방지 핵심)
+    // ★ 흰색 배경 명시적으로 채우기 (백색화 방지 핵심)
     ctx.fillStyle = options.backgroundColor || '#FFFFFF';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
-    // 이 시점에서 html2canvas가 DOM 내용을 캔버스에 그립니다. (시뮬레이션에서는 생략)
+    // 이 시점에서 html2canvas가 DOM 내용을 캔버스에 그립니다.
     
     return canvas;
 };
@@ -65,16 +64,8 @@ const HOUSING_TYPES = [
 ];
 
 const MATERIALS = [
-  { 
-    id: 'poly', label: '폴리아스파틱', priceMod: 1.0, 
-    description: '탄성과 광택이 우수하며 가성비가 좋습니다.',
-    badge: '일반', badgeColor: 'bg-gray-200 text-gray-700'
-  },
-  { 
-    id: 'kerapoxy', label: '에폭시(무광/무펄)', priceMod: 1.8, 
-    description: '내구성이 뛰어나고 매트한 질감.',
-    badge: '프리미엄', badgeColor: 'bg-amber-100 text-amber-800'
-  },
+  { id: 'poly', label: '폴리아스파틱', priceMod: 1.0, description: '탄성과 광택이 우수하며 가성비가 좋습니다.', badge: '일반', badgeColor: 'bg-gray-200 text-gray-700' },
+  { id: 'kerapoxy', label: '에폭시(무광/무펄)', priceMod: 1.8, description: '내구성이 뛰어나고 매트한 질감.', badge: '프리미엄', badgeColor: 'bg-amber-100 text-amber-800' },
 ];
 
 const SERVICE_AREAS = [
@@ -84,7 +75,7 @@ const SERVICE_AREAS = [
   { id: 'bathtub_wall', label: '욕조 벽 3면', basePrice: 150000, icon: Bath, unit: '구역' },
   { id: 'master_bath_wall', label: '안방욕실 벽 전체', basePrice: 300000, icon: Bath, unit: '구역' },
   { id: 'common_bath_wall', label: '공용욕실 벽 전체', basePrice: 300000, icon: Bath, unit: '구역' },
-  { id: 'balcony_laundry', label: '베란다/세탁실', basePrice: 150000, icon: LayoutGrid, unit: '개소', desc: '원하는 개수만큼 선택' },
+  { id: 'balcony_laundry', basePrice: 150000, icon: LayoutGrid, unit: '개소', desc: '원하는 개수만큼 선택' },
   { id: 'kitchen_wall', label: '주방 벽면', basePrice: 150000, icon: Utensils, unit: '구역' },
   { id: 'living_room', label: '거실 바닥', basePrice: 550000, icon: Sofa, unit: '구역', desc: '복도,주방 포함' },
 ];
@@ -487,13 +478,11 @@ export default function GroutEstimatorApp() {
     }
     
     try {
-        // [html2canvas 라이브러리 사용 가정]
-        
         // 1. 캡처 옵션 설정 (흰색 배경 명시, 고해상도 설정)
         const options = {
-            backgroundColor: '#FFFFFF', // 흰색 배경 명시
+            backgroundColor: '#FFFFFF', // 흰색 배경 명시 (핵심)
             scale: 2, // 고해상도 캡처
-            useCORS: true, // 외부 리소스(로고 등) 허용
+            useCORS: true, 
         };
 
         // 2. DOM을 Canvas로 변환 (시뮬레이션)
@@ -791,62 +780,101 @@ export default function GroutEstimatorApp() {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-fade-in">
           <div className="bg-white w-full max-w-sm rounded-xl shadow-2xl overflow-hidden animate-slide-down border border-gray-200">
             <div className="bg-indigo-700 p-4 text-white flex justify-between items-center">
-              <h3 className="font-extrabold text-lg flex items-center gap-2"><CheckCircle2 className="h-5 w-5 text-amber-400" /> 최종 견적 요약</h3>
+              <h3 className="font-extrabold text-lg flex items-center gap-2"><CheckCircle2 className="h-5 w-5 text-amber-400" /> 견적서 (이미지 저장용)</h3>
               <button onClick={() => setShowModal(false)} className="text-white/80 hover:text-white transition active:scale-95">
                 <X size={20} />
               </button>
             </div>
-            {/* ★★★ 견적 내용 영역에 Ref 추가 및 내부 스타일 조정 ★★★ */}
-            <div ref={quoteRef} id="quote-content" className="p-5 max-h-[60vh] overflow-y-auto text-gray-800 bg-white"> 
-              <div className="space-y-4 text-sm">
+            
+            {/* ★★★ 캡처 전용 견적서 양식 ★★★ */}
+            <div ref={quoteRef} id="quote-content" className="p-5 text-gray-800 bg-white"> 
+              <div className="border-4 border-indigo-700 rounded-lg p-5 space-y-4">
                 
-                <div className="flex justify-between border-b border-gray-200 pb-2">
-                  <span className="text-gray-500">시공 재료</span>
-                  <span className="font-bold text-indigo-600">
-                    {selectedMaterialData.label}
-                    <span className="text-xs ml-1 text-gray-500">
-                        ({material === 'poly' ? (polyOption === 'pearl' ? '펄' : '무펄') : (epoxyOption === 'kerapoxy' ? '케라폭시' : '스타라이크')})
-                    </span>
-                  </span>
-                </div>
-                
-                <div className="flex justify-between border-b border-gray-200 pb-2">
-                  <span className="text-gray-500">예상 시공 시간</span>
-                  <span className="font-bold text-blue-600">{calculation.estimatedHours}시간 내외</span>
+                {/* 헤더 및 로고 영역 */}
+                <div className="flex flex-col items-center border-b border-gray-300 pb-3 mb-3">
+                    <h1 className='text-xl font-extrabold text-indigo-800'>줄눈의미학 예상 견적서</h1>
+                    <p className='text-xs text-gray-500 mt-1'>Final Quotation Summary</p>
                 </div>
 
-                <div className="space-y-2 border-b border-gray-200 pb-4">
-                  <p className="text-gray-500 text-xs mb-1 font-bold">📋 시공 상세 범위</p>
-                  {SERVICE_AREAS.map(area => {if (quantities[area.id] > 0) {return (<div key={area.id} className="flex justify-between items-center bg-gray-50 p-2 rounded"><span>{area.label} <span className="text-gray-400 text-xs">x {quantities[area.id]}</span></span></div>);}return null;})}
-                </div>
-                
-                {SILICON_AREAS.some(area => quantities[area.id] > 0) && (
-                  <div className="space-y-2 border-b border-gray-200 pb-4">
-                    <p className="text-gray-500 text-xs mb-1 font-bold">🧴 실리콘/리폼 항목</p>
-                    {SILICON_AREAS.map(area => {if (quantities[area.id] > 0) {return (<div key={area.id} className="flex justify-between items-center bg-amber-50 p-2 rounded border border-amber-100 text-amber-800"><span>{area.label} <span className="text-amber-600 text-xs">x {quantities[area.id]}</span></span></div>);}return null;})}
-                  </div>
-                )}
-
-                {calculation.discountAmount > 0 && (
-                  <div className="space-y-2 border-b border-gray-200 pb-4">
-                    <p className="text-gray-500 text-xs mb-1 font-bold">🎁 할인 혜택</p>
-                    {REVIEW_EVENTS.map(evt => {if (selectedReviews.has(evt.id)) {return (<div key={evt.id} className="flex justify-between items-center bg-red-50 p-2 rounded border border-red-100 text-red-800"><span>{evt.label}</span><span className="font-bold text-red-600">-{evt.discount.toLocaleString()}원</span></div>);}return null;})}
-                  </div>
-                )}
-                
-                <div className="flex justify-between items-end pt-3 border-t border-gray-200">
-                    <span className="font-extrabold text-gray-800">총 예상 합계</span>
-                    <div className="text-right">
-                      <span className="text-2xl font-extrabold text-blue-600">{calculation.price.toLocaleString()}원</span>
-                      {calculation.label && <div className="text-xs text-red-600 font-bold mt-1">{calculation.label}</div>}
+                {/* 기본 정보 테이블 */}
+                <div className="space-y-2 border-b border-gray-200 pb-3">
+                    <div className="flex justify-between text-sm">
+                      <span className="font-semibold">현장 유형</span>
+                      <span>{HOUSING_TYPES.find(h => h.id === housingType).label}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="font-semibold">시공 재료</span>
+                      <span className="font-bold text-indigo-600">
+                        {selectedMaterialData.label} ({material === 'poly' ? (polyOption === 'pearl' ? '펄' : '무펄') : (epoxyOption === 'kerapoxy' ? '케라폭시' : '스타라이크')})
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="font-semibold">예상 시공 시간</span>
+                      <span className="font-bold text-gray-700">{calculation.estimatedHours}시간 내외</span>
                     </div>
                 </div>
-                <p className="text-xs text-gray-400 text-right mt-1">VAT 별도 / 현장상황별 상이</p>
+
+                {/* 시공 및 할인 내역 */}
+                <div className="space-y-2 text-sm border-b border-gray-200 pb-3">
+                    <p className="font-extrabold text-gray-800 flex items-center gap-1"><Calculator size={14}/> 시공 범위</p>
+                    {SERVICE_AREAS.map(area => quantities[area.id] > 0 ? (
+                        <div key={area.id} className="flex justify-between text-gray-600 pl-3">
+                            <span>- {area.label} <span className="text-gray-400 text-xs">x {quantities[area.id]}</span></span>
+                            {area.id === 'entrance' && calculation.isFreeEntrance && <span className='text-blue-500'>[패키지 서비스]</span>}
+                        </div>
+                    ) : null)}
+                    
+                    {SILICON_AREAS.some(area => quantities[area.id] > 0) && (
+                        <>
+                            <p className="font-extrabold text-gray-800 flex items-center gap-1 mt-3"><Eraser size={14}/> 실리콘/리폼</p>
+                            {SILICON_AREAS.map(area => quantities[area.id] > 0 ? (
+                                <div key={area.id} className="flex justify-between text-gray-600 pl-3">
+                                    <span>- {area.label} <span className="text-gray-400 text-xs">x {quantities[area.id]}</span></span>
+                                </div>
+                            ) : null)}
+                        </>
+                    )}
+                    
+                    {calculation.discountAmount > 0 && (
+                        <>
+                            <p className="font-extrabold text-red-600 flex items-center gap-1 mt-3"><Gift size={14}/> 할인 혜택</p>
+                            {REVIEW_EVENTS.map(evt => selectedReviews.has(evt.id) ? (
+                                <div key={evt.id} className="flex justify-between text-red-600 pl-3 font-semibold">
+                                    <span>- {evt.label}</span>
+                                    <span>-{evt.discount.toLocaleString()}원</span>
+                                </div>
+                            ) : null)}
+                        </>
+                    )}
+
+                </div>
+
+                {/* 총 합계 영역 */}
+                <div className="pt-3">
+                    <div className="flex justify-between items-end">
+                        <span className="font-extrabold text-lg text-gray-900">총 예상 견적 합계</span>
+                        <div className="text-right">
+                            <span className="text-3xl font-extrabold text-blue-600">{calculation.price.toLocaleString()}원</span>
+                            {calculation.label && <div className="text-xs text-red-600 font-bold mt-1">{calculation.label}</div>}
+                        </div>
+                    </div>
+                    <p className="text-xs text-gray-400 text-right mt-1">VAT 별도 / 현장상황별 상이</p>
+                </div>
+
+                {/* 안내 사항 영역 */}
+                 <div className="mt-4 pt-3 border-t border-gray-200">
+                    <p className='text-xs font-semibold text-red-600 mb-1 flex items-center gap-1'>
+                        <Info size={14}/> 주의 사항
+                    </p>
+                    <ul className='list-disc list-outside text-[11px] text-gray-600 ml-4 space-y-0.5'>
+                        <li>정확한 견적을 위해 **현장 사진 2~3장**이 필수입니다.</li>
+                        <li>견적 기준 타일 크기 외(조각 타일, 특이 구조) 시 추가 비용이 발생할 수 있습니다.</li>
+                    </ul>
+                 </div>
               </div>
             </div>
             
             <div className="p-4 bg-gray-50 border-t border-gray-200">
-                <p className='text-sm font-semibold text-center text-red-500 mb-3 flex items-center justify-center gap-1'><Info size={16}/> 전문가 상담 시 **현장 사진 2~3장**이 필수입니다.</p>
                <div className='grid grid-cols-2 gap-3'>
                     {/* ★★★ '이미지 저장' 버튼 연결 (유지) ★★★ */}
                     <button onClick={handleImageSave} className="flex items-center justify-center gap-1 bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition text-sm active:scale-95 shadow-md">
