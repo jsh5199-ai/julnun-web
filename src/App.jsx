@@ -713,7 +713,7 @@ export default function GroutEstimatorApp() {
         {/* --- 3. 원하는 시공범위를 선택해주세요 (유지) --- */}
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-300">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
-            <Calculator className="h-5 w-5 text-indigo-600" /> 3. 시공 범위 설정 (줄눈)
+            <Calculator className="h-5 w-5 text-indigo-600" /> 3. 시공 범위 선택
           </h2 >
           <div className="space-y-3">
             {SERVICE_AREAS.map((area) => {
@@ -821,7 +821,7 @@ export default function GroutEstimatorApp() {
             className="w-full py-3 rounded-lg bg-amber-500 text-gray-900 font-bold text-base hover:bg-amber-600 transition shadow-lg flex items-center justify-center gap-2 active:scale-95"
           >
             <Star size={20} fill="currentColor" className="text-white" />
-            고객 만족도 확인 (숨고 평점 4.9+)
+            고객 만족도 확인 (숨고 평점 5.0+)
           </button>
         </div>
       </main>
