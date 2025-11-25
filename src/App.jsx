@@ -8,7 +8,7 @@ import {
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
 // =================================================================
-// [스타일] 애니메이션 정의 (유지)
+// [스타일] 애니메이션 정의 (shine-effect 관련 스타일 제거)
 // =================================================================
 const GlobalStyles = () => (
   <style>{`
@@ -19,17 +19,7 @@ const GlobalStyles = () => (
       0%, 100% { box-shadow: 0 0 0 0 rgba(100, 116, 139, 0.4); } 
       50% { box-shadow: 0 0 0 8px rgba(100, 116, 139, 0); } 
     }
-    /* 리뷰 버튼 애니메이션 복구 */
-    @keyframes shine { 
-        0% { background-position: -200% 0; }
-        100% { background-position: 200% 0; }
-    }
-    .shine-effect {
-        /* 네이비 계열 배경에 맞게 흰색 빛깔로 조정 */
-        background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
-        background-size: 200% 100%;
-        animation: shine 5s infinite;
-    }
+    /* shine-effect 스타일 및 애니메이션을 제거합니다. */
     
     .animate-fade-in { animation: fadeIn 0.5s ease-out; }
     .animate-slide-down { animation: slideDown 0.3s ease-out; }
@@ -363,7 +353,6 @@ export default function GroutEstimatorApp() {
         q['master_bath_wall'] = Math.max(0, q['master_bath_wall'] - 1);
         q['common_bath_wall'] = Math.max(0, q['common_bath_wall'] - 1);
         isPackageActive = true;
-        isFreeEntrance = true;
         labelText = '패키지 할인 적용'; 
       }
       else if (qBathFloor >= 2 && (qShower >= 1 || qBathtub >= 1)) { 
@@ -374,12 +363,10 @@ export default function GroutEstimatorApp() {
         if (qShower >= 1) q['shower_booth'] -= 1;
         else q['bathtub_wall'] -= 1;
         isPackageActive = true;
-        isFreeEntrance = true;
         labelText = '패키지 할인 적용'; 
       }
       else if (qBathFloor >= 2 && qEntrance >= 1) { 
         isPackageActive = true;
-        isFreeEntrance = true;
         labelText = '패키지 할인 적용'; 
       }
       else if (qBathFloor === 1) { 
@@ -409,7 +396,7 @@ export default function GroutEstimatorApp() {
     }
 
 
-    // --- 잔여 항목 및 패키지 포함 항목 모두 계산 (유지) ---
+    // --- 잔여 항목 및 패키지 포함 항목 모두 계산 (할인 금액 표시 방식 수정) ---
     ALL_AREAS.forEach(area => {
         const initialCount = quantities[area.id] || 0;
         
@@ -942,13 +929,13 @@ export default function GroutEstimatorApp() {
                         </div>
                     )}
 
-                    {/* 개별 항목 루프 (시공 내역) */}
+                    {/* 개별 항목 루프 (할인 항목 표시 방식 수정 완료) */}
                     {calculation.itemizedPrices
                         .filter(item => !item.isDiscount) 
                         .map(item => {
                         
                         const isDiscounted = item.discount > 0;
-                        const finalPriceText = item.calculatedPrice > 0 ? `${item.calculatedPrice.toLocaleString()}원` : (item.isFreeService ? '무료' : '패키지 포함');
+                        const finalPriceText = item.calculatedPrice.toLocaleString();
                         
                         return (
                             <div key={item.id} className="flex flex-col text-gray-800 pl-2 pr-1 pt-1 border-b border-gray-100 last:border-b-0">
@@ -961,20 +948,20 @@ export default function GroutEstimatorApp() {
                                         {item.quantity > 0 && <span className="text-gray-400 text-xs font-normal"> x {item.quantity}</span>}
                                     </span>
                                     
-                                    {/* 원가 또는 최종 적용 가격 */}
-                                    <span className={`text-right w-2/5 font-bold text-sm ${isDiscounted ? 'text-gray-400 line-through' : 'text-indigo-600'}`}> 
-                                        {item.originalPrice.toLocaleString()}원
+                                    {/* 최종 적용 가격 */}
+                                    <span className={`text-right w-2/5 font-bold text-sm text-indigo-600`}> 
+                                        {item.calculatedPrice > 0 ? `${finalPriceText}원` : (item.isFreeService ? '무료' : '패키지 포함')}
                                     </span>
                                 </div>
-
-                                {/* 할인가 및 최종 가격 표시 */}
-                                {isDiscounted && (
-                                    <div className="flex justify-between items-center text-xs text-indigo-500 mt-0.5 pb-1 pl-3">
+                                
+                                {/* 할인이 발생한 경우에만 할인액 표시 */}
+                                {isDiscounted && item.discount > 0 && (
+                                    <div className="flex justify-between items-center text-xs text-gray-500 mt-0.5 pb-1 pl-3">
                                         <span className='font-normal'>
-                                            {item.isFreeService ? '🎁 무료 서비스 적용' : '✨ 할인가 적용'}
+                                            {item.isFreeService ? '🎁 서비스 할인 적용' : '✨ 항목 할인 적용'}
                                         </span>
                                         <span className="font-semibold text-indigo-600">
-                                            {finalPriceText}
+                                            -{(item.originalPrice - item.calculatedPrice).toLocaleString()}원
                                         </span>
                                     </div>
                                 )}
@@ -983,7 +970,7 @@ export default function GroutEstimatorApp() {
                         );
                     })}
 
-                    {/* 할인 항목 루프 (패키지 할인) */}
+                    {/* 할인 항목 루프 (패키지 할인, 리뷰 할인 등) */}
                     {calculation.itemizedPrices
                         .filter(item => item.isDiscount) 
                         .map(item => (
@@ -998,7 +985,7 @@ export default function GroutEstimatorApp() {
                         ))}
                 </div>
 
-                {/* 총 합계 영역 (총액 문구 및 패키지 라벨 제거 완료) */}
+                {/* 총 합계 영역 (유지) */}
                 <div className="pt-3 text-center"> 
                     
                     <div className="flex justify-end items-end"> 
@@ -1024,7 +1011,7 @@ export default function GroutEstimatorApp() {
             
             {/* ⭐️ [견적서 모달 하단 컨트롤 영역] ⭐️ */}
             <div className="p-4 bg-gray-50 border-t border-gray-200">
-                {/* 1. 숨고 리뷰 이벤트 버튼 (문구 삭제 위치에 배치, 색상 및 테두리 수정) */}
+                {/* 1. 숨고 리뷰 이벤트 버튼 (색상 및 테두리 수정, 애니메이션 제거) */}
                 {soomgoReviewEvent && (
                     <div className='mb-3'>
                         {(() => {
@@ -1038,14 +1025,14 @@ export default function GroutEstimatorApp() {
                             // 배경색 네이비로 고정
                             const fixedBgClasses = "bg-indigo-700 text-white hover:bg-indigo-800"; 
                             
-                            // 테두리 및 아이콘 색상 설정
+                            // 테두리 클래스: 적용 시 노란색, 미적용 시 짙은 네이비 (배경과 동일하게)
                             const borderClasses = isApplied
-                                ? "border-amber-400" // 적용 시 노란색 테두리
-                                : "border-indigo-700"; // 미적용 시 배경색과 동일한 네이비 테두리
+                                ? "border-amber-400" 
+                                : "border-indigo-700"; 
                                 
                             const iconColorClass = 'text-white'; // 아이콘 흰색 고정
 
-                            const animationClass = isApplied ? '' : 'shine-effect'; 
+                            // 애니메이션 클래스 제거 (className에 shine-effect를 넣지 않음)
 
                             const labelText = isApplied 
                                 ? `✅ 할인 적용 취소하기 (총액 +${discountAmount}원)` 
@@ -1054,7 +1041,8 @@ export default function GroutEstimatorApp() {
                             return (
                                 <button
                                     onClick={() => toggleReview(evt.id)}
-                                    className={`${baseClasses} ${fixedBgClasses} ${borderClasses} ${animationClass}`}
+                                    // shine-effect 클래스를 제거했습니다.
+                                    className={`${baseClasses} ${fixedBgClasses} ${borderClasses}`}
                                 >
                                     <Icon size={18} fill="currentColor" className={iconColorClass}/>
                                     <span>{labelText}</span>
