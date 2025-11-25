@@ -99,7 +99,7 @@ const FAQ_ITEMS = [
 ];
 
 // =================================================================
-// [컴포넌트] PackageToast (위치 및 색상 수정)
+// [컴포넌트] PackageToast (위치 및 색상 유지)
 // =================================================================
 const PackageToast = ({ isVisible, onClose }) => {
     useEffect(() => {
@@ -114,7 +114,7 @@ const PackageToast = ({ isVisible, onClose }) => {
     if (!isVisible) return null;
 
     return (
-        // 위치를 bottom-[120px]로 조정하여 하단바와 겹치지 않도록 수정
+        // 위치를 bottom-[120px]로 조정
         <div className="fixed bottom-[120px] left-1/2 -translate-x-1/2 z-50 max-w-sm w-11/12">
             <div className="bg-indigo-800 text-white p-3 rounded-xl shadow-2xl border border-indigo-700 flex items-center justify-between animate-toast">
                 <div className="flex items-center gap-2">
@@ -271,7 +271,7 @@ export default function GroutEstimatorApp() {
         q['entrance'] -= 1;
         isPackageActive = true;
         isFreeEntrance = false; 
-        labelText = '패키지 할인 적용'; // 괄호 제거
+        labelText = '패키지 할인 적용'; 
         packageDiscount = (150000 * 2) + 50000 - 300000;
     }
     // --- 패키지 2: 에폭시 75만원 (욕실바닥1+벽전체1) ---
@@ -282,7 +282,7 @@ export default function GroutEstimatorApp() {
         if (isMaster) q['master_bath_wall'] -= 1;
         else q['common_bath_wall'] -= 1;
         isPackageActive = true;
-        labelText = '패키지 할인 적용'; // 괄호 제거
+        labelText = '패키지 할인 적용'; 
         packageDiscount = (150000 * selectedMaterial.priceMod) + (300000 * selectedMaterial.priceMod) - 750000;
     }
     // --- 패키지 3: 폴리 50만원 (욕실바닥1+벽전체1) ---
@@ -293,7 +293,7 @@ export default function GroutEstimatorApp() {
         if (isMaster) q['master_bath_wall'] -= 1;
         else q['common_bath_wall'] -= 1;
         isPackageActive = true;
-        labelText = '패키지 할인 적용'; // 괄호 제거
+        labelText = '패키지 할인 적용'; 
         packageDiscount = (150000 * selectedMaterial.priceMod) + (300000 * selectedMaterial.priceMod) - 500000;
         if(packageDiscount < 0) packageDiscount = 0; 
     }
@@ -311,7 +311,7 @@ export default function GroutEstimatorApp() {
             q['common_bath_wall'] = Math.max(0, q['common_bath_wall'] - 1);
             isPackageActive = true;
             isFreeEntrance = true; 
-            labelText = '패키지 할인 적용'; // 괄호 제거
+            labelText = '패키지 할인 적용'; 
         }
         else if (qBathFloor >= 2 && qShower >= 1 && qBathtub >= 1) { 
             finalPackagePrice = 950000;
@@ -322,7 +322,7 @@ export default function GroutEstimatorApp() {
             q['bathtub_wall'] -= 1;
             isPackageActive = true;
             isFreeEntrance = true; 
-            labelText = '패키지 할인 적용'; // 괄호 제거
+            labelText = '패키지 할인 적용'; 
         }
         else if (qBathFloor >= 2 && (qShower >= 1 || qBathtub >= 1)) { 
             finalPackagePrice = 750000;
@@ -333,19 +333,19 @@ export default function GroutEstimatorApp() {
             else q['bathtub_wall'] -= 1;
             isPackageActive = true;
             isFreeEntrance = true; 
-            labelText = '패키지 할인 적용'; // 괄호 제거
+            labelText = '패키지 할인 적용'; 
         }
         else if (qBathFloor >= 2 && qEntrance >= 1) { 
             isPackageActive = true;
             isFreeEntrance = true; 
-            labelText = '패키지 할인 적용'; // 괄호 제거
+            labelText = '패키지 할인 적용'; 
         }
         else if (qBathFloor === 1) { 
             finalPackagePrice = 350000;
             originalPackagePrice = 150000 * selectedMaterial.priceMod;
             total += finalPackagePrice;
             q['bathroom_floor'] -= 1;
-            labelText = '패키지 할인 적용'; // 괄호 제거
+            labelText = '패키지 할인 적용'; 
         }
         if (originalPackagePrice > 0) packageDiscount = originalPackagePrice - finalPackagePrice;
         if(packageDiscount < 0) packageDiscount = 0; 
@@ -364,7 +364,7 @@ export default function GroutEstimatorApp() {
         q['common_bath_wall'] = Math.max(0, q['common_bath_wall'] - 1);
         isPackageActive = true;
         isFreeEntrance = true;
-        labelText = '패키지 할인 적용'; // 괄호 제거
+        labelText = '패키지 할인 적용'; 
       }
       else if (qBathFloor >= 2 && (qShower >= 1 || qBathtub >= 1)) { 
         finalPackagePrice = 380000;
@@ -375,25 +375,25 @@ export default function GroutEstimatorApp() {
         else q['bathtub_wall'] -= 1;
         isPackageActive = true;
         isFreeEntrance = true;
-        labelText = '패키지 할인 적용'; // 괄호 제거
+        labelText = '패키지 할인 적용'; 
       }
       else if (qBathFloor >= 2 && qEntrance >= 1) { 
         isPackageActive = true;
         isFreeEntrance = true;
-        labelText = '패키지 할인 적용'; // 괄호 제거
+        labelText = '패키지 할인 적용'; 
       }
       else if (qBathFloor === 1) { 
         finalPackagePrice = 200000;
         originalPackagePrice = 150000;
         total += finalPackagePrice;
         q['bathroom_floor'] -= 1;
-        labelText = '패키지 할인 적용'; // 괄호 제거
+        labelText = '패키지 할인 적용'; 
       }
       if (originalPackagePrice > 0) packageDiscount = originalPackagePrice - finalPackagePrice;
       if(packageDiscount < 0) packageDiscount = 0; 
     }
     
-    // 패키지 자체 할인 내역 추가 (label은 이미 위에서 괄호 제거됨)
+    // 패키지 자체 할인 내역 추가 (label은 괄호 제거된 상태)
     if(packageDiscount > 0) {
         itemizedPrices.push({
             id: 'package_discount',
@@ -840,14 +840,14 @@ export default function GroutEstimatorApp() {
         {/* PackageToast 위치 수정 완료 */}
         <PackageToast isVisible={showToast} onClose={handleCloseToast} />
 
-        {/* 최종 견적 하단 바 (리뷰 버튼 위치 수정) */}
+        {/* 최종 견적 하단 바 (리뷰 버튼 위치 수정 및 시인성 개선) */}
         <div className="fixed bottom-0 left-0 right-0 bg-indigo-900 shadow-2xl safe-area-bottom z-20">
             <div className="max-w-md mx-auto p-4 flex flex-col gap-2"> 
                 
                 {/* 1. 금액 및 정보 영역 (리뷰 버튼 포함) */}
                 <div className='flex items-center justify-between w-full text-white'> 
                     
-                    {/* 좌측: 금액 정보 */}
+                    {/* 좌측: 금액 정보 (총 예상 견적 문구 화이트 강조) */}
                     <div className='flex items-center gap-2'>
                         <span className='text-sm font-semibold text-white'>총 예상 견적</span>
                         {/* 금액 (화이트 강조) */}
@@ -857,7 +857,7 @@ export default function GroutEstimatorApp() {
                         </div>
                     </div>
                     
-                    {/* 우측: 패키지 라벨 또는 리뷰 약속 버튼 표시 */}
+                    {/* 우측: 패키지 라벨 또는 리뷰 약속 버튼 표시 (시인성 개선) */}
                     <div className='flex flex-col items-end'>
                         {/* A. 패키지 적용 라벨 (패키지 적용 시 우선 표시) */}
                         {calculation.label && (
@@ -877,12 +877,13 @@ export default function GroutEstimatorApp() {
 
                                     const baseClasses = "py-1 px-2 rounded-lg transition font-bold text-xs active:scale-[0.98] shadow-md flex items-center justify-center gap-1 relative overflow-hidden";
                                     
-                                    // 버튼 색상: 미적용 시 짙은 네이비, 적용 시 회색 계열
+                                    // 버튼 색상 수정: 미적용 시 밝은 계열(gray-100), 적용 시 짙은 계열(gray-700)
                                     const buttonClasses = isApplied
                                         ? "bg-gray-700 text-white hover:bg-gray-800" 
-                                        : "bg-indigo-700 text-white hover:bg-indigo-800"; // 숨고 버튼 색상 수정 완료
+                                        : "bg-gray-100 text-indigo-800 hover:bg-gray-200 border border-gray-300"; // 배경 대비를 위해 밝은 색상 사용
 
                                     const animationClass = isApplied ? '' : 'shine-effect'; 
+                                    const iconColorClass = isApplied ? 'text-white' : 'text-indigo-600'; // 미적용 시 아이콘 색상도 네이비 계열로 조정
 
                                     const labelText = isApplied 
                                         ? `✅ 할인 취소` 
@@ -893,7 +894,7 @@ export default function GroutEstimatorApp() {
                                             onClick={() => toggleReview(evt.id)}
                                             className={`${baseClasses} ${buttonClasses} ${animationClass}`}
                                         >
-                                            <Icon size={12} fill="currentColor" className="text-white"/>
+                                            <Icon size={12} fill="currentColor" className={iconColorClass}/>
                                             <span>{labelText}</span>
                                         </button>
                                     );
@@ -1056,11 +1057,14 @@ export default function GroutEstimatorApp() {
                     </ul>
                 </div>
               </div>
+              
+              {/* [확인]: 고객님이 지적하신 모달 내부의 리뷰 버튼은 완전히 제거되었습니다. */}
+
             </div>
             
             {/* ⭐️ [견적서 모달 하단 컨트롤 영역] ⭐️ */}
             <div className="p-4 bg-gray-50 border-t border-gray-200">
-                {/* 리뷰 버튼은 이제 하단바에 통합되어 모달에서 제거 */}
+                {/* 리뷰 버튼은 이제 하단바에 통합되어 모달에서 제거되었습니다. */}
                 
                 <p className='text-sm font-semibold text-center text-gray-600 mb-3 flex items-center justify-center gap-1'><Info size={16}/> 상담 시 현장사진이 있으면 큰 도움이 됩니다..</p> 
                 <div className='grid grid-cols-2 gap-3'>
