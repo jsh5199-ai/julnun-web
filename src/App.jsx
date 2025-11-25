@@ -652,7 +652,8 @@ export default function GroutEstimatorApp() {
   const isSoomgoReviewApplied = selectedReviews.has('soomgo_review');
   
   return (
-    <div className={`min-h-screen bg-gray-50 bg-gray-50 text-gray-800 font-sans pb-28`}>
+    // pb-28에서 pb-40으로 늘려 하단 바와 겹치지 않도록 조정
+    <div className={`min-h-screen bg-gray-50 text-gray-800 font-sans pb-40`}>
       <GlobalStyles />
 
       {/* 헤더: 짙은 네이비 배경 (프리미엄) */}
@@ -848,35 +849,51 @@ export default function GroutEstimatorApp() {
         {/* ★★★ PackageToast 컴포넌트 사용 ★★★ */}
         <PackageToast isVisible={showToast} onClose={handleCloseToast} />
 
-        {/* 최종 견적 하단 바 (그림자/애니메이션 제거 반영) */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-2xl p-4 safe-area-bottom z-20">
-            {/* items-end를 사용하여 금액 영역과 버튼의 하단 라인을 맞춤 */}
-            <div className="max-w-md mx-auto flex items-end justify-between gap-4"> 
-                {/* 금액 영역 */}
-                <div className='flex-shrink-0 w-auto flex flex-col items-start justify-end'> 
+        {/* ★★★ 최종 견적 하단 바 (최고의 디자인 적용) ★★★ */}
+        <div className="fixed bottom-0 left-0 right-0 bg-indigo-900 shadow-2xl safe-area-bottom z-20">
+            <div className="max-w-md mx-auto p-4 flex flex-col gap-2"> 
+                
+                {/* 1. 금액 및 정보 영역 (수평 배치) */}
+                <div className='flex items-center justify-between w-full text-white'> 
                     
-                    {/* 금액 표시 (예상 시공 시간 요소 제거됨) */}
-                    <div className="flex flex-col items-start"> 
-                        <div className="flex items-end gap-2">
-                            <div className="text-3xl font-extrabold text-indigo-700">{calculation.price.toLocaleString()}<span className="text-base font-normal text-gray-500">원</span></div>
+                    {/* 좌측: 금액 정보 */}
+                    <div className='flex items-center gap-2'>
+                        <span className='text-sm font-semibold text-indigo-300'>총 예상 견적</span>
+                        {/* 금액 (가장 강조) */}
+                        <div className="flex items-end gap-1">
+                            <span className="text-3xl font-extrabold text-amber-400">{calculation.price.toLocaleString()}</span>
+                            <span className="text-base font-normal text-amber-400">원</span>
                         </div>
-                        {/* 패키지 라벨 위치 이동: 금액 표시 아래로 배치 */}
-                        {calculation.label && <div className="text-xs font-bold text-red-600 mt-1">{calculation.label}</div>}
+                    </div>
+                    
+                    {/* 우측: 보조 정보/패키지 라벨 */}
+                    <div className='flex flex-col items-end'>
+                        {calculation.label && (
+                             <div className="text-xs font-bold text-green-400 mb-0.5 whitespace-nowrap">
+                                <Crown size={12} className='inline mr-1'/> {calculation.label}
+                            </div>
+                        )}
+                         <div className="text-xs font-medium text-indigo-400 flex items-center gap-1">
+                            <Clock size={12} /> 약 {calculation.estimatedHours}시간 소요
+                        </div>
                     </div>
                 </div>
 
-                {/* 버튼 영역: 그림자(shadow-xl) 및 액티브 스케일(active:scale-[0.98]) 제거됨 */}
+                {/* 2. 견적서 보기 버튼 (전체 너비 CTA) */}
                 <button 
                     onClick={() => {
                         setShowModal(true);
-                        setShowToast(false); // 견적서 보기 시 토스트 강제 종료
+                        setShowToast(false); 
                     }} 
                     disabled={!hasSelections} 
-                    className={`px-5 py-3 sm:px-7 sm:py-4 rounded-lg font-extrabold text-sm sm:text-base text-white transition-all flex-shrink-0
-                        ${hasSelections ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}
+                    className={`w-full py-3 rounded-xl font-extrabold text-lg transition-all 
+                        ${hasSelections 
+                            ? 'bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 shadow-md' 
+                            : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                        }
                     `}
                 >
-                    견적서 보기
+                    견적서 상세보기
                 </button>
             </div>
         </div>
