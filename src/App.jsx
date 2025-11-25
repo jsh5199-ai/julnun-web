@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useRef } from 'react';
+import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import html2canvas from 'html2canvas';
 import {
   Calculator, Home, Bath, DoorOpen, Utensils, LayoutGrid,
@@ -8,12 +8,13 @@ import {
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
 // =================================================================
-// [스타일] 애니메이션 정의 (Shine Effect 복구)
+// [스타일] 애니메이션 정의 (유지)
 // =================================================================
 const GlobalStyles = () => (
   <style>{`
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes slideUpFadeOut { 0% { opacity: 1; transform: translateY(0); } 80% { opacity: 1; transform: translateY(-10px); } 100% { opacity: 0; transform: translateY(-20px); } }
     @keyframes professionalPulse { 
       0%, 100% { box-shadow: 0 0 0 0 rgba(100, 116, 139, 0.4); } 
       50% { box-shadow: 0 0 0 8px rgba(100, 116, 139, 0); } 
@@ -32,6 +33,7 @@ const GlobalStyles = () => (
     
     .animate-fade-in { animation: fadeIn 0.5s ease-out; }
     .animate-slide-down { animation: slideDown 0.3s ease-out; }
+    .animate-toast { animation: slideUpFadeOut 3s forwards; }
     
     .selection-box { transition: all 0.2s ease-in-out; }
     .selection-selected {
@@ -95,6 +97,41 @@ const FAQ_ITEMS = [
     { question: "Q4. A/S 기간 및 조건은 어떻게 되나요?", answer: "시공 후 폴리아스파틱은 2년, 에폭시는 5년의 A/S를 제공합니다. 단, 고객 부주의나 타일 문제로 인한 하자는 소액의 출장비가 발생할 수 있습니다." },
     { question: "Q5. 구축 아파트도 시공이 가능한가요?", answer: "네, 가능합니다. 기존 줄눈을 제거하는 그라인딩 작업이 추가로 필요하며, 현재 견적은 신축/구축 동일하게 적용됩니다." },
 ];
+
+// =================================================================
+// [컴포넌트] PackageToast (새로 추가)
+// =================================================================
+const PackageToast = ({ isVisible, onClose }) => {
+    useEffect(() => {
+        if (isVisible) {
+            const timer = setTimeout(() => {
+                onClose();
+            }, 3000); // 3초 후 자동 닫기
+            return () => clearTimeout(timer);
+        }
+    }, [isVisible, onClose]);
+
+    if (!isVisible) return null;
+
+    return (
+        <div className="fixed bottom-[100px] left-1/2 -translate-x-1/2 z-50 max-w-sm w-11/12">
+            <div className="bg-indigo-700 text-white p-3 rounded-xl shadow-2xl border border-indigo-500 flex items-center justify-between animate-toast">
+                <div className="flex items-center gap-2">
+                    <Gift size={18} className='text-amber-300 flex-shrink-0' /> 
+                    <div className="text-sm font-bold truncate">
+                        🎉 패키지 할인이 적용되었습니다!
+                    </div>
+                </div>
+                <button 
+                    onClick={onClose} 
+                    className="text-xs font-extrabold text-amber-300 px-2 py-1 bg-indigo-600 rounded-full hover:bg-indigo-500 transition active:scale-95 flex-shrink-0"
+                >
+                    확인하기
+                </button>
+            </div>
+        </div>
+    );
+};
 
 // =================================================================
 // [컴포넌트] Accordion & MaterialDetailModal (유지)
@@ -171,19 +208,17 @@ export default function GroutEstimatorApp() {
   const [selectedReviews, setSelectedReviews] = useState(new Set());
   const [showModal, setShowModal] = useState(false);
   const [showMaterialModal, setShowMaterialModal] = useState(false); 
-  const [showPackageInfo, setShowPackageInfo] = useState(true);
+  const [showToast, setShowToast] = useState(false); // ★ 토스트 상태 추가
 
   const quoteRef = useRef(null); 
 
   const SOOMGO_REVIEW_URL = 'https://www.soomgo.com/profile/users/10755579?tab=review';
   const PHONE_NUMBER = '010-7734-6709';
 
-  const handleClosePackageInfo = () => {
-      setShowPackageInfo(false);
-  };
-
   // --- calculation 로직 (원가 추적 기능 통합) ---
   const handleQuantityChange = (id, delta) => {
+    let wasPackageActive = calculation.isPackageActive; // 변경 전 패키지 상태
+    
     setQuantities(prev => {
       const nextValue = Math.max(0, prev[id] + delta);
       const nextState = { ...prev, [id]: nextValue };
@@ -193,6 +228,10 @@ export default function GroutEstimatorApp() {
       }
       return nextState;
     });
+
+    // ★ 상태 업데이트는 비동기이므로, 다음 렌더링에서 calculation을 확인하거나
+    // ★ 간단하게 수량 변경 후 바로 토스트를 띄우는 로직을 적용 (UX 최적화를 위해 단순화)
+    // ★ 또는 useMemo 결과를 반영하기 위해 useEffect에서 처리할 수 있으나, 여기서는 useMemo 이후 useEffect로 처리합니다.
   };
 
   // 👈 리뷰 토글 함수 (useCallback으로 최적화)
@@ -518,6 +557,28 @@ export default function GroutEstimatorApp() {
 
   }, [housingType, material, quantities, selectedReviews]);
 
+    // ★ useEffect를 사용하여 패키지 활성화 여부가 변경될 때만 토스트를 띄웁니다.
+    const packageActiveRef = useRef(calculation.isPackageActive);
+
+    useEffect(() => {
+        if (calculation.isPackageActive && !packageActiveRef.current) {
+            // 패키지가 방금 활성화됨
+            setShowToast(true);
+        } else if (!calculation.isPackageActive && packageActiveRef.current) {
+            // 패키지가 방금 비활성화됨 (선택 해제)
+            // 토스트는 띄우지 않고 상태만 업데이트
+        }
+        
+        // 현재 패키지 상태를 참조값에 업데이트
+        packageActiveRef.current = calculation.isPackageActive;
+    }, [calculation.isPackageActive]);
+  
+    // 토스트 닫기 핸들러 (PackageToast 컴포넌트에 전달)
+    const handleCloseToast = useCallback(() => {
+        setShowToast(false);
+    }, []);
+
+
   // 견적서 생성 로직 (유지)
   const generateQuoteText = () => {
     return `[줄눈의미학 예상 견적서]\n\n총 예상 금액: ${calculation.price.toLocaleString()}원`;
@@ -597,7 +658,7 @@ export default function GroutEstimatorApp() {
   const isSoomgoReviewApplied = selectedReviews.has('soomgo_review');
   
   return (
-    <div className={`min-h-screen bg-gray-50 bg-gray-50 text-gray-800 font-sans ${calculation.isPackageActive ? 'pb-48' : 'pb-28'}`}>
+    <div className={`min-h-screen bg-gray-50 bg-gray-50 text-gray-800 font-sans pb-28`}>
       <GlobalStyles />
 
       {/* 헤더: 짙은 네이비 배경 (프리미엄) */}
@@ -790,39 +851,8 @@ export default function GroutEstimatorApp() {
 
       {/* 하단 고정바 */}
       <>
-        {/* ★★★ 패키지 혜택 바 수정 적용 (안내 문구로 변경) ★★★ */}
-        {calculation.isPackageActive && showPackageInfo && (
-          <div className="fixed bottom-[90px] left-4 right-4 max-w-md mx-auto z-10 animate-fade-in">
-            <div className="bg-indigo-700 text-white p-4 rounded-xl shadow-2xl border border-indigo-500 animate-[professionalPulse_2s_infinite]">
-              
-              {/* 닫기 버튼 */}
-              <button 
-                  onClick={handleClosePackageInfo} 
-                  className="absolute top-2 right-2 p-1 text-indigo-200 hover:text-white transition active:scale-95 rounded-full bg-indigo-600/50"
-              >
-                  <X size={16} />
-              </button>
-              
-              <div className="flex flex-col items-center justify-center text-center">
-                <div className="font-extrabold text-amber-300 text-lg mb-1 flex items-center gap-2">
-                    <Gift size={20} className='text-amber-300' /> 🎉 패키지 할인이 적용되었습니다!
-                </div>
-                
-                {/* CTA 강조 문구 */}
-                <p className="text-sm font-bold text-gray-100 mt-1">
-                    견적서 보기를 눌러 <span className='text-amber-300'>최종 할인 금액</span>을 확인해보세요.
-                </p>
-              </div>
-
-              {/* 하단 주의사항 */}
-              <div className="mt-3 pt-3 border-t border-indigo-600/50 text-center">
-                  <p className="text-[11px] font-bold text-indigo-200 bg-indigo-800/50 py-1 px-2 rounded">
-                      🚨 정확한 견적은 전문가 상담 시 확정됩니다.
-                  </p>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* ★★★ PackageToast 컴포넌트 사용 ★★★ */}
+        <PackageToast isVisible={showToast} onClose={handleCloseToast} />
 
         {/* 최종 견적 하단 바 (수직 정렬 수정 유지) */}
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-2xl p-4 safe-area-bottom z-20">
@@ -847,7 +877,10 @@ export default function GroutEstimatorApp() {
 
                 {/* 버튼 영역 */}
                 <button 
-                    onClick={() => setShowModal(true)} 
+                    onClick={() => {
+                        setShowModal(true);
+                        setShowToast(false); // 견적서 보기 시 토스트 강제 종료
+                    }} 
                     disabled={!hasSelections} 
                     className={`px-5 py-3 sm:px-7 sm:py-4 rounded-lg font-extrabold text-sm sm:text-base text-white shadow-xl transition-all flex-shrink-0
                         ${hasSelections ? 'bg-blue-600 hover:bg-blue-700 active:scale-[0.98]' : 'bg-gray-300 text-gray-500 cursor-not-allowed shadow-none'}
