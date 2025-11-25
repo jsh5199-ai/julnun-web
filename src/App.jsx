@@ -831,7 +831,7 @@ export default function GroutEstimatorApp() {
 
       {/* 하단 고정바 */}
       <>
-        {/* ★★★ [수정됨] 패키지 혜택 바 위치 조정 (bottom-[90px]) ★★★ */}
+        {/* ★★★ 패키지 혜택 바 위치 조정 (bottom-[90px]) ★★★ */}
         {calculation.isPackageActive && showPackageInfo && (
           <div className="fixed bottom-[90px] left-4 right-4 max-w-md mx-auto z-10">
             <div className="bg-gray-700 text-white p-4 rounded-lg shadow-2xl border border-gray-500 animate-[professionalPulse_2s_infinite]">
@@ -929,7 +929,7 @@ export default function GroutEstimatorApp() {
                 <div className="space-y-2 text-sm border-b border-gray-200 pb-3">
                     <p className="font-extrabold text-gray-800 flex items-center gap-1"><Calculator size={14}/> 시공 내역 및 가격</p>
 
-                    {/* ★★★ [수정됨] 무료 서비스 내용 삽입 (캡처 영역 포함) ★★★ */}
+                    {/* 무료 서비스 내용 삽입 */}
                     {calculation.isPackageActive && (
                         <div className="bg-blue-50/70 p-2 rounded-md border-l-4 border-blue-500 text-xs font-semibold text-gray-700">
                             <p className='flex items-center gap-1 text-blue-800 font-extrabold mb-1'><Crown size={12} className='text-amber-500'/> 패키지 포함 서비스 내역</p>
@@ -939,10 +939,8 @@ export default function GroutEstimatorApp() {
                                 <li>욕실 젠다이/세면대 실리콘 오염방지</li>
                                 <li>주방 싱크볼 실리콘 오염방지</li>
                             </ul>
-                            <p className='text-[10px] mt-1 text-gray-600'>※ 줄눈시공 항목은 패키지 가격에 통합 반영되며, 위 항목들은 서비스로 제공됩니다.</p>
                         </div>
                     )}
-                    {/* ★★★ [수정됨] 무료 서비스 내용 끝 ★★★ */}
 
                     {/* 개별 항목 루프 (시공 내역) */}
                     {calculation.itemizedPrices
@@ -1015,15 +1013,22 @@ export default function GroutEstimatorApp() {
                 </div>
 
                 {/* 안내 사항 영역 */}
-                    <div className="mt-4 pt-3 border-t border-gray-200">
-                        <p className='text-xs font-semibold text-red-600 mb-1 flex items-center gap-1'>
-                            <Info size={14}/> 주의 사항
-                        </p>
-                        <ul className='list-disc list-outside text-[11px] text-gray-600 ml-4 space-y-0.5'>
-                            <li>구축은 정확한 견적을 위해 현장 사진은 필수입니다.</li>
-                            <li>견적 기준 타일 크기 외(조각 타일, 특이 구조) 시 추가 비용이 발생할 수 있습니다.</li>
-                        </ul>
+                <div className="mt-4 pt-3 border-t border-gray-200">
+                    <p className='text-xs font-semibold text-red-600 mb-1 flex items-center gap-1'>
+                        <Info size={14}/> 주의 사항
+                    </p>
+                    
+                    {/* ★★★ [추가됨] 텍스트 강조 및 삽입 ★★★ */}
+                    <div className='text-[11px] font-bold text-gray-800 mb-2 p-1 border-y border-gray-200'>
+                        바닥 30x30cm, 벽 30x60cm 크기 기준
                     </div>
+                    {/* ★★★ [추가됨] 끝 ★★★ */}
+
+                    <ul className='list-disc list-outside text-[11px] text-gray-600 ml-4 space-y-0.5'>
+                        <li>구축은 정확한 견적을 위해 현장 사진은 필수입니다.</li>
+                        <li>견적 기준 타일 크기 외(조각 타일, 특이 구조) 시 추가 비용이 발생할 수 있습니다.</li>
+                    </ul>
+                </div>
               </div>
             </div>
             {/* ★★★ 캡처 영역 끝 ★★★ */}
