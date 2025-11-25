@@ -119,7 +119,7 @@ const PackageToast = ({ isVisible, onClose }) => {
                 <div className="flex items-center gap-2">
                     <Gift size={18} className='text-amber-300 flex-shrink-0' /> 
                     <div className="text-sm font-bold truncate">
-                        🎉 패키지 할인이 적용되었습니다!
+                        패키지 할인이 적용되었습니다!
                     </div>
                 </div>
                 <button 
