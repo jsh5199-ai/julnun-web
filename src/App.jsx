@@ -32,7 +32,7 @@ const GlobalStyles = () => (
 );
 
 // =================================================================
-// [데이터] (수정 반영)
+// [데이터] (유지)
 // =================================================================
 const HOUSING_TYPES = [
   { id: 'new', label: '신축 아파트', multiplier: 1.0 },
@@ -52,10 +52,6 @@ const MATERIALS = [
   },
 ];
 
-// '주방싱크볼 실리콘오염방지' (id: 'silicon_kitchen_line')는 SILICON_AREAS에 있었으나,
-// 사용자 요청에 따라 서비스 목록에서 제거해야 하는 항목으로 보아 SERVICE_AREAS에서 제외하고
-// 관련 항목은 SILICON_AREAS에서도 제거했습니다. (주방 벽면은 유지)
-
 const SERVICE_AREAS = [
   { id: 'entrance', label: '현관', basePrice: 50000, icon: DoorOpen, unit: '개소' },
   { id: 'bathroom_floor', label: '욕실 바닥', basePrice: 150000, icon: Bath, unit: '개소' },
@@ -71,7 +67,6 @@ const SERVICE_AREAS = [
 const SILICON_AREAS = [
   { id: 'silicon_bathtub', label: '욕조 테두리 교체', basePrice: 80000, icon: Eraser, unit: '개소', desc: '단독 8만 / 패키지시 5만' },
   { id: 'silicon_sink', label: '세면대+젠다이 교체', basePrice: 30000, icon: Eraser, unit: '개소', desc: '오염된 실리콘 제거 후 재시공' },
-  // 요청에 따라 'silicon_kitchen_line' 항목 제거
   { id: 'silicon_living_baseboard', label: '거실/주방 걸레받이 실리콘', basePrice: 400000, icon: Sofa, unit: '구역', desc: '단독 40만 / 패키지시 35만' },
 ];
 
@@ -557,7 +552,7 @@ export default function GroutEstimatorApp() {
 
       const options = {
         backgroundColor: '#FFFFFF',
-        scale: 4, // 👈 퀄리티 향상을 위해 4로 상향
+        scale: 4, // 퀄리티 향상을 위해 4로 상향
         useCORS: true, 
         windowHeight: node.offsetHeight, 
         windowWidth: node.offsetWidth,
@@ -643,7 +638,7 @@ export default function GroutEstimatorApp() {
           </div>
         </section>
 
-        {/* --- 2. 시공 재료 선택 (유지) --- */}
+        {/* --- 2. 시공 재료 선택 (수정: 상세 비교 버튼 추가) --- */}
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-150">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
             <Hammer className="h-5 w-5 text-indigo-600" /> 2. 시공 재료 선택
@@ -688,6 +683,16 @@ export default function GroutEstimatorApp() {
               </div>
             ))}
           </div>
+          {/* --- [수정] 재료 상세 비교 버튼 영역 (섹션 내부 이동 및 버튼 디자인 강화) --- */}
+          <div className="mt-5 pt-3 border-t border-gray-100 flex justify-center">
+              <button 
+                  onClick={() => setShowMaterialModal(true)} 
+                  className="w-full py-3 bg-indigo-50 text-indigo-700 rounded-lg font-extrabold text-sm hover:bg-indigo-100 transition shadow-md flex items-center justify-center gap-2 active:scale-[0.99]"
+              >
+                  <Info size={16} className='text-amber-500' fill='currentColor'/> **[필수 확인]** 최고급 재료 스펙 비교표 보기
+              </button>
+          </div>
+          {/* --- [수정] 끝 --- */}
         </section>
 
         {/* --- 3. 원하는 시공범위를 선택해주세요 (유지) --- */}
@@ -748,39 +753,54 @@ export default function GroutEstimatorApp() {
           </div>
         </section>
 
-        {/* --- 5. 할인 혜택 (리뷰 이벤트) (유지) --- */}
+        {/* --- 5. 할인 혜택 (리뷰 이벤트) (수정 반영) --- */}
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-600">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
             <Gift className="h-5 w-5 text-indigo-600" /> 5. 할인 이벤트
           </h2 >
           <div className="grid grid-cols-2 gap-3">
-            {REVIEW_EVENTS.map((evt) => (
-              <button 
-                key={evt.id} 
-                onClick={() => toggleReview(evt.id)} 
-                className={`p-3 rounded-lg border-2 transition-all relative overflow-hidden selection-box active:scale-[0.98] ${selectedReviews.has(evt.id) ? 'border-red-500 bg-red-50 shadow-md' : 'border-gray-300 bg-gray-50 text-gray-500 hover:border-red-300'}`}
-              >
-                {selectedReviews.has(evt.id) && <div className="absolute top-0 right-0 bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-bl-lg font-bold">APPLIED</div>}
-                <div className="flex flex-col items-center text-center gap-1">
-                  <span className={`font-semibold text-sm ${selectedReviews.has(evt.id) ? 'text-gray-800' : 'text-gray-600'}`}>{evt.label}</span>
-                  <span className={`text-xs font-bold ${selectedReviews.has(evt.id) ? 'text-red-600' : 'text-gray-400'}`}>-{evt.discount.toLocaleString()}원</span>
-                </div>
-              </button>
-            ))}
+            {REVIEW_EVENTS.map((evt) => {
+                const isApplied = selectedReviews.has(evt.id);
+                
+                // 숨고 리뷰 이벤트에만 새로운 디자인 적용
+                if (evt.id === 'soomgo_review') {
+                    const iconColor = isApplied ? 'text-white' : 'text-yellow-800';
+                    const bgColor = isApplied ? 'bg-red-600 border-red-600 shadow-lg' : 'bg-yellow-100 border-yellow-400 shadow-md';
+                    const textColor = isApplied ? 'text-white' : 'text-gray-900';
+                    const labelText = isApplied ? `✅ 2만원 할인 적용됨 (클릭하여 취소)` : `숨고 리뷰 작성하고 2만원 할인 받기`;
+                    const Icon = isApplied ? CheckCircle2 : Sparkles;
+
+                    return (
+                        <button 
+                            key={evt.id} 
+                            onClick={() => toggleReview(evt.id)} 
+                            className={`col-span-2 py-3 rounded-lg border-2 transition-all selection-box active:scale-[0.98] flex items-center justify-center gap-2 font-extrabold text-sm ${bgColor} ${textColor}`}
+                        >
+                            <Icon size={18} className={iconColor} />
+                            {labelText}
+                        </button>
+                    );
+                }
+
+                // 당근마켓 리뷰 이벤트는 기존 디자인 유지
+                return (
+                    <button 
+                        key={evt.id} 
+                        onClick={() => toggleReview(evt.id)} 
+                        className={`p-3 rounded-lg border-2 transition-all relative overflow-hidden selection-box active:scale-[0.98] ${isApplied ? 'border-red-500 bg-red-50 shadow-md' : 'border-gray-300 bg-gray-50 text-gray-500 hover:border-red-300'}`}
+                    >
+                        {isApplied && <div className="absolute top-0 right-0 bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-bl-lg font-bold">APPLIED</div>}
+                        <div className="flex flex-col items-center text-center gap-1">
+                            <span className={`font-semibold text-sm ${isApplied ? 'text-gray-800' : 'text-gray-600'}`}>{evt.label}</span>
+                            <span className={`text-xs font-bold ${isApplied ? 'text-red-600' : 'text-gray-400'}`}>-{evt.discount.toLocaleString()}원</span>
+                        </div>
+                    </button>
+                );
+            })}
           </div>
           <p className="text-xs text-gray-500 mt-3 text-center">※ 중복 선택 가능합니다. 시공 완료 후 꼭 작성해주세요!</p>
         </section>
         
-        {/* --- 재료 상세 비교 버튼 (유지) --- */}
-        <div className="flex justify-center pt-2">
-            <button 
-                onClick={() => setShowMaterialModal(true)} 
-                className="text-sm font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 transition active:scale-95"
-            >
-                <Info size={16} /> 최고급 재료 상세 스펙 비교하기
-            </button>
-        </div>
-
         {/* --- 자주 묻는 질문 (FAQ) (유지) --- */}
         <section className="bg-white p-5 rounded-xl border border-gray-100 shadow-lg mt-6 animate-fade-in delay-750">
             <h2 className="text-lg font-extrabold text-gray-800 mb-2 flex items-center gap-2 border-b pb-2">
@@ -868,7 +888,7 @@ export default function GroutEstimatorApp() {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-fade-in">
           <div className="bg-white w-full max-w-sm rounded-xl shadow-2xl overflow-hidden animate-slide-down border border-gray-200">
             <div className="bg-indigo-700 p-4 text-white flex justify-between items-center">
-              <h3 className="font-extrabold text-lg flex items-center gap-2"><CheckCircle2 className="h-5 w-5 text-amber-400" /> 견적서 </h3>
+              <h3 className="font-extrabold text-lg flex items-center gap-2"><CheckCircle2 className="h-5 w-5 text-amber-400" /> 견적서 (이미지 저장용)</h3>
               <button onClick={() => setShowModal(false)} className="text-white/80 hover:text-white transition active:scale-95">
                 <X size={20} />
               </button>
@@ -913,7 +933,8 @@ export default function GroutEstimatorApp() {
                             <ul className='list-disc list-outside text-[11px] ml-4 space-y-0.5'>
                                 {calculation.isFreeEntrance && <li>현관 바닥 서비스 (폴리아스파틱)</li>}
                                 <li>변기테두리, 바닥테두리</li>
-                                <li>욕실 젠다이 실리콘 오염방지코팅</li>
+                                <li>욕실 젠다이/세면대 실리콘</li>
+                                <li>주방 싱크볼</li>
                             </ul>
                         </div>
                     )}
@@ -988,22 +1009,16 @@ export default function GroutEstimatorApp() {
                     <p className="text-xs text-gray-400 text-right mt-1">VAT 별도 / 현장상황별 상이</p>
                 </div>
 
-                {/* 안내 사항 영역 (주의사항 문구 삭제 반영) */}
+                {/* 안내 사항 영역 (수정 반영) */}
                 <div className="mt-4 pt-3 border-t border-gray-200">
-                    <p className='text-xs font-semibold text-red-600 mb-1 flex items-center gap-1'>
-                        <Info size={14}/> 주의 사항
-                    </p>
-                    
-                    {/* ★★★ [수정 반영] 텍스트 강조 및 삽입 ★★★ */}
-                    <div className='text-[11px] font-bold text-gray-800 mb-2 p-1 border-y border-gray-200'>
-                        바닥 30x30cm, 벽 30x60cm 크기 기준
+                    {/* ★★★ [수정] 버튼 스타일로 변경 ★★★ */}
+                    <div className='w-full py-1.5 px-2 text-center bg-red-50 text-red-600 rounded-md font-bold text-[11px] shadow-sm'>
+                        주의사항 | 바닥 30x30cm, 벽면 30x60cm 크기 기준
                     </div>
-                    {/* ★★★ [수정 반영] 끝 ★★★ */}
+                    {/* ★★★ [수정] 끝 ★★★ */}
 
-                    <ul className='list-disc list-outside text-[11px] text-gray-600 ml-4 space-y-0.5'>
-                        {/* <li>구축은 정확한 견적을 위해 현장 사진은 필수입니다. (삭제됨)</li> */}
-                        {/* <li>견적 기준 타일 크기 외(조각 타일, 특이 구조) 시 추가 비용이 발생할 수 있습니다. (삭제됨)</li> */}
-                        <li>전문가와 상담 시 최종 금액이 확정됩니다.</li>
+                    <ul className='list-disc list-outside text-[11px] text-gray-600 ml-4 space-y-0.5 mt-2'>
+                        <li>위 견적은 예상 금액이며, 전문가와 상담 시 최종 금액이 확정됩니다.</li>
                     </ul>
                 </div>
               </div>
@@ -1012,9 +1027,14 @@ export default function GroutEstimatorApp() {
             
             {/* ⭐️ [견적서 모달 하단 컨트롤 영역] ⭐️ */}
             <div className="p-4 bg-gray-50 border-t border-gray-200">
+                {/* 숨고 리뷰 이벤트 버튼을 모달 내에서 삭제하고, 이벤트 목록에서 디자인이 통합되었으므로,
+                   여기서는 당근마켓 이벤트에 대해서만 일반적인 버튼 로직을 유지하거나,
+                   아니면 이 부분을 완전히 제거하고 아래 상담 버튼만 남겨도 좋습니다.
+                   (기존 코드에서는 숨고 이벤트만 모달에 다시 삽입되어 있었으므로, 숨고 이벤트만 다시 구현했습니다.)
+                */}
                 {soomgoReviewEvent && (
                     <div className='mb-3'>
-                        <button
+                         <button
                             onClick={() => toggleReview(soomgoReviewEvent.id)}
                             className={`w-full py-2 rounded-lg transition active:scale-[0.99] text-sm font-bold flex items-center justify-center gap-2 shadow-md ${isSoomgoReviewApplied ? 'bg-red-600 text-white' : 'bg-red-100 text-red-600 border border-red-300 hover:bg-red-200'}`}
                         >
@@ -1028,13 +1048,13 @@ export default function GroutEstimatorApp() {
                     </div>
                 )}
                 
-                <p className='text-sm font-semibold text-center text-red-500 mb-3 flex items-center justify-center gap-1'><Info size={16}/> 상담 시 현장사진이 있으면 큰 도움이 됩니다.</p>
+                <p className='text-sm font-semibold text-center text-red-500 mb-3 flex items-center justify-center gap-1'><Info size={16}/> 상담 시 현장사진이 있으면 큰 도움이 됩니다..</p>
                 <div className='grid grid-cols-2 gap-3'>
                     <button onClick={handleImageSave} className="flex items-center justify-center gap-1 bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition text-sm active:scale-95 shadow-md">
                         <ImageIcon size={16} /> 견적 이미지 저장
                     </button>
                     <button onClick={() => window.location.href = `tel:${PHONE_NUMBER}`} className="flex items-center justify-center gap-1 bg-indigo-600 text-white py-3 rounded-lg font-bold hover:bg-indigo-700 transition shadow-md text-sm active:scale-95 col-span-1">
-                        <Phone size={16} /> 상담원 연결
+                        <Phone size={16} /> 전화 상담
                     </button>
                 </div>
             </div>
