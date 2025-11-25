@@ -6,13 +6,13 @@ import {
 
 // =================================================================
 // [가상 라이브러리 함수 정의 - 실제 환경에서는 'html2canvas' 설치 후 사용]
+// =시는 html2canvas 라이브러리를 사용한다고 가정합니다.
 // =================================================================
-const delay = ms => new Promise(res => setTimeout(res, ms)); // ★ 딜레이 함수 추가
+const delay = ms => new Promise(res => setTimeout(res, ms)); 
 
 const simulateHtmlToCanvas = async (node, options) => {
     // 이 함수를 실제 html2canvas(node, options) 호출로 대체해야 합니다.
     
-    // 비동기 렌더링 완료 대기 (중요)
     await delay(100); 
 
     const canvas = document.createElement('canvas');
@@ -27,8 +27,6 @@ const simulateHtmlToCanvas = async (node, options) => {
     // 흰색 배경 명시적으로 채우기 (백색화 방지 핵심)
     ctx.fillStyle = options.backgroundColor || '#FFFFFF';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    // 이 시점에서 html2canvas가 DOM 내용을 캔버스에 그립니다.
     
     return canvas;
 };
@@ -493,7 +491,7 @@ export default function GroutEstimatorApp() {
         await delay(100); 
 
         const options = {
-            backgroundColor: '#FFFFFF', // 흰색 배경 명시 
+            backgroundColor: '#FFFFFF', // 흰색 배경 명시 (핵심)
             scale: 2, // 고해상도 캡처
             useCORS: true, 
             windowHeight: node.offsetHeight, 
@@ -506,7 +504,7 @@ export default function GroutEstimatorApp() {
         const dataUrl = canvas.toDataURL('image/png', 1.0);
         const filename = '줄눈의미학_견적서_' + new Date().getTime();
         
-        // 3. 다운로드 링크 생성 및 클릭 (Blob 다운로드 방식 시뮬레이션으로 변경)
+        // 3. 다운로드 링크 생성 및 클릭 (Blob 다운로드 방식 시뮬레이션)
         
         // Blob 생성 및 다운로드 방식 (안정성 향상)
         canvas.toBlob((blob) => {
@@ -519,7 +517,7 @@ export default function GroutEstimatorApp() {
             link.click();
             document.body.removeChild(link);
             
-            URL.revokeObjectURL(url); // 메모리 해제
+            URL.revokeObjectURL(url); 
             
             alert("이미지 저장이 완료되었습니다! (갤러리 또는 다운로드 폴더 확인)");
             setShowModal(false); 
@@ -730,8 +728,8 @@ export default function GroutEstimatorApp() {
         <section className="bg-white p-5 rounded-xl border border-gray-100 shadow-lg mt-6 animate-fade-in delay-750">
             <h2 className="text-lg font-extrabold text-gray-800 mb-2 flex items-center gap-2 border-b pb-2">
                 <HelpCircle className="h-5 w-5 text-indigo-600"/> 고객 지원 센터
-            </h2>
-            <div className="space-y-1">
+            </h2 >
+          <div className="space-y-1">
                 {FAQ_ITEMS.map((item, index) => (
                     <Accordion key={index} question={item.question} answer={item.answer} />
                 ))}
@@ -826,7 +824,7 @@ export default function GroutEstimatorApp() {
                       <span className='text-right flex-shrink-0'>{HOUSING_TYPES.find(h => h.id === housingType).label}</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      {/* 텍스트 밀림 방지: 오른쪽 값에 flex-shrink-0 강제 적용 */}
+                      {/* 문구 간소화 적용 */}
                       <span className="font-semibold flex-shrink-0 pr-2">시공 재료</span> 
                       <span className="font-bold text-indigo-600 text-right flex-shrink-0">
                         {selectedMaterialData.label} ({material === 'poly' ? (polyOption === 'pearl' ? '펄' : '무펄') : (epoxyOption === 'kerapoxy' ? '케라폭시' : '스타라이크')})
@@ -843,7 +841,7 @@ export default function GroutEstimatorApp() {
                     <p className="font-extrabold text-gray-800 flex items-center gap-1"><Calculator size={14}/> 시공 범위</p>
                     {SERVICE_AREAS.map(area => quantities[area.id] > 0 ? (
                         <div key={area.id} className="flex justify-between text-gray-600 pl-3">
-                            {/* 내용 영역은 75% 너비로 제한하여 텍스트 겹침 방지 */}
+                            {/* 내용 영역 W-3/4로 제한 유지 */}
                             <span className='w-3/4'>- {area.label} <span className="text-gray-400 text-xs">x {quantities[area.id]}</span></span>
                             {area.id === 'entrance' && calculation.isFreeEntrance && <span className='text-blue-500 flex-shrink-0'>[패키지 서비스]</span>}
                         </div>
@@ -874,10 +872,11 @@ export default function GroutEstimatorApp() {
 
                 </div>
 
-                {/* 총 합계 영역 */}
+                {/* 총 합계 영역 (문구 간소화 적용) */}
                 <div className="pt-3">
                     <div className="flex justify-between items-end">
-                        <span className="font-extrabold text-lg text-gray-900">총 예상 견적 합계</span>
+                        {/* 문구 변경: 총액으로 간소화 */}
+                        <span className="font-extrabold text-lg text-gray-900">총액</span>
                         <div className="text-right">
                             <span className="text-3xl font-extrabold text-blue-600">{calculation.price.toLocaleString()}원</span>
                             {calculation.label && <div className="text-xs text-red-600 font-bold mt-1">{calculation.label}</div>}
