@@ -848,7 +848,7 @@ export default function GroutEstimatorApp() {
         {/* ★★★ PackageToast 컴포넌트 사용 ★★★ */}
         <PackageToast isVisible={showToast} onClose={handleCloseToast} />
 
-        {/* 최종 견적 하단 바 (예상 시공 시간 제거 반영) */}
+        {/* 최종 견적 하단 바 (그림자/애니메이션 제거 반영) */}
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-2xl p-4 safe-area-bottom z-20">
             {/* items-end를 사용하여 금액 영역과 버튼의 하단 라인을 맞춤 */}
             <div className="max-w-md mx-auto flex items-end justify-between gap-4"> 
@@ -865,15 +865,15 @@ export default function GroutEstimatorApp() {
                     </div>
                 </div>
 
-                {/* 버튼 영역 */}
+                {/* 버튼 영역: 그림자(shadow-xl) 및 액티브 스케일(active:scale-[0.98]) 제거됨 */}
                 <button 
                     onClick={() => {
                         setShowModal(true);
                         setShowToast(false); // 견적서 보기 시 토스트 강제 종료
                     }} 
                     disabled={!hasSelections} 
-                    className={`px-5 py-3 sm:px-7 sm:py-4 rounded-lg font-extrabold text-sm sm:text-base text-white shadow-xl transition-all flex-shrink-0
-                        ${hasSelections ? 'bg-blue-600 hover:bg-blue-700 active:scale-[0.98]' : 'bg-gray-300 text-gray-500 cursor-not-allowed shadow-none'}
+                    className={`px-5 py-3 sm:px-7 sm:py-4 rounded-lg font-extrabold text-sm sm:text-base text-white transition-all flex-shrink-0
+                        ${hasSelections ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}
                     `}
                 >
                     견적서 보기
