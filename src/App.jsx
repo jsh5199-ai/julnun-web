@@ -5,10 +5,12 @@ import {
     REVIEW_EVENTS, FAQ_ITEMS, ICON_PATHS, getBasePrice, calculateEstimate 
 } from './quoteLogic';
 
-// [아이콘 컴포넌트] (변경 없음)
+// [아이콘 컴포넌트] (변경 없음 - SVG 렌더링 로직은 그대로 유지)
 const Icon = ({ name, size = 24, className = "" }) => (
     <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      {ICON_PATHS[name] || <circle cx="12" cy="12" r="10" />}
+      {/* ICON_PATHS[name]에 해당하는 경로가 없으면 기본 원형 아이콘을 렌더링 */}
+      {ICON_PATHS[name] && <path d={ICON_PATHS[name]} />}
+      {!ICON_PATHS[name] && <circle cx="12" cy="12" r="10" />}
     </svg>
 );
 
@@ -283,8 +285,10 @@ export default function GroutEstimatorApp() {
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-1 bg-white rounded-md border border-slate-200 p-1">
+                                        {/* 수량 감소 버튼: 'x' 아이콘을 45도 회전하여 마이너스처럼 보이게 함 */}
                                         <button onClick={() => handleQuantityChange(area.id, -1)} className={`w-9 h-9 rounded-md flex items-center justify-center transition-all ${quantities[area.id] > 0 ? 'text-[#1e3a8a] hover:bg-blue-50' : 'text-slate-300'}`}><Icon name="x" size={14} className="rotate-45" /></button>
                                         <span className={`w-8 text-center text-lg font-bold ${quantities[area.id] > 0 ? 'text-[#1e3a8a]' : 'text-slate-300'}`}>{quantities[area.id]}</span>
+                                        {/* 수량 증가 버튼: 'x' 아이콘을 일반 플러스처럼 보이게 함 */}
                                         <button onClick={() => handleQuantityChange(area.id, 1)} className="w-9 h-9 rounded-md text-slate-700 hover:bg-slate-100 transition-all flex items-center justify-center"><Icon name="x" size={14} /></button>
                                     </div>
                                 </div>
@@ -304,8 +308,10 @@ export default function GroutEstimatorApp() {
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-1 bg-white rounded-md border border-slate-200 p-1">
+                                        {/* 수량 감소 버튼 */}
                                         <button onClick={() => handleQuantityChange(area.id, -1)} className={`w-9 h-9 rounded-md flex items-center justify-center transition-all ${quantities[area.id] > 0 ? 'text-orange-700 hover:bg-orange-50' : 'text-slate-300'}`}><Icon name="x" size={14} className="rotate-45" /></button>
                                         <span className={`w-8 text-center text-lg font-bold ${quantities[area.id] > 0 ? 'text-orange-900' : 'text-slate-300'}`}>{quantities[area.id]}</span>
+                                        {/* 수량 증가 버튼 */}
                                         <button onClick={() => handleQuantityChange(area.id, 1)} className="w-9 h-9 rounded-md text-slate-700 hover:bg-slate-100 transition-all flex items-center justify-center"><Icon name="x" size={14} /></button>
                                     </div>
                                 </div>
@@ -444,7 +450,6 @@ export default function GroutEstimatorApp() {
                                 {(calculation.isPackageActive || calculation.isMinCost) && (<div className="flex justify-between items-center text-sm font-bold text-blue-600"><span>패키지 적용 / 최소 출장비</span><span>{calculation.priceAfterPackageDiscount.toLocaleString()}원</span></div>)}
                                 {calculation.totalReviewDiscount > 0 && (<div className="flex justify-between items-center text-base font-extrabold text-red-500"><span>🎁 리뷰 할인 금액</span><span>-{calculation.totalReviewDiscount.toLocaleString()}원</span></div>)}
                                 
-                                {/* [수정된 부분] 최종 결제 금액에서 (VAT 포함) 문구 삭제 */}
                                 <div className="flex justify-between items-center pt-3 mt-1 border-t border-dashed border-slate-300"><span className="text-xl font-extrabold text-slate-900">최종 결제 금액</span><span className="text-3xl font-extrabold text-[#1e3a8a]">{calculation.price.toLocaleString()}원</span></div>
                             </div>
                             
