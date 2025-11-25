@@ -18,7 +18,7 @@ const GlobalStyles = () => (
       0%, 100% { box-shadow: 0 0 0 0 rgba(100, 116, 139, 0.4); } 
       50% { box-shadow: 0 0 0 8px rgba(100, 116, 139, 0); } 
     }
-    /* 리뷰 버튼 애니메이션 추가: 관심을 유도하고 클릭을 명확히 함 */
+    /* 리뷰 버튼 애니메이션 유지 */
     @keyframes shine { 
         0% { background-position: -200% 0; }
         100% { background-position: 200% 0; }
@@ -43,7 +43,7 @@ const GlobalStyles = () => (
 );
 
 // =================================================================
-// [데이터] (유지)
+// [데이터] (수정: 당근마켓 리뷰 이벤트 삭제)
 // =================================================================
 const HOUSING_TYPES = [
   { id: 'new', label: '신축 아파트', multiplier: 1.0 },
@@ -85,7 +85,7 @@ const ALL_AREAS = [...SERVICE_AREAS, ...SILICON_AREAS];
 
 const REVIEW_EVENTS = [
   { id: 'soomgo_review', label: '숨고 리뷰이벤트', discount: 20000, icon: Star, desc: '시공 후기 작성 약속' },
-  { id: 'karrot_review', label: '당근마켓 리뷰이벤트', discount: 10000, icon: Star, desc: '동네생활 후기 작성 약속' },
+  // { id: 'karrot_review', label: '당근마켓 리뷰이벤트', discount: 10000, icon: Star, desc: '동네생활 후기 작성 약속' }, <-- 삭제됨
 ];
 
 const FAQ_ITEMS = [
@@ -595,10 +595,8 @@ export default function GroutEstimatorApp() {
   // 숨고 리뷰 이벤트 정보
   const soomgoReviewEvent = REVIEW_EVENTS.find(evt => evt.id === 'soomgo_review');
   const isSoomgoReviewApplied = selectedReviews.has('soomgo_review');
-  const karrotReviewEvent = REVIEW_EVENTS.find(evt => evt.id === 'karrot_review');
-  const isKarrotReviewApplied = selectedReviews.has('karrot_review');
-
-
+  // 당근마켓 리뷰 이벤트 정보 삭제됨
+  
   return (
     <div className={`min-h-screen bg-gray-50 bg-gray-50 text-gray-800 font-sans ${calculation.isPackageActive ? 'pb-48' : 'pb-28'}`}>
       <GlobalStyles />
@@ -727,9 +725,9 @@ export default function GroutEstimatorApp() {
                     </div>
                   </div>
                   <div className="flex items-center gap-1 bg-white px-1 py-1 rounded-full shadow-md border border-gray-200">
-                    <button onClick={() => handleQuantityChange(area.id, -1)} className={`w-7 h-7 flex items-center justify-center rounded-full transition active:scale-90 text-lg font-bold ${quantities[area.id] > 0 ? 'text-indigo-600 hover:bg-gray-100' : 'text-gray-400 cursor-not-allowed'}`}>-</button>
+                    <button onClick={() => handleQuantityChange(area.id, -1)} className={`w-7 h-7 flex items-center justify-center rounded-full transition active:scale-90 text-lg font-bold ${quantities[area.id] > 0 ? 'text-amber-600 hover:bg-gray-100' : 'text-gray-400 cursor-not-allowed'}`}>-</button>
                     <span className={`w-5 text-center text-sm font-bold ${quantities[area.id] > 0 ? 'text-gray-900' : 'text-gray-400'}`}>{quantities[area.id]}</span>
-                    <button onClick={() => handleQuantityChange(area.id, 1)} className="w-7 h-7 flex items-center justify-center text-indigo-600 hover:bg-gray-100 rounded-full font-bold text-lg transition active:scale-90">+</button>
+                    <button onClick={() => handleQuantityChange(area.id, 1)} className="w-7 h-7 flex items-center justify-center text-amber-600 hover:bg-gray-100 rounded-full font-bold text-lg transition active:scale-90">+</button>
                   </div>
                 </div>
               );
@@ -765,19 +763,8 @@ export default function GroutEstimatorApp() {
             })}
           </div>
         </section>
-
-        {/* --- 5. 할인 혜택 (리뷰 이벤트) 섹션 삭제됨 */}
-        {/*
-        <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-600">
-          <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
-            <Gift className="h-5 w-5 text-indigo-600" /> 5. 할인 이벤트
-          </h2 >
-          <div className="grid grid-cols-2 gap-3">
-            {...} (리뷰 이벤트 버튼)
-          </div>
-          <p className="text-xs text-gray-500 mt-3 text-center">※ 중복 선택 가능합니다. 시공 완료 후 꼭 작성해주세요!</p>
-        </section>
-        */}
+        
+        {/* --- 5. 할인 이벤트 섹션은 삭제되었습니다. --- */}
         
         {/* --- 자주 묻는 질문 (FAQ) (유지) --- */}
         <section className="bg-white p-5 rounded-xl border border-gray-100 shadow-lg mt-6 animate-fade-in delay-750">
@@ -959,9 +946,8 @@ export default function GroutEstimatorApp() {
                     })}
 
                     {/* 할인 항목 루프 (리뷰 할인 포함) */}
-                    {/* 당근마켓 리뷰 이벤트는 숨고 리뷰 버튼 디자인을 위해 잠시 숨김 처리 */}
                     {calculation.itemizedPrices
-                        .filter(item => item.isDiscount && item.id !== 'soomgo_review') // 숨고 리뷰 외 할인 항목
+                        .filter(item => item.isDiscount) 
                         .map(item => (
                             <div key={item.id} className="flex justify-between items-center text-red-600 font-semibold pl-2 pr-1 pt-1 border-b border-gray-100 last:border-b-0">
                                 <span className={`w-3/5`}>
@@ -1006,68 +992,37 @@ export default function GroutEstimatorApp() {
             
             {/* ⭐️ [견적서 모달 하단 컨트롤 영역] ⭐️ */}
             <div className="p-4 bg-gray-50 border-t border-gray-200">
-                {/* ★★★ 리뷰 이벤트 버튼 최상퀄리티 디자인 (숨고, 당근 모두 통합) ★★★ */}
-                
-                {/* 1. 숨고 리뷰 이벤트 버튼 */}
-                <div className='mb-2'>
-                    {(() => {
-                        const evt = soomgoReviewEvent;
-                        const isApplied = isSoomgoReviewApplied;
-                        const discountAmount = evt.discount.toLocaleString();
-                        const Icon = isApplied ? CheckCircle2 : Star;
-                        
-                        const baseClasses = "w-full py-3 rounded-xl transition font-extrabold text-sm active:scale-[0.98] shadow-lg flex items-center justify-center gap-2 relative overflow-hidden";
-                        
-                        const appliedClasses = "bg-red-600 text-white shadow-red-300/50 hover:bg-red-700";
-                        const pendingClasses = "bg-yellow-100 text-yellow-800 shadow-yellow-300/50 hover:bg-yellow-200 border-2 border-yellow-500";
-                        
-                        const labelText = isApplied 
-                            ? `✅ 숨고 할인 적용됨 (취소 시 +${discountAmount}원)` 
-                            : `✨ 숨고 리뷰 약속하고 ${discountAmount}원 할인받기`;
+                {/* 1. 숨고 리뷰 이벤트 버튼 (최상 퀄리티 디자인 적용) */}
+                {soomgoReviewEvent && (
+                    <div className='mb-4'>
+                        {(() => {
+                            const evt = soomgoReviewEvent;
+                            const isApplied = isSoomgoReviewApplied;
+                            const discountAmount = evt.discount.toLocaleString();
+                            const Icon = isApplied ? CheckCircle2 : Sparkles;
+                            
+                            const baseClasses = "w-full py-3 rounded-xl transition font-extrabold text-white text-sm active:scale-[0.98] shadow-lg flex items-center justify-center gap-2 relative overflow-hidden";
+                            
+                            // 네이비 계열 색상 테마 적용
+                            const appliedClasses = "bg-gray-700 shadow-gray-400/50 hover:bg-gray-800";
+                            const pendingClasses = "bg-indigo-600 shadow-indigo-400/50 hover:bg-indigo-700";
+                            
+                            const labelText = isApplied 
+                                ? `✅ 할인 적용 취소하기 (총액 +${discountAmount}원)` 
+                                : `🎁 숨고 리뷰 약속하고 ${discountAmount}원 할인받기!`;
 
-                        return (
-                            <button
-                                onClick={() => toggleReview(evt.id)}
-                                className={`${baseClasses} ${isApplied ? appliedClasses : pendingClasses} ${!isApplied ? 'shine-effect' : ''}`}
-                            >
-                                <Icon size={18} fill={isApplied ? 'currentColor' : '#f59e0b'} className={isApplied ? 'text-white' : 'text-yellow-800'}/>
-                                <span>{labelText}</span>
-                            </button>
-                        );
-                    })()}
-                </div>
-
-                {/* 2. 당근마켓 리뷰 이벤트 버튼 (서브 할인) */}
-                <div className='mb-3'>
-                    {(() => {
-                        const evt = karrotReviewEvent;
-                        const isApplied = isKarrotReviewApplied;
-                        const discountAmount = evt.discount.toLocaleString();
-                        const Icon = isApplied ? CheckCircle2 : Gift;
-                        
-                        const baseClasses = "w-full py-2 rounded-lg transition font-bold text-xs active:scale-[0.99] shadow-md border";
-                        
-                        const appliedClasses = "bg-indigo-600 text-white hover:bg-indigo-700 border-indigo-600";
-                        const pendingClasses = "bg-white text-gray-700 hover:bg-gray-100 border-gray-300";
-                        
-                        const labelText = isApplied 
-                            ? `✅ 당근 리뷰 할인 적용 (${discountAmount}원)` 
-                            : `당근마켓 리뷰 추가 적용 (${discountAmount}원 할인)`;
-
-                        return (
-                            <button
-                                onClick={() => toggleReview(evt.id)}
-                                className={`${baseClasses} ${isApplied ? appliedClasses : pendingClasses} flex items-center justify-center gap-2`}
-                            >
-                                <Icon size={16} className={isApplied ? 'text-white' : 'text-indigo-600'}/>
-                                <span>{labelText}</span>
-                            </button>
-                        );
-                    })()}
-                </div>
-                
-                {/* ★★★ 리뷰 이벤트 버튼 최적화 끝 ★★★ */}
-
+                            return (
+                                <button
+                                    onClick={() => toggleReview(evt.id)}
+                                    className={`${baseClasses} ${isApplied ? appliedClasses : pendingClasses} ${!isApplied ? 'shine-effect' : ''}`}
+                                >
+                                    <Icon size={18} fill="currentColor" className="text-white"/>
+                                    <span>{labelText}</span>
+                                </button>
+                            );
+                        })()}
+                    </div>
+                )}
                 
                 <p className='text-sm font-semibold text-center text-red-500 mb-3 flex items-center justify-center gap-1'><Info size={16}/> 상담 시 현장사진이 있으면 큰 도움이 됩니다..</p>
                 <div className='grid grid-cols-2 gap-3'>
