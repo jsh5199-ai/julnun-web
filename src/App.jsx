@@ -5,20 +5,19 @@ import {
 } from 'lucide-react';
 
 // =================================================================
-// [유틸리티 함수]
+// [가상 라이브러리 함수 정의 - 실제 환경에서는 'html2canvas' 설치 후 사용]
+// =시는 html2canvas 라이브러리를 사용한다고 가정합니다.
 // =================================================================
-const delay = ms => new Promise(res => setTimeout(res, ms));
+const delay = ms => new Promise(res => setTimeout(res, ms)); 
 
 const simulateHtmlToCanvas = async (node, options) => {
-    // 실제 환경에서는 html2canvas(node, options) 호출로 대체되어야 합니다.
+    // 이 함수를 실제 html2canvas(node, options) 호출로 대체해야 합니다.
     
-    // 비동기 렌더링 완료 대기 (스타일 계산 안정화)
     await delay(100); 
 
     const canvas = document.createElement('canvas');
     const scale = options.scale || 1;
     
-    // 캡처 영역의 실제 크기 사용
     canvas.width = node.offsetWidth * scale;
     canvas.height = node.offsetHeight * scale;
     
@@ -29,25 +28,31 @@ const simulateHtmlToCanvas = async (node, options) => {
     ctx.fillStyle = options.backgroundColor || '#FFFFFF';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
-    // 이 시점에서 html2canvas가 DOM 내용을 캔버스에 그립니다.
-    
     return canvas;
 };
 // =================================================================
 
 
 // =================================================================
-// [스타일] (유지)
+// [스타일] 애니메이션 정의 (대기업 스타일)
 // =================================================================
 const GlobalStyles = () => (
   <style>{`
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes professionalPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(100, 116, 139, 0.4); } 50% { box-shadow: 0 0 0 8px rgba(100, 116, 139, 0); } }
+    @keyframes professionalPulse { 
+      0%, 100% { box-shadow: 0 0 0 0 rgba(100, 116, 139, 0.4); } 
+      50% { box-shadow: 0 0 0 8px rgba(100, 116, 139, 0); } 
+    }
     .animate-fade-in { animation: fadeIn 0.5s ease-out; }
     .animate-slide-down { animation: slideDown 0.3s ease-out; }
+    
     .selection-box { transition: all 0.2s ease-in-out; }
-    .selection-selected { border: 3px solid #3b82f6; background-color: #f0f9ff; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05); }
+    .selection-selected {
+      border: 3px solid #3b82f6;
+      background-color: #f0f9ff;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    }
     .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom); }
   `}</style>
 );
@@ -61,8 +66,16 @@ const HOUSING_TYPES = [
 ];
 
 const MATERIALS = [
-  { id: 'poly', label: '폴리아스파틱', priceMod: 1.0, description: '탄성과 광택이 우수하며 가성비가 좋습니다.', badge: '일반', badgeColor: 'bg-gray-200 text-gray-700' },
-  { id: 'kerapoxy', label: '에폭시(무광/무펄)', priceMod: 1.8, description: '내구성이 뛰어나고 매트한 질감.', badge: '프리미엄', badgeColor: 'bg-amber-100 text-amber-800' },
+  { 
+    id: 'poly', label: '폴리아스파틱', priceMod: 1.0, 
+    description: '탄성과 광택이 우수하며 가성비가 좋습니다.',
+    badge: '일반', badgeColor: 'bg-gray-200 text-gray-700'
+  },
+  { 
+    id: 'kerapoxy', label: '에폭시(무광/무펄)', priceMod: 1.8, 
+    description: '내구성이 뛰어나고 매트한 질감.',
+    badge: '프리미엄', badgeColor: 'bg-amber-100 text-amber-800'
+  },
 ];
 
 const SERVICE_AREAS = [
@@ -173,8 +186,7 @@ export default function GroutEstimatorApp() {
   const [showModal, setShowModal] = useState(false);
   const [showMaterialModal, setShowMaterialModal] = useState(false); 
 
-  // ★★★ 캡처 대상 Ref를 모달 내부가 아닌, 오프스크린 렌더링용으로 분리 ★★★
-  const offScreenQuoteRef = useRef(null); 
+  const quoteRef = useRef(null); 
 
   const SOOMGO_REVIEW_URL = 'https://www.soomgo.com/profile/users/10755579?tab=review';
   const PHONE_NUMBER = '010-7734-6709';
@@ -466,28 +478,35 @@ export default function GroutEstimatorApp() {
     }
   };
 
-  // ★★★ 이미지 저장 로직 (Off-Screen 캡처 + 안정화) ★★★
+  // ★★★ 이미지 저장 로직 (안정화 적용) ★★★
   const handleImageSave = async () => {
-    const node = offScreenQuoteRef.current; // 모달 내부가 아닌, 오프스크린 Ref 사용
+    const node = quoteRef.current;
     if (!node) {
-        alert("이미지 저장 영역을 찾을 수 없습니다. (렌더링 대기 중)");
+        alert("이미지 저장 영역을 찾을 수 없습니다.");
         return;
     }
     
-    // 캡처 안정화를 위한 최종 옵션
     try {
+        // 1. 캡처 전 렌더링 안정화 대기 (백색화 방지 핵심)
+        await delay(100); 
+
         const options = {
-            backgroundColor: '#FFFFFF', 
-            scale: 2, 
+            backgroundColor: '#FFFFFF', // 흰색 배경 명시 (핵심)
+            scale: 2, // 고해상도 캡처
             useCORS: true, 
+            windowHeight: node.offsetHeight, 
+            windowWidth: node.offsetWidth,
         };
 
-        // 1. DOM을 Canvas로 변환 (시뮬레이션)
+        // 2. DOM을 Canvas로 변환 (시뮬레이션)
         const canvas = await simulateHtmlToCanvas(node, options); 
 
+        const dataUrl = canvas.toDataURL('image/png', 1.0);
         const filename = '줄눈의미학_견적서_' + new Date().getTime();
         
-        // 2. Blob 다운로드 방식 (모바일 갤러리 저장 안정성 향상)
+        // 3. 다운로드 링크 생성 및 클릭 (Blob 다운로드 방식 시뮬레이션)
+        
+        // Blob 생성 및 다운로드 방식 (안정성 향상)
         canvas.toBlob((blob) => {
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
@@ -498,7 +517,7 @@ export default function GroutEstimatorApp() {
             link.click();
             document.body.removeChild(link);
             
-            URL.revokeObjectURL(url);
+            URL.revokeObjectURL(url); 
             
             alert("이미지 저장이 완료되었습니다! (갤러리 또는 다운로드 폴더 확인)");
             setShowModal(false); 
@@ -761,7 +780,7 @@ export default function GroutEstimatorApp() {
         {/* 최종 견적 하단 바 (반응형 개선 적용) */}
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-2xl p-4 safe-area-bottom z-20">
           <div className="max-w-md mx-auto flex items-center justify-between gap-4">
-            {/* 금액 영역: 狭い 화면에서 밀림 방지 */}
+            {/* 금액 영역: 좁은 화면에서 밀림 방지 */}
             <div className='flex-shrink-0 w-auto'> 
               <div className="text-sm text-gray-500 font-medium flex items-center gap-1">
                 <Clock size={14} className="text-indigo-600" /> 예상 시공 시간: <span className='font-extrabold text-gray-800'>{calculation.estimatedHours}</span>시간
@@ -788,10 +807,9 @@ export default function GroutEstimatorApp() {
               </button>
             </div>
             
-            {/* ★★★ 캡처 전용 견적서 양식 ★★★ */}
+            {/* ★★★ 캡처 전용 견적서 양식 (안정화된 구조) ★★★ */}
             <div className="p-5 text-gray-800 bg-white overflow-y-auto max-h-[70vh]"> 
-              {/* Off-Screen 캡처를 위한 구조: 모달 내부에서는 숨겨져 있지만, Ref를 통해 캡처됨 */}
-              <div ref={offScreenQuoteRef} id="quote-content" className="border-4 border-indigo-700 rounded-lg p-5 space-y-4 mx-auto" style={{ width: '320px', position: 'fixed', left: '-9999px', top: '0' }}> 
+              <div ref={quoteRef} id="quote-content" className="border-4 border-indigo-700 rounded-lg p-5 space-y-4 mx-auto" style={{ width: '320px' }}>
                 
                 {/* 헤더 및 로고 영역 */}
                 <div className="flex flex-col items-center border-b border-gray-300 pb-3 mb-3">
@@ -806,6 +824,7 @@ export default function GroutEstimatorApp() {
                       <span className='text-right flex-shrink-0'>{HOUSING_TYPES.find(h => h.id === housingType).label}</span>
                     </div>
                     <div className="flex justify-between text-sm">
+                      {/* 문구 간소화 적용 */}
                       <span className="font-semibold flex-shrink-0 pr-2">시공 재료</span> 
                       <span className="font-bold text-indigo-600 text-right flex-shrink-0">
                         {selectedMaterialData.label} ({material === 'poly' ? (polyOption === 'pearl' ? '펄' : '무펄') : (epoxyOption === 'kerapoxy' ? '케라폭시' : '스타라이크')})
@@ -822,6 +841,7 @@ export default function GroutEstimatorApp() {
                     <p className="font-extrabold text-gray-800 flex items-center gap-1"><Calculator size={14}/> 시공 범위</p>
                     {SERVICE_AREAS.map(area => quantities[area.id] > 0 ? (
                         <div key={area.id} className="flex justify-between text-gray-600 pl-3">
+                            {/* 내용 영역 W-3/4로 제한 유지 */}
                             <span className='w-3/4'>- {area.label} <span className="text-gray-400 text-xs">x {quantities[area.id]}</span></span>
                             {area.id === 'entrance' && calculation.isFreeEntrance && <span className='text-blue-500 flex-shrink-0'>[패키지 서비스]</span>}
                         </div>
@@ -855,6 +875,7 @@ export default function GroutEstimatorApp() {
                 {/* 총 합계 영역 (문구 간소화 적용) */}
                 <div className="pt-3">
                     <div className="flex justify-between items-end">
+                        {/* 문구 변경: 총액으로 간소화 */}
                         <span className="font-extrabold text-lg text-gray-900">총액</span>
                         <div className="text-right">
                             <span className="text-3xl font-extrabold text-blue-600">{calculation.price.toLocaleString()}원</span>
