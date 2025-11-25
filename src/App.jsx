@@ -790,33 +790,33 @@ export default function GroutEstimatorApp() {
 
       {/* 하단 고정바 */}
       <>
-        {/* ★★★ 패키지 혜택 바 위치 조정 (bottom-[90px]) ★★★ */}
+        {/* ★★★ 패키지 혜택 바 수정 적용 (안내 문구로 변경) ★★★ */}
         {calculation.isPackageActive && showPackageInfo && (
-          <div className="fixed bottom-[90px] left-4 right-4 max-w-md mx-auto z-10">
-            <div className="bg-gray-700 text-white p-4 rounded-lg shadow-2xl border border-gray-500 animate-[professionalPulse_2s_infinite]">
+          <div className="fixed bottom-[90px] left-4 right-4 max-w-md mx-auto z-10 animate-fade-in">
+            <div className="bg-indigo-700 text-white p-4 rounded-xl shadow-2xl border border-indigo-500 animate-[professionalPulse_2s_infinite]">
               
               {/* 닫기 버튼 */}
               <button 
                   onClick={handleClosePackageInfo} 
-                  className="absolute top-2 right-2 p-1 text-gray-400 hover:text-white transition active:scale-95 rounded-full bg-gray-600/50"
+                  className="absolute top-2 right-2 p-1 text-indigo-200 hover:text-white transition active:scale-95 rounded-full bg-indigo-600/50"
               >
                   <X size={16} />
               </button>
               
-              <div className="flex items-start gap-3">
-                <div className="text-sm flex-1">
-                  <div className="font-extrabold text-amber-300 mb-1">🎉 프리미엄 패키지 적용 중!</div>
-                  <div className="space-y-0.5 text-xs text-gray-300">
-                    {calculation.isFreeEntrance && <div>- 현관 바닥 서비스 (폴리아스파틱)</div>}
-                    <div>- 변기테두리, 바닥테두리</div>
-                    <div>- 욕실 젠다이 실리콘 오염방지</div>
-                    {/* <li>주방 싱크볼</li> <-- 삭제됨 */}
-                  </div>
+              <div className="flex flex-col items-center justify-center text-center">
+                <div className="font-extrabold text-amber-300 text-lg mb-1 flex items-center gap-2">
+                    <Gift size={20} className='text-amber-300' /> 🎉 패키지 할인이 적용되었습니다!
                 </div>
+                
+                {/* CTA 강조 문구 */}
+                <p className="text-sm font-bold text-gray-100 mt-1">
+                    견적서 보기를 눌러 <span className='text-amber-300'>최종 할인 금액</span>을 확인해보세요.
+                </p>
               </div>
-              
-              <div className="mt-3 pt-3 border-t border-gray-600/50 text-center">
-                  <p className="text-[11px] font-bold text-gray-300 bg-gray-800/50 py-1 px-2 rounded">
+
+              {/* 하단 주의사항 */}
+              <div className="mt-3 pt-3 border-t border-indigo-600/50 text-center">
+                  <p className="text-[11px] font-bold text-indigo-200 bg-indigo-800/50 py-1 px-2 rounded">
                       🚨 정확한 견적은 전문가 상담 시 확정됩니다.
                   </p>
               </div>
@@ -824,7 +824,7 @@ export default function GroutEstimatorApp() {
           </div>
         )}
 
-        {/* 최종 견적 하단 바 (수정 적용) */}
+        {/* 최종 견적 하단 바 (수직 정렬 수정 유지) */}
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-2xl p-4 safe-area-bottom z-20">
             {/* items-end를 사용하여 금액 영역과 버튼의 하단 라인을 맞춤 */}
             <div className="max-w-md mx-auto flex items-end justify-between gap-4"> 
