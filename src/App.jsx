@@ -679,7 +679,7 @@ export default function GroutEstimatorApp() {
                           {item.id === material && <CheckCircle2 size={12} className="text-blue-600" />}
                         </div>
                         <span className="font-bold text-gray-800">{item.label}</span>
-                    </div>
+                      </div>
                       <span className={`text-xs font-bold px-3 py-1 rounded-full ${item.badgeColor}`}>
                         {item.badge}
                       </span>
@@ -925,31 +925,6 @@ export default function GroutEstimatorApp() {
                 <div className="space-y-2 text-sm border-b border-gray-200 pb-3">
                     <p className="font-extrabold text-gray-800 flex items-center gap-1"><Calculator size={14}/> 시공 내역 및 가격</p>
 
-                    {/* 👈 [수정된 부분]: 숨고 리뷰 이벤트 버튼 영역 */}
-                    {REVIEW_EVENTS.map(evt => {
-                        if (evt.id === 'soomgo_review') {
-                            const isApplied = selectedReviews.has(evt.id);
-                            return (
-                                <div key={evt.id} className="flex justify-between items-center pl-2 pr-1 pt-1 border-b border-gray-100">
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            toggleReview(evt.id);
-                                        }}
-                                        className={`w-3/5 text-left transition active:scale-95 text-xs font-bold px-2 py-1 rounded-md flex items-center gap-1 shadow-sm ${isApplied ? 'bg-red-600 text-white' : 'bg-red-100 text-red-600 border border-red-300 hover:bg-red-200'}`}
-                                    >
-                                        <Gift size={12}/> {isApplied ? '할인 적용 완료 (클릭 취소)' : '숨고 리뷰이벤트 적용'}
-                                    </button>
-                                    <span className={`text-right w-2/5 font-bold ${isApplied ? 'text-red-600' : 'text-gray-400'}`}>
-                                        {isApplied ? `-${evt.discount.toLocaleString()}원` : '0원'}
-                                    </span>
-                                </div>
-                            );
-                        }
-                        return null;
-                    })}
-                    {/* 👆 [수정된 부분 끝] */}
-                    
                     {/* 개별 항목 루프 (시공 내역) */}
                     {calculation.itemizedPrices
                         .filter(item => !item.isDiscount) // 할인 항목 제외
@@ -991,9 +966,9 @@ export default function GroutEstimatorApp() {
                         );
                     })}
 
-                    {/* 👈 [추가된 부분]: 할인 항목 루프 (리뷰 할인 포함) */}
+                    {/* 할인 항목 루프 (리뷰 할인 포함) */}
                     {calculation.itemizedPrices
-                        .filter(item => item.isDiscount && item.id !== 'soomgo_review') // 숨고 리뷰는 위에서 버튼으로 처리했으므로 제외
+                        .filter(item => item.isDiscount && item.id !== 'soomgo_review')
                         .map(item => (
                             <div key={item.id} className="flex justify-between items-center text-red-600 font-semibold pl-2 pr-1 pt-1 border-b border-gray-100 last:border-b-0">
                                 <span className={`w-3/5`}>
@@ -1008,6 +983,30 @@ export default function GroutEstimatorApp() {
 
                 {/* 총 합계 영역 */}
                 <div className="pt-3">
+                    
+                    {/* 👈 [수정된 부분]: 총액 위에 리뷰 버튼 배치 */}
+                    {REVIEW_EVENTS.map(evt => {
+                        if (evt.id === 'soomgo_review') {
+                            const isApplied = selectedReviews.has(evt.id);
+                            return (
+                                <div key={evt.id} className='mb-2'>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            toggleReview(evt.id);
+                                        }}
+                                        className={`w-full py-2 rounded-lg transition active:scale-[0.99] text-xs font-bold flex items-center justify-center gap-2 shadow-md ${isApplied ? 'bg-red-600 text-white' : 'bg-red-100 text-red-600 border border-red-300 hover:bg-red-200'}`}
+                                    >
+                                        <Gift size={14}/> 
+                                        <span>{isApplied ? `숨고 리뷰이벤트 해제 (-${evt.discount.toLocaleString()}원)` : `숨고 리뷰이벤트 적용 (+20,000원 할인)`}</span>
+                                    </button>
+                                </div>
+                            );
+                        }
+                        return null;
+                    })}
+                    {/* 👆 [수정된 부분 끝] */}
+                    
                     <div className="flex justify-between items-end">
                         <span className="font-extrabold text-lg text-gray-900">총액</span>
                         <div className="text-right">
