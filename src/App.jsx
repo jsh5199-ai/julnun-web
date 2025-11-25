@@ -14,7 +14,6 @@ const simulateHtmlToCanvas = async (node, options) => {
     const canvas = document.createElement('canvas');
     const scale = options.scale || 1;
     
-    // 캡처 안정화를 위해 node의 계산된 크기를 사용
     canvas.width = node.offsetWidth * scale;
     canvas.height = node.offsetHeight * scale;
     
@@ -797,8 +796,7 @@ export default function GroutEstimatorApp() {
               </button>
             </div>
             
-            {/* ★★★ 캡처 전용 견적서 양식 ★★★ */}
-            {/* 캡처 대상인 div의 max-height/overflow 속성을 제거하고, 내부 div의 스크롤을 유지하여 캡처 안정성 확보 */}
+            {/* ★★★ 캡처 전용 견적서 양식 (안정화된 구조) ★★★ */}
             <div className="p-5 text-gray-800 bg-white overflow-y-auto max-h-[70vh]"> 
               <div ref={quoteRef} id="quote-content" className="border-4 border-indigo-700 rounded-lg p-5 space-y-4 mx-auto" style={{ width: '320px' }}> {/* 명시적 너비 지정 */}
                 
@@ -815,14 +813,15 @@ export default function GroutEstimatorApp() {
                       <span className='text-right'>{HOUSING_TYPES.find(h => h.id === housingType).label}</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="font-semibold flex-shrink-0 pr-2">시공 재료</span> {/* pr-2로 간격 확보 */}
-                      <span className="font-bold text-indigo-600 text-right">
+                      {/* 텍스트 밀림 방지를 위해 오른쪽 텍스트에만 flex-shrink-0 적용 */}
+                      <span className="font-semibold flex-shrink-0 pr-2">시공 재료</span> 
+                      <span className="font-bold text-indigo-600 text-right flex-shrink-0">
                         {selectedMaterialData.label} ({material === 'poly' ? (polyOption === 'pearl' ? '펄' : '무펄') : (epoxyOption === 'kerapoxy' ? '케라폭시' : '스타라이크')})
                       </span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="font-semibold flex-shrink-0">예상 시공 시간</span>
-                      <span className="font-bold text-gray-700 text-right">{calculation.estimatedHours}시간 내외</span>
+                      <span className="font-bold text-gray-700 text-right flex-shrink-0">{calculation.estimatedHours}시간 내외</span>
                     </div>
                 </div>
 
@@ -831,7 +830,7 @@ export default function GroutEstimatorApp() {
                     <p className="font-extrabold text-gray-800 flex items-center gap-1"><Calculator size={14}/> 시공 범위</p>
                     {SERVICE_AREAS.map(area => quantities[area.id] > 0 ? (
                         <div key={area.id} className="flex justify-between text-gray-600 pl-3">
-                            {/* truncate 대신 텍스트가 줄바꿈되도록 허용 */}
+                            {/* 내용 영역을 75% 너비로 제한하고, 수량 영역은 밀리지 않도록 설정 */}
                             <span className='w-3/4'>- {area.label} <span className="text-gray-400 text-xs">x {quantities[area.id]}</span></span>
                             {area.id === 'entrance' && calculation.isFreeEntrance && <span className='text-blue-500 flex-shrink-0'>[패키지 서비스]</span>}
                         </div>
@@ -895,7 +894,7 @@ export default function GroutEstimatorApp() {
                     <button onClick={handleImageSave} className="flex items-center justify-center gap-1 bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition text-sm active:scale-95 shadow-md">
                         <ImageIcon size={16} /> 견적 이미지 저장
                     </button>
-                    {/* 전화 상담 버튼 문구 수정 (연락처 삭제) */}
+                    {/* 전화 상담 버튼 문구 수정 */}
                     <button onClick={() => window.location.href = `tel:${PHONE_NUMBER}`} className="flex items-center justify-center gap-1 bg-indigo-600 text-white py-3 rounded-lg font-bold hover:bg-indigo-700 transition shadow-md text-sm active:scale-95 col-span-1">
                         <Phone size={16} /> 전화 상담
                     </button>
