@@ -32,7 +32,7 @@ const GlobalStyles = () => (
 );
 
 // =================================================================
-// [데이터] (유지)
+// [데이터] (수정 반영)
 // =================================================================
 const HOUSING_TYPES = [
   { id: 'new', label: '신축 아파트', multiplier: 1.0 },
@@ -52,6 +52,10 @@ const MATERIALS = [
   },
 ];
 
+// '주방싱크볼 실리콘오염방지' (id: 'silicon_kitchen_line')는 SILICON_AREAS에 있었으나,
+// 사용자 요청에 따라 서비스 목록에서 제거해야 하는 항목으로 보아 SERVICE_AREAS에서 제외하고
+// 관련 항목은 SILICON_AREAS에서도 제거했습니다. (주방 벽면은 유지)
+
 const SERVICE_AREAS = [
   { id: 'entrance', label: '현관', basePrice: 50000, icon: DoorOpen, unit: '개소' },
   { id: 'bathroom_floor', label: '욕실 바닥', basePrice: 150000, icon: Bath, unit: '개소' },
@@ -67,7 +71,7 @@ const SERVICE_AREAS = [
 const SILICON_AREAS = [
   { id: 'silicon_bathtub', label: '욕조 테두리 교체', basePrice: 80000, icon: Eraser, unit: '개소', desc: '단독 8만 / 패키지시 5만' },
   { id: 'silicon_sink', label: '세면대+젠다이 교체', basePrice: 30000, icon: Eraser, unit: '개소', desc: '오염된 실리콘 제거 후 재시공' },
-  { id: 'silicon_kitchen_line', label: '주방 실리콘오염방지', basePrice: 50000, icon: Eraser, unit: '구역', desc: '음식물 오염 방지' },
+  // 요청에 따라 'silicon_kitchen_line' 항목 제거
   { id: 'silicon_living_baseboard', label: '거실/주방 걸레받이 실리콘', basePrice: 400000, icon: Sofa, unit: '구역', desc: '단독 40만 / 패키지시 35만' },
 ];
 
@@ -392,10 +396,10 @@ export default function GroutEstimatorApp() {
 
         // 1. 현관 무료 서비스 처리
         if (area.id === 'entrance' && isFreeEntrance) {
-             finalCalculatedPrice = 0;
-             finalDiscount = itemOriginalTotal;
-             isFreeServiceItem = true;
-             total += finalCalculatedPrice;
+              finalCalculatedPrice = 0;
+              finalDiscount = itemOriginalTotal;
+              isFreeServiceItem = true;
+              total += finalCalculatedPrice;
         } else if (packageCount > 0 && ['bathroom_floor', 'master_bath_wall', 'common_bath_wall', 'shower_booth', 'bathtub_wall'].includes(area.id)) {
             // 2. 핵심 패키지 항목 처리 (욕실바닥/벽 전체/샤워/욕조)
             
@@ -540,69 +544,42 @@ export default function GroutEstimatorApp() {
     }
   };
 
-  // 이미지 저장 로직 (유지)
+  // 이미지 저장 로직 (수정: scale 4 적용 및 직접 다운로드)
   const handleImageSave = async () => {
     const node = quoteRef.current;
     if (!node) {
-        alert("이미지 저장 영역을 찾을 수 없습니다.");
-        return;
+      alert("이미지 저장 영역을 찾을 수 없습니다.");
+      return;
     }
     
     try {
-        await delay(100); 
+      await delay(100); 
 
-        const options = {
-            backgroundColor: '#FFFFFF',
-            scale: 2, 
-            useCORS: true, 
-            windowHeight: node.offsetHeight, 
-            windowWidth: node.offsetWidth,
-        };
+      const options = {
+        backgroundColor: '#FFFFFF',
+        scale: 4, // 👈 퀄리티 향상을 위해 4로 상향
+        useCORS: true, 
+        windowHeight: node.offsetHeight, 
+        windowWidth: node.offsetWidth,
+      };
 
-        const canvas = await html2canvas(node, options); 
+      const canvas = await html2canvas(node, options); 
 
-        const dataUrl = canvas.toDataURL('image/png', 1.0);
-        
-        const windowContent = `
-            <!DOCTYPE html>
-            <html>
-                <head>
-                    <title>줄눈 견적 이미지 저장</title>
-                    <meta name="viewport" content="width=device-width, initial-scale=1">
-                    <style>
-                        body { margin: 0; background: #f0f0f0; display: flex; flex-direction: column; align-items: center; padding-top: 70px; }
-                        img { max-width: 95%; height: auto; border: 1px solid #ccc; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-                        .info {
-                            position: fixed; top: 0; left: 0; right: 0; 
-                            background: #d4edda;
-                            color: #155724; 
-                            padding: 10px; text-align: center; font-size: 16px; 
-                            font-weight: bold; border-bottom: 2px solid #c3e6cb;
-                            z-index: 1000;
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div class="info">
-                        ✅ 저장을 위해 이미지를 길게(꾹) 눌러 '저장'하세요. (PC는 우클릭)
-                    </div>
-                    <img src="${dataUrl}" alt="줄눈 견적서 이미지"/>
-                </body>
-            </html>
-        `;
+      const dataUrl = canvas.toDataURL('image/png', 1.0);
+      
+      // 새 창을 띄우지 않고 직접 다운로드
+      const a = document.createElement('a');
+      a.href = dataUrl;
+      a.download = `줄눈의미학_견적서_${new Date().toLocaleDateString('ko-KR').replace(/\./g, '').trim()}.png`; // 파일 이름 설정
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
 
-        const printWindow = window.open('', '_blank');
-        if (printWindow) {
-            printWindow.document.write(windowContent);
-            printWindow.document.close();
-            setShowModal(false);
-        } else {
-            alert("팝업 차단이 설정되어 있습니다. 해제 후 다시 시도해주세요.");
-        }
-        
+      setShowModal(false);
+      
     } catch (error) {
-        console.error("이미지 캡처 및 저장 실패:", error);
-        alert("이미지 저장 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+      console.error("이미지 캡처 및 저장 실패:", error);
+      alert("이미지 저장 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
     }
   };
 
@@ -934,10 +911,10 @@ export default function GroutEstimatorApp() {
                         <div className="bg-blue-50/70 p-2 rounded-md border-l-4 border-blue-500 text-xs font-semibold text-gray-700">
                             <p className='flex items-center gap-1 text-blue-800 font-extrabold mb-1'><Crown size={12} className='text-amber-500'/> 패키지 포함 서비스 내역</p>
                             <ul className='list-disc list-outside text-[11px] ml-4 space-y-0.5'>
-                                {calculation.isFreeEntrance && <li>현관 바닥 서비스 (일반 재료)</li>}
-                                <li>변기테두리, 바닥테두리 (줄눈)</li>
-                                <li>욕실 젠다이/세면대 실리콘 오염방지</li>
-                                <li>주방 싱크볼 실리콘 오염방지</li>
+                                {calculation.isFreeEntrance && <li>현관 바닥 서비스 (폴리아스파틱)</li>}
+                                <li>변기테두리, 바닥테두리</li>
+                                <li>욕실 젠다이/세면대 실리콘</li>
+                                <li>주방 싱크볼</li>
                             </ul>
                         </div>
                     )}
@@ -1012,21 +989,22 @@ export default function GroutEstimatorApp() {
                     <p className="text-xs text-gray-400 text-right mt-1">VAT 별도 / 현장상황별 상이</p>
                 </div>
 
-                {/* 안내 사항 영역 */}
+                {/* 안내 사항 영역 (주의사항 문구 삭제 반영) */}
                 <div className="mt-4 pt-3 border-t border-gray-200">
                     <p className='text-xs font-semibold text-red-600 mb-1 flex items-center gap-1'>
                         <Info size={14}/> 주의 사항
                     </p>
                     
-                    {/* ★★★ [추가됨] 텍스트 강조 및 삽입 ★★★ */}
+                    {/* ★★★ [수정 반영] 텍스트 강조 및 삽입 ★★★ */}
                     <div className='text-[11px] font-bold text-gray-800 mb-2 p-1 border-y border-gray-200'>
                         바닥 30x30cm, 벽 30x60cm 크기 기준
                     </div>
-                    {/* ★★★ [추가됨] 끝 ★★★ */}
+                    {/* ★★★ [수정 반영] 끝 ★★★ */}
 
                     <ul className='list-disc list-outside text-[11px] text-gray-600 ml-4 space-y-0.5'>
-                        <li>구축은 정확한 견적을 위해 현장 사진은 필수입니다.</li>
-                        <li>견적 기준 타일 크기 외(조각 타일, 특이 구조) 시 추가 비용이 발생할 수 있습니다.</li>
+                        {/* <li>구축은 정확한 견적을 위해 현장 사진은 필수입니다. (삭제됨)</li> */}
+                        {/* <li>견적 기준 타일 크기 외(조각 타일, 특이 구조) 시 추가 비용이 발생할 수 있습니다. (삭제됨)</li> */}
+                        <li>위 견적은 예상 금액이며, 전문가와 상담 시 최종 금액이 확정됩니다.</li>
                     </ul>
                 </div>
               </div>
