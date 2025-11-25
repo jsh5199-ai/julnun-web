@@ -1,6 +1,5 @@
 import React, { useState, useMemo, useRef } from 'react';
 import html2canvas from 'html2canvas';
-// quoteLogic은 외부 파일이므로 import 구문은 유지합니다.
 import { 
     HOUSING_TYPES, MATERIALS, MATERIAL_GUIDE, SERVICE_AREAS, SILICON_AREAS, 
     REVIEW_EVENTS, FAQ_ITEMS, ICON_PATHS, getBasePrice, calculateEstimate 
@@ -13,7 +12,7 @@ const Icon = ({ name, size = 24, className = "" }) => (
     </svg>
 );
 
-// [스타일 정의] (quote-canvas-container 스타일 수정)
+// [스타일 정의] (변경 없음)
 const GlobalStyles = () => (
     <style>{`
     @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css");
@@ -25,16 +24,12 @@ const GlobalStyles = () => (
     .no-scrollbar::-webkit-scrollbar { display: none; } .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     .shadow-card { box-shadow: 0 4px 12px rgba(30, 58, 138, 0.08); }
     .shadow-float { box-shadow: 0 -5px 20px -5px rgba(30, 58, 138, 0.15); }
-    /* ******************************************************************* */
-    /* [수정] 이미지 캡처 영역 디자인 개선 */
-    /* ******************************************************************* */
     .quote-canvas-container { 
         background-color: #FFFFFF !important; 
         padding: 24px; 
-        border-radius: 0; /* 캡처 시 불필요한 둥근 모서리 제거 */
-        box-shadow: none !important; /* 캡처 시 그림자 제거 */
+        border-radius: 0; 
+        box-shadow: none !important; 
     }
-    /* 모달 전체 컨테이너에서 그림자/둥근 모서리 제거 (캡처할 때만 적용될 수 있도록) */
     .quote-modal-content {
         border-radius: 0 !important;
         box-shadow: none !important;
@@ -100,42 +95,33 @@ export default function GroutEstimatorApp() {
         return calculateEstimate(quantities, housingType, effectiveMaterialId, selectedReviews);
     }, [housingType, material, polyOption, epoxyOption, quantities, selectedReviews]);
 
-    // *******************************************************************
-    // [수정] 이미지 저장 로직 개선 (갤러리 저장 호환성 향상 및 전문 디자인 적용)
-    // *******************************************************************
     const saveAsImage = async () => {
         if (!quoteRef.current) return alert("에러: 견적서 영역을 찾을 수 없습니다.");
         
         const element = quoteRef.current;
         const originalOverflow = element.style.overflow;
         
-        // 캡처 전: 깔끔한 출력을 위해 임시로 스타일 조정
         element.style.overflow = 'visible';
-        
-        // 캡처 영역의 높이를 임시로 크게 설정 (모바일 스크롤 시 깨짐 방지)
         const originalMaxHeight = element.style.maxHeight;
         element.style.maxHeight = 'unset'; 
 
-        // 캡처할 때 하단 버튼 영역 제외
         const footerElement = element.querySelector('.quote-modal-footer');
         if (footerElement) footerElement.style.display = 'none';
 
         try {
             const canvas = await html2canvas(element, { 
-                scale: 3, // 고해상도 이미지 (시인성/전문성)
+                scale: 3, 
                 logging: false, 
                 useCORS: true,
-                backgroundColor: '#ffffff' // 배경색을 명시적으로 흰색으로 지정
+                backgroundColor: '#ffffff'
             });
 
-            // 캡처 후: 스타일 원복
             if (footerElement) footerElement.style.display = 'flex';
             element.style.overflow = originalOverflow;
             element.style.maxHeight = originalMaxHeight;
 
             const filename = `줄눈의미학_견적서_${new Date().toISOString().slice(0, 10)}.png`;
 
-            // 1. Web Share API 시도 (모바일 갤러리 저장이 가장 잘 됨)
             if (navigator.share && navigator.canShare) {
                 const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
                 const file = new File([blob], filename, { type: 'image/png' });
@@ -145,11 +131,10 @@ export default function GroutEstimatorApp() {
                         title: '줄눈의미학 정식 견적서',
                         files: [file],
                     });
-                    return; // 공유 성공하면 종료
+                    return; 
                 }
             }
             
-            // 2. 일반적인 다운로드 fallback (갤러리 저장이 안 될 수 있음)
             const image = canvas.toDataURL('image/png');
             const link = document.createElement('a');
             link.href = image;
@@ -161,7 +146,6 @@ export default function GroutEstimatorApp() {
             console.error("이미지 저장 중 오류 발생:", error);
             alert("이미지 저장에 실패했습니다. 직접 스크린샷을 찍어주세요.");
             
-            // 오류 발생 시에도 스타일은 원복
             if (footerElement) footerElement.style.display = 'flex';
             element.style.overflow = originalOverflow;
             element.style.maxHeight = originalMaxHeight;
@@ -177,7 +161,6 @@ export default function GroutEstimatorApp() {
     return (
         <div className="min-h-screen pb-44 selection:bg-[#1e3a8a] selection:text-white bg-white">
             <GlobalStyles />
-            {/* 헤더 (생략) */}
             <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-100">
                 <div className="max-w-md mx-auto px-6 h-16 flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -191,7 +174,6 @@ export default function GroutEstimatorApp() {
             </header>
 
             <main className="max-w-md mx-auto px-6 pt-24 space-y-10">
-                {/* 상단 홍보 배너 (생략) */}
                  <div className="animate-enter bg-slate-50 border border-slate-200 rounded-xl p-5 flex flex-col gap-2">
                     <div className="flex items-center gap-2 text-[#1e3a8a] font-bold text-lg">
                         <Icon name="trophy" size={20} className="text-[#1e3a8a]" /> 숨고 리뷰/평점 1등 업체
@@ -201,7 +183,6 @@ export default function GroutEstimatorApp() {
                     </div>
                 </div>
 
-                {/* STEP 1: 현장 유형 (생략) */}
                 <section className="animate-enter" style={{ animationDelay: '0.1s' }}>
                     <div className="flex items-center justify-between mb-4">
                         <h2 className="text-xl font-bold text-[#1e3a8a]">현장 유형</h2>
@@ -217,7 +198,6 @@ export default function GroutEstimatorApp() {
                     </div>
                 </section>
 
-                {/* STEP 2: 재료 선택 (생략) */}
                 <section className="animate-enter" style={{ animationDelay: '0.2s' }}>
                     <div className="flex items-center justify-between mb-4">
                         <h2 className="text-xl font-bold text-[#1e3a8a]">시공 소재</h2>
@@ -283,7 +263,6 @@ export default function GroutEstimatorApp() {
                     </div>
                 </section>
 
-                {/* STEP 3: 공간 선택 (생략) */}
                 <section className="animate-enter" style={{ animationDelay: '0.3s' }}>
                     <div className="flex items-center justify-between mb-4">
                         <h2 className="text-xl font-bold text-[#1e3a8a]">시공 구역</h2>
@@ -335,7 +314,6 @@ export default function GroutEstimatorApp() {
                     </div>
                 </section>
 
-                {/* 할인 혜택 (생략) */}
                 <section className="animate-enter" style={{ animationDelay: '0.4s' }}>
                     <div className="flex items-center justify-between mb-4">
                         <h2 className="text-xl font-bold text-[#1e3a8a]">프로모션</h2>
@@ -355,7 +333,6 @@ export default function GroutEstimatorApp() {
                     <div className="text-center mt-4"><p className="text-sm text-rose-500 font-bold bg-rose-50 inline-block px-4 py-2 rounded-lg">※ 서비스 이용 후 꼭! 작성해주세요</p></div>
                 </section>
 
-                {/* FAQ (생략) */}
                 <section className="pb-8">
                     <h2 className="text-xl font-bold text-[#1e3a8a] mb-5">자주 묻는 질문</h2>
                     <div className="bg-white rounded-xl border border-slate-200 px-4">
@@ -364,8 +341,7 @@ export default function GroutEstimatorApp() {
                 </section>
             </main>
 
-            {/* --- Floating Bottom Bar (생략) --- */}
-             <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-200 p-4 pb-8 shadow-float">
+            <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-200 p-4 pb-8 shadow-float">
                 <div className="max-w-md mx-auto relative">
                     {calculation.isMinCost && (
                         <div className="absolute bottom-full left-0 right-0 mb-4 animate-enter">
@@ -409,15 +385,12 @@ export default function GroutEstimatorApp() {
                 </div>
             </div>
 
-            {/* --- Modal --- */}
             {showModal && (
                 <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4">
                     <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setShowModal(false)} />
-                    {/* [수정] quote-modal-content 클래스 추가 및 캡처 디자인 적용 */}
                     <div ref={quoteRef} className="relative bg-white w-full max-w-md rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden animate-enter max-h-[90vh] flex flex-col quote-modal-content">
                         <div className="flex-1 overflow-y-auto quote-canvas-container"> 
                             
-                            {/* [디자인 개선] 정식 견적서 제목 부분 강화 */}
                             <div className="flex justify-between items-center pb-4 mb-6 border-b border-[#1e3a8a]"> 
                                 <h3 className="font-extrabold text-3xl text-[#1e3a8a] flex items-center gap-2">
                                     <Icon name="shield" size={30} className="text-amber-500 stroke-2"/> 정식 견적서
@@ -429,19 +402,16 @@ export default function GroutEstimatorApp() {
                             </div>
 
                             <div className="grid grid-cols-2 gap-3 border-b border-slate-200 pb-6 mb-6">
-                                {/* [디자인 개선] 현장 유형 카드 디자인 통일 */}
                                 <div className="p-4 rounded-lg bg-blue-50 border border-blue-100">
                                     <div className="text-xs text-[#1e3a8a] font-bold mb-1 uppercase tracking-wider">현장 유형</div>
                                     <div className="font-bold text-slate-900 flex items-center gap-1 text-base">{HOUSING_TYPES.find(h => h.id === housingType).label}</div>
                                 </div>
-                                {/* [디자인 개선] 시공 소재 카드 디자인 통일 */}
                                 <div className="p-4 rounded-lg bg-blue-50 border border-blue-100">
                                     <div className="text-xs text-[#1e3a8a] font-bold mb-1 uppercase tracking-wider">시공 소재</div>
                                     <div className="font-bold text-slate-900 flex items-center gap-1 text-base">{MATERIALS.find(m => m.id === material).label} <span className="text-sm text-slate-500 font-medium">({material === 'poly' ? (polyOption === 'pearl' ? '펄' : '무펄') : (epoxyOption === 'kerapoxy' ? '케라폭시' : '스타라이크')})</span></div>
                                 </div>
                             </div>
                             
-                            {/* [디자인 개선] 선택 내역 표 형식으로 시인성 높임 */}
                             <div>
                                 <h4 className="text-base font-bold text-[#1e3a8a] mb-3 flex items-center gap-2 uppercase tracking-wider">선택 시공 구역</h4>
                                 <div className="space-y-1">
@@ -469,15 +439,15 @@ export default function GroutEstimatorApp() {
                                 </div>
                             </div>
                             
-                            {/* [디자인 개선] 가격 요약 박스 디자인 강화 */}
                             <div className="space-y-2 py-5 border-y border-slate-200 mt-6 bg-slate-50 p-4 rounded-lg">
                                 <div className="flex justify-between items-center text-sm font-medium text-slate-500"><span>순수 시공 합계 (할인 미적용)</span><span className='line-through text-slate-400'>{calculation.fullOriginalPrice.toLocaleString()}원</span></div>
                                 {(calculation.isPackageActive || calculation.isMinCost) && (<div className="flex justify-between items-center text-sm font-bold text-blue-600"><span>패키지 적용 / 최소 출장비</span><span>{calculation.priceAfterPackageDiscount.toLocaleString()}원</span></div>)}
                                 {calculation.totalReviewDiscount > 0 && (<div className="flex justify-between items-center text-base font-extrabold text-red-500"><span>🎁 리뷰 할인 금액</span><span>-{calculation.totalReviewDiscount.toLocaleString()}원</span></div>)}
-                                <div className="flex justify-between items-center pt-3 mt-1 border-t border-dashed border-slate-300"><span className="text-xl font-extrabold text-slate-900">최종 결제 금액 (VAT 포함)</span><span className="text-3xl font-extrabold text-[#1e3a8a]">{calculation.price.toLocaleString()}원</span></div>
+                                
+                                {/* [수정된 부분] 최종 결제 금액에서 (VAT 포함) 문구 삭제 */}
+                                <div className="flex justify-between items-center pt-3 mt-1 border-t border-dashed border-slate-300"><span className="text-xl font-extrabold text-slate-900">최종 결제 금액</span><span className="text-3xl font-extrabold text-[#1e3a8a]">{calculation.price.toLocaleString()}원</span></div>
                             </div>
                             
-                            {/* 유의사항 및 추가 정보 (생략) */}
                             <div className="space-y-3 pt-5">
                                 {calculation.isPackageActive && !calculation.isMinCost && (<div className="bg-blue-50 p-4 rounded-lg space-y-2 text-xs border border-blue-100"><h4 className="text-[#1e3a8a] font-bold flex items-center gap-1.5 text-sm"><Icon name="gift" size={16}/> 패키지 서비스 (FREE)</h4><ul className="list-disc list-inside text-slate-700 space-y-1 pl-1"><li>현관 바닥 시공 (폴리아스파틱)</li><li>변기 테두리 / 바닥 테두리 서비스</li>{calculation.FREE_SILICON_AREAS.includes('silicon_sink') && <li>욕실 젠다이/세면대 실리콘 오염방지</li>}</ul></div>)}
                                 
@@ -510,7 +480,6 @@ export default function GroutEstimatorApp() {
                             </div>
                         </div>
                         
-                        {/* [수정] 캡처에서 제외되어야 할 하단 버튼 영역 */}
                         <div className="p-5 bg-slate-50 border-t border-slate-200 flex-none quote-modal-footer">
                             <p className='text-[10px] text-center text-slate-400 mb-3'>* 위 내용은 이미지로 저장되며, 현장 상황에 따라 변동될 수 있습니다.</p>
                             <div className="grid grid-cols-2 gap-3">
