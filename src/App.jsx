@@ -868,7 +868,7 @@ export default function GroutEstimatorApp() {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-fade-in">
           <div className="bg-white w-full max-w-sm rounded-xl shadow-2xl overflow-hidden animate-slide-down border border-gray-200">
             <div className="bg-indigo-700 p-4 text-white flex justify-between items-center">
-              <h3 className="font-extrabold text-lg flex items-center gap-2"><CheckCircle2 className="h-5 w-5 text-amber-400" /> 견적서 (이미지 저장용)</h3>
+              <h3 className="font-extrabold text-lg flex items-center gap-2"><CheckCircle2 className="h-5 w-5 text-amber-400" /> 견적서 </h3>
               <button onClick={() => setShowModal(false)} className="text-white/80 hover:text-white transition active:scale-95">
                 <X size={20} />
               </button>
@@ -913,8 +913,7 @@ export default function GroutEstimatorApp() {
                             <ul className='list-disc list-outside text-[11px] ml-4 space-y-0.5'>
                                 {calculation.isFreeEntrance && <li>현관 바닥 서비스 (폴리아스파틱)</li>}
                                 <li>변기테두리, 바닥테두리</li>
-                                <li>욕실 젠다이/세면대 실리콘</li>
-                                <li>주방 싱크볼</li>
+                                <li>욕실 젠다이 실리콘 오염방지코팅</li>
                             </ul>
                         </div>
                     )}
@@ -1004,7 +1003,7 @@ export default function GroutEstimatorApp() {
                     <ul className='list-disc list-outside text-[11px] text-gray-600 ml-4 space-y-0.5'>
                         {/* <li>구축은 정확한 견적을 위해 현장 사진은 필수입니다. (삭제됨)</li> */}
                         {/* <li>견적 기준 타일 크기 외(조각 타일, 특이 구조) 시 추가 비용이 발생할 수 있습니다. (삭제됨)</li> */}
-                        <li>위 견적은 예상 금액이며, 전문가와 상담 시 최종 금액이 확정됩니다.</li>
+                        <li>전문가와 상담 시 최종 금액이 확정됩니다.</li>
                     </ul>
                 </div>
               </div>
@@ -1029,13 +1028,13 @@ export default function GroutEstimatorApp() {
                     </div>
                 )}
                 
-                <p className='text-sm font-semibold text-center text-red-500 mb-3 flex items-center justify-center gap-1'><Info size={16}/> 상담 시 현장사진이 있으면 큰 도움이 됩니다..</p>
+                <p className='text-sm font-semibold text-center text-red-500 mb-3 flex items-center justify-center gap-1'><Info size={16}/> 상담 시 현장사진이 있으면 큰 도움이 됩니다.</p>
                 <div className='grid grid-cols-2 gap-3'>
                     <button onClick={handleImageSave} className="flex items-center justify-center gap-1 bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition text-sm active:scale-95 shadow-md">
                         <ImageIcon size={16} /> 견적 이미지 저장
                     </button>
                     <button onClick={() => window.location.href = `tel:${PHONE_NUMBER}`} className="flex items-center justify-center gap-1 bg-indigo-600 text-white py-3 rounded-lg font-bold hover:bg-indigo-700 transition shadow-md text-sm active:scale-95 col-span-1">
-                        <Phone size={16} /> 전화 상담
+                        <Phone size={16} /> 상담원 연결
                     </button>
                 </div>
             </div>
