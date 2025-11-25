@@ -2,7 +2,7 @@ import React, { useState, useMemo, useCallback, useRef } from 'react';
 import html2canvas from 'html2canvas';
 import {
   Calculator, Home, Bath, DoorOpen, Utensils, LayoutGrid,
-  CheckCircle2, Info, Copy, RefreshCw, Phone, Sparkles, Hammer, Sofa, Palette, Crown, Gift, Eraser, Star, X, ChevronDown, HelpCircle, Zap, TrendingUp, Trophy, Clock, Image as ImageIcon
+  CheckCircle2, Info, RefreshCw, Phone, Sparkles, Hammer, Sofa, Palette, Crown, Gift, Eraser, Star, X, ChevronDown, HelpCircle, Zap, TrendingUp, Trophy, Clock, Image as ImageIcon
 } from 'lucide-react';
 
 const delay = ms => new Promise(res => setTimeout(res, ms));
@@ -18,6 +18,17 @@ const GlobalStyles = () => (
       0%, 100% { box-shadow: 0 0 0 0 rgba(100, 116, 139, 0.4); } 
       50% { box-shadow: 0 0 0 8px rgba(100, 116, 139, 0); } 
     }
+    /* 리뷰 버튼 애니메이션 추가: 관심을 유도하고 클릭을 명확히 함 */
+    @keyframes shine { 
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+    }
+    .shine-effect {
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+        background-size: 200% 100%;
+        animation: shine 5s infinite;
+    }
+    
     .animate-fade-in { animation: fadeIn 0.5s ease-out; }
     .animate-slide-down { animation: slideDown 0.3s ease-out; }
     
@@ -584,6 +595,8 @@ export default function GroutEstimatorApp() {
   // 숨고 리뷰 이벤트 정보
   const soomgoReviewEvent = REVIEW_EVENTS.find(evt => evt.id === 'soomgo_review');
   const isSoomgoReviewApplied = selectedReviews.has('soomgo_review');
+  const karrotReviewEvent = REVIEW_EVENTS.find(evt => evt.id === 'karrot_review');
+  const isKarrotReviewApplied = selectedReviews.has('karrot_review');
 
 
   return (
@@ -753,53 +766,18 @@ export default function GroutEstimatorApp() {
           </div>
         </section>
 
-        {/* --- 5. 할인 혜택 (리뷰 이벤트) (수정 반영) --- */}
+        {/* --- 5. 할인 혜택 (리뷰 이벤트) 섹션 삭제됨 */}
+        {/*
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-600">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
             <Gift className="h-5 w-5 text-indigo-600" /> 5. 할인 이벤트
           </h2 >
           <div className="grid grid-cols-2 gap-3">
-            {REVIEW_EVENTS.map((evt) => {
-                const isApplied = selectedReviews.has(evt.id);
-                
-                // 숨고 리뷰 이벤트에만 새로운 디자인 적용
-                if (evt.id === 'soomgo_review') {
-                    const iconColor = isApplied ? 'text-white' : 'text-yellow-800';
-                    const bgColor = isApplied ? 'bg-red-600 border-red-600 shadow-lg' : 'bg-yellow-100 border-yellow-400 shadow-md';
-                    const textColor = isApplied ? 'text-white' : 'text-gray-900';
-                    const labelText = isApplied ? `✅ 2만원 할인 적용됨 (클릭하여 취소)` : `숨고 리뷰 작성하고 2만원 할인 받기`;
-                    const Icon = isApplied ? CheckCircle2 : Sparkles;
-
-                    return (
-                        <button 
-                            key={evt.id} 
-                            onClick={() => toggleReview(evt.id)} 
-                            className={`col-span-2 py-3 rounded-lg border-2 transition-all selection-box active:scale-[0.98] flex items-center justify-center gap-2 font-extrabold text-sm ${bgColor} ${textColor}`}
-                        >
-                            <Icon size={18} className={iconColor} />
-                            {labelText}
-                        </button>
-                    );
-                }
-
-                // 당근마켓 리뷰 이벤트는 기존 디자인 유지
-                return (
-                    <button 
-                        key={evt.id} 
-                        onClick={() => toggleReview(evt.id)} 
-                        className={`p-3 rounded-lg border-2 transition-all relative overflow-hidden selection-box active:scale-[0.98] ${isApplied ? 'border-red-500 bg-red-50 shadow-md' : 'border-gray-300 bg-gray-50 text-gray-500 hover:border-red-300'}`}
-                    >
-                        {isApplied && <div className="absolute top-0 right-0 bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-bl-lg font-bold">APPLIED</div>}
-                        <div className="flex flex-col items-center text-center gap-1">
-                            <span className={`font-semibold text-sm ${isApplied ? 'text-gray-800' : 'text-gray-600'}`}>{evt.label}</span>
-                            <span className={`text-xs font-bold ${isApplied ? 'text-red-600' : 'text-gray-400'}`}>-{evt.discount.toLocaleString()}원</span>
-                        </div>
-                    </button>
-                );
-            })}
+            {...} (리뷰 이벤트 버튼)
           </div>
           <p className="text-xs text-gray-500 mt-3 text-center">※ 중복 선택 가능합니다. 시공 완료 후 꼭 작성해주세요!</p>
         </section>
+        */}
         
         {/* --- 자주 묻는 질문 (FAQ) (유지) --- */}
         <section className="bg-white p-5 rounded-xl border border-gray-100 shadow-lg mt-6 animate-fade-in delay-750">
@@ -848,7 +826,7 @@ export default function GroutEstimatorApp() {
                     {calculation.isFreeEntrance && <div>- 현관 바닥 서비스 (일반 재료)</div>}
                     <div>- 변기테두리, 바닥테두리</div>
                     <div>- 욕실 젠다이 실리콘 오염방지</div>
-                    <div>- 주방 싱크볼</div>
+                    {/* <li>주방 싱크볼</li> <-- 삭제됨 */}
                   </div>
                 </div>
               </div>
@@ -934,7 +912,7 @@ export default function GroutEstimatorApp() {
                                 {calculation.isFreeEntrance && <li>현관 바닥 서비스 (폴리아스파틱)</li>}
                                 <li>변기테두리, 바닥테두리</li>
                                 <li>욕실 젠다이/세면대 실리콘</li>
-                                <li>주방 싱크볼</li>
+                                {/* <li>주방 싱크볼</li> <-- 삭제됨 */}
                             </ul>
                         </div>
                     )}
@@ -981,8 +959,9 @@ export default function GroutEstimatorApp() {
                     })}
 
                     {/* 할인 항목 루프 (리뷰 할인 포함) */}
+                    {/* 당근마켓 리뷰 이벤트는 숨고 리뷰 버튼 디자인을 위해 잠시 숨김 처리 */}
                     {calculation.itemizedPrices
-                        .filter(item => item.isDiscount) // 패키지 할인 및 리뷰 할인 모두 포함
+                        .filter(item => item.isDiscount && item.id !== 'soomgo_review') // 숨고 리뷰 외 할인 항목
                         .map(item => (
                             <div key={item.id} className="flex justify-between items-center text-red-600 font-semibold pl-2 pr-1 pt-1 border-b border-gray-100 last:border-b-0">
                                 <span className={`w-3/5`}>
@@ -1027,26 +1006,68 @@ export default function GroutEstimatorApp() {
             
             {/* ⭐️ [견적서 모달 하단 컨트롤 영역] ⭐️ */}
             <div className="p-4 bg-gray-50 border-t border-gray-200">
-                {/* 숨고 리뷰 이벤트 버튼을 모달 내에서 삭제하고, 이벤트 목록에서 디자인이 통합되었으므로,
-                   여기서는 당근마켓 이벤트에 대해서만 일반적인 버튼 로직을 유지하거나,
-                   아니면 이 부분을 완전히 제거하고 아래 상담 버튼만 남겨도 좋습니다.
-                   (기존 코드에서는 숨고 이벤트만 모달에 다시 삽입되어 있었으므로, 숨고 이벤트만 다시 구현했습니다.)
-                */}
-                {soomgoReviewEvent && (
-                    <div className='mb-3'>
-                         <button
-                            onClick={() => toggleReview(soomgoReviewEvent.id)}
-                            className={`w-full py-2 rounded-lg transition active:scale-[0.99] text-sm font-bold flex items-center justify-center gap-2 shadow-md ${isSoomgoReviewApplied ? 'bg-red-600 text-white' : 'bg-red-100 text-red-600 border border-red-300 hover:bg-red-200'}`}
-                        >
-                            <Gift size={16}/> 
-                            <span>
-                                {isSoomgoReviewApplied 
-                                    ? `숨고 리뷰이벤트 적용 해제 (총액 +${soomgoReviewEvent.discount.toLocaleString()}원)` 
-                                    : `숨고 리뷰이벤트 적용 (총액 -${soomgoReviewEvent.discount.toLocaleString()}원 할인)`}
-                            </span>
-                        </button>
-                    </div>
-                )}
+                {/* ★★★ 리뷰 이벤트 버튼 최상퀄리티 디자인 (숨고, 당근 모두 통합) ★★★ */}
+                
+                {/* 1. 숨고 리뷰 이벤트 버튼 */}
+                <div className='mb-2'>
+                    {(() => {
+                        const evt = soomgoReviewEvent;
+                        const isApplied = isSoomgoReviewApplied;
+                        const discountAmount = evt.discount.toLocaleString();
+                        const Icon = isApplied ? CheckCircle2 : Star;
+                        
+                        const baseClasses = "w-full py-3 rounded-xl transition font-extrabold text-sm active:scale-[0.98] shadow-lg flex items-center justify-center gap-2 relative overflow-hidden";
+                        
+                        const appliedClasses = "bg-red-600 text-white shadow-red-300/50 hover:bg-red-700";
+                        const pendingClasses = "bg-yellow-100 text-yellow-800 shadow-yellow-300/50 hover:bg-yellow-200 border-2 border-yellow-500";
+                        
+                        const labelText = isApplied 
+                            ? `✅ 숨고 할인 적용됨 (취소 시 +${discountAmount}원)` 
+                            : `✨ 숨고 리뷰 약속하고 ${discountAmount}원 할인받기`;
+
+                        return (
+                            <button
+                                onClick={() => toggleReview(evt.id)}
+                                className={`${baseClasses} ${isApplied ? appliedClasses : pendingClasses} ${!isApplied ? 'shine-effect' : ''}`}
+                            >
+                                <Icon size={18} fill={isApplied ? 'currentColor' : '#f59e0b'} className={isApplied ? 'text-white' : 'text-yellow-800'}/>
+                                <span>{labelText}</span>
+                            </button>
+                        );
+                    })()}
+                </div>
+
+                {/* 2. 당근마켓 리뷰 이벤트 버튼 (서브 할인) */}
+                <div className='mb-3'>
+                    {(() => {
+                        const evt = karrotReviewEvent;
+                        const isApplied = isKarrotReviewApplied;
+                        const discountAmount = evt.discount.toLocaleString();
+                        const Icon = isApplied ? CheckCircle2 : Gift;
+                        
+                        const baseClasses = "w-full py-2 rounded-lg transition font-bold text-xs active:scale-[0.99] shadow-md border";
+                        
+                        const appliedClasses = "bg-indigo-600 text-white hover:bg-indigo-700 border-indigo-600";
+                        const pendingClasses = "bg-white text-gray-700 hover:bg-gray-100 border-gray-300";
+                        
+                        const labelText = isApplied 
+                            ? `✅ 당근 리뷰 할인 적용 (${discountAmount}원)` 
+                            : `당근마켓 리뷰 추가 적용 (${discountAmount}원 할인)`;
+
+                        return (
+                            <button
+                                onClick={() => toggleReview(evt.id)}
+                                className={`${baseClasses} ${isApplied ? appliedClasses : pendingClasses} flex items-center justify-center gap-2`}
+                            >
+                                <Icon size={16} className={isApplied ? 'text-white' : 'text-indigo-600'}/>
+                                <span>{labelText}</span>
+                            </button>
+                        );
+                    })()}
+                </div>
+                
+                {/* ★★★ 리뷰 이벤트 버튼 최적화 끝 ★★★ */}
+
                 
                 <p className='text-sm font-semibold text-center text-red-500 mb-3 flex items-center justify-center gap-1'><Info size={16}/> 상담 시 현장사진이 있으면 큰 도움이 됩니다..</p>
                 <div className='grid grid-cols-2 gap-3'>
