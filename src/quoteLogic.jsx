@@ -1,26 +1,30 @@
 /**
  * /src/quoteLogic.jsx
  * 줄눈 견적 계산기의 데이터 및 비즈니스 로직을 포함하는 모듈입니다.
+ * 모든 상수는 외부 React 컴포넌트에서 import 할 수 있도록 export 합니다.
  */
 
 const MIN_COST = 200000; // 최소 출장 비용 (원)
 
-// ... (HOUSING_TYPES, MATERIALS, MATERIAL_GUIDE, SERVICE_AREAS, SILICON_AREAS, REVIEW_EVENTS, ICON_PATHS, PRICE_TABLE 정의 부분은 동일)
+/** 현장 유형 */
 export const HOUSING_TYPES = [
     { id: 'new', label: '신축 입주 예정', icon: 'home' },
     { id: 'old', label: '거주 중/재시공', icon: 'refreshCw' },
 ];
 
+/** 시공 재료 (메인 선택) */
 export const MATERIALS = [
     { id: 'poly', label: '폴리아스파틱', subLabel: 'Polyaspartic', description: '최고급 마감재. 강력한 내구성, 황변 현상 및 탈락 방지. 시공 후 10년 품질 보증.', tags: ['최고급'], badgeColor: 'bg-green-100 text-green-700' },
     { id: 'epoxy', label: '에폭시 (세라믹)', subLabel: 'Epoxy', description: '기본형 재료. 저렴하지만 황변 가능성 및 내구성이 낮음. 욕실 전용.', tags: ['기본형'], badgeColor: 'bg-yellow-100 text-yellow-700' },
 ];
 
+/** 소재 가이드 (정보 제공용) */
 export const MATERIAL_GUIDE = [
     { material: '폴리아스파틱', color: 'blue', pros: ['강력한 내구성', '황변 없음', '10년 보증', '빠른 건조'], cons: ['상대적으로 높은 비용'] },
     { material: '에폭시', color: 'slate', pros: ['저렴한 비용', '다양한 색상'], cons: ['황변 가능성 높음', '내구성 약함', '탈락 가능성'] },
 ];
 
+/** 서비스 구역 (줄눈 시공) */
 export const SERVICE_AREAS = [
     { id: 'bathroom1', label: '욕실 1', icon: 'bathtub' },
     { id: 'bathroom2', label: '욕실 2', icon: 'bathtub' },
@@ -29,16 +33,19 @@ export const SERVICE_AREAS = [
     { id: 'entrance', label: '현관 바닥', icon: 'key' },
 ];
 
+/** 실리콘 오염방지 구역 */
 export const SILICON_AREAS = [
     { id: 'silicon_sink', label: '욕실 젠다이/세면대', icon: 'scissors', basePrice: 40000 },
     { id: 'silicon_kitchen', label: '주방 싱크대/걸레받이', icon: 'scissors', basePrice: 50000 },
 ];
 
+/** 리뷰 이벤트 (할인) */
 export const REVIEW_EVENTS = [
     { id: 'blog', label: '블로그 리뷰', discount: 20000 },
     { id: 'cafe', label: '카페 리뷰', discount: 10000 },
 ];
 
+/** 아이콘 경로 */
 export const ICON_PATHS = {
     home: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6',
     refreshCw: 'M23 4v6h-6M1 20v-6h6M3.5 13C2.3 11.5 2 9.7 2 8c0-5 4-8 9-8s9 3 9 8-4 8-9 8h-4',
@@ -63,6 +70,14 @@ export const ICON_PATHS = {
     soup: 'M2 15h20M7 15v-4a5 5 0 0110 0v4M12 19h1a3 3 0 000-6',
     scissors: 'M20 7L13 14M20 17l-7-7M2 7l6 6M2 17l6-6M9 7l1.5 1.5M9 17l1.5-1.5M10 10a3 3 0 00-3-3 3 3 0 00-3 3 3 3 0 003 3 3 3 0 003-3zM14 14a3 3 0 00-3 3 3 3 0 003 3 3 3 0 003-3 3 3 0 00-3-3z',
 };
+
+/** 자주 묻는 질문 */
+export const FAQ_ITEMS = [ // <<<<<<<<<<< 이 부분이 export 되어야 합니다.
+    { question: '줄눈 시공은 왜 필요한가요?', answer: '줄눈 사이에 곰팡이, 물때, 오염물질이 침투하는 것을 막아주어 청결한 환경을 유지하고 타일을 보호합니다. 또한, 시각적인 미관을 개선합니다.' },
+    { question: '시공 시간은 얼마나 걸리나요?', answer: '일반적인 아파트 기준, 하루(약 6~8시간) 정도 소요되며, 시공 후 24시간 양생 시간이 필요합니다.' },
+    { question: '다른 업체보다 비싼데 이유가 뭔가요?', answer: '저희는 10년 보증의 최고급 폴리아스파틱 소재를 사용하고, 하자 없는 꼼꼼한 시공을 원칙으로 합니다. 견적의 차이는 곧 시공 품질과 내구성에 반영됩니다.' },
+    { question: 'AS는 어떻게 되나요?', answer: '폴리아스파틱 시공은 10년, 에폭시 시공은 2년 무상 A/S를 보장합니다. 단, 고객 부주의로 인한 하자는 제외됩니다.' },
+];
 
 const PRICE_TABLE = {
     poly: {
@@ -122,19 +137,15 @@ export const calculateEstimate = (quantities, housingType, effectiveMaterialId, 
     let subTotal = 0;
     let fullOriginalPrice = 0;
 
-    // 1. 줄눈 시공 항목 가격 계산 및 합계 누적 (fullOriginalPrice 및 subTotal)
     SERVICE_AREAS.forEach(area => {
         const count = quantities[area.id] || 0;
         if (count > 0) {
-            // 해당 현장 유형에 맞는 기본 단가 적용
-            // bathroom1, bathroom2, veranda, kitchen, entrance 모두 여기서 가격을 가져옵니다.
             const price = PRICE_TABLE[baseMaterial][housingType][area.id] || 0;
             fullOriginalPrice += price * count;
             subTotal += price * count;
         }
     });
 
-    // 2. 실리콘 오염방지 항목 가격 계산 및 합계 누적
     SILICON_AREAS.forEach(area => {
         const count = quantities[area.id] || 0;
         if (count > 0) {
@@ -143,17 +154,12 @@ export const calculateEstimate = (quantities, housingType, effectiveMaterialId, 
         }
     });
 
-    // ---------------------------------------------------
-    // B. 패키지 및 서비스 적용 (할인 로직)
-    // ---------------------------------------------------
-
     let isPackageActive = false;
     let priceAfterPackageDiscount = subTotal;
     let label = "";
     const FREE_SILICON_AREAS = [];
     let isFreeEntrance = false;
 
-    // 패키지 활성화 조건 (욕실 2개 이상 선택 AND (베란다 1개 이상 OR 주방 1개 이상) 선택)
     const bathCount = (quantities.bathroom1 || 0) + (quantities.bathroom2 || 0);
     const hasVeranda = (quantities.veranda || 0) > 0;
     const hasKitchen = (quantities.kitchen || 0) > 0;
@@ -161,7 +167,6 @@ export const calculateEstimate = (quantities, housingType, effectiveMaterialId, 
     if (bathCount >= 2 && (hasVeranda || hasKitchen)) {
         isPackageActive = true;
         
-        // 1. 패키지 이름/라벨 결정
         if (bathCount >= 2 && hasVeranda && hasKitchen) {
             label = "풀패키지 할인";
         } else if (bathCount >= 2 && hasVeranda) {
@@ -170,41 +175,23 @@ export const calculateEstimate = (quantities, housingType, effectiveMaterialId, 
             label = "주방 패키지";
         }
         
-        // 2. 서비스 항목 결정 및 가격 조정 (차감)
-        
-        // [현관 무료 서비스] (Polyaspartic으로만 제공한다고 가정)
-        // 현관이 선택되었고 수량이 1개 이상일 경우
         if ((quantities.entrance || 0) > 0) {
-             // 현관 가격을 차감하고, 서비스 플래그 설정
              const entrancePrice = PRICE_TABLE.poly[housingType].entrance || 0;
-             // priceAfterPackageDiscount는 이미 subTotal(entrance 포함)로 초기화되었으므로 가격을 차감함
-             priceAfterPackageDiscount -= entrancePrice * (quantities.entrance || 0); // 수량만큼 차감
+             priceAfterPackageDiscount -= entrancePrice * (quantities.entrance || 0);
              isFreeEntrance = true;
-             
-             // 주의: 현관이 2개 이상 선택되는 경우는 일반적이지 않으나, 계산 로직의 정확도를 위해 수량 적용
         }
 
-        // [실리콘 무료 서비스] (욕실 젠다이/세면대)
         if (bathCount >= 2 && (quantities.silicon_sink || 0) > 0) {
-            // priceAfterPackageDiscount는 이미 subTotal(실리콘 싱크 포함)로 초기화되었으므로 가격을 차감함
             priceAfterPackageDiscount -= (quantities.silicon_sink || 0) * (SILICON_AREAS.find(a => a.id === 'silicon_sink').basePrice);
             FREE_SILICON_AREAS.push('silicon_sink');
         }
     }
 
-    // ---------------------------------------------------
-    // C. 최소 출장 비용 적용 (Minimum Cost)
-    // ---------------------------------------------------
-    
     let isMinCost = false;
     if (priceAfterPackageDiscount < MIN_COST && subTotal > 0) {
         priceAfterPackageDiscount = MIN_COST;
         isMinCost = true;
     }
-
-    // ---------------------------------------------------
-    // D. 리뷰 할인 적용 (Review Discount)
-    // ---------------------------------------------------
 
     let totalReviewDiscount = 0;
     selectedReviews.forEach(id => {
@@ -214,21 +201,18 @@ export const calculateEstimate = (quantities, housingType, effectiveMaterialId, 
         }
     });
 
-    // ---------------------------------------------------
-    // E. 최종 가격 계산
-    // ---------------------------------------------------
     let finalPrice = priceAfterPackageDiscount - totalReviewDiscount;
     finalPrice = Math.max(0, finalPrice);
 
     return {
-        price: finalPrice, // 최종 결제 금액
-        fullOriginalPrice: fullOriginalPrice, // 할인이 하나도 적용 안 된 순수 합계
-        priceAfterPackageDiscount: priceAfterPackageDiscount, // 패키지/최소 금액 적용 후 가격
-        totalReviewDiscount: totalReviewDiscount, // 총 리뷰 할인 금액
-        isPackageActive: isPackageActive, // 패키지 적용 여부
-        isMinCost: isMinCost, // 최소 금액 적용 여부
-        label: label, // 패키지 라벨
-        isFreeEntrance: isFreeEntrance, // 현관 무료 서비스 여부
-        FREE_SILICON_AREAS: FREE_SILICON_AREAS, // 무료 실리콘 구역 목록
+        price: finalPrice,
+        fullOriginalPrice: fullOriginalPrice,
+        priceAfterPackageDiscount: priceAfterPackageDiscount,
+        totalReviewDiscount: totalReviewDiscount,
+        isPackageActive: isPackageActive,
+        isMinCost: isMinCost,
+        label: label,
+        isFreeEntrance: isFreeEntrance,
+        FREE_SILICON_AREAS: FREE_SILICON_AREAS,
     };
 };
