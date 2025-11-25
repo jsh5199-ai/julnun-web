@@ -106,7 +106,7 @@ const PackageToast = ({ isVisible, onClose }) => {
         if (isVisible) {
             const timer = setTimeout(() => {
                 onClose();
-            }, 3000); // 3초 후 자동 닫기
+            }, 3000); // 4초 후 자동 닫기
             return () => clearTimeout(timer);
         }
     }, [isVisible, onClose]);
@@ -660,26 +660,7 @@ export default function GroutEstimatorApp() {
         </div>
       </header>
 
-      {/* --- [추가된 섹션] 줄눈의미학 브랜드 홍보 섹션 --- */}
-      <section className="bg-white py-4 border-b border-gray-100 shadow-md">
-        <div className="max-w-md mx-auto px-4 text-center">
-            <h2 className="text-base font-extrabold text-gray-800 mb-2">
-                줄눈의미학, 고객의 선택에는 이유가 있습니다.
-            </h2>
-            <div className="flex justify-around text-center">
-                <p className="flex items-center text-xs font-semibold text-indigo-700 gap-1">
-                    <Trophy size={14} className="text-indigo-600" /> 숨고/평점 1위 브랜드
-                </p>
-                <p className="flex items-center text-xs font-semibold text-indigo-700 gap-1">
-                    <Zap size={14} className="text-indigo-600" /> 실제 이용 고객 1만명 돌파
-                </p>
-                <p className="flex items-center text-xs font-semibold text-indigo-700 gap-1">
-                    <CheckCircle2 size={14} className="text-indigo-600" /> 최대 5년 책임 보증
-                </p>
-            </div>
-        </div>
-      </section>
-      {/* ------------------------------------ */}
+      {/* --- [삭제된 섹션] 브랜드 홍보 섹션 삭제됨 --- */}
 
       <main className="max-w-md mx-auto p-4 space-y-6">
         
@@ -822,7 +803,7 @@ export default function GroutEstimatorApp() {
         {/* --- 자주 묻는 질문 (FAQ) (유지) --- */}
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 mt-6 animate-fade-in delay-750">
             <h2 className="text-lg font-extrabold text-gray-800 mb-2 flex items-center gap-2 border-b pb-2">
-                <HelpCircle className="h-5 w-5 text-indigo-600"/> 고객 지원 센터
+                <HelpCircle className="h-5 w-5 text-indigo-600"/> 자주 묻는 질문
             </h2 >
           <div className="space-y-1">
               {FAQ_ITEMS.map((item, index) => (
@@ -1055,8 +1036,8 @@ export default function GroutEstimatorApp() {
                             // 애니메이션 클래스 제거
 
                             const labelText = isApplied 
-                                ? `✅ 할인 적용 취소하기 (총액 +${discountAmount}원)` 
-                                : `🎁 숨고 리뷰 약속하고 ${discountAmount}원 할인받기!`;
+                                ? `할인 적용 취소하기 (총액 +${discountAmount}원)` 
+                                : `숨고 리뷰 약속하고 ${discountAmount}원 할인받기!`;
 
                             return (
                                 <button
