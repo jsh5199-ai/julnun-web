@@ -5,30 +5,48 @@ import {
 } from 'lucide-react';
 
 // =================================================================
-// [스타일] 애니메이션 정의 (대기업 스타일)
+// [가상 라이브러리 함수 정의 - 실제 환경에서는 'html2canvas' 설치 후 사용]
+// 이 함수를 실제 html2canvas(node, options) 호출로 대체해야 합니다.
+// =================================================================
+const simulateHtmlToCanvas = async (node, options) => {
+    // 실제 환경: return html2canvas(node, options);
+    
+    // 시뮬레이션: 내용이 있는 캔버스 반환
+    const canvas = document.createElement('canvas');
+    canvas.width = node.offsetWidth;
+    canvas.height = node.offsetHeight;
+    const ctx = canvas.getContext('2d');
+    
+    // 흰색 배경 채우기 (백색화면 방지)
+    ctx.fillStyle = options.backgroundColor || '#FFFFFF';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // 여기에 캡처된 내용이 그려졌다고 가정 (실제로는 html2canvas가 수행)
+    
+    return canvas;
+};
+// =================================================================
+
+
+// =================================================================
+// [스타일] (유지)
 // =================================================================
 const GlobalStyles = () => (
   <style>{`
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-    /* 금융 스타일의 부드러운 펄스 효과 */
     @keyframes professionalPulse { 
       0%, 100% { box-shadow: 0 0 0 0 rgba(100, 116, 139, 0.4); } 
       50% { box-shadow: 0 0 0 8px rgba(100, 116, 139, 0); } 
     }
     .animate-fade-in { animation: fadeIn 0.5s ease-out; }
     .animate-slide-down { animation: slideDown 0.3s ease-out; }
-    
-    /* 선택/활성화 시 굵은 테두리와 명확한 배경 변화 */
-    .selection-box { 
-      transition: all 0.2s ease-in-out;
-    }
+    .selection-box { transition: all 0.2s ease-in-out; }
     .selection-selected {
-      border: 3px solid #3b82f6; /* sky-500 대신 명확한 blue */
-      background-color: #f0f9ff; /* sky-50 연한 배경 */
+      border: 3px solid #3b82f6; 
+      background-color: #f0f9ff; 
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
     }
-
     .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom); }
   `}</style>
 );
@@ -42,16 +60,8 @@ const HOUSING_TYPES = [
 ];
 
 const MATERIALS = [
-  { 
-    id: 'poly', label: '폴리아스파틱', priceMod: 1.0, 
-    description: '탄성과 광택이 우수하며 가성비가 좋습니다.',
-    badge: '일반', badgeColor: 'bg-gray-200 text-gray-700'
-  },
-  { 
-    id: 'kerapoxy', label: '에폭시(무광/무펄)', priceMod: 1.8, 
-    description: '내구성이 뛰어나고 매트한 질감.',
-    badge: '프리미엄', badgeColor: 'bg-amber-100 text-amber-800'
-  },
+  { id: 'poly', label: '폴리아스파틱', priceMod: 1.0, description: '탄성과 광택이 우수하며 가성비가 좋습니다.', badge: '일반', badgeColor: 'bg-gray-200 text-gray-700' },
+  { id: 'kerapoxy', label: '에폭시(무광/무펄)', priceMod: 1.8, description: '내구성이 뛰어나고 매트한 질감.', badge: '프리미엄', badgeColor: 'bg-amber-100 text-amber-800' },
 ];
 
 const SERVICE_AREAS = [
@@ -165,9 +175,9 @@ export default function GroutEstimatorApp() {
   const quoteRef = useRef(null); 
 
   const SOOMGO_REVIEW_URL = 'https://www.soomgo.com/profile/users/10755579?tab=review';
-  const PHONE_NUMBER = '010-7734-6709';
+  const PHONE_NUMBER = '010-7734-6709'; // 연락처 문구는 버튼에서 제거됨
 
-  // --- 기존 로직 (handleQuantityChange, toggleReview, calculation, generateQuoteText, copyToClipboard) 유지 ---
+  // --- 로직 (handleQuantityChange, toggleReview, calculation, generateQuoteText, copyToClipboard) 유지 ---
 
   const handleQuantityChange = (id, delta) => {
     setQuantities(prev => {
@@ -463,57 +473,43 @@ export default function GroutEstimatorApp() {
         return;
     }
     
-    // 로딩 상태 표시 또는 버튼 비활성화 로직 추가 추천 (UX 개선)
+    // 로딩 처리 시작 (필요시)
     
     try {
-        // 실제 html2canvas 라이브러리를 사용한다고 가정하고, 다운로드 로직을 구현합니다.
-        // 이 코드는 실제 라이브러리가 없는 환경에서는 작동하지 않으나, 의도된 구현 방식을 보여줍니다.
+        // [html2canvas 라이브러리 사용 가정]
         
-        // 1. 이미지 다운로드를 위한 Canvas 생성
-        // (실제 코드에서는 html2canvas(node, { useCORS: true, logging: false }) 를 사용합니다.)
-        const canvas = await new Promise((resolve) => {
-             // 비동기 변환 시뮬레이션
-             const tempCanvas = document.createElement('canvas');
-             tempCanvas.width = node.offsetWidth * 2; // 고해상도 처리를 위해 크기를 키움
-             tempCanvas.height = node.offsetHeight * 2;
-             const ctx = tempCanvas.getContext('2d');
-             ctx.scale(2, 2);
-             
-             // 간소화된 Canvas 변환 로직 (실제 라이브러리 대체)
-             ctx.fillStyle = 'white'; 
-             ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-             
-             // DOM의 스타일과 내용을 완벽하게 그리는 과정은 라이브러리에 의존합니다.
-             // 여기서는 성공적으로 변환되었다고 가정합니다.
-             resolve(tempCanvas);
-        });
-        
+        // 1. 캡처 옵션 설정 (흰색 배경 강제 적용, 캡처 해상도 조정)
+        const options = {
+            // 실제 구현 시, useCORS: true 옵션으로 외부 이미지 로딩 문제를 해결합니다.
+            backgroundColor: '#FFFFFF', 
+            scale: 2, // 고해상도 캡처
+        };
+
+        // 2. DOM을 Canvas로 변환 (simulateHtmlToCanvas는 실제 라이브러리 호출을 대체합니다)
+        // const canvas = await html2canvas(node, options); 
+        const canvas = await simulateHtmlToCanvas(node, options); 
+
         const dataUrl = canvas.toDataURL('image/png', 1.0);
         const filename = '줄눈의미학_견적서_' + new Date().getTime();
         
-        // 2. 다운로드 링크 생성 및 클릭
+        // 3. 다운로드 링크 생성 및 클릭 (모바일 갤러리 저장 유도)
         const link = document.createElement('a');
         link.download = filename + '.png';
         link.href = dataUrl;
         
-        // IOS/Android 갤러리 저장 유도를 위한 트릭
-        if (typeof window.navigator.msSaveBlob !== 'undefined') {
-            // IE/Edge (거의 사용 안함)
-            window.navigator.msSaveBlob(canvas.msToBlob(), filename + '.png');
-        } else {
-            // Chrome, Firefox, Safari, 모바일 브라우저
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
+        // 다운로드 실행
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
         
         alert("이미지 저장이 완료되었습니다! (갤러리 또는 다운로드 폴더 확인)");
         setShowModal(false); 
 
     } catch (error) {
         console.error("이미지 저장 실패:", error);
-        alert("이미지 저장에 실패했습니다. (내부 오류 또는 권한 문제)");
+        alert("이미지 저장 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
     }
+    // 로딩 처리 종료 (필요시)
   };
 
 
@@ -792,8 +788,8 @@ export default function GroutEstimatorApp() {
                 <X size={20} />
               </button>
             </div>
-            {/* ★★★ 견적 내용 영역에 Ref 추가 ★★★ */}
-            <div ref={quoteRef} id="quote-content" className="p-5 max-h-[60vh] overflow-y-auto text-gray-800">
+            {/* ★★★ 견적 내용 영역에 Ref 추가 및 내부 스타일 조정 ★★★ */}
+            <div ref={quoteRef} id="quote-content" className="p-5 max-h-[60vh] overflow-y-auto text-gray-800 bg-white"> 
               <div className="space-y-4 text-sm">
                 
                 <div className="flex justify-between border-b border-gray-200 pb-2">
@@ -844,11 +840,11 @@ export default function GroutEstimatorApp() {
             <div className="p-4 bg-gray-50 border-t border-gray-200">
                 <p className='text-sm font-semibold text-center text-red-500 mb-3 flex items-center justify-center gap-1'><Info size={16}/> 전문가 상담 시 **현장 사진 2~3장**이 필수입니다.</p>
                <div className='grid grid-cols-2 gap-3'>
-                    {/* ★★★ '이미지 저장' 버튼 연결 (카카오톡 버튼 제거) ★★★ */}
+                    {/* ★★★ '이미지 저장' 버튼 연결 (유지) ★★★ */}
                     <button onClick={handleImageSave} className="flex items-center justify-center gap-1 bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition text-sm active:scale-95 shadow-md">
                         <ImageIcon size={16} /> 견적 이미지 저장
                     </button>
-                    {/* ★★★ 전화 상담 버튼 문구 수정 ★★★ */}
+                    {/* ★★★ 전화 상담 버튼 문구 수정 (연락처 삭제) ★★★ */}
                     <button onClick={() => window.location.href = `tel:${PHONE_NUMBER}`} className="flex items-center justify-center gap-1 bg-indigo-600 text-white py-3 rounded-lg font-bold hover:bg-indigo-700 transition shadow-md text-sm active:scale-95 col-span-1">
                         <Phone size={16} /> 전화 상담
                     </button>
