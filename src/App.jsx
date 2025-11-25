@@ -831,9 +831,9 @@ export default function GroutEstimatorApp() {
 
       {/* 하단 고정바 */}
       <>
-        {/* 패키지 혜택 바: 닫기 버튼 추가 */}
+        {/* 패키지 혜택 바: 위치 조정 bottom-[110px] -> bottom-[140px] */}
         {calculation.isPackageActive && showPackageInfo && (
-          <div className="fixed bottom-[110px] left-4 right-4 max-w-md mx-auto z-10">
+          <div className="fixed bottom-[140px] left-4 right-4 max-w-md mx-auto z-10">
             <div className="bg-gray-700 text-white p-4 rounded-lg shadow-2xl border border-gray-500 animate-[professionalPulse_2s_infinite]">
               
               {/* 닫기 버튼 */}
@@ -866,7 +866,7 @@ export default function GroutEstimatorApp() {
           </div>
         )}
 
-        {/* 최종 견적 하단 바 (유지) */}
+        {/* 최종 견적 하단 바 (특수효과 제거) */}
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-2xl p-4 safe-area-bottom z-20">
           <div className="max-w-md mx-auto flex items-center justify-between gap-4">
             {/* 금액 영역: 좁은 화면에서 밀림 방지 */}
@@ -876,11 +876,13 @@ export default function GroutEstimatorApp() {
               </div>
               <div className="flex items-end gap-2">
                 <div className="text-3xl font-extrabold text-indigo-700">{calculation.price.toLocaleString()}<span className="text-base font-normal text-gray-500">원</span></div>
-                {calculation.label && <div className="text-xs font-bold text-red-600 mb-1 animate-pulse">{calculation.label}</div>}
+                {/* animate-pulse 제거 */}
+                {calculation.label && <div className="text-xs font-bold text-red-600 mb-1">{calculation.label}</div>}
               </div>
             </div>
             {/* 버튼 영역: 작은 화면에서 패딩/폰트 크기 조정 */}
-            <button onClick={() => setShowModal(true)} disabled={!hasSelections} className={`px-5 py-3 sm:px-7 sm:py-4 rounded-lg font-extrabold text-sm sm:text-base text-white shadow-xl transition-all ${hasSelections ? 'bg-blue-600 hover:bg-blue-700 active:scale-[0.98] shadow-blue-500/50' : 'bg-gray-300 text-gray-500 cursor-not-allowed shadow-none'}`}>견적서 보기</button>
+            {/* shadow-blue-500/50 제거 */}
+            <button onClick={() => setShowModal(true)} disabled={!hasSelections} className={`px-5 py-3 sm:px-7 sm:py-4 rounded-lg font-extrabold text-sm sm:text-base text-white shadow-xl transition-all ${hasSelections ? 'bg-blue-600 hover:bg-blue-700 active:scale-[0.98]' : 'bg-gray-300 text-gray-500 cursor-not-allowed shadow-none'}`}>견적서 보기</button>
           </div>
         </div>
       </>
@@ -987,7 +989,6 @@ export default function GroutEstimatorApp() {
                 {/* 총 합계 영역 */}
                 <div className="pt-3">
                     
-                    {/* 👈 [수정된 부분: 숨고 리뷰 버튼을 캡쳐 영역 밖으로 이동] */}
                     
                     <div className="flex justify-between items-end">
                         <span className="font-extrabold text-lg text-gray-900">총액</span>
@@ -1013,7 +1014,7 @@ export default function GroutEstimatorApp() {
             </div>
             {/* ★★★ 캡처 영역 끝 ★★★ */}
             
-            {/* ⭐️ [수정된 부분: 숨고 리뷰 이벤트 버튼 추가 및 로직 통합] ⭐️ */}
+            {/* ⭐️ [견적서 모달 하단 컨트롤 영역] ⭐️ */}
             <div className="p-4 bg-gray-50 border-t border-gray-200">
                 {soomgoReviewEvent && (
                     <div className='mb-3'>
@@ -1041,7 +1042,7 @@ export default function GroutEstimatorApp() {
                     </button>
                 </div>
             </div>
-            {/* ⭐️ [수정된 부분 끝] ⭐️ */}
+            {/* ⭐️ [견적서 모달 하단 컨트롤 영역 끝] ⭐️ */}
           </div>
         </div>
       )}
