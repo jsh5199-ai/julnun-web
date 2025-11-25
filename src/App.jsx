@@ -363,7 +363,6 @@ export default function GroutEstimatorApp() {
         q['master_bath_wall'] = Math.max(0, q['master_bath_wall'] - 1);
         q['common_bath_wall'] = Math.max(0, q['common_bath_wall'] - 1);
         isPackageActive = true;
-        isFreeEntrance = true;
         labelText = '(폴리 풀패키지: 70만)';
       }
       else if (qBathFloor >= 2 && (qShower >= 1 || qBathtub >= 1)) { 
@@ -594,17 +593,18 @@ export default function GroutEstimatorApp() {
     const packageActiveRef = useRef(calculation.isPackageActive);
 
     useEffect(() => {
-        if (calculation.isPackageActive && !packageActiveRef.current) {
+        // [수정된 로직] calculation이 재계산될 때마다 실행
+        const currentIsActive = calculation.isPackageActive;
+        const previousIsActive = packageActiveRef.current;
+
+        if (currentIsActive && !previousIsActive) {
             // 패키지가 방금 활성화됨
             setShowToast(true);
-        } else if (!calculation.isPackageActive && packageActiveRef.current) {
-            // 패키지가 방금 비활성화됨 (선택 해제)
-            // 토스트는 띄우지 않고 상태만 업데이트
         }
         
         // 현재 패키지 상태를 참조값에 업데이트
-        packageActiveRef.current = calculation.isPackageActive;
-    }, [calculation.isPackageActive]);
+        packageActiveRef.current = currentIsActive;
+    }, [calculation.isPackageActive]); // calculation.isPackageActive가 변경될 때만 의존성 배열에 따라 실행
   
     // 토스트 닫기 핸들러 (PackageToast 컴포넌트에 전달)
     const handleCloseToast = useCallback(() => {
@@ -888,7 +888,7 @@ export default function GroutEstimatorApp() {
         {/* ★★★ PackageToast 컴포넌트 사용 ★★★ */}
         <PackageToast isVisible={showToast} onClose={handleCloseToast} />
 
-        {/* ★★★ 최종 견적 하단 바 (다크 그린 디자인 적용) ★★★ */}
+        {/* ★★★ 최종 견적 하단 바 (최고의 디자인 적용) ★★★ */}
         <div className="fixed bottom-0 left-0 right-0 bg-emerald-800 shadow-2xl safe-area-bottom z-20">
             <div className="max-w-md mx-auto p-4 flex flex-col gap-2"> 
                 
