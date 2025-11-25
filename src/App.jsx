@@ -99,7 +99,7 @@ const FAQ_ITEMS = [
 ];
 
 // =================================================================
-// [컴포넌트] PackageToast (새로 추가)
+// [컴포넌트] PackageToast (유지)
 // =================================================================
 const PackageToast = ({ isVisible, onClose }) => {
     useEffect(() => {
@@ -119,7 +119,7 @@ const PackageToast = ({ isVisible, onClose }) => {
                 <div className="flex items-center gap-2">
                     <Gift size={18} className='text-amber-300 flex-shrink-0' /> 
                     <div className="text-sm font-bold truncate">
-                        패키지 할인이 적용되었습니다!
+                        🎉 패키지 할인이 적용되었습니다!
                     </div>
                 </div>
                 <button 
@@ -208,7 +208,7 @@ export default function GroutEstimatorApp() {
   const [selectedReviews, setSelectedReviews] = useState(new Set());
   const [showModal, setShowModal] = useState(false);
   const [showMaterialModal, setShowMaterialModal] = useState(false); 
-  const [showToast, setShowToast] = useState(false); // ★ 토스트 상태 추가
+  const [showToast, setShowToast] = useState(false); 
 
   const quoteRef = useRef(null); 
 
@@ -217,8 +217,6 @@ export default function GroutEstimatorApp() {
 
   // --- calculation 로직 (원가 추적 기능 통합) ---
   const handleQuantityChange = (id, delta) => {
-    let wasPackageActive = calculation.isPackageActive; // 변경 전 패키지 상태
-    
     setQuantities(prev => {
       const nextValue = Math.max(0, prev[id] + delta);
       const nextState = { ...prev, [id]: nextValue };
@@ -228,10 +226,6 @@ export default function GroutEstimatorApp() {
       }
       return nextState;
     });
-
-    // ★ 상태 업데이트는 비동기이므로, 다음 렌더링에서 calculation을 확인하거나
-    // ★ 간단하게 수량 변경 후 바로 토스트를 띄우는 로직을 적용 (UX 최적화를 위해 단순화)
-    // ★ 또는 useMemo 결과를 반영하기 위해 useEffect에서 처리할 수 있으나, 여기서는 useMemo 이후 useEffect로 처리합니다.
   };
 
   // 👈 리뷰 토글 함수 (useCallback으로 최적화)
@@ -534,7 +528,7 @@ export default function GroutEstimatorApp() {
     });
     total -= discountAmount;
     
-    // 예상 시공 시간 계산 (유지)
+    // 예상 시공 시간 계산 (견적서 모달에서 사용)
     let estimatedHours = 0;
     if (totalAreaCount > 0) {
         estimatedHours = 4;
@@ -854,18 +848,14 @@ export default function GroutEstimatorApp() {
         {/* ★★★ PackageToast 컴포넌트 사용 ★★★ */}
         <PackageToast isVisible={showToast} onClose={handleCloseToast} />
 
-        {/* 최종 견적 하단 바 (수직 정렬 수정 유지) */}
+        {/* 최종 견적 하단 바 (예상 시공 시간 제거 반영) */}
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-2xl p-4 safe-area-bottom z-20">
             {/* items-end를 사용하여 금액 영역과 버튼의 하단 라인을 맞춤 */}
             <div className="max-w-md mx-auto flex items-end justify-between gap-4"> 
-                {/* 금액 및 시간 영역 */}
-                <div className='flex-shrink-0 w-auto flex flex-col items-start'> 
-                    {/* 예상 시공 시간 */}
-                    <div className="text-sm text-gray-500 font-medium flex items-center gap-1 mb-1">
-                        <Clock size={14} className="text-indigo-600" /> 예상 시공 시간: <span className='font-extrabold text-gray-800'>{calculation.estimatedHours}</span>시간
-                    </div>
-
-                    {/* 금액 영역 */}
+                {/* 금액 영역 */}
+                <div className='flex-shrink-0 w-auto flex flex-col items-start justify-end'> 
+                    
+                    {/* 금액 표시 (예상 시공 시간 요소 제거됨) */}
                     <div className="flex flex-col items-start"> 
                         <div className="flex items-end gap-2">
                             <div className="text-3xl font-extrabold text-indigo-700">{calculation.price.toLocaleString()}<span className="text-base font-normal text-gray-500">원</span></div>
@@ -925,6 +915,7 @@ export default function GroutEstimatorApp() {
                         {selectedMaterialData.label} ({material === 'poly' ? (polyOption === 'pearl' ? '펄' : '무펄') : (epoxyOption === 'kerapoxy' ? '케라폭시' : '스타라이크')})
                       </span>
                     </div>
+                    {/* 예상 시공 시간은 견적서에는 유지합니다. */}
                     <div className="flex justify-between items-center">
                       <span className="font-semibold flex-shrink-0">예상 시공 시간</span>
                       <span className="font-bold text-gray-700 text-right flex-shrink-0">{calculation.estimatedHours}시간 내외</span>
