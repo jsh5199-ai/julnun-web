@@ -605,7 +605,7 @@ export default function GroutEstimatorApp() {
         <div className="p-4 flex items-center justify-between max-w-md mx-auto">
           <div className="flex items-center gap-2">
             <TrendingUp className="h-6 w-6 text-amber-400" />
-            <h1 className="text-xl font-extrabold text-gray-50 tracking-wide">프리미엄 줄눈 견적</h1>
+            <h1 className="text-xl font-extrabold text-gray-50 tracking-wide">줄눈의미학</h1>
           </div>
           <button onClick={() => window.location.reload()} className="text-xs bg-indigo-800 px-3 py-1 rounded-full text-indigo-300 hover:bg-indigo-700 transition active:scale-95 shadow-md">
             <RefreshCw size={12} className="inline mr-1" /> 초기화
@@ -651,7 +651,7 @@ export default function GroutEstimatorApp() {
         {/* --- 2. 시공 재료 선택 (상세 비교 버튼) --- */}
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-150">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
-            <Hammer className="h-5 w-5 text-indigo-600" /> 2. 시공 재료 선택
+            <Hammer className="h-5 w-5 text-indigo-600" /> 2. 줄눈소재 선택
           </h2 >
           <div className="space-y-4">
             {MATERIALS.map((item) => (
@@ -699,7 +699,7 @@ export default function GroutEstimatorApp() {
                   onClick={() => setShowMaterialModal(true)} 
                   className="w-full py-3 bg-indigo-50 text-indigo-700 rounded-lg font-extrabold text-sm hover:bg-indigo-100 transition shadow-md flex items-center justify-center gap-2 active:scale-[0.99]"
               >
-                  <Info size={16} className='text-amber-500' fill='currentColor'/> **[필수 확인]** 최고급 재료 스펙 비교표 보기
+                  <Info size={16} className='text-amber-500' fill='currentColor'/> 소재 양생기간 확인하기
               </button>
           </div>
           {/* --- [수정] 끝 --- */}
@@ -809,7 +809,7 @@ export default function GroutEstimatorApp() {
                 <div className="text-sm flex-1">
                   <div className="font-extrabold text-amber-300 mb-1">🎉 프리미엄 패키지 적용 중!</div>
                   <div className="space-y-0.5 text-xs text-gray-300">
-                    {calculation.isFreeEntrance && <div>- 현관 바닥 서비스 (일반 재료)</div>}
+                    {calculation.isFreeEntrance && <div>- 현관 바닥 서비스 (폴리아스파틱)</div>}
                     <div>- 변기테두리, 바닥테두리</div>
                     <div>- 욕실 젠다이 실리콘 오염방지</div>
                     {/* <li>주방 싱크볼</li> <-- 삭제됨 */}
@@ -986,7 +986,7 @@ export default function GroutEstimatorApp() {
 
                     {/* 폰트 크기 조정으로 가독성 개선 */}
                     <ul className='list-disc list-inside text-[11px] text-gray-600 ml-4 space-y-0.5 mt-2 text-left'>
-                        <li>위 견적은 예상 금액이며, 전문가와 상담 시 최종 금액이 확정됩니다.</li>
+                        <li>전문가와 상담 시 최종 금액이 확정됩니다.</li>
                     </ul>
                 </div>
               </div>
