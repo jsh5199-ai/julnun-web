@@ -831,7 +831,7 @@ export default function GroutEstimatorApp() {
 
       {/* 하단 고정바 */}
       <>
-        {/* ★★★ [수정됨] 패키지 혜택 바 위치 조정 (bottom-[105px] -> bottom-[90px]) ★★★ */}
+        {/* ★★★ [수정됨] 패키지 혜택 바 위치 조정 (bottom-[90px]) ★★★ */}
         {calculation.isPackageActive && showPackageInfo && (
           <div className="fixed bottom-[90px] left-4 right-4 max-w-md mx-auto z-10">
             <div className="bg-gray-700 text-white p-4 rounded-lg shadow-2xl border border-gray-500 animate-[professionalPulse_2s_infinite]">
@@ -929,19 +929,20 @@ export default function GroutEstimatorApp() {
                 <div className="space-y-2 text-sm border-b border-gray-200 pb-3">
                     <p className="font-extrabold text-gray-800 flex items-center gap-1"><Calculator size={14}/> 시공 내역 및 가격</p>
 
-                    {/* ★★★ [추가됨] 무료 서비스 내용 삽입 ★★★ */}
+                    {/* ★★★ [수정됨] 무료 서비스 내용 삽입 (캡처 영역 포함) ★★★ */}
                     {calculation.isPackageActive && (
                         <div className="bg-blue-50/70 p-2 rounded-md border-l-4 border-blue-500 text-xs font-semibold text-gray-700">
                             <p className='flex items-center gap-1 text-blue-800 font-extrabold mb-1'><Crown size={12} className='text-amber-500'/> 패키지 포함 서비스 내역</p>
                             <ul className='list-disc list-outside text-[11px] ml-4 space-y-0.5'>
                                 {calculation.isFreeEntrance && <li>현관 바닥 서비스 (일반 재료)</li>}
+                                <li>변기테두리, 바닥테두리 (줄눈)</li>
                                 <li>욕실 젠다이/세면대 실리콘 오염방지</li>
                                 <li>주방 싱크볼 실리콘 오염방지</li>
                             </ul>
                             <p className='text-[10px] mt-1 text-gray-600'>※ 줄눈시공 항목은 패키지 가격에 통합 반영되며, 위 항목들은 서비스로 제공됩니다.</p>
                         </div>
                     )}
-                    {/* ★★★ [추가됨] 무료 서비스 내용 끝 ★★★ */}
+                    {/* ★★★ [수정됨] 무료 서비스 내용 끝 ★★★ */}
 
                     {/* 개별 항목 루프 (시공 내역) */}
                     {calculation.itemizedPrices
