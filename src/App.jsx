@@ -857,7 +857,7 @@ export default function GroutEstimatorApp() {
                         </div>
                     </div>
                     
-                    {/* 우측: 패키지 라벨 또는 리뷰 약속 버튼 표시 (시인성 개선) */}
+                    {/* 우측: 패키지 라벨만 표시 (하단바로 리뷰 버튼 이동 완료) */}
                     <div className='flex flex-col items-end'>
                         {/* A. 패키지 적용 라벨 (패키지 적용 시 우선 표시) */}
                         {calculation.label && (
@@ -865,43 +865,7 @@ export default function GroutEstimatorApp() {
                                  <Crown size={12} className='inline mr-1'/> {calculation.label}
                              </div>
                         )}
-
-                        {/* B. 숨고 리뷰 약속 버튼 (패키지가 적용되지 않았을 때 표시) */}
-                        {!calculation.isPackageActive && soomgoReviewEvent && (
-                            <div className='text-right'>
-                                {(() => {
-                                    const evt = soomgoReviewEvent;
-                                    const isApplied = isSoomgoReviewApplied;
-                                    const discountAmount = evt.discount.toLocaleString();
-                                    const Icon = isApplied ? CheckCircle2 : Sparkles;
-
-                                    const baseClasses = "py-1 px-2 rounded-lg transition font-bold text-xs active:scale-[0.98] shadow-md flex items-center justify-center gap-1 relative overflow-hidden";
-                                    
-                                    // 버튼 색상 수정: 미적용 시 밝은 계열(gray-100), 적용 시 짙은 계열(gray-700)
-                                    const buttonClasses = isApplied
-                                        ? "bg-gray-700 text-white hover:bg-gray-800" 
-                                        : "bg-gray-100 text-indigo-800 hover:bg-gray-200 border border-gray-300"; // 배경 대비를 위해 밝은 색상 사용
-
-                                    const animationClass = isApplied ? '' : 'shine-effect'; 
-                                    const iconColorClass = isApplied ? 'text-white' : 'text-indigo-600'; // 미적용 시 아이콘 색상도 네이비 계열로 조정
-
-                                    const labelText = isApplied 
-                                        ? `✅ 할인 취소` 
-                                        : `🎁 리뷰 약속 ${discountAmount}원 할인`;
-
-                                    return (
-                                        <button
-                                            onClick={() => toggleReview(evt.id)}
-                                            className={`${baseClasses} ${buttonClasses} ${animationClass}`}
-                                        >
-                                            <Icon size={12} fill="currentColor" className={iconColorClass}/>
-                                            <span>{labelText}</span>
-                                        </button>
-                                    );
-                                })()}
-                            </div>
-                        )}
-                         
+                        {/* 리뷰 버튼은 모달로 이동 */}
                     </div>
                 </div>
 
@@ -1057,16 +1021,48 @@ export default function GroutEstimatorApp() {
                     </ul>
                 </div>
               </div>
-              
-              {/* [확인]: 고객님이 지적하신 모달 내부의 리뷰 버튼은 완전히 제거되었습니다. */}
-
             </div>
             
             {/* ⭐️ [견적서 모달 하단 컨트롤 영역] ⭐️ */}
             <div className="p-4 bg-gray-50 border-t border-gray-200">
-                {/* 리뷰 버튼은 이제 하단바에 통합되어 모달에서 제거되었습니다. */}
+                {/* 1. 숨고 리뷰 이벤트 버튼 (문구 삭제 위치에 배치) */}
+                {soomgoReviewEvent && (
+                    <div className='mb-3'>
+                        {(() => {
+                            const evt = soomgoReviewEvent;
+                            const isApplied = isSoomgoReviewApplied;
+                            const discountAmount = evt.discount.toLocaleString();
+                            const Icon = isApplied ? CheckCircle2 : Sparkles;
+
+                            const baseClasses = "w-full py-3 rounded-xl transition font-extrabold text-sm active:scale-[0.98] shadow-lg flex items-center justify-center gap-2 relative overflow-hidden";
+                            
+                            // 버튼 색상: 미적용 시 짙은 네이비 (메인 CTA와 대비)
+                            const buttonClasses = isApplied
+                                ? "bg-gray-700 text-white hover:bg-gray-800" 
+                                : "bg-indigo-700 text-white hover:bg-indigo-800"; 
+
+                            const animationClass = isApplied ? '' : 'shine-effect'; 
+                            const iconColorClass = isApplied ? 'text-white' : 'text-white'; 
+
+                            const labelText = isApplied 
+                                ? `✅ 할인 적용 취소하기 (총액 +${discountAmount}원)` 
+                                : `🎁 숨고 리뷰 약속하고 ${discountAmount}원 할인받기!`;
+
+                            return (
+                                <button
+                                    onClick={() => toggleReview(evt.id)}
+                                    className={`${baseClasses} ${buttonClasses} ${animationClass}`}
+                                >
+                                    <Icon size={18} fill="currentColor" className={iconColorClass}/>
+                                    <span>{labelText}</span>
+                                </button>
+                            );
+                        })()}
+                    </div>
+                )}
                 
-                <p className='text-sm font-semibold text-center text-gray-600 mb-3 flex items-center justify-center gap-1'><Info size={16}/> 상담 시 현장사진이 있으면 큰 도움이 됩니다..</p> 
+                {/* 기존의 "상담 시 현장사진이 있으면 큰 도움이 됩니다.." 문구 삭제 */}
+                
                 <div className='grid grid-cols-2 gap-3'>
                     {/* 버튼 내부 정렬 수정 */}
                     <button onClick={handleImageSave} className="flex items-center justify-center gap-1 bg-indigo-600 text-white py-3 rounded-lg font-bold hover:bg-indigo-700 transition text-sm active:scale-95 shadow-md"> 
