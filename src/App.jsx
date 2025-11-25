@@ -831,9 +831,9 @@ export default function GroutEstimatorApp() {
 
       {/* 하단 고정바 */}
       <>
-        {/* 패키지 혜택 바: 위치 조정 bottom-[110px] -> bottom-[140px] */}
+        {/* 패키지 혜택 바: 위치 조정 bottom-[140px] -> bottom-[105px], 번개 이모티콘 제거 */}
         {calculation.isPackageActive && showPackageInfo && (
-          <div className="fixed bottom-[140px] left-4 right-4 max-w-md mx-auto z-10">
+          <div className="fixed bottom-[105px] left-4 right-4 max-w-md mx-auto z-10">
             <div className="bg-gray-700 text-white p-4 rounded-lg shadow-2xl border border-gray-500 animate-[professionalPulse_2s_infinite]">
               
               {/* 닫기 버튼 */}
@@ -844,8 +844,8 @@ export default function GroutEstimatorApp() {
                   <X size={16} />
               </button>
               
-              <div className="flex items-start gap-3 pr-6">
-                <div className="bg-white/20 p-2 rounded-full flex-shrink-0 mt-1"><Zap className="w-5 h-5 text-amber-300" /></div>
+              <div className="flex items-start gap-3">
+                {/* ⚡️ 번개 아이콘 제거됨 */}
                 <div className="text-sm flex-1">
                   <div className="font-extrabold text-amber-300 mb-1">🎉 프리미엄 패키지 적용 중!</div>
                   <div className="space-y-0.5 text-xs text-gray-300">
@@ -866,7 +866,7 @@ export default function GroutEstimatorApp() {
           </div>
         )}
 
-        {/* 최종 견적 하단 바 (특수효과 제거) */}
+        {/* 최종 견적 하단 바 (유지) */}
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-2xl p-4 safe-area-bottom z-20">
           <div className="max-w-md mx-auto flex items-center justify-between gap-4">
             {/* 금액 영역: 좁은 화면에서 밀림 방지 */}
@@ -876,12 +876,12 @@ export default function GroutEstimatorApp() {
               </div>
               <div className="flex items-end gap-2">
                 <div className="text-3xl font-extrabold text-indigo-700">{calculation.price.toLocaleString()}<span className="text-base font-normal text-gray-500">원</span></div>
-                {/* animate-pulse 제거 */}
+                {/* animate-pulse 제거됨 */}
                 {calculation.label && <div className="text-xs font-bold text-red-600 mb-1">{calculation.label}</div>}
               </div>
             </div>
             {/* 버튼 영역: 작은 화면에서 패딩/폰트 크기 조정 */}
-            {/* shadow-blue-500/50 제거 */}
+            {/* 그림자 특수효과 제거됨 */}
             <button onClick={() => setShowModal(true)} disabled={!hasSelections} className={`px-5 py-3 sm:px-7 sm:py-4 rounded-lg font-extrabold text-sm sm:text-base text-white shadow-xl transition-all ${hasSelections ? 'bg-blue-600 hover:bg-blue-700 active:scale-[0.98]' : 'bg-gray-300 text-gray-500 cursor-not-allowed shadow-none'}`}>견적서 보기</button>
           </div>
         </div>
