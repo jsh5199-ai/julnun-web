@@ -42,13 +42,12 @@ const GlobalStyles = () => (
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
     }
     .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom); }
-    /* 단계 표시기 스타일 */
-    .step-indicator { transition: all 0.3s ease; }
+    .step-indicator { transition: all 0.3s ease; }
   `}</style>
 );
 
 // =================================================================
-// [데이터] 카테고리별로 분리
+// [데이터] (유지)
 // =================================================================
 const HOUSING_TYPES = [
   { id: 'new', label: '신축 아파트', multiplier: 1.0 },
@@ -208,7 +207,9 @@ const MaterialDetailModal = React.memo(({ onClose }) => (
 // =================================================================
 
 export default function GroutEstimatorApp() {
-  const [currentStep, setCurrentStep] = useState(1); // ★ Step 관리 상태 추가
+  // ★ TOTAL_STEPS를 5로 변경했습니다.
+  const TOTAL_STEPS = 5; 
+  const [currentStep, setCurrentStep] = useState(1);
   const [housingType, setHousingType] = useState('new');
   const [material, setMaterial] = useState('poly');
   const [polyOption, setPolyOption] = useState('pearl');
@@ -225,7 +226,6 @@ export default function GroutEstimatorApp() {
 
   const SOOMGO_REVIEW_URL = 'https://www.soomgo.com/profile/users/10755579?tab=review';
   const PHONE_NUMBER = '010-7734-6709';
-  const TOTAL_STEPS = 4; // 총 단계 수 정의
 
   // --- Step 네비게이션 함수 ---
   const handleNext = () => setCurrentStep(prev => Math.min(TOTAL_STEPS, prev + 1));
@@ -289,8 +289,6 @@ export default function GroutEstimatorApp() {
 
     // --- 패키지 로직 (유지) ---
     
-    // ... (기존 패키지 로직은 길어 생략하고 '유지'합니다. 복사된 q를 차감하는 방식)
-
     // --- 패키지 1: 폴리 30만원 (욕실2+현관1) ---
     if (selectedMaterial.id === 'poly' && qBathFloor >= 2 && qEntrance >= 1 && qBathWallTotal === 0 && qShower === 0 && qBathtub === 0) {
         total += 300000;
@@ -529,6 +527,22 @@ export default function GroutEstimatorApp() {
 
     });
     
+    // 패키지 자체 할인 내역 추가
+    if(packageDiscount > 0) {
+        itemizedPrices.push({
+            id: 'package_discount',
+            label: labelText,
+            quantity: 1,
+            unit: '건',
+            originalPrice: packageDiscount, 
+            calculatedPrice: 0,
+            discount: packageDiscount,
+            isPackageItem: true,
+            isDiscount: true,
+        });
+    }
+
+
     // --- 리뷰 할인 적용 (유지) ---
     let discountAmount = 0;
     REVIEW_EVENTS.forEach(evt => {
@@ -610,27 +624,29 @@ export default function GroutEstimatorApp() {
   const soomgoReviewEvent = REVIEW_EVENTS.find(evt => evt.id === 'soomgo_review');
   const isSoomgoReviewApplied = selectedReviews.has('soomgo_review');
   
-  // 현재 단계 제목
+  // 현재 단계 제목 (Header에 표시할 간결한 제목)
   const stepTitles = {
-    1: '1. 현장 및 소재 선택',
-    2: '2. 시공 범위 선택: 욕실',
-    3: '3. 시공 범위 선택: 기타 (현관/베란다/주방/거실)',
-    4: '4. 추가 시공 및 할인/FAQ',
+    1: '현장 유형 선택',
+    2: '줄눈 소재 선택',
+    3: '욕실 시공 범위',
+    4: '기타 시공 범위',
+    5: '추가 시공 및 할인/FAQ',
   };
 
   // 각 단계의 아이콘
   const stepIcons = {
-    1: <Home className="h-5 w-5 text-white" />,
-    2: <Bath className="h-5 w-5 text-white" />,
-    3: <LayoutGrid className="h-5 w-5 text-white" />,
-    4: <Gift className="h-5 w-5 text-white" />,
+    1: <Home className="h-5 w-5 text-amber-400" />,
+    2: <Hammer className="h-5 w-5 text-amber-400" />,
+    3: <Bath className="h-5 w-5 text-amber-400" />,
+    4: <LayoutGrid className="h-5 w-5 text-amber-400" />,
+    5: <Gift className="h-5 w-5 text-amber-400" />,
   };
   
   return (
     <div className={`min-h-screen bg-gray-50 text-gray-800 font-sans pb-40`}>
       <GlobalStyles />
 
-      {/* 헤더: 짙은 네이비 배경 + 단계 표시기 */}
+      {/* Header: 짙은 네이비 배경 + 단계 표시기 */}
       <header className="bg-indigo-900 text-white sticky top-0 z-20 shadow-xl">
         <div className="p-4 max-w-md mx-auto">
           <div className="flex items-center justify-between mb-3">
@@ -640,34 +656,40 @@ export default function GroutEstimatorApp() {
             </button>
           </div>
           
-          {/* 단계 표시기 */}
-          <div className="flex items-center justify-between">
-              {Object.keys(stepTitles).map(step => (
-                  <div key={step} className="flex-1 text-center relative px-1">
-                      <div className={`step-indicator h-2 rounded-full ${parseInt(step) <= currentStep ? 'bg-amber-400' : 'bg-indigo-700'}`}></div>
-                      <span className={`absolute top-5 left-1/2 -translate-x-1/2 text-xs font-bold transition-colors ${parseInt(step) === currentStep ? 'text-amber-400' : 'text-gray-400'}`}>
-                          {step}단계
+          {/* ★ 단계 표시기 및 현재 단계 타이틀 통합 */}
+          <div className="bg-indigo-700/50 rounded-xl p-3 shadow-inner border border-indigo-700">
+              <div className="flex items-center justify-between mb-2">
+                  <div className='flex items-center gap-2'>
+                      {stepIcons[currentStep]}
+                      <span className='text-sm font-extrabold text-amber-400'>
+                          STEP {currentStep} / {TOTAL_STEPS}
                       </span>
                   </div>
-              ))}
+                  <span className='text-lg font-extrabold text-white'>
+                      {stepTitles[currentStep]}
+                  </span>
+              </div>
+              
+              {/* 진행 바 */}
+              <div className="w-full bg-indigo-500 rounded-full h-2">
+                  <div 
+                      className="bg-amber-400 h-2 rounded-full step-indicator" 
+                      style={{ width: `${(currentStep / TOTAL_STEPS) * 100}%` }}
+                  ></div>
+              </div>
           </div>
-          <div className='h-6'></div>
         </div>
       </header>
 
+      {/* main: 상단 헤더 통합으로 인해 상단 패딩을 줄였습니다. */}
       <main className="max-w-md mx-auto p-4 space-y-6">
-          {/* 현재 단계 제목 (본문) */}
-          <h2 className="text-xl font-extrabold flex items-center gap-2 text-gray-800 border-b border-indigo-200 pb-2 animate-fade-in">
-              {stepIcons[currentStep]} {stepTitles[currentStep]}
-          </h2>
           
-        {/* --- Step 1: 현장 유형 및 소재 선택 --- */}
+        {/* --- Step 1: 현장 유형 선택 (분리) --- */}
         {currentStep === 1 && (
           <div className='space-y-6 animate-fade-in'>
-              {/* 1. 현장 유형 섹션 */}
-            <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100">
+              <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100">
               <h3 className="text-lg font-bold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
-                <Home className="h-5 w-5 text-indigo-600" /> 현장 유형 선택
+                <Home className="h-5 w-5 text-indigo-600" /> 현장 유형을 선택하세요.
               </h3>
               <div className="grid grid-cols-2 gap-3">
                 {HOUSING_TYPES.map((type) => (
@@ -685,11 +707,15 @@ export default function GroutEstimatorApp() {
                 ))}
               </div>
             </section>
-
-            {/* 2. 줄눈 소재 선택 */}
-            <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100">
+          </div>
+        )}
+        
+        {/* --- Step 2: 줄눈 소재 선택 (분리) --- */}
+        {currentStep === 2 && (
+          <div className='space-y-6 animate-fade-in'>
+              <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100">
               <h3 className="text-lg font-bold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
-                <Hammer className="h-5 w-5 text-indigo-600" /> 줄눈 소재 선택
+                <Hammer className="h-5 w-5 text-indigo-600" /> 줄눈 소재를 선택하세요.
               </h3>
               <div className="space-y-4">
                 {MATERIALS.map((item) => (
@@ -744,8 +770,8 @@ export default function GroutEstimatorApp() {
           </div>
         )}
 
-        {/* --- Step 2: 욕실 범위 선택 --- */}
-        {currentStep === 2 && (
+        {/* --- Step 3: 욕실 범위 선택 --- */}
+        {currentStep === 3 && (
           <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in">
             <h3 className="text-lg font-bold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
               <Bath className="h-5 w-5 text-indigo-600" /> 욕실 시공 범위 ({material === 'poly' ? '폴리아스파틱' : '에폭시'})
@@ -775,8 +801,8 @@ export default function GroutEstimatorApp() {
           </section>
         )}
         
-        {/* --- Step 3: 기타 시공 범위 선택 (현관/베란다/주방/거실) --- */}
-        {currentStep === 3 && (
+        {/* --- Step 4: 기타 시공 범위 선택 (현관/베란다/주방/거실) --- */}
+        {currentStep === 4 && (
           <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in">
             <h3 className="text-lg font-bold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
               <LayoutGrid className="h-5 w-5 text-indigo-600" /> 기타 시공 범위 ({material === 'poly' ? '폴리아스파틱' : '에폭시'})
@@ -806,10 +832,10 @@ export default function GroutEstimatorApp() {
           </section>
         )}
 
-        {/* --- Step 4: 추가 시공 및 할인/FAQ --- */}
-        {currentStep === 4 && (
+        {/* --- Step 5: 추가 시공 및 할인/FAQ --- */}
+        {currentStep === 5 && (
           <div className='space-y-6 animate-fade-in'>
-              {/* 4. 추가 시공 (실리콘/리폼) */}
+              {/* 5-1. 추가 시공 (실리콘/리폼) */}
               <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100">
                 <h3 className="text-lg font-bold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
                     <Eraser className="h-5 w-5 text-indigo-600" /> 추가 시공 (실리콘/리폼)
@@ -838,7 +864,7 @@ export default function GroutEstimatorApp() {
                 </div>
               </section>
 
-              {/* 5. 할인 이벤트 */}
+              {/* 5-2. 할인 이벤트 */}
               <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100">
                   <h3 className="text-lg font-bold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
                     <Gift className="h-5 w-5 text-indigo-600" /> 할인 이벤트 적용
@@ -858,7 +884,7 @@ export default function GroutEstimatorApp() {
                   )}
               </section>
               
-              {/* 6. FAQ */}
+              {/* 5-3. FAQ */}
               <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 mt-6">
                   <h3 className="text-lg font-bold text-gray-800 mb-2 flex items-center gap-2 border-b pb-2">
                       <HelpCircle className="h-5 w-5 text-indigo-600"/> 자주 묻는 질문 (FAQ)
