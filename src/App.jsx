@@ -272,11 +272,11 @@ export default function GroutEstimatorApp() {
           newQuantities['bathtub_wall'] = 0;
         }
         
-        // 샤워부스 벽 3면 선택 시 -> 안방/공용욕실 벽 전체 제외
+        // 샤워부스 벽 3면 선택 시 -> 안방욕실 벽 전체 제외
         if (id === 'shower_booth' && (newQuantities['master_bath_wall'] || 0) > 0) {
           newQuantities['master_bath_wall'] = 0;
         }
-        // 욕조 벽 3면 선택 시 -> 안방/공용욕실 벽 전체 제외
+        // 욕조 벽 3면 선택 시 -> 공용욕실 벽 전체 제외
         if (id === 'bathtub_wall' && (newQuantities['common_bath_wall'] || 0) > 0) {
           newQuantities['common_bath_wall'] = 0;
         }
@@ -291,7 +291,6 @@ export default function GroutEstimatorApp() {
           newQuantities['entrance'] = 1;
           setAreaMaterials(prevMat => ({ ...prevMat, 'entrance': 'poly' }));
         } 
-        // NOTE: 1개로 감소 시 현관 자동 해제 로직은 복잡성 때문에 생략하고 수동 해제하도록 유지
       }
       
       return newQuantities;
@@ -335,7 +334,7 @@ export default function GroutEstimatorApp() {
     return summary;
   }, []);
   
-  // ⭐️ [유지] 혼합 패키지 매칭 로직 - 현관 자동 인식 기능 추가
+  // ⭐️ [유지] 혼합 패키지 매칭 로직 - 현관 자동 인식 기능 포함
   const findMatchingPackage = useCallback((selectionSummary, quantities) => {
     let polySelections = { ...(selectionSummary['poly'] || {}) };
     const epoxySelections = selectionSummary['kerapoxy'] || {};
@@ -645,7 +644,7 @@ export default function GroutEstimatorApp() {
   const currentEmbedUrl = getEmbedUrl(currentVideo.id);
 
 
-  // ⭐️ 컴포넌트: 개별 소재 선택 버튼
+  // ⭐️ [수정] 컴포넌트: 개별 소재 선택 버튼 - 안내 문구 삭제
   const MaterialSelectButtons = ({ areaId, currentMat, onChange, isQuantitySelected }) => (
     <div className={`mt-2 ${isQuantitySelected ? 'animate-slide-down' : ''} transition-all duration-300`}>
       <div className='flex gap-1.5 pt-2 border-t border-gray-100'>
@@ -669,7 +668,8 @@ export default function GroutEstimatorApp() {
           </button>
         ))}
       </div>
-      {isQuantitySelected && <p className='text-[10px] text-gray-500 mt-1'>*해당 영역에 **{MATERIALS.find(m => m.id === currentMat)?.label.split('(')[0].trim()}** 적용</p>}
+      {/* ⚠️ 안내 문구 삭제됨 */}
+      {/* {isQuantitySelected && <p className='text-[10px] text-gray-500 mt-1'>*해당 영역에 **{MATERIALS.find(m => m.id === currentMat)?.label.split('(')[0].trim()}** 적용</p>} */}
     </div>
   );
 
@@ -836,7 +836,14 @@ export default function GroutEstimatorApp() {
                             <div className={`p-2 rounded-full shadow-sm ${isSelected ? 'bg-indigo-700 text-white' : 'bg-gray-200 text-indigo-600'}`}><Icon size={18} /></div> 
                             <div>
                                 <div className="font-semibold text-gray-800">{area.label}</div>
-                                <div className="text-xs text-gray-500">기본 {area.basePrice.toLocaleString()}원~{area.desc && <span className="block text-indigo-600">{area.desc}</span>}</div>
+                                <div className="text-xs text-gray-500">
+                                    기본 {area.basePrice.toLocaleString()}원~
+                                    {area.desc && <span className="block text-indigo-600">{area.desc}</span>}
+                                    {/* ⭐️ 현관 바닥 추천 문구 추가 ⭐️ */}
+                                    {area.id === 'entrance' && (
+                                        <span className="block text-amber-500 font-bold mt-0.5">현관은 폴리아스파틱을 적극 추천합니다.</span>
+                                    )}
+                                </div>
                             </div>
                         </div>
                         <div className="flex items-center gap-1 bg-white px-1 py-1 rounded-full shadow-md border border-gray-200">
