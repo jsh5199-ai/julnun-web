@@ -76,7 +76,7 @@ const SERVICE_AREAS = [
   { id: 'bathtub_wall', label: '욕조 벽 3면', basePrice: 150000, icon: Bath, unit: '구역' },
   { id: 'master_bath_wall', label: '안방욕실 벽 전체', basePrice: 300000, icon: Bath, unit: '구역' },
   { id: 'common_bath_wall', label: '공용욕실 벽 전체', basePrice: 300000, icon: Bath, unit: '구역' },
-  // ⭐️ 베란다/세탁실 basePrice를 80000원으로 조정 (Poly 가격) ⭐️
+  // ⭐️ [수정 반영] 베란다/세탁실 basePrice를 80000원으로 조정 (Poly 가격) ⭐️
   { id: 'balcony_laundry', label: '베란다/세탁실', basePrice: 80000, icon: LayoutGrid, unit: '개소', desc: '원하는 개수만큼 선택' }, 
   { id: 'kitchen_wall', label: '주방 벽면', basePrice: 150000, icon: Utensils, unit: '구역' },
   { id: 'living_room', label: '거실 바닥', basePrice: 550000, icon: Sofa, unit: '구역', desc: '복도,주방 포함' },
@@ -416,7 +416,7 @@ export default function GroutEstimatorApp() {
     return null; // 매칭되는 패키지 없음
   }, [quantities]);
   
-  // 🚀 [수정] calculation 로직: 베란다/세탁실 특수 견적가 적용
+  // 🚀 [수정] calculation 로직: 오타 수정 및 모든 로직 통합
   const calculation = useMemo(() => {
     const selectedHousing = HOUSING_TYPES.find(h => h.id === housingType);
     let itemizedPrices = []; 
@@ -450,7 +450,7 @@ export default function GroutEstimatorApp() {
         isFreeEntrance = true;
     }
 
-    // ⭐️ 3. 특정 5개 항목 패키지 가격 오버라이드 ⭐️ (유지)
+    // ⭐️ 3. 특정 5개 항목 패키지 가격 오버라이드 ⭐️ 
     let customPackagePrice = 0;
     let customPackageLabel = '';
     const isCustomPackageMatch = qBathFloor === 2 && qMasterWall === 1 && qCommonWall === 1 && qEntrance === 1;
@@ -458,7 +458,7 @@ export default function GroutEstimatorApp() {
     if (isCustomPackageMatch && !matchedPackage) {
         // 모든 5개 항목이 동일한 소재인지 확인
         const requiredAreas = ['bathroom_floor', 'master_bath_wall', 'common_bath_wall', 'entrance'];
-        const allAreas Selected = requiredAreas.every(id => quantities[id] > 0);
+        const allAreasSelected = requiredAreas.every(id => quantities[id] > 0);
         
         if (allAreasSelected) {
             // 해당 영역들의 소재가 모두 동일한지 확인
@@ -534,7 +534,7 @@ export default function GroutEstimatorApp() {
         // 거실 바닥 에폭시 특수 계수 처리 (영역별 소재 반영) - 유지
         if (area.id === 'living_room' && selectedAreaMaterial && selectedAreaMaterial.id === 'kerapoxy') currentMod = 2.0;
 
-        // ⭐️ [수정] 베란다/세탁실 에폭시 특수 계수 처리: 300,000원 / 80,000원 = 3.75 ⭐️
+        // ⭐️ [반영] 베란다/세탁실 에폭시 특수 계수 처리: 300,000원 / 80,000원 = 3.75 ⭐️
         if (area.id === 'balcony_laundry' && selectedAreaMaterial && selectedAreaMaterial.id === 'kerapoxy') {
              currentMod = 3.75; 
         } 
@@ -932,8 +932,6 @@ export default function GroutEstimatorApp() {
             {SILICON_AREAS.map((area) => {
               const Icon = area.icon;
               const isSelected = quantities[area.id] > 0;
-              // currentMat, areaMaterials는 더 이상 필요하지 않으나, 재사용을 위해 유지
-              // const currentMat = areaMaterials[area.id];
 
               return (
                 <div key={area.id} className={`flex flex-col p-3 rounded-lg border transition duration-150 ${isSelected ? 'bg-indigo-50 border-indigo-400' : 'bg-gray-50 border-gray-200 hover:bg-gray-100'}`}> 
@@ -954,22 +952,11 @@ export default function GroutEstimatorApp() {
                             <button 
                                 onClick={() => {
                                     handleQuantityChange(area.id, 1);
-                                    // 실리콘/리폼 항목은 소재 변경 로직이 필요 없음.
                                 }} 
                                 className="w-7 h-7 flex items-center justify-center text-indigo-600 hover:bg-gray-100 rounded-full font-bold text-lg transition active:scale-90"
                             >+</button> 
                         </div>
                     </div>
-                    
-                    {/* ⚠️ 영역별 소재 선택 버튼 삭제됨 */}
-                    {/* {isSelected && (
-                        <MaterialSelectButtons 
-                            areaId={area.id}
-                            currentMat={currentMat}
-                            onChange={handleAreaMaterialChange}
-                            isQuantitySelected={isSelected}
-                        />
-                    )} */}
                 </div>
               );
             })}
