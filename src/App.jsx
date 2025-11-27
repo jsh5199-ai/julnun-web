@@ -429,12 +429,12 @@ export default function GroutEstimatorApp() {
     return null; // 매칭되는 패키지 없음
   }, [quantities]);
   
-  // 🚀 [수정] calculation 로직: 복합 패키지 로직 추가
+  // 🚀 [수정] calculation 로직: 오류 수정 및 55만원 패키지 로직 통합
   const calculation = useMemo(() => {
     const selectedHousing = HOUSING_TYPES.find(h => h.id === housingType);
     let itemizedPrices = []; 
     
-    // ⭐️ 1. 필요한 수량 변수 추출 ⭐️
+    // ⭐️ 1. 필요한 수량 변수 추출 (오류 수정 반영) ⭐️
     const qEntrance = quantities['entrance'] || 0;
     const qBathFloor = quantities['bathroom_floor'] || 0;
     const qMasterWall = quantities['master_bath_wall'] || 0;
@@ -469,90 +469,29 @@ export default function GroutEstimatorApp() {
     let customPackagePrice = 0;
     let customPackageAreas = [];
     
-    // -----------------------------------------------------------
-    // 4-1. [신규 로직] 복합 소재 커스텀 패키지 체크 (총 7가지)
-    // -----------------------------------------------------------
-    const isBathFloor2 = qBathFloor === 2;
-    const packages = [
-        // P1: 현관(P), 욕실바닥(E), 안방전체(P), 공용전체(E) -> 115만 (5개소)
-        { price: 1150000, match: isBathFloor2 && qEntrance === 1 && qMasterWall === 1 && qCommonWall === 1 && qShowerBooth === 0 && qBathtubWall === 0, 
-          mats: { entrance: 'poly', bathroom_floor: 'kerapoxy', master_bath_wall: 'poly', common_bath_wall: 'kerapoxy' } },
-        // P2: 현관(E), 욕실바닥(E), 안방전체(P), 공용전체(E) -> 120만 (5개소)
-        { price: 1200000, match: isBathFloor2 && qEntrance === 1 && qMasterWall === 1 && qCommonWall === 1 && qShowerBooth === 0 && qBathtubWall === 0, 
-          mats: { entrance: 'kerapoxy', bathroom_floor: 'kerapoxy', master_bath_wall: 'poly', common_bath_wall: 'kerapoxy' } },
-        // P3: 현관(P), 욕실바닥(E), 안방전체(E), 공용전체(P) -> 115만 (5개소)
-        { price: 1150000, match: isBathFloor2 && qEntrance === 1 && qMasterWall === 1 && qCommonWall === 1 && qShowerBooth === 0 && qBathtubWall === 0, 
-          mats: { entrance: 'poly', bathroom_floor: 'kerapoxy', master_bath_wall: 'kerapoxy', common_bath_wall: 'poly' } },
-        
-        // P4: 현관(P), 욕실바닥(E), 샤워3면(E), 욕조3면(P) -> 90만 (4개소)
-        { price: 900000, match: isBathFloor2 && qEntrance === 1 && qShowerBooth === 1 && qBathtubWall === 1 && qMasterWall === 0 && qCommonWall === 0,
-          mats: { entrance: 'poly', bathroom_floor: 'kerapoxy', shower_booth: 'kerapoxy', bathtub_wall: 'poly' } },
-        // P5: 현관(P), 욕실바닥(E), 샤워3면(P), 욕조3면(E) -> 90만 (4개소)
-        { price: 900000, match: isBathFloor2 && qEntrance === 1 && qShowerBooth === 1 && qBathtubWall === 1 && qMasterWall === 0 && qCommonWall === 0,
-          mats: { entrance: 'poly', bathroom_floor: 'kerapoxy', shower_booth: 'poly', bathtub_wall: 'kerapoxy' } },
-
-        // P6: 현관(P), 욕실바닥(E), 샤워3면(E), 공용전체(P) -> 105만 (5개소)
-        { price: 1050000, match: isBathFloor2 && qEntrance === 1 && qShowerBooth === 1 && qCommonWall === 1 && qMasterWall === 0 && qBathtubWall === 0,
-          mats: { entrance: 'poly', bathroom_floor: 'kerapoxy', shower_booth: 'kerapoxy', common_bath_wall: 'poly' } },
-        // P7: 현관(P), 욕실바닥(E), 욕조3면(E), 안방전체(P) -> 110만 (5개소)
-        { price: 1100000, match: isBathFloor2 && qEntrance === 1 && qBathtubWall === 1 && qMasterWall === 1 && qCommonWall === 0 && qShowerBooth === 0,
-          mats: { entrance: 'poly', bathroom_floor: 'kerapoxy', bathtub_wall: 'kerapoxy', master_bath_wall: 'poly' } },
-    ];
-    
-    const allCustomPackageAreas = ['entrance', 'bathroom_floor', 'master_bath_wall', 'common_bath_wall', 'shower_booth', 'bathtub_wall'];
-
-    if (!matchedPackage) {
-        for (const pkg of packages) {
-            if (pkg.match) {
-                // 선택된 모든 영역의 소재가 패키지 요구사항과 일치하는지 확인
-                const isMaterialMatch = Object.entries(pkg.mats).every(([areaId, requiredMat]) => {
-                    return quantities[areaId] > 0 && areaMaterials[areaId] === requiredMat;
-                });
-
-                // 패키지에 포함된 영역만 선택했는지 확인 (추가 선택 방지)
-                const selectedAreasCount = Object.keys(quantities).filter(id => quantities[id] > 0).length;
-                const packageRequiredCount = Object.keys(pkg.mats).length;
-                
-                // 욕실 바닥은 수량이 2개이므로, area ID 개수와 선택된 수량이 일치하지 않을 수 있음.
-                // 대신, 선택된 모든 항목이 패키지 요구사항에만 포함되어 있고, 다른 항목이 추가되지 않았는지 확인
-                const allSelectedInPackage = Object.keys(quantities).every(id => {
-                    if (quantities[id] > 0) {
-                        return Object.keys(pkg.mats).includes(id) || SILICON_AREAS.some(a => a.id === id); // 실리콘 항목은 패키지 외 선택 허용
-                    }
-                    return true;
-                });
-
-
-                if (isMaterialMatch && allSelectedInPackage) {
-                    customPackagePrice = pkg.price;
-                    customPackageAreas = Object.keys(pkg.mats);
-                    labelText = '패키지 할인 적용 중';
-                    break;
-                }
-            }
-        }
-    }
-    // -----------------------------------------------------------
-    
-    // 4-3. 폴리아스파틱 5종 (55만원) 패키지 체크 (이전 로직 유지)
+    // 4-1. [신규 로직] 폴리아스파틱 5종 (55만원) 패키지 체크
     const isPoly550KMatch = 
-        qEntrance === 1 && qBathFloor === 2 && qShowerBooth === 1 && qBathtubWall === 1 &&
-        qMasterWall === 0 && qCommonWall === 0;
+        qEntrance === 1 && 
+        qBathFloor === 2 && 
+        qShowerBooth === 1 && 
+        qBathtubWall === 1 &&
+        qMasterWall === 0 && // 다른 벽면 패키지와 충돌 방지
+        qCommonWall === 0;
 
     const poly550KAreas = ['entrance', 'bathroom_floor', 'shower_booth', 'bathtub_wall'];
     
-    if (customPackagePrice === 0 && isPoly550KMatch && !matchedPackage) {
+    if (isPoly550KMatch && !matchedPackage) {
         const allPoly = poly550KAreas.every(id => areaMaterials[id] === 'poly');
         
         if (allPoly) {
             customPackagePrice = 550000;
             customPackageAreas = poly550KAreas;
+            // ⭐️ [수정 반영] 문구를 '패키지 할인 적용 중'으로 고정
             labelText = '패키지 할인 적용 중'; 
         }
     }
 
-
-    // 4-4. 기존 5종 패키지 (안방/공용 벽 전체 포함, 70만/130만/135만) 체크
+    // 4-2. 기존 5종 패키지 (안방/공용 벽 전체 포함, 70만/130만/135만) 체크
     const isOld5ItemsMatch = qEntrance === 1 && qBathFloor === 2 && qMasterWall === 1 && qCommonWall === 1 && 
                              qShowerBooth === 0 && qBathtubWall === 0; // 55만원 패키지와 충돌 방지
     const old5ItemAreas = ['entrance', 'bathroom_floor', 'master_bath_wall', 'common_bath_wall'];
@@ -863,7 +802,7 @@ export default function GroutEstimatorApp() {
                                     {area.desc && <span className="block text-indigo-600">{area.desc}</span>}
                                     {/* ⭐️ 현관 바닥 추천 문구 추가 ⭐️ */}
                                     {area.id === 'entrance' && (
-                                        <span className="block text-amber-500 font-bold mt-0.5">현관은 폴리아스파틱을 적극 추천합니다.</span>
+                                        <span className="block text-amber-500 font-bold mt-0.5">현관은 폴리소재 적극 추천</span>
                                     )}
                                 </div>
                             </div>
@@ -1062,7 +1001,7 @@ export default function GroutEstimatorApp() {
           
           {/* B. 기타 범위 (주방/베란다) */}
           <h3 className="text-base font-extrabold flex items-center gap-2 mb-3 mt-4 text-gray-700">
-            <LayoutGrid size={16} className="text-indigo-500" /> B. 기타 범위 (주방/베란다/거실)
+            <LayoutGrid size={16} className="text-indigo-500" /> B. 기타 범위
           </h3>
           {renderAreaList(OTHER_AREAS)}
 
@@ -1071,7 +1010,7 @@ export default function GroutEstimatorApp() {
         {/* --- 4. 실리콘 교체할 곳 선택 (유지) --- */}
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-600">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
-            <Eraser className="h-5 w-5 text-indigo-600" /> 4. 추가 시공 (실리콘/리폼)
+            <Eraser className="h-5 w-5 text-indigo-600" /> 4. 실리콘 시공
           </h2 >
           <div className="space-y-3">
             {SILICON_AREAS.map((area) => {
