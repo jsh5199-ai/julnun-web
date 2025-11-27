@@ -306,13 +306,13 @@ export default function GroutEstimatorApp() {
   // ⭐️ [유지] 리뷰 토글 핸들러
   const toggleReview = useCallback((id) => {
       setSelectedReviews(prev => {
-          const newSet = new Set(prev);
-          if (newSet.has(id)) {
-              newSet.delete(id);
-          } else {
-              newSet.add(id);
-          }
-          return newSet;
+        const newSet = new Set(prev);
+        if (newSet.has(id)) {
+            newSet.delete(id);
+        } else {
+            newSet.add(id);
+        }
+        return newSet;
       });
   }, []);
 
@@ -341,7 +341,7 @@ export default function GroutEstimatorApp() {
     const epoxySelections = selectionSummary['kerapoxy'] || {};
     
     const totalSelectedCount = Object.values(polySelections).reduce((sum, v) => sum + v, 0) + 
-                               Object.values(epoxySelections).reduce((sum, v) => sum + v, 0);
+                             Object.values(epoxySelections).reduce((sum, v) => sum + v, 0);
     if (totalSelectedCount === 0) return null;
 
     for (const pkg of MIXED_PACKAGES) {
@@ -416,7 +416,7 @@ export default function GroutEstimatorApp() {
     return null; // 매칭되는 패키지 없음
   }, [quantities]);
   
-  // 🚀 [수정] calculation 로직: 오타 수정 및 모든 로직 통합
+  // 🚀 [수정] calculation 로직: 현관 소재에 따른 5종 패키지 가격 분리 및 로직 정리
   const calculation = useMemo(() => {
     const selectedHousing = HOUSING_TYPES.find(h => h.id === housingType);
     let itemizedPrices = []; 
@@ -427,6 +427,7 @@ export default function GroutEstimatorApp() {
     const matchedPackage = matchedPackageResult ? matchedPackageResult : null;
     const isAutoPackageEntrance = matchedPackageResult && matchedPackageResult.autoEntrance;
 
+    // q는 계산 시 패키지에 포함되어 제외될 항목을 표시하는 임시 수량 맵
     let q = { ...quantities };
     let total = 0;
     let labelText = null;
@@ -450,152 +451,174 @@ export default function GroutEstimatorApp() {
         isFreeEntrance = true;
     }
 
-    // ⭐️ 3. 특정 5개 항목 패키지 가격 오버라이드 ⭐️ 
+    // ⭐️ 3. 특정 5개 항목 패키지 가격 오버라이드 (수정된 로직) ⭐️ 
     let customPackagePrice = 0;
-    let customPackageLabel = '';
-    const isCustomPackageMatch = qBathFloor === 2 && qMasterWall === 1 && qCommonWall === 1 && qEntrance === 1;
+    
+    // 현관, 욕실바닥2, 안방욕실벽전체, 공용욕실벽전체 선택 확인
+    const isCustomPackageMatch = qEntrance === 1 && qBathFloor === 2 && qMasterWall === 1 && qCommonWall === 1;
 
     if (isCustomPackageMatch && !matchedPackage) {
-        // 모든 5개 항목이 동일한 소재인지 확인
-        const requiredAreas = ['bathroom_floor', 'master_bath_wall', 'common_bath_wall', 'entrance'];
-        const allAreasSelected = requiredAreas.every(id => quantities[id] > 0);
-        
-        if (allAreasSelected) {
-            // 해당 영역들의 소재가 모두 동일한지 확인
-            const mats = requiredAreas.map(id => areaMaterials[id]);
-            const allSame = mats.every(m => m === mats[0]);
-            
-            if (allSame) {
-                const materialId = mats[0];
-                
-                if (materialId === 'kerapoxy') {
-                    customPackagePrice = 1300000; // 130만원
-                    customPackageLabel = '프리미엄 5종 패키지 (에폭시)';
-                } else if (materialId === 'poly') {
-                    customPackagePrice = 700000; // 70만원
-                    customPackageLabel = '일반 5종 패키지 (폴리)';
-                }
-            }
-        }
+      // 패키지 영역: 현관, 욕실바닥(2), 안방벽, 공용벽
+      const requiredAreas = ['entrance', 'bathroom_floor', 'master_bath_wall', 'common_bath_wall']; 
+      
+      const allAreasSelected = requiredAreas.every(id => quantities[id] > 0);
+      
+      if (allAreasSelected) {
+          // 현관을 제외한 4개소의 소재 확인 (욕실 바닥은 2곳이지만, 맵에서 ID는 1개이므로 소재는 1개만 체크)
+          const nonEntranceAreas = ['bathroom_floor', 'master_bath_wall', 'common_bath_wall']; 
+          
+          const nonEntranceMats = nonEntranceAreas.map(id => areaMaterials[id]);
+          const allNonEntranceEpoxy = nonEntranceMats.every(m => m === 'kerapoxy');
+          
+          const entranceMat = areaMaterials['entrance'];
+
+          if (allNonEntranceEpoxy) {
+              if (entranceMat === 'poly') {
+                  customPackagePrice = 1300000; // 현관 폴리 + 나머지 4개소 에폭시 (130만원)
+              } else if (entranceMat === 'kerapoxy') {
+                  customPackagePrice = 1350000; // 현관 에폭시 + 나머지 4개소 에폭시 (135만원)
+              }
+          }
+          // 모든 항목이 폴리인 경우
+          const allSamePoly = requiredAreas.every(id => areaMaterials[id] === 'poly');
+          if (allSamePoly) {
+              customPackagePrice = 700000; // 일반 5종 패키지 (폴리)
+          }
+      }
     }
     
     // --- 패키지 로직 적용 ---
     if (customPackagePrice > 0) {
         total = customPackagePrice;
         isPackageActive = true;
-        labelText = customPackageLabel;
+        labelText = '패키지 할인 적용 중'; // 문구 통일
         
-        // 커스텀 패키지에 포함된 항목은 개별 계산에서 제외
-        const customPackageAreas = ['bathroom_floor', 'master_bath_wall', 'common_bath_wall', 'entrance'];
+        // 커스텀 패키지에 포함된 항목은 잔여 계산에서 제외
+        const customPackageAreas = ['entrance', 'bathroom_floor', 'master_bath_wall', 'common_bath_wall'];
         customPackageAreas.forEach(id => { q[id] = 0; });
     } else if (matchedPackage) {
-        // ⭐️ 혼합 패키지 적용 ⭐️ (유지)
-        total = matchedPackage.price;
-        isPackageActive = true;
-        labelText = '패키지 할인 적용 중'; // 혼합패키지 일 경우 라벨 고정
-        
-        // 패키지 항목은 개별 계산에서 제외 (q를 0으로 설정)
-        ALL_AREAS.forEach(area => { q[area.id] = 0; });
-        
+      // ⭐️ 혼합 패키지 적용 ⭐️ (유지)
+      total = matchedPackage.price;
+      isPackageActive = true;
+      labelText = '패키지 할인 적용 중'; // 문구 통일
+      
+      // 패키지 항목은 잔여 계산에서 제외
+      ALL_AREAS.forEach(area => { q[area.id] = 0; });
+      
     } else {
       // 매칭되는 패키지가 없는 경우 개별 계산으로 진행
     }
     
     // ⭐️ 3. 현관 무료 서비스가 적용될 경우 잔여 수량 (q)에서 현관을 제외 ⭐️
-    if (isFreeEntrance && customPackagePrice === 0 && !matchedPackage) { // 커스텀/혼합 패키지에 포함되지 않은 경우에만 독립적인 현관 무료 로직 실행
-        // q는 최종 계산에 사용되는 잔여 수량
-        q['entrance'] = 0; 
-        isPackageActive = isPackageActive || true; // 서비스가 적용되면 패키지 활성화로 간주
+    if (isFreeEntrance && customPackagePrice === 0 && !matchedPackage) { 
+      // q는 최종 계산에 사용되는 잔여 수량
+      q['entrance'] = 0; 
+      isPackageActive = isPackageActive || true; // 서비스가 적용되면 패키지 활성화로 간주
+      labelText = '패키지 할인 적용 중'; // 문구 통일
     }
     
     // ⭐️ 4. 하단 바 문구 고정 ⭐️
     if (isPackageActive && !labelText) {
-        labelText = '패키지 할인 적용 중';
+      labelText = '패키지 할인 적용 중';
     }
 
 
     // --- 5. 잔여 항목 및 아이템 계산 (영역별 소재 반영) ---
     ALL_AREAS.forEach(area => {
-        // 자동 패키지 현관이 발동된 경우, quantities를 임시로 조정하여 itemizedPrices에 포함
-        const isEntranceAutoIncluded = area.id === 'entrance' && isAutoPackageEntrance && !quantities['entrance'];
-        const initialCount = isEntranceAutoIncluded ? 1 : (quantities[area.id] || 0);
-        
-        if (initialCount === 0) return;
+      // 자동 패키지 현관이 발동된 경우, quantities를 임시로 조정하여 itemizedPrices에 포함
+      const isEntranceAutoIncluded = area.id === 'entrance' && isAutoPackageEntrance && !quantities['entrance'];
+      const initialCount = isEntranceAutoIncluded ? 1 : (quantities[area.id] || 0);
+      
+      if (initialCount === 0) return;
 
-        // 패키지 적용으로 인해 차감된 수량 (matchedPackage 또는 FreeEntrance 시 0)
-        const count = q[area.id] || 0; 
-        const originalBasePrice = area.basePrice;
+      // 패키지 적용으로 인해 차감된 수량 (matchedPackage 또는 FreeEntrance 시 0)
+      // NOTE: q[area.id]는 패키지/서비스에 포함되지 않은 잔여 항목 수량임
+      const count = q[area.id] || 0; 
+      const originalBasePrice = area.basePrice;
 
-        const areaMatId = areaMaterials[area.id];
-        const selectedAreaMaterial = MATERIALS.find(m => m.id === areaMatId);
-        
-        let currentMod = selectedAreaMaterial ? selectedAreaMaterial.priceMod : 1.0;
-        
-        // 거실 바닥 에폭시 특수 계수 처리 (영역별 소재 반영) - 유지
-        if (area.id === 'living_room' && selectedAreaMaterial && selectedAreaMaterial.id === 'kerapoxy') currentMod = 2.0;
+      const areaMatId = areaMaterials[area.id];
+      const selectedAreaMaterial = MATERIALS.find(m => m.id === areaMatId);
+      
+      let currentMod = selectedAreaMaterial ? selectedAreaMaterial.priceMod : 1.0;
+      
+      // 거실 바닥 에폭시 특수 계수 처리 (영역별 소재 반영) - 유지
+      if (area.id === 'living_room' && selectedAreaMaterial && selectedAreaMaterial.id === 'kerapoxy') currentMod = 2.0;
 
-        // ⭐️ [반영] 베란다/세탁실 에폭시 특수 계수 처리: 300,000원 / 80,000원 = 3.75 ⭐️
-        if (area.id === 'balcony_laundry' && selectedAreaMaterial && selectedAreaMaterial.id === 'kerapoxy') {
-             currentMod = 3.75; 
-        } 
-        
-        // 항목의 원래 총 가격 (패키지 적용 전)
-        let itemOriginalTotal = originalBasePrice * initialCount * currentMod * selectedHousing.multiplier;
-        
-        let finalCalculatedPrice = 0;
-        let finalDiscount = 0;
-        let isFreeServiceItem = false;
-        let packageCount = initialCount - count; // 패키지/서비스로 처리된 수량
+      // ⭐️ [반영] 베란다/세탁실 에폭시 특수 계수 처리: 300,000원 / 80,000원 = 3.75 ⭐️
+      if (area.id === 'balcony_laundry' && selectedAreaMaterial && selectedAreaMaterial.id === 'kerapoxy') {
+          currentMod = 3.75; 
+      } 
+      
+      // 항목의 원래 총 가격 (패키지 적용 전)
+      let itemOriginalTotal = originalBasePrice * initialCount * currentMod * selectedHousing.multiplier;
+      
+      let finalCalculatedPrice = 0;
+      let finalDiscount = 0;
+      let isFreeServiceItem = false;
+      let packageCount = initialCount - count; // 패키지/서비스로 처리된 수량
 
-        // A. 패키지 적용 항목 (가격 0원)
-        if (matchedPackage || customPackagePrice > 0) {
-             finalCalculatedPrice = 0;
-             finalDiscount = Math.floor(itemOriginalTotal / 1000) * 1000;
-             packageCount = initialCount;
-        } 
-        // B. 현관 무료 서비스 적용 항목 (가격 0원)
-        else if (area.id === 'entrance' && isFreeEntrance) {
-             finalCalculatedPrice = 0;
-             finalDiscount = Math.floor(itemOriginalTotal / 1000) * 1000;
-             isFreeServiceItem = true;
-             packageCount = initialCount;
-        }
-        // C. 개별 선택 항목 (일반 계산 및 실리콘 패키지 할인 적용)
-        else {
-            let remainingCalculatedPrice = itemOriginalTotal;
-            let remainingDiscount = 0;
-            
-            // 실리콘/리폼 패키지 할인 
-            if (area.id === 'silicon_bathtub' && initialCount >= 1 && totalAreaCount >= 3) {
-                let fixedPrice = 50000 * initialCount; 
-                remainingDiscount = itemOriginalTotal - fixedPrice; 
-                remainingCalculatedPrice = fixedPrice; 
-            } else if (area.id === 'silicon_living_baseboard' && initialCount >= 1 && totalAreaCount >= 3) {
-                let fixedPrice = 350000 * initialCount; 
-                remainingDiscount = itemOriginalTotal - fixedPrice; 
-                remainingCalculatedPrice = fixedPrice; 
-            }
+      // A. 패키지 적용 항목 (가격 0원)
+      if (matchedPackage || customPackagePrice > 0) {
+            finalCalculatedPrice = 0;
+            finalDiscount = Math.floor(itemOriginalTotal / 1000) * 1000;
+            packageCount = initialCount;
+      } 
+      // B. 현관 무료 서비스 적용 항목 (가격 0원)
+      else if (area.id === 'entrance' && isFreeEntrance) {
+            finalCalculatedPrice = 0;
+            finalDiscount = Math.floor(itemOriginalTotal / 1000) * 1000;
+            isFreeServiceItem = true;
+            packageCount = initialCount;
+      }
+      // C. 개별 선택 항목 (일반 계산 및 실리콘 패키지 할인 적용)
+      else {
+          // 남은 수량(count)에 대해서만 계산하고, total에 합산
+          let remainingOriginalTotal = originalBasePrice * count * currentMod * selectedHousing.multiplier;
+          let remainingCalculatedPrice = remainingOriginalTotal;
+          let remainingDiscount = 0;
+          
+          // 실리콘/리폼 패키지 할인 (남은 수량에 대한 할인이 아니라, 원래 수량에 대한 할인 로직임)
+          // 이 부분은 패키지 가격이 0원이 되는 A/B 조건과 별개로, C에서는 개별 항목의 가격 자체를 할인함.
+          if (area.id === 'silicon_bathtub' && initialCount >= 1 && totalAreaCount >= 3) {
+              let fixedPrice = 50000 * initialCount; 
+              // 패키지에 포함되지 않은 경우에만 적용되도록 로직 수정
+              if (count > 0) {
+                 remainingDiscount = (originalBasePrice * initialCount) - fixedPrice;
+                 remainingCalculatedPrice = fixedPrice;
+              } else {
+                 remainingDiscount = 0;
+              }
+          } else if (area.id === 'silicon_living_baseboard' && initialCount >= 1 && totalAreaCount >= 3) {
+              let fixedPrice = 350000 * initialCount; 
+              if (count > 0) {
+                 remainingDiscount = (originalBasePrice * initialCount) - fixedPrice;
+                 remainingCalculatedPrice = fixedPrice;
+              } else {
+                 remainingDiscount = 0;
+              }
+          }
+          
+          // 최종 계산 가격은 남은 수량에 대한 계산 가격
+          finalCalculatedPrice = Math.floor(remainingCalculatedPrice / 1000) * 1000; 
+          finalDiscount = Math.floor(remainingDiscount / 1000) * 1000; 
+          total += finalCalculatedPrice;
+      }
 
-            finalCalculatedPrice = Math.floor(remainingCalculatedPrice / 1000) * 1000; 
-            finalDiscount = Math.floor(remainingDiscount / 1000) * 1000; 
-            total += finalCalculatedPrice;
-        }
-
-        // 개별 항목 가격 정보 추가
-        itemizedPrices.push({
-           id: area.id, 
-           label: area.label, 
-           quantity: initialCount, 
-           unit: area.unit, 
-           originalPrice: Math.floor(itemOriginalTotal / 1000) * 1000, 
-           calculatedPrice: finalCalculatedPrice, 
-           discount: finalDiscount, 
-           isFreeService: isFreeServiceItem, 
-           // 패키지 또는 서비스 적용 시 true
-           isPackageItem: packageCount > 0, 
-           isDiscount: false, 
-           materialLabel: selectedAreaMaterial ? selectedAreaMaterial.label.split('(')[0].trim() : 'N/A'
-         });
+      // 개별 항목 가격 정보 추가
+      itemizedPrices.push({
+          id: area.id, 
+          label: area.label, 
+          quantity: initialCount, 
+          unit: area.unit, 
+          originalPrice: Math.floor(itemOriginalTotal / 1000) * 1000, 
+          calculatedPrice: finalCalculatedPrice, 
+          discount: finalDiscount, 
+          isFreeService: isFreeServiceItem, 
+          // 패키지 또는 서비스 적용 시 true
+          isPackageItem: packageCount > 0 || (area.id === 'silicon_bathtub' && totalAreaCount >= 3) || (area.id === 'silicon_living_baseboard' && totalAreaCount >= 3), 
+          isDiscount: false, 
+          materialLabel: selectedAreaMaterial ? selectedAreaMaterial.label.split('(')[0].trim() : 'N/A'
+        });
     });
     
     // --- 리뷰 할인 적용 (유지) ---
@@ -653,7 +676,7 @@ export default function GroutEstimatorApp() {
   const generateQuoteText = () => `[줄눈의미학 예상 견적서]\n\n총 예상 금액: ${calculation.price.toLocaleString()}원`;
   
   const handleImageSave = async () => {
-     if (quoteRef.current) {
+      if (quoteRef.current) {
         try {
             // html2canvas 옵션 설정 (높은 해상도를 위해 scale 사용)
             const canvas = await html2canvas(quoteRef.current, {
@@ -676,7 +699,7 @@ export default function GroutEstimatorApp() {
             console.error('Error saving image:', error);
             alert('이미지 저장 중 오류가 발생했습니다.');
         }
-    }
+      }
   };
 
 
@@ -782,7 +805,7 @@ export default function GroutEstimatorApp() {
           </div>
         </section>
         
-        {/* --- 1. 현장 유형 섹션 (유지) --- */}
+        {/* --- 1. 현장 유형 섹션 (UI 버그 수정) --- */}
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-150">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
             <Home className="h-5 w-5 text-indigo-600" /> 1. 현장 유형을 선택하세요
@@ -968,10 +991,10 @@ export default function GroutEstimatorApp() {
             <h2 className="text-lg font-extrabold text-gray-800 mb-2 flex items-center gap-2 border-b pb-2">
                 <HelpCircle className="h-5 w-5 text-indigo-600"/> 자주 묻는 질문
             </h2 >
-          <div className="space-y-1">
-              {FAQ_ITEMS.map((item, index) => (
-                  <Accordion key={index} question={item.question} answer={item.answer} />
-              ))}
+            <div className="space-y-1">
+                {FAQ_ITEMS.map((item, index) => (
+                    <Accordion key={index} question={item.question} answer={item.answer} />
+                ))}
             </div>
         </section>
 
@@ -1119,7 +1142,8 @@ export default function GroutEstimatorApp() {
                                     </>
                                 ) : (
                                     <>
-                                        <li>변기테두리, 바닥테두리</li>
+                                        <li>욕실/현관 바닥 (줄눈/테두리 시공)</li>
+                                        <li>욕실 벽면 (샤워부스/욕조 벽면)</li>
                                         <li>욕실 젠다이/세면대 실리콘</li>
                                     </>
                                 )}
@@ -1132,7 +1156,7 @@ export default function GroutEstimatorApp() {
                         .filter(item => !item.isDiscount) 
                         .map(item => {
                         
-                        const isDiscounted = item.discount > 0;
+                        const isDiscounted = item.discount > 0 && !item.isPackageItem;
                         const finalPriceText = item.calculatedPrice.toLocaleString();
                         
                         return (
@@ -1149,13 +1173,13 @@ export default function GroutEstimatorApp() {
                                     </span>
                                     
                                     {/* 최종 적용 가격 */}
-                                    <span className={`text-right w-2/5 font-bold text-sm text-indigo-600`}> 
-                                        {item.calculatedPrice > 0 ? `${finalPriceText}원` : (item.isPackageItem || item.isFreeService ? '패키지 포함' : '0원')}
+                                    <span className={`text-right w-2/5 font-bold text-sm ${item.calculatedPrice > 0 ? 'text-indigo-600' : 'text-gray-500'}`}> 
+                                        {item.calculatedPrice > 0 ? `${finalPriceText}원` : (item.isFreeService ? '🎁 서비스 포함' : '👑 패키지 포함')}
                                     </span>
                                 </div>
                                 
                                 {/* 할인이 발생한 경우에만 할인액 표시 */}
-                                {isDiscounted && item.discount > 0 && (
+                                {(isDiscounted || item.isFreeService) && item.discount > 0 && (
                                     <div className="flex justify-between items-center text-xs text-gray-500 mt-0.5 pb-1 pl-3">
                                         <span className='font-normal'>
                                             {item.isFreeService ? '🎁 서비스 할인 적용' : '✨ 항목 할인 적용'}
