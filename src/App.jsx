@@ -7,6 +7,9 @@ import {
 
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
+// ⭐️ 최소 출장비 상수 정의 (전역으로 이동)
+const MIN_FEE = 200000;
+
 // =================================================================
 // [스타일] 애니메이션 정의 (유지)
 // =================================================================
@@ -229,11 +232,8 @@ export default function GroutEstimatorApp() {
 
   const SOOMGO_REVIEW_URL = 'https://www.soomgo.com/profile/users/10755579?tab=review';
   const PHONE_NUMBER = '010-7734-6709';
-  
-  // ⭐️ 최소 출장비 상수 정의
-  const MIN_FEE = 200000;
 
-  // --- calculation 로직 (수정됨) ---
+  // --- calculation 로직 (유지) ---
   const handleQuantityChange = useCallback((id, delta) => {
     setQuantities(prev => {
       const nextValue = Math.max(0, prev[id] + delta);
@@ -592,7 +592,7 @@ export default function GroutEstimatorApp() {
       itemizedPrices: itemizedPrices.filter(item => item.quantity > 0 || item.isDiscount),
     };
 
-  }, [MIN_FEE, housingType, material, quantities, selectedReviews]);
+  }, [housingType, material, quantities, selectedReviews]);
 
   // ★ useEffect를 사용하여 패키지 활성화 여부가 변경될 때만 토스트를 띄웁니다. (유지)
   const packageActiveRef = useRef(calculation.isPackageActive);
@@ -768,7 +768,7 @@ export default function GroutEstimatorApp() {
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-150">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
             <Home className="h-5 w-5 text-indigo-600" /> 1. 현장 유형을 선택하세요
-          </h2>
+          </h2 >
           <div className="grid grid-cols-2 gap-3">
             {HOUSING_TYPES.map((type) => (
               <button
