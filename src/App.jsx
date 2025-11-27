@@ -72,9 +72,9 @@ const BATHROOM_AREAS = [
 // 기타 범위 (현관, 베란다, 주방, 거실)
 const OTHER_AREAS = [
   { id: 'entrance', label: '현관', polyPrice: 50000, epoxyPrice: 50000, icon: DoorOpen, unit: '개소' },
-  { id: 'balcony_laundry', label: '베란다/세탁실', polyPrice: 150000, epoxyPrice: 270000, icon: LayoutGrid, unit: '개소', desc: '원하는 개수만큼 선택' }, // 15만 * 1.8
-  { id: 'kitchen_wall', label: '주방 벽면', polyPrice: 150000, epoxyPrice: 270000, icon: Utensils, unit: '구역' }, // 15만 * 1.8
-  { id: 'living_room', label: '거실 바닥', polyPrice: 550000, epoxyPrice: 1100000, icon: Sofa, unit: '구역', desc: '복도,주방 포함' }, // 55만 * 2.0
+  { id: 'balcony_laundry', label: '베란다/세탁실', polyPrice: 150000, epoxyPrice: 270000, icon: LayoutGrid, unit: '개소', desc: '원하는 개수만큼 선택' }, 
+  { id: 'kitchen_wall', label: '주방 벽면', polyPrice: 150000, epoxyPrice: 270000, icon: Utensils, unit: '구역' }, 
+  { id: 'living_room', label: '거실 바닥', polyPrice: 550000, epoxyPrice: 1100000, icon: Sofa, unit: '구역', desc: '복도,주방 포함' },
 ];
 
 // 실리콘 시공 영역
@@ -258,7 +258,7 @@ export default function GroutEstimatorApp() {
     });
   }, []);
   
-  // --- 견적 계산 로직 (★ 패키지 로직 수정 완료) ---
+  // --- 견적 계산 로직 (★ 패키지 로직 수정) ---
   const calculation = useMemo(() => {
     const selectedHousing = HOUSING_TYPES.find(h => h.id === housingType);
 
@@ -274,7 +274,6 @@ export default function GroutEstimatorApp() {
     const getAreaDetail = (areaId) => ALL_AREAS.find(a => a.id === areaId);
     const getBasePrice = (areaId, matId) => {
         const area = getAreaDetail(areaId);
-        // 실리콘 항목은 polyPrice/epoxyPrice가 동일한 고정가로 설정되어 있습니다.
         if (!area) return 0;
         return matId === 'poly' ? area.polyPrice : area.epoxyPrice;
     };
@@ -286,7 +285,6 @@ export default function GroutEstimatorApp() {
     const qMasterWall = q['master_bath_wall'] || 0;
     const qCommonWall = q['common_bath_wall'] || 0;
     const qEntrance = q['entrance'] || 0;
-    const qBathWallOne = (qMasterWall >= 1 || qCommonWall >= 1);
     const qBathWallTotal = qMasterWall + qCommonWall;
     
     // 선택된 소재 일치 여부 확인
@@ -329,9 +327,9 @@ export default function GroutEstimatorApp() {
         const individualPrice = getBasePrice('bathroom_floor', 'poly') + (qMasterWall > 0 ? getBasePrice('master_bath_wall', 'poly') : getBasePrice('common_bath_wall', 'poly')); 
         
         if (individualPrice < 500000) { 
-            // 개별 가격(45만)이 패키지 가격(50만)보다 저렴하므로, 패키지 할인은 적용되지 않음 (개별가 합산)
+            // 개별 가격(45만)이 패키지 가격(50만)보다 저렴하므로, 개별 가격 합산으로 처리 (할인 없음)
         } else {
-             // 개별 가격이 50만 이상일 때만 패키지 적용 (할인 발생)
+             // 개별 가격이 50만 이상일 때만 패키지 적용
              appliedPackagePrice = 500000;
              appliedPackageOriginalPrice = individualPrice;
              
@@ -371,6 +369,7 @@ export default function GroutEstimatorApp() {
         const basePrice = getBasePrice(area.id, itemMaterial); 
         
         let itemOriginalTotal = basePrice * initialCount * selectedHousing.multiplier;
+        
         let remainingOriginalPrice = basePrice * count * selectedHousing.multiplier;
         let remainingCalculatedPrice = remainingOriginalPrice;
         let remainingDiscount = 0;
