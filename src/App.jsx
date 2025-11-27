@@ -558,7 +558,9 @@ export default function GroutEstimatorApp() {
     });
     total -= discountAmount;
     
-    let finalPrice = Math.max(0, Math.floor(total / 1000) * 1000); // 1,000원 단위로 반올림
+    let originalCalculatedPrice = Math.max(0, Math.floor(total / 1000) * 1000); // Original total after rounding
+    
+    let finalPrice = originalCalculatedPrice; // Start with the original
     let minimumFeeApplied = false;
 
     // ⭐️ 최소 출장비 (20만원) 적용 로직 ⭐️
@@ -580,6 +582,7 @@ export default function GroutEstimatorApp() {
 
     return { 
       price: finalPrice, 
+      originalCalculatedPrice, // 원가 반환 추가
       label: labelText,
       isPackageActive,
       isFreeEntrance,
@@ -589,7 +592,7 @@ export default function GroutEstimatorApp() {
       itemizedPrices: itemizedPrices.filter(item => item.quantity > 0 || item.isDiscount),
     };
 
-  }, [housingType, material, quantities, selectedReviews]);
+  }, [MIN_FEE, housingType, material, quantities, selectedReviews]);
 
   // ★ useEffect를 사용하여 패키지 활성화 여부가 변경될 때만 토스트를 띄웁니다. (유지)
   const packageActiveRef = useRef(calculation.isPackageActive);
@@ -932,16 +935,33 @@ export default function GroutEstimatorApp() {
             <div className="fixed bottom-0 left-0 right-0 bg-indigo-900 shadow-2xl safe-area-bottom z-20 animate-slide-down">
                 <div className="max-w-md mx-auto p-4 flex flex-col gap-2"> 
                     
+                    {/* ⭐️ 최소 출장비 버튼/뱃지 추가 ⭐️ */}
+                    {calculation.minimumFeeApplied && (
+                        <div className="bg-red-500 text-white p-2 rounded-lg font-extrabold text-xs text-center shadow-lg flex items-center justify-center gap-1">
+                            <Clock size={16} /> 최소 출장비 {MIN_FEE.toLocaleString()}원 적용
+                        </div>
+                    )}
+
                     {/* 1. 금액 및 정보 영역 */}
                     <div className='flex items-center justify-between w-full text-white'> 
                         
                         {/* 좌측: 금액 정보 (총 예상 견적 문구 화이트 강조) */}
                         <div className='flex items-center gap-2'>
                             <span className='text-sm font-semibold text-white'>총 예상 견적</span>
-                            {/* 금액 (화이트 강조) */}
-                            <div className="flex items-end gap-1">
-                                <span className="text-3xl font-extrabold text-white">{calculation.price.toLocaleString()}</span>
-                                <span className="text-base font-normal text-white">원</span>
+                            <div className="flex flex-col items-end gap-0.5">
+                                
+                                {/* 1. 최소 출장비 적용 시, 원래 가격 스트라이크 아웃 */}
+                                {calculation.minimumFeeApplied && (
+                                    <span className="text-xs text-gray-400 line-through font-normal">
+                                        {calculation.originalCalculatedPrice.toLocaleString()}원
+                                    </span>
+                                )}
+                                
+                                {/* 2. 최종 적용 가격 */}
+                                <div className="flex items-end gap-1">
+                                    <span className="text-3xl font-extrabold text-white">{calculation.price.toLocaleString()}</span>
+                                    <span className="text-base font-normal text-white">원</span>
+                                </div>
                             </div>
                         </div>
                         
