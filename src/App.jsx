@@ -253,7 +253,7 @@ export default function GroutEstimatorApp() {
   const SOOMGO_REVIEW_URL = 'https://www.soomgo.com/profile/users/10755579?tab=review';
   const PHONE_NUMBER = '010-7734-6709';
 
-  // ⭐️ [수정] 수량 변경 핸들러 - 욕실 2곳 선택 시 현관 자동 선택 및 소재 설정 로직 추가
+  // ⭐️ [수정] 수량 변경 핸들러 - 영역 자동 제외 로직 추가
   const handleQuantityChange = useCallback((id, delta) => {
     setQuantities(prev => {
       const currentQty = prev[id] || 0;
@@ -261,16 +261,37 @@ export default function GroutEstimatorApp() {
       
       const newQuantities = { ...prev, [id]: newQty };
 
-      // 1. 욕실 바닥 (bathroom_floor) 수량이 2개 이상일 때 현관 (entrance) 처리
+      // === 1. 더 넓은 영역 선택 시 작은 영역 제외 로직 ===
+      if (newQty > 0) {
+        // 안방욕실 벽 전체 선택 시 -> 샤워부스 벽 3면 제외
+        if (id === 'master_bath_wall' && (newQuantities['shower_booth'] || 0) > 0) {
+          newQuantities['shower_booth'] = 0;
+        }
+        // 공용욕실 벽 전체 선택 시 -> 욕조 벽 3면 제외
+        if (id === 'common_bath_wall' && (newQuantities['bathtub_wall'] || 0) > 0) {
+          newQuantities['bathtub_wall'] = 0;
+        }
+        
+        // 샤워부스 벽 3면 선택 시 -> 안방/공용욕실 벽 전체 제외
+        if (id === 'shower_booth' && (newQuantities['master_bath_wall'] || 0) > 0) {
+          newQuantities['master_bath_wall'] = 0;
+        }
+        // 욕조 벽 3면 선택 시 -> 안방/공용욕실 벽 전체 제외
+        if (id === 'bathtub_wall' && (newQuantities['common_bath_wall'] || 0) > 0) {
+          newQuantities['common_bath_wall'] = 0;
+        }
+      }
+
+      // === 2. 욕실 바닥 2곳 선택 시 현관 (entrance) 자동 선택 로직 ===
       if (id === 'bathroom_floor') {
         const otherBathQty = newQuantities['bathroom_floor'] || 0;
         
-        // 2개 이상 선택 시 현관을 1개로 자동 설정 (패키지 서비스)
+        // 2개 이상 선택 시 현관을 1개로 자동 설정
         if (otherBathQty >= 2 && (newQuantities['entrance'] || 0) === 0) {
           newQuantities['entrance'] = 1;
-          // 현관을 폴리아스파틱으로 자동 설정 (패키지 기준)
           setAreaMaterials(prevMat => ({ ...prevMat, 'entrance': 'poly' }));
         } 
+        // NOTE: 1개로 감소 시 현관 자동 해제 로직은 복잡성 때문에 생략하고 수동 해제하도록 유지
       }
       
       return newQuantities;
@@ -314,20 +335,16 @@ export default function GroutEstimatorApp() {
     return summary;
   }, []);
   
-  // ⭐️ [수정] 혼합 패키지 매칭 로직 - 현관 자동 인식 기능 추가
+  // ⭐️ [유지] 혼합 패키지 매칭 로직 - 현관 자동 인식 기능 추가
   const findMatchingPackage = useCallback((selectionSummary, quantities) => {
-    // 깊은 복사 (deep clone) 대신, 매칭을 위한 임시 변수만 사용
     let polySelections = { ...(selectionSummary['poly'] || {}) };
     const epoxySelections = selectionSummary['kerapoxy'] || {};
     
-    // 선택된 항목이 없으면 매칭 불가능
     const totalSelectedCount = Object.values(polySelections).reduce((sum, v) => sum + v, 0) + 
                                Object.values(epoxySelections).reduce((sum, v) => sum + v, 0);
     if (totalSelectedCount === 0) return null;
 
-    // 1. 모든 MIXED_PACKAGES 순회하며 매칭 확인
     for (const pkg of MIXED_PACKAGES) {
-      // 매칭을 위한 임시 선택 변수 (현관 자동 포함 가능성 반영)
       let tempPolySelections = { ...polySelections };
       let tempEpoxySelections = { ...epoxySelections };
       let appliedAutoEntrance = false;
@@ -336,37 +353,24 @@ export default function GroutEstimatorApp() {
       const requiredEntrance = pkg.P_areas.find(([id]) => id === 'entrance');
       const isEntranceSelected = quantities['entrance'] > 0;
       
-      // 패키지가 현관 1개소를 요구하고, 사용자가 현관을 선택하지 않았을 경우
       if (requiredEntrance && requiredEntrance[1] === 1 && !isEntranceSelected) {
           
           let otherPolyMatch = true;
-          let polyMismatchCount = 0;
           for (const [id, requiredQty] of pkg.P_areas) {
-              if (id !== 'entrance') {
-                  if ((tempPolySelections[id] || 0) !== requiredQty) {
-                      otherPolyMatch = false;
-                      break;
-                  }
-                  if (tempPolySelections[id] > 0 && (tempPolySelections[id] || 0) !== requiredQty) {
-                      polyMismatchCount++;
-                  }
+              if (id !== 'entrance' && (tempPolySelections[id] || 0) !== requiredQty) { 
+                  otherPolyMatch = false;
+                  break;
               }
           }
           
           let epoxyMatch = true;
-          let epoxyMismatchCount = 0;
           for (const [id, requiredQty] of pkg.E_areas) {
               if ((tempEpoxySelections[id] || 0) !== requiredQty) { 
                   epoxyMatch = false;
                   break;
               }
-               if (tempEpoxySelections[id] > 0 && (tempEpoxySelections[id] || 0) !== requiredQty) {
-                  epoxyMismatchCount++;
-              }
           }
           
-          // 현관을 제외한 나머지 모든 조건이 일치하거나 (추가 선택은 없어야 함),
-          // 현관만 유일하게 누락된 경우에만 현관을 자동으로 추가합니다.
           const currentTotalSelectedCount = Object.keys(polySelections).filter(id => id !== 'entrance' && polySelections[id] > 0).length + Object.keys(epoxySelections).filter(id => epoxySelections[id] > 0).length;
           const packageTotalRequiredCount = pkg.P_areas.filter(([id]) => id !== 'entrance').length + pkg.E_areas.length;
 
@@ -405,7 +409,6 @@ export default function GroutEstimatorApp() {
                            [...selectedAreaIds].every(id => packageAreaIds.has(id));
 
       if (isIdSetMatch) {
-        // 현관 자동 포함 여부를 결과에 추가
         return { ...pkg, autoEntrance: appliedAutoEntrance }; 
       }
     }
@@ -475,7 +478,7 @@ export default function GroutEstimatorApp() {
     // --- 5. 잔여 항목 및 아이템 계산 (영역별 소재 반영) ---
     ALL_AREAS.forEach(area => {
         // 자동 패키지 현관이 발동된 경우, quantities를 임시로 조정하여 itemizedPrices에 포함
-        const isEntranceAutoIncluded = area.id === 'entrance' && isAutoPackageEntrance;
+        const isEntranceAutoIncluded = area.id === 'entrance' && isAutoPackageEntrance && !quantities['entrance'];
         const initialCount = isEntranceAutoIncluded ? 1 : (quantities[area.id] || 0);
         
         if (initialCount === 0) return;
@@ -1074,7 +1077,7 @@ export default function GroutEstimatorApp() {
                             </p>
                             <ul className='list-disc list-inside text-[11px] ml-1 space-y-0.5 text-left'>
                                 {calculation.isFreeEntrance && <li>현관 바닥 서비스 (폴리아스파틱)</li>}
-                                {calculation.label.includes('혼합패키지') ? (
+                                {matchedPackage ? (
                                     <>
                                         <li>에폭시 시공 영역: {calculation.itemizedPrices.filter(i => i.materialLabel === '에폭시' && !i.isDiscount && i.isPackageItem).map(i => i.label).join(', ')}</li>
                                         <li>폴리아스파틱 시공 영역: {calculation.itemizedPrices.filter(i => i.materialLabel === '폴리아스파틱' && !i.isDiscount && i.isPackageItem).map(i => i.label).join(', ')}</li>
