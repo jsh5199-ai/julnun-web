@@ -69,18 +69,24 @@ const MATERIALS = [
   },
 ];
 
-const SERVICE_AREAS = [
+// ⭐️ [수정] 카테고리별로 데이터 분리 ⭐️
+const BATHROOM_AREAS = [
   { id: 'entrance', label: '현관', basePrice: 50000, icon: DoorOpen, unit: '개소' },
   { id: 'bathroom_floor', label: '욕실 바닥', basePrice: 150000, icon: Bath, unit: '개소' },
   { id: 'shower_booth', label: '샤워부스 벽 3면', basePrice: 150000, icon: Bath, unit: '구역' },
   { id: 'bathtub_wall', label: '욕조 벽 3면', basePrice: 150000, icon: Bath, unit: '구역' },
   { id: 'master_bath_wall', label: '안방욕실 벽 전체', basePrice: 300000, icon: Bath, unit: '구역' },
   { id: 'common_bath_wall', label: '공용욕실 벽 전체', basePrice: 300000, icon: Bath, unit: '구역' },
-  // ⭐️ [수정 반영] 베란다/세탁실 basePrice를 80000원으로 조정 (Poly 가격) ⭐️
+];
+
+const OTHER_AREAS = [
   { id: 'balcony_laundry', label: '베란다/세탁실', basePrice: 80000, icon: LayoutGrid, unit: '개소', desc: '원하는 개수만큼 선택' }, 
   { id: 'kitchen_wall', label: '주방 벽면', basePrice: 150000, icon: Utensils, unit: '구역' },
   { id: 'living_room', label: '거실 바닥', basePrice: 550000, icon: Sofa, unit: '구역', desc: '복도,주방 포함' },
 ];
+
+const SERVICE_AREAS = [...BATHROOM_AREAS, ...OTHER_AREAS];
+// ⭐️ [수정 끝] ⭐️
 
 const SILICON_AREAS = [
   { id: 'silicon_bathtub', label: '욕조 테두리 교체', basePrice: 80000, icon: Eraser, unit: '개소', desc: '단독 8만 / 패키지시 5만' },
@@ -732,6 +738,64 @@ export default function GroutEstimatorApp() {
       </div>
     </div>
   );
+  
+  // ⭐️ [신규] 시공 범위 리스트 렌더링 함수 ⭐️
+  const renderAreaList = (areas) => (
+    <div className="space-y-3">
+        {areas.map((area) => {
+            const Icon = area.icon;
+            const isSelected = quantities[area.id] > 0;
+            const currentMat = areaMaterials[area.id];
+
+            return (
+                <div key={area.id} className={`flex flex-col p-3 rounded-lg border transition duration-150 ${isSelected ? 'bg-indigo-50 border-indigo-400' : 'bg-gray-50 border-gray-200 hover:bg-gray-100'}`}>
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className={`p-2 rounded-full shadow-sm ${isSelected ? 'bg-indigo-700 text-white' : 'bg-gray-200 text-indigo-600'}`}><Icon size={18} /></div> 
+                            <div>
+                                <div className="font-semibold text-gray-800">{area.label}</div>
+                                <div className="text-xs text-gray-500">
+                                    기본 {area.basePrice.toLocaleString()}원~
+                                    {area.desc && <span className="block text-indigo-600">{area.desc}</span>}
+                                    {/* ⭐️ 현관 바닥 추천 문구 추가 ⭐️ */}
+                                    {area.id === 'entrance' && (
+                                        <span className="block text-amber-500 font-bold mt-0.5">현관은 폴리아스파틱을 적극 추천합니다.</span>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-1 bg-white px-1 py-1 rounded-full shadow-md border border-gray-200">
+                            <button 
+                                onClick={() => handleQuantityChange(area.id, -1)} 
+                                className={`w-7 h-7 flex items-center justify-center rounded-full transition active:scale-90 text-lg font-bold ${quantities[area.id] > 0 ? 'text-indigo-600 hover:bg-gray-100' : 'text-gray-400 cursor-not-allowed'}`}
+                            >-</button> 
+                            <span className={`w-5 text-center text-sm font-bold ${quantities[area.id] > 0 ? 'text-gray-900' : 'text-gray-400'}`}>{quantities[area.id]}</span>
+                            <button 
+                                onClick={() => {
+                                    handleQuantityChange(area.id, 1);
+                                    if (quantities[area.id] === 0) {
+                                        handleAreaMaterialChange(area.id, material);
+                                    }
+                                }} 
+                                className="w-7 h-7 flex items-center justify-center text-indigo-600 hover:bg-gray-100 rounded-full font-bold text-lg transition active:scale-90"
+                            >+</button> 
+                        </div>
+                    </div>
+
+                    {/* ⭐️ 영역별 소재 선택 버튼 ⭐️ */}
+                    {isSelected && (
+                        <MaterialSelectButtons 
+                            areaId={area.id}
+                            currentMat={currentMat}
+                            onChange={handleAreaMaterialChange}
+                            isQuantitySelected={isSelected}
+                        />
+                    )}
+                </div>
+            );
+        })}
+    </div>
+  );
 
 
   return (
@@ -799,7 +863,7 @@ export default function GroutEstimatorApp() {
           </div>
         </section>
         
-        {/* --- 1. 현장 유형 섹션 (UI 버그 수정 반영) --- */}
+        {/* --- 1. 현장 유형 섹션 (유지) --- */}
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-150">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
             <Home className="h-5 w-5 text-indigo-600" /> 1. 현장 유형을 선택하세요
@@ -878,69 +942,29 @@ export default function GroutEstimatorApp() {
           </div>
         </section>
 
-        {/* ⭐️ --- 3. 원하는 시공범위를 선택해주세요 (소재 선택 버튼 추가) --- ⭐️ */}
+        {/* ⭐️ --- 3. 원하는 시공범위를 선택해주세요 (카테고리 분리 적용) --- ⭐️ */}
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-450">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
             <Calculator className="h-5 w-5 text-indigo-600" /> 3. 시공범위 선택
           </h2 >
-          <div className="space-y-3">
-            {SERVICE_AREAS.map((area) => {
-              const Icon = area.icon;
-              const isSelected = quantities[area.id] > 0;
-              const currentMat = areaMaterials[area.id];
+          
+          {/* A. 욕실 범위 */}
+          <h3 className="text-base font-extrabold flex items-center gap-2 mb-3 mt-4 text-gray-700">
+            <Bath size={16} className="text-indigo-500" /> A. 욕실 및 현관 범위
+          </h3>
+          {renderAreaList(BATHROOM_AREAS)}
 
-              return (
-                <div key={area.id} className={`flex flex-col p-3 rounded-lg border transition duration-150 ${isSelected ? 'bg-indigo-50 border-indigo-400' : 'bg-gray-50 border-gray-200 hover:bg-gray-100'}`}>
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded-full shadow-sm ${isSelected ? 'bg-indigo-700 text-white' : 'bg-gray-200 text-indigo-600'}`}><Icon size={18} /></div> 
-                            <div>
-                                <div className="font-semibold text-gray-800">{area.label}</div>
-                                <div className="text-xs text-gray-500">
-                                    기본 {area.basePrice.toLocaleString()}원~
-                                    {area.desc && <span className="block text-indigo-600">{area.desc}</span>}
-                                    {/* ⭐️ 현관 바닥 추천 문구 추가 ⭐️ */}
-                                    {area.id === 'entrance' && (
-                                        <span className="block text-amber-500 font-bold mt-0.5">현관은 폴리아스파틱을 적극 추천합니다.</span>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-1 bg-white px-1 py-1 rounded-full shadow-md border border-gray-200">
-                            <button 
-                                onClick={() => handleQuantityChange(area.id, -1)} 
-                                className={`w-7 h-7 flex items-center justify-center rounded-full transition active:scale-90 text-lg font-bold ${quantities[area.id] > 0 ? 'text-indigo-600 hover:bg-gray-100' : 'text-gray-400 cursor-not-allowed'}`}
-                            >-</button> 
-                            <span className={`w-5 text-center text-sm font-bold ${quantities[area.id] > 0 ? 'text-gray-900' : 'text-gray-400'}`}>{quantities[area.id]}</span>
-                            <button 
-                                onClick={() => {
-                                    handleQuantityChange(area.id, 1);
-                                    // 수량이 0에서 1이 될 때, 전역 소재를 초기값으로 설정 (선택이 없었을 경우)
-                                    if (quantities[area.id] === 0) {
-                                        handleAreaMaterialChange(area.id, material);
-                                    }
-                                }} 
-                                className="w-7 h-7 flex items-center justify-center text-indigo-600 hover:bg-gray-100 rounded-full font-bold text-lg transition active:scale-90"
-                            >+</button> 
-                        </div>
-                    </div>
+          <div className="border-t border-gray-100 mt-4 pt-4"></div>
+          
+          {/* B. 기타 범위 (주방/베란다) */}
+          <h3 className="text-base font-extrabold flex items-center gap-2 mb-3 mt-4 text-gray-700">
+            <LayoutGrid size={16} className="text-indigo-500" /> B. 기타 범위 (주방/베란다/거실)
+          </h3>
+          {renderAreaList(OTHER_AREAS)}
 
-                    {/* ⭐️ 영역별 소재 선택 버튼 ⭐️ */}
-                    {isSelected && (
-                        <MaterialSelectButtons 
-                            areaId={area.id}
-                            currentMat={currentMat}
-                            onChange={handleAreaMaterialChange}
-                            isQuantitySelected={isSelected}
-                        />
-                    )}
-                </div>
-              );
-            })}
-          </div>
         </section>
 
-        {/* --- 4. 실리콘 교체할 곳 선택 (소재 선택 버튼 삭제) --- */}
+        {/* --- 4. 실리콘 교체할 곳 선택 (유지) --- */}
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-600">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
             <Eraser className="h-5 w-5 text-indigo-600" /> 4. 추가 시공 (실리콘/리폼)
