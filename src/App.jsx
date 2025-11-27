@@ -128,6 +128,10 @@ const MIXED_PACKAGES = [
 ];
 // -----------------------------------------------------------------
 
+// =================================================================
+// [컴포넌트] (누락된 컴포넌트 추가 및 유지)
+// =================================================================
+
 const PackageToast = ({ isVisible, onClose, label }) => {
     const toastLabel = label || '패키지 할인'; // 안전한 기본값 설정
     
@@ -161,8 +165,6 @@ const PackageToast = ({ isVisible, onClose, label }) => {
         </div>
     );
 };
-// ... (Accordion and MaterialDetailModal components are omitted for brevity, assumed to be here)
-// ...
 
 const MaterialDetailModal = ({ onClose }) => (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-fade-in">
@@ -206,6 +208,27 @@ const MaterialDetailModal = ({ onClose }) => (
     </div>
 );
 
+const Accordion = ({ question, answer }) => {
+    const [isOpen, setIsOpen] = useState(false);
+
+    return (
+        <div className="border-b border-gray-100">
+            <button
+                className="flex justify-between items-center w-full py-3 text-left font-semibold text-gray-800 hover:text-indigo-600 transition duration-150"
+                onClick={() => setIsOpen(!isOpen)}
+            >
+                <span>{question}</span>
+                <ChevronDown size={18} className={`text-indigo-600 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+            </button>
+            {isOpen && (
+                <div className="pb-3 text-sm text-gray-600 animate-slide-down">
+                    {answer}
+                </div>
+            )}
+        </div>
+    );
+};
+
 
 export default function GroutEstimatorApp() {
   const [housingType, setHousingType] = useState('new');
@@ -230,9 +253,30 @@ export default function GroutEstimatorApp() {
   const SOOMGO_REVIEW_URL = 'https://www.soomgo.com/profile/users/10755579?tab=review';
   const PHONE_NUMBER = '010-7734-6709';
 
+  // ⭐️ [누락된 함수 추가] 수량 변경 핸들러 ⭐️
+  const handleQuantityChange = useCallback((id, delta) => {
+    setQuantities(prev => {
+      const newQty = Math.max(0, (prev[id] || 0) + delta);
+      return { ...prev, [id]: newQty };
+    });
+  }, []);
+  
   // ⭐️ [신규 핸들러] 영역별 소재 변경 핸들러
   const handleAreaMaterialChange = useCallback((id, mat) => {
     setAreaMaterials(prev => ({ ...prev, [id]: mat }));
+  }, []);
+  
+  // ⭐️ 리뷰 토글 핸들러 추가
+  const toggleReview = useCallback((id) => {
+      setSelectedReviews(prev => {
+          const newSet = new Set(prev);
+          if (newSet.has(id)) {
+              newSet.delete(id);
+          } else {
+              newSet.add(id);
+          }
+          return newSet;
+      });
   }, []);
 
   // ⭐️ [신규 함수] 사용자의 선택을 표준화된 맵으로 변환 (패키지 매칭용)
@@ -258,7 +302,7 @@ export default function GroutEstimatorApp() {
     
     // 선택된 항목이 없으면 매칭 불가능
     const totalSelectedCount = Object.values(polySelections).reduce((sum, v) => sum + v, 0) + 
-                                  Object.values(epoxySelections).reduce((sum, v) => sum + v, 0);
+                               Object.values(epoxySelections).reduce((sum, v) => sum + v, 0);
     if (totalSelectedCount === 0) return null;
 
     // 1. 모든 MIXED_PACKAGES 순회하며 매칭 확인
@@ -300,6 +344,7 @@ export default function GroutEstimatorApp() {
   
   const calculation = useMemo(() => {
     const selectedHousing = HOUSING_TYPES.find(h => h.id === housingType);
+    let itemizedPrices = []; // 견적 항목 초기화
     
     // ⭐️ 혼합 패키지 매칭 시도 ⭐️
     const selectionSummary = getSelectionSummary(quantities, areaMaterials);
@@ -323,47 +368,48 @@ export default function GroutEstimatorApp() {
         ALL_AREAS.forEach(area => { q[area.id] = 0; });
         
     } else {
-        // --- 2. 기존 단일 소재 패키지 로직 (후순위) ---
+      // --- 2. 기존 단일 소재 패키지 로직 (후순위) ---
 
-        const selectedMaterial = MATERIALS.find(m => m.id === material); // 전역 소재 사용
-        const qBathFloor = q['bathroom_floor'] || 0;
-        const qShower = q['shower_booth'] || 0;
-        const qBathtub = q['bathtub_wall'] || 0;
-        const qMasterWall = q['master_bath_wall'] || 0;
-        const qCommonWall = q['common_bath_wall'] || 0;
-        const qEntrance = q['entrance'] || 0;
-        const qBathWallOne = (qMasterWall >= 1 || qCommonWall >= 1);
-        const qBathWallTotal = qMasterWall + qCommonWall;
-        let packageDiscount = 0;
+      const selectedMaterial = MATERIALS.find(m => m.id === material); // 전역 소재 사용
+      const qBathFloor = q['bathroom_floor'] || 0;
+      const qShower = q['shower_booth'] || 0;
+      const qBathtub = q['bathtub_wall'] || 0;
+      const qMasterWall = q['master_bath_wall'] || 0;
+      const qCommonWall = q['common_bath_wall'] || 0;
+      const qEntrance = q['entrance'] || 0;
+      const qBathWallOne = (qMasterWall >= 1 || qCommonWall >= 1);
+      const qBathWallTotal = qMasterWall + qCommonWall;
+      let packageDiscount = 0;
 
-        // ... (기존 패키지 로직 삽입 - q 수량 차감 및 total 계산)
-        if (selectedMaterial.id === 'poly' && qBathFloor >= 2 && qEntrance >= 1 && qBathWallTotal === 0 && qShower === 0 && qBathtub === 0) {
-            total += 300000; q['bathroom_floor'] -= 2; isPackageActive = true; isFreeEntrance = true; labelText = '패키지 할인 적용'; packageDiscount = (150000 * 2) + 50000 - 300000;
-        } else if (selectedMaterial.id === 'kerapoxy' && qBathFloor >= 1 && qBathWallOne && qBathFloor === 1 && qBathWallTotal === 1) {
-            let isMaster = qMasterWall >= 1; total += 750000; q['bathroom_floor'] -= 1; if (isMaster) q['master_bath_wall'] -= 1; else q['common_bath_wall'] -= 1; isPackageActive = true; labelText = '패키지 할인 적용'; packageDiscount = (150000 * selectedMaterial.priceMod) + (300000 * selectedMaterial.priceMod) - 750000;
-        } else if (selectedMaterial.id === 'poly' && qBathFloor >= 1 && qBathWallOne && qBathFloor === 1 && qBathWallTotal === 1) {
-            let isMaster = qMasterWall >= 1; total += 500000; q['bathroom_floor'] -= 1; if (isMaster) q['master_bath_wall'] -= 1; else q['common_bath_wall'] -= 1; isPackageActive = true; labelText = '패키지 할인 적용'; packageDiscount = (150000 * selectedMaterial.priceMod) + (300000 * selectedMaterial.priceMod) - 500000; if(packageDiscount < 0) packageDiscount = 0; 
-        } else if (selectedMaterial.id === 'kerapoxy') {
-            let originalPackagePrice = 0; let finalPackagePrice = 0;
-            if (qBathFloor >= 2 && qBathWallTotal >= 2) { finalPackagePrice = 1300000; originalPackagePrice = (150000 * 2 * selectedMaterial.priceMod) + (300000 * 2 * selectedMaterial.priceMod); total += finalPackagePrice; q['bathroom_floor'] -= 2; q['master_bath_wall'] = Math.max(0, q['master_bath_wall'] - 1); q['common_bath_wall'] = Math.max(0, q['common_bath_wall'] - 1); isPackageActive = true; isFreeEntrance = true; labelText = '패키지 할인 적용'; 
-            } else if (qBathFloor >= 2 && qShower >= 1 && qBathtub >= 1) { finalPackagePrice = 950000; originalPackagePrice = (150000 * 2 * selectedMaterial.priceMod) + (150000 * 2 * selectedMaterial.priceMod); total += finalPackagePrice; q['bathroom_floor'] -= 2; q['shower_booth'] -= 1; q['bathtub_wall'] -= 1; isPackageActive = true; isFreeEntrance = true; labelText = '패키지 할인 적용'; 
-            } else if (qBathFloor >= 2 && (qShower >= 1 || qBathtub >= 1)) { finalPackagePrice = 750000; originalPackagePrice = (150000 * 2 * selectedMaterial.priceMod) + (150000 * selectedMaterial.priceMod); total += finalPackagePrice; q['bathroom_floor'] -= 2; if (qShower >= 1) q['shower_booth'] -= 1; else q['bathtub_wall'] -= 1; isPackageActive = true; isFreeEntrance = true; labelText = '패키지 할인 적용'; 
-            } else if (qBathFloor >= 2 && qEntrance >= 1) { isPackageActive = true; isFreeEntrance = true; labelText = '패키지 할인 적용'; 
-            } else if (qBathFloor === 1) { finalPackagePrice = 350000; originalPackagePrice = 150000 * selectedMaterial.priceMod; total += finalPackagePrice; q['bathroom_floor'] -= 1; labelText = '패키지 할인 적용'; 
-            } if (originalPackagePrice > 0) packageDiscount = originalPackagePrice - finalPackagePrice; if(packageDiscount < 0) packageDiscount = 0; 
-        } else { 
-            let originalPackagePrice = 0; let finalPackagePrice = 0;
-            if (qBathFloor >= 2 && qBathWallTotal >= 2) { finalPackagePrice = 700000; originalPackagePrice = (150000 * 2) + (300000 * 2); total += finalPackagePrice; q['bathroom_floor'] -= 2; q['master_bath_wall'] = Math.max(0, q['master_bath_wall'] - 1); q['common_bath_wall'] = Math.max(0, q['common_bath_wall'] - 1); isPackageActive = true; labelText = '패키지 할인 적용'; 
-            } else if (qBathFloor >= 2 && (qShower >= 1 || qBathtub >= 1)) { finalPackagePrice = 380000; originalPackagePrice = (150000 * 2) + 150000; total += finalPackagePrice; q['bathroom_floor'] -= 2; if (qShower >= 1) q['shower_booth'] -= 1; else q['bathtub_wall'] -= 1; isPackageActive = true; labelText = '패키지 할인 적용'; 
-            } else if (qBathFloor >= 2 && qEntrance >= 1) { isPackageActive = true; isFreeEntrance = true; labelText = '패키지 할인 적용'; 
-            } else if (qBathFloor === 1) { finalPackagePrice = 200000; originalPackagePrice = 150000; total += finalPackagePrice; q['bathroom_floor'] -= 1; labelText = '패키지 할인 적용'; 
-            } if (originalPackagePrice > 0) packageDiscount = originalPackagePrice - finalPackagePrice; if(packageDiscount < 0) packageDiscount = 0; 
-        }
-        
-        if(packageDiscount > 0) {
-            itemizedPrices.push({ id: 'package_discount', label: labelText, quantity: 1, unit: '건', originalPrice: packageDiscount, calculatedPrice: 0, discount: packageDiscount, isPackageItem: true, isDiscount: true, });
-        }
-        // --- 2. 기존 단일 소재 패키지 로직 끝 ---
+      // ... (기존 패키지 로직 삽입 - q 수량 차감 및 total 계산)
+      // NOTE: 여기는 제공하신 로직 그대로 유지하며, 변수 선언/초기화 시 발생하는 오류만 방지했습니다.
+      if (selectedMaterial.id === 'poly' && qBathFloor >= 2 && qEntrance >= 1 && qBathWallTotal === 0 && qShower === 0 && qBathtub === 0) {
+          total += 300000; q['bathroom_floor'] -= 2; isPackageActive = true; isFreeEntrance = true; labelText = '패키지 할인 적용'; packageDiscount = (150000 * 2) + 50000 - 300000;
+      } else if (selectedMaterial.id === 'kerapoxy' && qBathFloor >= 1 && qBathWallOne && qBathFloor === 1 && qBathWallTotal === 1) {
+          let isMaster = qMasterWall >= 1; total += 750000; q['bathroom_floor'] -= 1; if (isMaster) q['master_bath_wall'] -= 1; else q['common_bath_wall'] -= 1; isPackageActive = true; labelText = '패키지 할인 적용'; packageDiscount = (150000 * selectedMaterial.priceMod) + (300000 * selectedMaterial.priceMod) - 750000;
+      } else if (selectedMaterial.id === 'poly' && qBathFloor >= 1 && qBathWallOne && qBathFloor === 1 && qBathWallTotal === 1) {
+          let isMaster = qMasterWall >= 1; total += 500000; q['bathroom_floor'] -= 1; if (isMaster) q['master_bath_wall'] -= 1; else q['common_bath_wall'] -= 1; isPackageActive = true; labelText = '패키지 할인 적용'; packageDiscount = (150000 * selectedMaterial.priceMod) + (300000 * selectedMaterial.priceMod) - 500000; if(packageDiscount < 0) packageDiscount = 0; 
+      } else if (selectedMaterial.id === 'kerapoxy') {
+          let originalPackagePrice = 0; let finalPackagePrice = 0;
+          if (qBathFloor >= 2 && qBathWallTotal >= 2) { finalPackagePrice = 1300000; originalPackagePrice = (150000 * 2 * selectedMaterial.priceMod) + (300000 * 2 * selectedMaterial.priceMod); total += finalPackagePrice; q['bathroom_floor'] -= 2; q['master_bath_wall'] = Math.max(0, q['master_bath_wall'] - 1); q['common_bath_wall'] = Math.max(0, q['common_bath_wall'] - 1); isPackageActive = true; isFreeEntrance = true; labelText = '패키지 할인 적용'; 
+          } else if (qBathFloor >= 2 && qShower >= 1 && qBathtub >= 1) { finalPackagePrice = 950000; originalPackagePrice = (150000 * 2 * selectedMaterial.priceMod) + (150000 * 2 * selectedMaterial.priceMod); total += finalPackagePrice; q['bathroom_floor'] -= 2; q['shower_booth'] -= 1; q['bathtub_wall'] -= 1; isPackageActive = true; isFreeEntrance = true; labelText = '패키지 할인 적용'; 
+          } else if (qBathFloor >= 2 && (qShower >= 1 || qBathtub >= 1)) { finalPackagePrice = 750000; originalPackagePrice = (150000 * 2 * selectedMaterial.priceMod) + (150000 * selectedMaterial.priceMod); total += finalPackagePrice; q['bathroom_floor'] -= 2; if (qShower >= 1) q['shower_booth'] -= 1; else q['bathtub_wall'] -= 1; isPackageActive = true; isFreeEntrance = true; labelText = '패키지 할인 적용'; 
+          } else if (qBathFloor >= 2 && qEntrance >= 1) { isPackageActive = true; isFreeEntrance = true; labelText = '패키지 할인 적용'; 
+          } else if (qBathFloor === 1) { finalPackagePrice = 350000; originalPackagePrice = 150000 * selectedMaterial.priceMod; total += finalPackagePrice; q['bathroom_floor'] -= 1; labelText = '패키지 할인 적용'; 
+          } if (originalPackagePrice > 0) packageDiscount = originalPackagePrice - finalPackagePrice; if(packageDiscount < 0) packageDiscount = 0; 
+      } else { 
+          let originalPackagePrice = 0; let finalPackagePrice = 0;
+          if (qBathFloor >= 2 && qBathWallTotal >= 2) { finalPackagePrice = 700000; originalPackagePrice = (150000 * 2) + (300000 * 2); total += finalPackagePrice; q['bathroom_floor'] -= 2; q['master_bath_wall'] = Math.max(0, q['master_bath_wall'] - 1); q['common_bath_wall'] = Math.max(0, q['common_bath_wall'] - 1); isPackageActive = true; labelText = '패키지 할인 적용'; 
+          } else if (qBathFloor >= 2 && (qShower >= 1 || qBathtub >= 1)) { finalPackagePrice = 380000; originalPackagePrice = (150000 * 2) + 150000; total += finalPackagePrice; q['bathroom_floor'] -= 2; if (qShower >= 1) q['shower_booth'] -= 1; else q['bathtub_wall'] -= 1; isPackageActive = true; labelText = '패키지 할인 적용'; 
+          } else if (qBathFloor >= 2 && qEntrance >= 1) { isPackageActive = true; isFreeEntrance = true; labelText = '패키지 할인 적용'; 
+          } else if (qBathFloor === 1) { finalPackagePrice = 200000; originalPackagePrice = 150000; total += finalPackagePrice; q['bathroom_floor'] -= 1; labelText = '패키지 할인 적용'; 
+          } if (originalPackagePrice > 0) packageDiscount = originalPackagePrice - finalPackagePrice; if(packageDiscount < 0) packageDiscount = 0; 
+      }
+      
+      if(packageDiscount > 0) {
+          itemizedPrices.push({ id: 'package_discount', label: labelText, quantity: 1, unit: '건', originalPrice: packageDiscount, calculatedPrice: 0, discount: packageDiscount, isPackageItem: true, isDiscount: true, });
+      }
+      // --- 2. 기존 단일 소재 패키지 로직 끝 ---
     }
 
 
@@ -388,10 +434,10 @@ export default function GroutEstimatorApp() {
         // 혼합 패키지가 적용된 경우 (matchedPackage)에는 모든 항목을 0원 (패키지 포함)으로 추가
         if (matchedPackage) {
              itemizedPrices.push({
-                id: area.id, label: area.label, quantity: initialCount, unit: area.unit, originalPrice: Math.floor(itemOriginalTotal / 1000) * 1000, calculatedPrice: 0, discount: itemOriginalTotal, isFreeService: false, isPackageItem: true, isDiscount: false, materialLabel: selectedAreaMaterial ? selectedAreaMaterial.label.split('(')[0].trim() : 'N/A'
+               id: area.id, label: area.label, quantity: initialCount, unit: area.unit, originalPrice: Math.floor(itemOriginalTotal / 1000) * 1000, calculatedPrice: 0, discount: itemOriginalTotal, isFreeService: false, isPackageItem: true, isDiscount: false, materialLabel: selectedAreaMaterial ? selectedAreaMaterial.label.split('(')[0].trim() : 'N/A'
              });
         } else {
-             // 단일 패키지 및 개별 선택 로직 적용
+            // 단일 패키지 및 개별 선택 로직 적용
             let remainingCalculatedPrice = originalBasePrice * count * currentMod * selectedHousing.multiplier;
             let remainingDiscount = 0;
             let finalCalculatedPrice = 0;
@@ -401,20 +447,29 @@ export default function GroutEstimatorApp() {
             
             // 기존 개별 계산 로직 (유지)
             if (area.id === 'entrance' && initialCount >= 1 && isFreeEntrance) {
-                  finalCalculatedPrice = 0; finalDiscount = originalBasePrice * initialCount * currentMod * selectedHousing.multiplier; isFreeServiceItem = true; total += finalCalculatedPrice;
+                 finalCalculatedPrice = 0; finalDiscount = originalBasePrice * initialCount * currentMod * selectedHousing.multiplier; isFreeServiceItem = true; total += finalCalculatedPrice;
             } else if (packageCount > 0 && ['bathroom_floor', 'master_bath_wall', 'common_bath_wall', 'shower_booth', 'bathtub_wall'].includes(area.id)) {
                  if (count === 0) { finalCalculatedPrice = 0; finalDiscount = itemOriginalTotal - 0; } else { if (area.id === 'living_room' && isPackageActive) { let fixedDiscount = (areaMatId === 'poly' ? 50000 : 150000) * count; remainingCalculatedPrice = Math.max(0, remainingCalculatedPrice - fixedDiscount); remainingDiscount = fixedDiscount; } finalCalculatedPrice = Math.floor(remainingCalculatedPrice / 1000) * 1000; finalDiscount = Math.floor(remainingDiscount / 1000) * 1000; total += finalCalculatedPrice; }
             } else {
-                if (area.id === 'living_room' && isPackageActive) { let fixedDiscount = (areaMatId === 'poly' ? 50000 : 150000) * initialCount; remainingCalculatedPrice = Math.max(0, itemOriginalTotal - fixedDiscount); remainingDiscount = fixedDiscount; } 
-                else if (area.id === 'balcony_laundry' && isPackageActive) { if (areaMatId === 'poly') { let fixedPrice = 100000 * initialCount; remainingDiscount = itemOriginalTotal - fixedPrice; remainingCalculatedPrice = fixedPrice; } }
-                else if (area.id === 'silicon_bathtub' && isPackageActive) { let fixedPrice = 50000 * initialCount; remainingDiscount = itemOriginalTotal - fixedPrice; remainingCalculatedPrice = fixedPrice; }
-                else if (area.id === 'silicon_living_baseboard' && isPackageActive) { let fixedPrice = 350000 * initialCount; remainingDiscount = itemOriginalTotal - fixedPrice; remainingCalculatedPrice = fixedPrice; }
-                finalCalculatedPrice = Math.floor(remainingCalculatedPrice / 1000) * 1000; finalDiscount = Math.floor(remainingDiscount / 1000) * 1000; total += finalCalculatedPrice;
+                 if (area.id === 'living_room' && isPackageActive) { let fixedDiscount = (areaMatId === 'poly' ? 50000 : 150000) * initialCount; remainingCalculatedPrice = Math.max(0, itemOriginalTotal - fixedDiscount); remainingDiscount = fixedDiscount; } 
+                 else if (area.id === 'balcony_laundry' && isPackageActive) { if (areaMatId === 'poly') { let fixedPrice = 100000 * initialCount; remainingDiscount = itemOriginalTotal - fixedPrice; remainingCalculatedPrice = fixedPrice; } }
+                 else if (area.id === 'silicon_bathtub' && isPackageActive) { let fixedPrice = 50000 * initialCount; remainingDiscount = itemOriginalTotal - fixedPrice; remainingCalculatedPrice = fixedPrice; }
+                 else if (area.id === 'silicon_living_baseboard' && isPackageActive) { let fixedPrice = 350000 * initialCount; remainingDiscount = itemOriginalTotal - fixedPrice; remainingCalculatedPrice = fixedPrice; }
+                 
+                 // packageCount가 0일 때, remainingCalculatedPrice가 0으로 초기화된 경우를 방지하여 itemOriginalTotal로 초기화
+                 if (packageCount === 0) {
+                     remainingCalculatedPrice = itemOriginalTotal;
+                     remainingDiscount = 0;
+                 }
+                 
+                 finalCalculatedPrice = Math.floor(remainingCalculatedPrice / 1000) * 1000; 
+                 finalDiscount = Math.floor(remainingDiscount / 1000) * 1000; 
+                 total += finalCalculatedPrice;
             }
 
-             // 개별 항목 가격 정보 추가
-             itemizedPrices.push({
-                id: area.id, label: area.label, quantity: initialCount, unit: area.unit, originalPrice: Math.floor(itemOriginalTotal / 1000) * 1000, calculatedPrice: finalCalculatedPrice, discount: finalDiscount, isFreeService: isFreeServiceItem, isPackageItem: packageCount > 0 && !isFreeServiceItem, isDiscount: false, materialLabel: selectedAreaMaterial ? selectedAreaMaterial.label.split('(')[0].trim() : 'N/A'
+            // 개별 항목 가격 정보 추가
+            itemizedPrices.push({
+               id: area.id, label: area.label, quantity: initialCount, unit: area.unit, originalPrice: Math.floor(itemOriginalTotal / 1000) * 1000, calculatedPrice: finalCalculatedPrice, discount: finalDiscount, isFreeService: isFreeServiceItem, isPackageItem: packageCount > 0 && !isFreeServiceItem, isDiscount: false, materialLabel: selectedAreaMaterial ? selectedAreaMaterial.label.split('(')[0].trim() : 'N/A'
              });
         }
     });
@@ -454,7 +509,7 @@ export default function GroutEstimatorApp() {
       itemizedPrices: itemizedPrices.filter(item => item.quantity > 0 || item.isDiscount),
     };
 
-  }, [quantities, selectedReviews, MIN_FEE, housingType, areaMaterials, getSelectionSummary, findMatchingPackage]);
+  }, [quantities, selectedReviews, housingType, areaMaterials, getSelectionSummary, findMatchingPackage]);
 
 
   // ★ useEffect (유지)
@@ -475,8 +530,37 @@ export default function GroutEstimatorApp() {
 
   // --- 기타 핸들러 (유지) ---
   const generateQuoteText = () => `[줄눈의미학 예상 견적서]\n\n총 예상 금액: ${calculation.price.toLocaleString()}원`;
-  const copyToClipboard = async () => { /* ... */ };
-  const handleImageSave = async () => { /* ... */ };
+  
+  // 클립보드 복사 함수 (필요 시 복구)
+  // const copyToClipboard = async () => { /* ... */ }; 
+  
+  // 이미지 저장 함수 (캡처 로직이 불완전하므로 임시 주석 처리)
+  const handleImageSave = async () => {
+     if (quoteRef.current) {
+        try {
+            // html2canvas 옵션 설정 (높은 해상도를 위해 scale 사용)
+            const canvas = await html2canvas(quoteRef.current, {
+                scale: 3, // 캡처 해상도 3배 증가
+                useCORS: true,
+                allowTaint: true,
+                backgroundColor: '#ffffff'
+            });
+            const image = canvas.toDataURL('image/png');
+            
+            // 다운로드 링크 생성 및 클릭
+            const link = document.createElement('a');
+            link.href = image;
+            link.download = `줄눈의미학_견적서_${new Date().toISOString().slice(0, 10)}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            alert('견적서 이미지가 저장되었습니다!');
+        } catch (error) {
+            console.error('Error saving image:', error);
+            alert('이미지 저장 중 오류가 발생했습니다.');
+        }
+    }
+  };
 
 
   const hasSelections = Object.values(quantities).some(v => v > 0);
@@ -518,7 +602,7 @@ export default function GroutEstimatorApp() {
 
 
   return (
-    <div className={`min-h-screen bg-gray-50 t  ext-gray-800 font-sans pb-40`}>
+    <div className={`min-h-screen bg-gray-50 text-gray-800 font-sans pb-40`}>
       <GlobalStyles />
 
       {/* ⭐️ [유지] 헤더 ⭐️ */}
@@ -738,9 +822,21 @@ export default function GroutEstimatorApp() {
                             </div>
                         </div>
                         <div className="flex items-center gap-1 bg-white px-1 py-1 rounded-full shadow-md border border-gray-200">
-                            <button onClick={() => handleQuantityChange(area.id, -1)} className={`w-7 h-7 flex items-center justify-center rounded-full transition active:scale-90 text-lg font-bold ${quantities[area.id] > 0 ? 'text-indigo-600 hover:bg-gray-100' : 'text-gray-400 cursor-not-allowed'}`}>-</button> 
+                            <button 
+                                onClick={() => handleQuantityChange(area.id, -1)} 
+                                className={`w-7 h-7 flex items-center justify-center rounded-full transition active:scale-90 text-lg font-bold ${quantities[area.id] > 0 ? 'text-indigo-600 hover:bg-gray-100' : 'text-gray-400 cursor-not-allowed'}`}
+                            >-</button> 
                             <span className={`w-5 text-center text-sm font-bold ${quantities[area.id] > 0 ? 'text-gray-900' : 'text-gray-400'}`}>{quantities[area.id]}</span>
-                            <button onClick={() => handleQuantityChange(area.id, 1)} className="w-7 h-7 flex items-center justify-center text-indigo-600 hover:bg-gray-100 rounded-full font-bold text-lg transition active:scale-90">+</button> 
+                            <button 
+                                onClick={() => {
+                                    handleQuantityChange(area.id, 1);
+                                    // 수량이 0에서 1이 될 때, 전역 소재를 초기값으로 설정 (선택이 없었을 경우)
+                                    if (quantities[area.id] === 0 && areaMaterials[area.id] === 'poly') {
+                                        handleAreaMaterialChange(area.id, material);
+                                    }
+                                }} 
+                                className="w-7 h-7 flex items-center justify-center text-indigo-600 hover:bg-gray-100 rounded-full font-bold text-lg transition active:scale-90"
+                            >+</button> 
                         </div>
                     </div>
                     
@@ -997,8 +1093,6 @@ export default function GroutEstimatorApp() {
                     <div className='w-full py-1.5 px-2 text-center bg-gray-100 text-indigo-600 rounded-md font-bold text-[11px] shadow-sm flex items-center justify-center'>
                         참고 | 바닥 30x30cm, 벽면 30x60cm 크기 기준
                     </div>
-                    
-                    {/* 전문가와 상담 시 최종 금액이 확정됩니다. 문구 제거 */}
                 </div>
               </div>
             </div>
@@ -1015,18 +1109,12 @@ export default function GroutEstimatorApp() {
                             const Icon = isApplied ? CheckCircle2 : Sparkles;
 
                             const baseClasses = "w-full py-3 rounded-xl transition font-extrabold text-sm active:scale-[0.98] shadow-lg flex items-center justify-center gap-2 relative overflow-hidden border-2";
-                            
-                            // 배경색 네이비로 고정
                             const fixedBgClasses = "bg-indigo-700 text-white hover:bg-indigo-800"; 
-                            
-                            // 테두리 클래스: 적용 시 노란색, 미적용 시 짙은 네이비 (배경과 동일하게)
                             const borderClasses = isApplied
                                 ? "border-amber-400" 
                                 : "border-indigo-700"; 
                                 
                             const iconColorClass = 'text-white'; // 아이콘 흰색 고정
-
-                            // 애니메이션 클래스 제거
 
                             const labelText = isApplied 
                                 ? `할인 적용 취소하기 (총액 +${discountAmount}원)` 
@@ -1035,7 +1123,6 @@ export default function GroutEstimatorApp() {
                             return (
                                 <button
                                     onClick={() => toggleReview(evt.id)}
-                                    // shine-effect 클래스를 제거했습니다.
                                     className={`${baseClasses} ${fixedBgClasses} ${borderClasses}`}
                                 >
                                     <Icon size={18} fill="currentColor" className={iconColorClass}/>
@@ -1045,8 +1132,6 @@ export default function GroutEstimatorApp() {
                         })()}
                     </div>
                 )}
-                
-                {/* 기존의 "상담 시 현장사진이 있으면 큰 도움이 됩니다.." 문구 삭제됨 */}
                 
                 <div className='grid grid-cols-2 gap-3'>
                     {/* 버튼 내부 정렬 수정 */}
