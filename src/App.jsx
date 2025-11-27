@@ -152,7 +152,7 @@ const PackageToast = ({ isVisible, onClose, label }) => {
                 <div className="flex items-center gap-2">
                     <Gift size={18} className='text-white flex-shrink-0' /> 
                     <div className="text-sm font-bold truncate">
-                        {toastLabel} 적용되었습니다! 
+                        {label || '패키지 할인'} 적용되었습니다! 
                     </div>
                 </div>
                 <button 
@@ -271,10 +271,6 @@ export default function GroutEstimatorApp() {
           // 현관을 폴리아스파틱으로 자동 설정 (패키지 기준)
           setAreaMaterials(prevMat => ({ ...prevMat, 'entrance': 'poly' }));
         } 
-        // 2개 미만으로 감소했으나, 현관이 1개소만 남아있고, 이전에 자동 선택된 경우 해제 로직
-        else if (currentQty >= 2 && newQty < 2 && (newQuantities['entrance'] === 1)) {
-          // 현관을 0으로 해제할지 여부는 비즈니스 로직에 따라 다름. 여기서는 해제하지 않고 냅둡니다. 
-        }
       }
       
       return newQuantities;
@@ -342,40 +338,47 @@ export default function GroutEstimatorApp() {
       
       // 패키지가 현관 1개소를 요구하고, 사용자가 현관을 선택하지 않았을 경우
       if (requiredEntrance && requiredEntrance[1] === 1 && !isEntranceSelected) {
-          // 현관이 패키지 요구사항의 유일한 누락 항목인지 확인하기 위해, 
-          // 우선 현관을 제외하고 다른 모든 항목이 일치하는지 확인합니다.
           
           let otherPolyMatch = true;
+          let polyMismatchCount = 0;
           for (const [id, requiredQty] of pkg.P_areas) {
-              if (id !== 'entrance' && (tempPolySelections[id] || 0) !== requiredQty) { 
-                  otherPolyMatch = false;
-                  break;
+              if (id !== 'entrance') {
+                  if ((tempPolySelections[id] || 0) !== requiredQty) {
+                      otherPolyMatch = false;
+                      break;
+                  }
+                  if (tempPolySelections[id] > 0 && (tempPolySelections[id] || 0) !== requiredQty) {
+                      polyMismatchCount++;
+                  }
               }
           }
           
           let epoxyMatch = true;
+          let epoxyMismatchCount = 0;
           for (const [id, requiredQty] of pkg.E_areas) {
               if ((tempEpoxySelections[id] || 0) !== requiredQty) { 
                   epoxyMatch = false;
                   break;
               }
+               if (tempEpoxySelections[id] > 0 && (tempEpoxySelections[id] || 0) !== requiredQty) {
+                  epoxyMismatchCount++;
+              }
           }
           
-          // 현관을 제외한 나머지 모든 조건이 일치하면, 현관을 자동으로 추가하여 패키지를 완성합니다.
-          if (otherPolyMatch && epoxyMatch) {
+          // 현관을 제외한 나머지 모든 조건이 일치하거나 (추가 선택은 없어야 함),
+          // 현관만 유일하게 누락된 경우에만 현관을 자동으로 추가합니다.
+          const currentTotalSelectedCount = Object.keys(polySelections).filter(id => id !== 'entrance' && polySelections[id] > 0).length + Object.keys(epoxySelections).filter(id => epoxySelections[id] > 0).length;
+          const packageTotalRequiredCount = pkg.P_areas.filter(([id]) => id !== 'entrance').length + pkg.E_areas.length;
+
+          // 현관을 제외한 나머지 항목의 종류와 갯수가 패키지 요구사항과 정확히 일치할 때
+          if (otherPolyMatch && epoxyMatch && currentTotalSelectedCount === packageTotalRequiredCount) {
               tempPolySelections['entrance'] = 1; // 현관 자동 포함
               appliedAutoEntrance = true;
           }
       }
       
-      // 현관 자동 포함이 적용되지 않았다면, 기존 선택 그대로 사용
-      if (!appliedAutoEntrance) {
-           // 패키지가 현관을 요구하는데 사용자가 선택하지 않았으면 불일치
-           if (requiredEntrance && requiredEntrance[1] === 1 && !isEntranceSelected) continue;
-      }
-      
       let isMatch = true;
-
+      
       // 1.2. Poly Quantities Match (임시 선택 사용)
       for (const [id, requiredQty] of pkg.P_areas) {
         if ((tempPolySelections[id] || 0) !== requiredQty) { 
@@ -410,7 +413,7 @@ export default function GroutEstimatorApp() {
     return null; // 매칭되는 패키지 없음
   }, [quantities]);
   
-  // 🚀 [수정] calculation 로직: 현관 자동 포함 및 무료 서비스 반영
+  // 🚀 [수정] calculation 로직: 현관 자동 포함 및 무료 서비스 반영, labelText 고정
   const calculation = useMemo(() => {
     const selectedHousing = HOUSING_TYPES.find(h => h.id === housingType);
     let itemizedPrices = []; 
@@ -447,7 +450,6 @@ export default function GroutEstimatorApp() {
     if (matchedPackage) {
         // ⭐️ 혼합 패키지 적용 ⭐️
         total = matchedPackage.price;
-        labelText = matchedPackage.label;
         isPackageActive = true;
         
         // 패키지 항목은 개별 계산에서 제외 (q를 0으로 설정)
@@ -462,13 +464,19 @@ export default function GroutEstimatorApp() {
         // q는 최종 계산에 사용되는 잔여 수량
         q['entrance'] = 0; 
         isPackageActive = isPackageActive || true; // 서비스가 적용되면 패키지 활성화로 간주
-        labelText = labelText || '욕실 2곳 시공 서비스 (현관 무료)';
+    }
+    
+    // ⭐️ 4. 하단 바 문구 고정 ⭐️
+    if (isPackageActive) {
+        labelText = '패키지 할인 적용 중';
     }
 
 
-    // --- 4. 잔여 항목 및 아이템 계산 (영역별 소재 반영) ---
+    // --- 5. 잔여 항목 및 아이템 계산 (영역별 소재 반영) ---
     ALL_AREAS.forEach(area => {
-        const initialCount = quantities[area.id] || 0;
+        // 자동 패키지 현관이 발동된 경우, quantities를 임시로 조정하여 itemizedPrices에 포함
+        const isEntranceAutoIncluded = area.id === 'entrance' && isAutoPackageEntrance;
+        const initialCount = isEntranceAutoIncluded ? 1 : (quantities[area.id] || 0);
         
         if (initialCount === 0) return;
 
@@ -567,8 +575,8 @@ export default function GroutEstimatorApp() {
     return { 
       price: finalPrice, 
       originalCalculatedPrice, 
-      label: matchedPackage ? matchedPackage.label : labelText, 
-      isPackageActive: !!matchedPackage || isPackageActive,
+      label: labelText, 
+      isPackageActive: isPackageActive,
       isFreeEntrance: isFreeEntrance,
       discountAmount,
       minimumFeeApplied, 
@@ -1062,7 +1070,7 @@ export default function GroutEstimatorApp() {
                     {calculation.isPackageActive && (
                         <div className="bg-indigo-50/70 p-2 rounded-md border-l-4 border-indigo-500 text-xs font-semibold text-gray-700">
                             <p className='flex items-center gap-1 text-indigo-800 font-extrabold mb-1'>
-                                <Crown size={12} className='text-indigo-400'/> {calculation.label} 적용
+                                <Crown size={12} className='text-indigo-400'/> {calculation.label} 
                             </p>
                             <ul className='list-disc list-inside text-[11px] ml-1 space-y-0.5 text-left'>
                                 {calculation.isFreeEntrance && <li>현관 바닥 서비스 (폴리아스파틱)</li>}
