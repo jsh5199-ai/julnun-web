@@ -475,7 +475,7 @@ export default function GroutEstimatorApp() {
     return null; // 매칭되는 패키지 없음
   }, [quantities]);
   
-  // 🚀 [수정] calculation 로직: 현관 강제 poly 적용 및 새로운 115만원 패키지 포함
+  // 🚀 [수정] calculation 로직: 혼합 패키지 적용 시 labelText 고정
   const calculation = useMemo(() => {
     const selectedHousing = HOUSING_TYPES.find(h => h.id === housingType);
     let itemizedPrices = []; 
@@ -585,7 +585,8 @@ export default function GroutEstimatorApp() {
       // ⭐️ 혼합 패키지 및 NEW 115만원 패키지 적용 ⭐️
       total = matchedPackage.price;
       isPackageActive = true;
-      labelText = matchedPackage.label; // 패키지 이름을 라벨로 사용
+      // ⭐️ [수정된 부분] 혼합 패키지 적용 시, 라벨 문구를 '패키지 할인 적용 중'으로 통일
+      labelText = '패키지 할인 적용 중'; 
       
       // ⭐️ 혼합 패키지에 포함된 항목만 q에서 제외 ⭐️
       const packageAreas = getPackageAreaIds(matchedPackage);
@@ -635,7 +636,7 @@ export default function GroutEstimatorApp() {
               // 베란다/세탁실: 폴리 10만, 에폭시 25만 -> 계수 2.5
               currentMod = 2.5; 
           } else if (area.id === 'kitchen_wall') {
-              // 주방 벽면: 폴리 15만, 에폭시 25만 -> 계수 1.666...
+              // 주방 벽면: 폴리 15만, 에폭시 25만 -> 계수 250000 / 150000;
               currentMod = 250000 / 150000; // 정확한 비율 계산
           } else if (area.id === 'bathroom_floor' || area.id === 'shower_booth' || area.id === 'bathtub_wall' || area.id === 'master_bath_wall' || area.id === 'common_bath_wall' || area.id === 'entrance') {
               // 욕실 및 현관: 기본 계수 1.8 적용 (현관은 여기 걸리더라도 'poly'로 강제되므로 1.0이 됨)
