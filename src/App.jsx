@@ -215,7 +215,6 @@ export default function GroutEstimatorApp() {
   const [quantities, setQuantities] = useState(
     [...ALL_AREAS].reduce((acc, area) => ({ ...acc, [area.id]: 0 }), {})
   );
-  // ⭐️ [신규 상태] 각 영역별 자재 선택 (기본값은 poly)
   const [areaMaterials, setAreaMaterials] = useState(
     [...ALL_AREAS].reduce((acc, area) => ({ ...acc, [area.id]: 'poly' }), {})
   );
@@ -246,57 +245,48 @@ export default function GroutEstimatorApp() {
         if (!summary[mat]) {
           summary[mat] = {};
         }
-        // 각 자재별, 영역별 수량을 저장
         summary[mat][id] = qty;
       }
     }
     return summary;
   }, []);
   
-  // ⭐️ [신규 함수] 혼합 패키지 매칭 로직
+  // ⭐️ [안정화된 함수] 혼합 패키지 매칭 로직
   const findMatchingPackage = useCallback((selectionSummary) => {
     const polySelections = selectionSummary['poly'] || {};
     const epoxySelections = selectionSummary['kerapoxy'] || {};
+    
+    // 선택된 항목이 없으면 매칭 불가능
+    const totalSelectedCount = Object.values(polySelections).reduce((sum, v) => sum + v, 0) + 
+                                  Object.values(epoxySelections).reduce((sum, v) => sum + v, 0);
+    if (totalSelectedCount === 0) return null;
 
+    // 1. 모든 MIXED_PACKAGES 순회하며 매칭 확인
     for (const pkg of MIXED_PACKAGES) {
       let isMatch = true;
-
-      // 1. Poly 요구사항과 사용자의 Poly 선택 비교
-      const requiredPolyCount = pkg.P_areas.reduce((sum, [, qty]) => sum + qty, 0);
-      const selectedPolyCount = Object.values(polySelections).reduce((sum, v) => sum + v, 0);
-
-      // 2. Epoxy 요구사항과 사용자의 Epoxy 선택 비교
-      const requiredEpoxyCount = pkg.E_areas.reduce((sum, [, qty]) => sum + qty, 0);
-      const selectedEpoxyCount = Object.values(epoxySelections).reduce((sum, v) => sum + v, 0);
-
-      // 3. 총 개수 일치 확인 (필요한 총 개수와 사용자가 선택한 총 개수 비교)
-      if (selectedPolyCount + selectedEpoxyCount !== requiredPolyCount + requiredEpoxyCount) {
-        continue;
-      }
       
-      // 4. 세부 항목 수량 일치 확인 (Poly 항목)
+      // A. Poly Quantities Match (요구되는 Poly 항목이 사용자의 Poly 선택에 정확히 있는지 확인)
       for (const [id, requiredQty] of pkg.P_areas) {
-        if (polySelections[id] !== requiredQty) {
-          isMatch = false;
-          break;
+        if ((polySelections[id] || 0) !== requiredQty) { 
+            isMatch = false;
+            break;
         }
       }
       if (!isMatch) continue;
 
-      // 5. 세부 항목 수량 일치 확인 (Epoxy 항목)
+      // B. Epoxy Quantities Match (요구되는 Epoxy 항목이 사용자의 Epoxy 선택에 정확히 있는지 확인)
       for (const [id, requiredQty] of pkg.E_areas) {
-        if (epoxySelections[id] !== requiredQty) {
-          isMatch = false;
-          break;
+        if ((epoxySelections[id] || 0) !== requiredQty) { 
+            isMatch = false;
+            break;
         }
       }
       if (!isMatch) continue;
 
-      // 6. Poly 또는 Epoxy로 선택된 항목 중 패키지에 없는 항목이 있는지 확인 (선택한 항목 ID 목록이 패키지 항목 ID 목록과 정확히 일치해야 함)
+      // 2. 선택된 항목 ID 목록이 패키지 ID 목록과 '완벽히 일치'하는지 확인 (추가 선택 방지)
       const selectedAreaIds = new Set([...Object.keys(polySelections), ...Object.keys(epoxySelections)]);
       const packageAreaIds = new Set([...pkg.P_areas.map(([id]) => id), ...pkg.E_areas.map(([id]) => id)]);
       
-      // 선택된 항목 ID 목록이 패키지 ID 목록에 모두 포함되어야 함 (완벽 일치)
       const isIdSetMatch = selectedAreaIds.size === packageAreaIds.size && 
                            [...selectedAreaIds].every(id => packageAreaIds.has(id));
 
@@ -391,7 +381,7 @@ export default function GroutEstimatorApp() {
         
         let currentMod = selectedAreaMaterial ? selectedAreaMaterial.priceMod : 1.0;
         
-        if (area.id === 'living_room' && selectedAreaMaterial.id === 'kerapoxy') currentMod = 2.0;
+        if (area.id === 'living_room' && selectedAreaMaterial && selectedAreaMaterial.id === 'kerapoxy') currentMod = 2.0;
 
         let itemOriginalTotal = originalBasePrice * initialCount * currentMod * selectedHousing.multiplier;
         
