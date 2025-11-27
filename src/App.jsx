@@ -931,7 +931,7 @@ export default function GroutEstimatorApp() {
         {/* ⭐️ --- 2. 시공 재료 선택 (기본값 역할만 함) --- ⭐️ */}
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-300">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
-            <Hammer className="h-5 w-5 text-indigo-600" /> 2. 줄눈소재 기본 설정 (새 영역 선택 시 초기값)
+            <Hammer className="h-5 w-5 text-indigo-600" /> 2. 줄눈소재 안내
           </h2 >
           <div className="space-y-4">
             {MATERIALS.map((item) => (
