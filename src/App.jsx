@@ -98,7 +98,7 @@ const FAQ_ITEMS = [
     { question: "Q5. 구축 아파트도 시공이 가능한가요?", answer: "네, 가능합니다. 기존 줄눈을 제거하는 그라인딩 작업이 추가로 필요하며, 현재 견적은 신축/구축 동일하게 적용됩니다." },
 ];
 
-// 🎥 YouTube 영상 목록 및 URL 생성 함수 (수정됨: 영상 ID와 버튼 클릭 매핑에 맞게 업데이트)
+// 🎥 YouTube 영상 목록 및 URL 생성 함수 (유지)
 const YOUTUBE_VIDEOS = [
     // 에폭시 시공영상 버튼 클릭 시 XekG8hevWpA 재생
     { id: 'XekG8hevWpA', title: '에폭시 시공영상 (벽면/바닥)', label: '에폭시 시공영상' }, 
@@ -680,7 +680,7 @@ export default function GroutEstimatorApp() {
     <div className={`min-h-screen bg-gray-50 t  ext-gray-800 font-sans pb-40`}>
       <GlobalStyles />
 
-      {/* ⭐️ [수정] 헤더: 아이콘 제거 및 상담원 연결 버튼 추가 ⭐️ */}
+      {/* ⭐️ [유지] 헤더: 아이콘 제거 및 상담원 연결 버튼 추가 ⭐️ */}
       <header className="bg-indigo-900 text-white sticky top-0 z-20 shadow-xl">
         <div className="p-4 flex items-center justify-between max-w-md mx-auto">
           {/* 아이콘 제거 */}
@@ -914,52 +914,51 @@ export default function GroutEstimatorApp() {
         {/* PackageToast 위치 수정 완료 */}
         <PackageToast isVisible={showToast} onClose={handleCloseToast} />
 
-        {/* 최종 견적 하단 바 (패키지 문구 노란색으로 변경) */}
-        <div className="fixed bottom-0 left-0 right-0 bg-indigo-900 shadow-2xl safe-area-bottom z-20">
-            <div className="max-w-md mx-auto p-4 flex flex-col gap-2"> 
-                
-                {/* 1. 금액 및 정보 영역 */}
-                <div className='flex items-center justify-between w-full text-white'> 
+        {/* ⭐️ [수정] hasSelections가 true일 때만 하단 견적 바 렌더링 ⭐️ */}
+        {hasSelections && (
+            <div className="fixed bottom-0 left-0 right-0 bg-indigo-900 shadow-2xl safe-area-bottom z-20 animate-slide-down">
+                <div className="max-w-md mx-auto p-4 flex flex-col gap-2"> 
                     
-                    {/* 좌측: 금액 정보 (총 예상 견적 문구 화이트 강조) */}
-                    <div className='flex items-center gap-2'>
-                        <span className='text-sm font-semibold text-white'>총 예상 견적</span>
-                        {/* 금액 (화이트 강조) */}
-                        <div className="flex items-end gap-1">
-                            <span className="text-3xl font-extrabold text-white">{calculation.price.toLocaleString()}</span>
-                            <span className="text-base font-normal text-white">원</span>
+                    {/* 1. 금액 및 정보 영역 */}
+                    <div className='flex items-center justify-between w-full text-white'> 
+                        
+                        {/* 좌측: 금액 정보 (총 예상 견적 문구 화이트 강조) */}
+                        <div className='flex items-center gap-2'>
+                            <span className='text-sm font-semibold text-white'>총 예상 견적</span>
+                            {/* 금액 (화이트 강조) */}
+                            <div className="flex items-end gap-1">
+                                <span className="text-3xl font-extrabold text-white">{calculation.price.toLocaleString()}</span>
+                                <span className="text-base font-normal text-white">원</span>
+                            </div>
+                        </div>
+                        
+                        {/* 우측: 패키지 라벨만 표시 (노란색으로 변경) */}
+                        <div className='flex flex-col items-end'>
+                            {/* A. 패키지 적용 라벨 (패키지 적용 시 노란색 텍스트로 표시) */}
+                            {calculation.label && (
+                                <div className="text-xs font-bold text-amber-300 mb-0.5 whitespace-nowrap">
+                                    <Crown size={12} className='inline mr-1 text-amber-300'/> {calculation.label}
+                                </div>
+                            )}
                         </div>
                     </div>
-                    
-                    {/* 우측: 패키지 라벨만 표시 (노란색으로 변경) */}
-                    <div className='flex flex-col items-end'>
-                        {/* A. 패키지 적용 라벨 (패키지 적용 시 노란색 텍스트로 표시) */}
-                        {calculation.label && (
-                               <div className="text-xs font-bold text-amber-300 mb-0.5 whitespace-nowrap">
-                                   <Crown size={12} className='inline mr-1 text-amber-300'/> {calculation.label}
-                               </div>
-                        )}
-                    </div>
-                </div>
 
-                {/* 2. 견적서 보기 버튼 (색상 유지) */}
-                <button 
-                    onClick={() => {
-                        setShowModal(true);
-                        setShowToast(false); 
-                    }} 
-                    disabled={!hasSelections} 
-                    className={`w-full py-3 rounded-xl font-extrabold text-lg transition-all 
-                        ${hasSelections 
-                            ? 'bg-indigo-700 text-white hover:bg-indigo-800 active:bg-indigo-900 shadow-md' 
-                            : 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                        }
-                    `}
-                >
-                    견적서 상세보기
-                </button>
+                    {/* 2. 견적서 보기 버튼 (색상 유지) */}
+                    <button 
+                        onClick={() => {
+                            setShowModal(true);
+                            setShowToast(false); 
+                        }} 
+                        // hasSelections가 true일 때만 렌더링되므로, disabled는 항상 false (활성화)
+                        className={`w-full py-3 rounded-xl font-extrabold text-lg transition-all 
+                            'bg-indigo-700 text-white hover:bg-indigo-800 active:bg-indigo-900 shadow-md'
+                        `}
+                    >
+                        견적서 상세보기
+                    </button>
+                </div>
             </div>
-        </div>
+        )}
       </>
 
       {/* 견적서 모달 */}
