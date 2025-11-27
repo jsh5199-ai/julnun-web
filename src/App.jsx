@@ -144,14 +144,14 @@ const NEW_MIXED_PACKAGES = [
     { 
         id: 'P_MIX_NEW_A', 
         price: 1150000, 
-        label: '혼합벽면A (바닥/안방벽E, 공용벽P)', 
+        label: '혼합벽면A (바닥/안방벽E, 공용벽P) 115만', 
         E_areas: [['bathroom_floor', 2], ['master_bath_wall', 1]], 
         P_areas: [['entrance', 1], ['common_bath_wall', 1]] 
     },
     { 
         id: 'P_MIX_NEW_B', 
         price: 1150000, 
-        label: '혼합벽면B (바닥/공용벽E, 안방벽P)', 
+        label: '혼합벽면B (바닥/공용벽E, 안방벽P) 115만', 
         E_areas: [['bathroom_floor', 2], ['common_bath_wall', 1]], 
         P_areas: [['entrance', 1], ['master_bath_wall', 1]] 
     },
@@ -291,6 +291,7 @@ export default function GroutEstimatorApp() {
 
   // ⭐️ [수정] 현관은 강제로 폴리 아스파틱으로 설정되도록 조정 ⭐️
   useEffect(() => {
+    // 현관이 선택된 경우, 소재를 'poly'로 강제합니다.
     if (quantities['entrance'] > 0 && areaMaterials['entrance'] !== 'poly') {
         setAreaMaterials(prev => ({ ...prev, 'entrance': 'poly' }));
     }
@@ -383,9 +384,10 @@ export default function GroutEstimatorApp() {
     // 현관이 선택되었지만 areaMats에서 누락된 경우를 대비하여 한 번 더 확인 (poly로 강제)
     if (q['entrance'] > 0) {
         if (!summary['poly']) summary['poly'] = {};
+        // 현관은 poly로 강제되므로, poly 목록에 추가하고, 혹시 모를 epoxy 목록에서는 삭제
         summary['poly']['entrance'] = q['entrance'];
         if(summary['kerapoxy'] && summary['kerapoxy']['entrance']) {
-            delete summary['kerapoxy']['entrance']; // 혹시라도 에폭시로 잘못 등록되었다면 삭제
+            delete summary['kerapoxy']['entrance']; 
         }
     }
     
@@ -478,7 +480,7 @@ export default function GroutEstimatorApp() {
     const selectedHousing = HOUSING_TYPES.find(h => h.id === housingType);
     let itemizedPrices = []; 
     
-    // ⭐️ 1. 필요한 수량 변수 추출 (오류 수정 반영) ⭐️
+    // ⭐️ 1. 필요한 수량 변수 추출 ⭐️
     const qEntrance = quantities['entrance'] || 0;
     const qBathFloor = quantities['bathroom_floor'] || 0;
     const qMasterWall = quantities['master_bath_wall'] || 0;
@@ -550,15 +552,11 @@ export default function GroutEstimatorApp() {
           const nonEntranceMats = nonEntranceAreas.map(id => areaMaterials[id]);
           const allNonEntranceEpoxy = nonEntranceMats.every(m => m === 'kerapoxy');
           
-          // 현관은 강제로 poly이므로, entranceMat은 항상 poly
           const entranceMat = 'poly'; 
 
           if (allNonEntranceEpoxy) {
               if (entranceMat === 'poly') {
                   customPackagePrice = 1300000; // 현관 폴리 + 나머지 4개소 에폭시 (130만원)
-              } else if (entranceMat === 'kerapoxy') { 
-                  // 이 로직은 현관이 강제 poly이므로 발생하지 않음 (이전 코드 호환성 유지)
-                  // customPackagePrice = 1350000; 
               }
           }
           // 모든 항목이 폴리인 경우
@@ -584,10 +582,10 @@ export default function GroutEstimatorApp() {
         customPackageAreas.forEach(id => { q[id] = 0; });
 
     } else if (matchedPackage) {
-      // ⭐️ 혼합 패키지 적용 ⭐️
+      // ⭐️ 혼합 패키지 및 NEW 115만원 패키지 적용 ⭐️
       total = matchedPackage.price;
       isPackageActive = true;
-      labelText = '패키지 할인 적용 중';
+      labelText = matchedPackage.label; // 패키지 이름을 라벨로 사용
       
       // ⭐️ 혼합 패키지에 포함된 항목만 q에서 제외 ⭐️
       const packageAreas = getPackageAreaIds(matchedPackage);
@@ -601,7 +599,7 @@ export default function GroutEstimatorApp() {
     if (isFreeEntrance && customPackagePrice === 0 && !matchedPackage) { 
       q['entrance'] = 0; 
       isPackageActive = isPackageActive || true; 
-      labelText = '패키지 할인 적용 중';
+      labelText = labelText || '패키지 할인 적용 중';
     }
     
     // ⭐️ 6. 하단 바 문구 고정 ⭐️
@@ -1255,7 +1253,6 @@ export default function GroutEstimatorApp() {
                             </p>
                             <ul className='list-disc list-inside text-[11px] ml-1 space-y-0.5 text-left'>
                                 {calculation.isFreeEntrance && <li>현관 바닥 서비스 (폴리아스파틱)</li>}
-                                {/* NOTE: 패키지 상세 내역 출력 로직은 현재 복잡하므로, 대표 문구로 대체 */}
                                 <li>패키지 포함 영역이 할인 적용되었습니다.</li>
                             </ul>
                         </div>
@@ -1272,18 +1269,18 @@ export default function GroutEstimatorApp() {
                         return (
                             <div key={item.id} className="flex flex-col text-gray-800 pl-2 pr-1 pt-1 border-b border-gray-100 last:border-b-0">
                                 
-                                {/* 항목 이름 및 수량 */}
+                                {/* 항목 이름 및 수량 (w-3/5 -> w-7/12로 변경) */}
                                 <div className="flex justify-between items-center">
-                                    <span className={`w-3/5 font-semibold text-gray-700 text-sm`}>
+                                    <span className={`w-7/12 font-semibold text-gray-700 text-sm break-words`}>
                                         <span className="text-gray-400 mr-1">-</span>
                                         {item.label} 
                                         {item.quantity > 0 && <span className="text-gray-400 text-xs font-normal"> x {item.quantity}</span>}
-                                        {/* ⭐️ 영역별 소재 라벨 추가 ⭐️ */}
-                                        <span className='text-indigo-500 text-[10px] ml-1 font-extrabold'>({item.materialLabel})</span>
+                                        {/* ⭐️ 영역별 소재 라벨 추가 (text-[10px] -> text-[9px]로 변경) ⭐️ */}
+                                        <span className='text-indigo-500 text-[9px] ml-1 font-extrabold break-all'>({item.materialLabel})</span>
                                     </span>
                                     
-                                    {/* 최종 적용 가격 */}
-                                    <span className={`text-right w-2/5 font-bold text-sm ${item.calculatedPrice > 0 ? 'text-indigo-600' : 'text-gray-500'}`}> 
+                                    {/* 최종 적용 가격 (w-2/5 -> w-5/12로 변경) */}
+                                    <span className={`text-right w-5/12 font-bold text-sm ${item.calculatedPrice > 0 ? 'text-indigo-600' : 'text-gray-500'}`}> 
                                         {item.calculatedPrice > 0 ? `${finalPriceText}원` : (item.isFreeService ? '🎁 서비스 포함' : '👑 패키지 포함')}
                                     </span>
                                 </div>
