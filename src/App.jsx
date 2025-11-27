@@ -434,7 +434,7 @@ export default function GroutEstimatorApp() {
     const selectedHousing = HOUSING_TYPES.find(h => h.id === housingType);
     let itemizedPrices = []; 
     
-    // ⭐️ 1. 필요한 수량 변수 추출 (오류 수정) ⭐️
+    // ⭐️ 1. 필요한 수량 변수 추출 (오류 수정 반영) ⭐️
     const qEntrance = quantities['entrance'] || 0;
     const qBathFloor = quantities['bathroom_floor'] || 0;
     const qMasterWall = quantities['master_bath_wall'] || 0;
@@ -486,12 +486,14 @@ export default function GroutEstimatorApp() {
         if (allPoly) {
             customPackagePrice = 550000;
             customPackageAreas = poly550KAreas;
-            labelText = '폴리아스파틱 5종 패키지 적용 중 (55만)';
+            // ⭐️ [수정 반영] 문구를 '패키지 할인 적용 중'으로 고정
+            labelText = '패키지 할인 적용 중'; 
         }
     }
 
-    // 4-2. 기존 5종 패키지 (안방/공용 벽 전체 포함) 체크
-    const isOld5ItemsMatch = qEntrance === 1 && qBathFloor === 2 && qMasterWall === 1 && qCommonWall === 1;
+    // 4-2. 기존 5종 패키지 (안방/공용 벽 전체 포함, 70만/130만/135만) 체크
+    const isOld5ItemsMatch = qEntrance === 1 && qBathFloor === 2 && qMasterWall === 1 && qCommonWall === 1 && 
+                             qShowerBooth === 0 && qBathtubWall === 0; // 55만원 패키지와 충돌 방지
     const old5ItemAreas = ['entrance', 'bathroom_floor', 'master_bath_wall', 'common_bath_wall'];
 
     if (customPackagePrice === 0 && isOld5ItemsMatch && !matchedPackage) {
@@ -522,7 +524,7 @@ export default function GroutEstimatorApp() {
 
           if (customPackagePrice > 0) {
               customPackageAreas = old5ItemAreas;
-              labelText = customPackagePrice >= 1300000 ? '프리미엄 5종 패키지 적용 중' : '일반 5종 패키지 적용 중';
+              labelText = '패키지 할인 적용 중';
           }
       }
     }
@@ -583,13 +585,14 @@ export default function GroutEstimatorApp() {
       // ⭐️ 특수 영역 (기타 범위) 에폭시 계수 처리 ⭐️
       if (selectedAreaMaterial && selectedAreaMaterial.id === 'kerapoxy') {
           if (area.id === 'living_room') {
+              // 거실 바닥: 폴리 55만, 에폭시 110만 -> 계수 2.0
               currentMod = 2.0; 
           } else if (area.id === 'balcony_laundry') {
               // 베란다/세탁실: 폴리 10만, 에폭시 25만 -> 계수 2.5
               currentMod = 2.5; 
           } else if (area.id === 'kitchen_wall') {
               // 주방 벽면: 폴리 15만, 에폭시 25만 -> 계수 1.666...
-              currentMod = 250000 / 150000;
+              currentMod = 250000 / 150000; // 정확한 비율 계산
           } else if (area.id === 'bathroom_floor' || area.id === 'shower_booth' || area.id === 'bathtub_wall' || area.id === 'master_bath_wall' || area.id === 'common_bath_wall' || area.id === 'entrance') {
               // 욕실 및 현관: 기본 계수 1.8 적용
               currentMod = 1.8;
@@ -799,7 +802,7 @@ export default function GroutEstimatorApp() {
                                     {area.desc && <span className="block text-indigo-600">{area.desc}</span>}
                                     {/* ⭐️ 현관 바닥 추천 문구 추가 ⭐️ */}
                                     {area.id === 'entrance' && (
-                                        <span className="block text-amber-500 font-bold mt-0.5">현관은 폴리아스파틱을 적극 추천합니다.</span>
+                                        <span className="block text-amber-500 font-bold mt-0.5">현관은 폴리소재 적극 추천</span>
                                     )}
                                 </div>
                             </div>
@@ -998,7 +1001,7 @@ export default function GroutEstimatorApp() {
           
           {/* B. 기타 범위 (주방/베란다) */}
           <h3 className="text-base font-extrabold flex items-center gap-2 mb-3 mt-4 text-gray-700">
-            <LayoutGrid size={16} className="text-indigo-500" /> B. 기타 범위 (주방/베란다/거실)
+            <LayoutGrid size={16} className="text-indigo-500" /> B. 기타 범위
           </h3>
           {renderAreaList(OTHER_AREAS)}
 
