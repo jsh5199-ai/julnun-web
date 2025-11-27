@@ -209,7 +209,7 @@ export default function GroutEstimatorApp() {
   );
   const [selectedReviews, setSelectedReviews] = useState(new Set());
   const [showModal, setShowModal] = useState(false);
-  const [showMaterialModal, setShowMaterialModal] = useState(false); 
+  const [showMaterialModal, setShowMaterial] = useState(false); 
   const [showToast, setShowToast] = useState(false); 
 
   const quoteRef = useRef(null); 
@@ -217,7 +217,7 @@ export default function GroutEstimatorApp() {
   const SOOMGO_REVIEW_URL = 'https://www.soomgo.com/profile/users/10755579?tab=review';
   const PHONE_NUMBER = '010-7734-6709';
 
-  // --- calculation 로직 (유지) ---
+  // --- calculation 로직 (수정됨: totalDiscountAmount 리턴 추가) ---
   const handleQuantityChange = (id, delta) => {
     setQuantities(prev => {
       const nextValue = Math.max(0, prev[id] + delta);
@@ -526,6 +526,9 @@ export default function GroutEstimatorApp() {
     });
     total -= discountAmount;
     
+    // ★★★ 1단계: 총 할인 금액 계산 추가 ★★★
+    const totalDiscountAmount = packageDiscount + discountAmount;
+    
     // 예상 시공 시간 계산 (기능은 유지하되, 리턴하지 않음)
     let estimatedHours = 0;
     if (totalAreaCount > 0) {
@@ -542,7 +545,7 @@ export default function GroutEstimatorApp() {
       label: labelText,
       isPackageActive,
       isFreeEntrance,
-      discountAmount,
+      totalDiscountAmount, // <= 통합된 총 할인 금액 리턴
       // estimatedHours 제외
       itemizedPrices: itemizedPrices.filter(item => item.quantity > 0 || item.isDiscount),
     };
@@ -644,7 +647,7 @@ export default function GroutEstimatorApp() {
   
   return (
     // pb-28에서 pb-40으로 늘려 하단 바와 겹치지 않도록 조정
-    <div className={`min-h-screen bg-gray-50 t  ext-gray-800 font-sans pb-40`}>
+    <div className={`min-h-screen bg-gray-50 t  ext-gray-800 font-sans pb-40`}>
       <GlobalStyles />
 
       {/* 헤더: 짙은 네이비 배경 (유지) */}
@@ -852,7 +855,7 @@ export default function GroutEstimatorApp() {
                         {/* A. 패키지 적용 라벨 (패키지 적용 시 노란색 텍스트로 표시) */}
                         {calculation.label && (
                              <div className="text-xs font-bold text-amber-300 mb-0.5 whitespace-nowrap">
-                                 <Crown size={12} className='inline mr-1 text-amber-300'/> {calculation.label}
+                                <Crown size={12} className='inline mr-1 text-amber-300'/> {calculation.label}
                              </div>
                         )}
                     </div>
@@ -889,14 +892,18 @@ export default function GroutEstimatorApp() {
               </button>
             </div>
             
-            {/* ★★★ 캡처 전용 견적서 양식 (요청 문구 모두 삭제 적용) ★★★ */}
+            {/* ★★★ 캡처 전용 견적서 양식 (수정됨) ★★★ */}
             <div className="p-5 text-gray-800 bg-white overflow-y-auto max-h-[70vh]"> 
               <div ref={quoteRef} id="quote-content" className="border-4 border-indigo-700 rounded-lg p-5 space-y-3 mx-auto" style={{ width: '320px' }}>
                 
-                {/* 헤더 및 로고 영역 (영어 문구 제거) */}
+                {/* 3단계: 헤더 및 로고 영역 (브랜딩 강화) */}
                 <div className="flex flex-col items-center border-b border-gray-300 pb-3 mb-3">
-                    <h1 className='text-xl font-extrabold text-indigo-800 text-center'>줄눈의미학 예상 견적서</h1>
-                    {/* Final Quotation Summary 제거 */}
+                    {/* 상단 아이콘 및 브랜드명 추가 */}
+                    <div className="flex items-center gap-1.5 text-indigo-700 mb-1">
+                        <Sparkles size={18} className='text-indigo-600'/>
+                        <span className='text-xs font-semibold'>줄눈의미학</span>
+                    </div>
+                    <h1 className='text-xl font-extrabold text-indigo-800 text-center'>예상 견적서</h1>
                 </div>
 
                 {/* 기본 정보 테이블 */}
@@ -915,7 +922,6 @@ export default function GroutEstimatorApp() {
 
                 {/* 시공 및 할인 내역 */}
                 <div className="space-y-2 text-sm border-b border-gray-200 pb-3">
-                    {/* 시공 내역 및 가격 문구 제거 */}
 
                     {/* 패키지 포함 서비스 내역 */}
                     {calculation.isPackageActive && (
@@ -988,10 +994,26 @@ export default function GroutEstimatorApp() {
                         ))}
                 </div>
 
-                {/* 총 합계 영역 (유지) */}
-                <div className="pt-3 text-center"> 
-                    
-                    <div className="flex justify-end items-end"> 
+                {/* 2단계: 총 합계 및 할인 요약 영역 (수정됨) */}
+                {/* 1. 총 할인 금액 요약 (할인액이 0보다 클 때만 표시) */}
+                {calculation.totalDiscountAmount > 0 && (
+                    <div className="flex justify-between items-center pt-2 text-sm font-semibold text-gray-600 border-t border-gray-200">
+                        <span className="flex items-center text-indigo-600 font-bold">
+                            <Zap size={14} className='mr-1 text-amber-500' fill='currentColor'/>
+                            총 할인 금액
+                        </span>
+                        <span className="text-indigo-600">
+                            - {calculation.totalDiscountAmount.toLocaleString()}원
+                        </span>
+                    </div>
+                )}
+                
+                {/* 2. 최종 결제 금액 강조 */}
+                <div className="pt-3 text-center border-t-4 border-double border-indigo-700 mt-2"> 
+                    <div className="flex justify-between items-center">
+                        <span className="text-sm font-extrabold text-gray-800 flex items-center">
+                             <Trophy size={16} className='mr-1 text-indigo-700'/> 최종 예상 견적
+                        </span>
                         <div className="text-right">
                             <span className="text-3xl font-extrabold text-indigo-700">{calculation.price.toLocaleString()}원</span>
                         </div>
@@ -1032,8 +1054,6 @@ export default function GroutEstimatorApp() {
                                 : "border-indigo-700"; 
                                 
                             const iconColorClass = 'text-white'; // 아이콘 흰색 고정
-
-                            // 애니메이션 클래스 제거
 
                             const labelText = isApplied 
                                 ? `할인 적용 취소하기 (총액 +${discountAmount}원)` 
