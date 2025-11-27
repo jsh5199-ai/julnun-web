@@ -98,10 +98,12 @@ const FAQ_ITEMS = [
     { question: "Q5. 구축 아파트도 시공이 가능한가요?", answer: "네, 가능합니다. 기존 줄눈을 제거하는 그라인딩 작업이 추가로 필요하며, 현재 견적은 신축/구축 동일하게 적용됩니다." },
 ];
 
-// 🎥 YouTube 영상 목록 및 URL 생성 함수 (수정됨: 버튼 명칭에 맞게 업데이트)
+// 🎥 YouTube 영상 목록 및 URL 생성 함수 (수정됨: 영상 ID와 버튼 클릭 매핑에 맞게 업데이트)
 const YOUTUBE_VIDEOS = [
-    { id: 'M6Aq_VVaG0s', title: '에폭시 시공영상', label: '에폭시 시공영상' }, // 이전 '시공 현장 영상 (벽면)'
-    { id: 'XekG8hevWpA', title: '밑작업 영상', label: '밑작업 영상' }, // 이전 '시공 현장 영상 (바닥)'
+    // 에폭시 시공영상 버튼 클릭 시 XekG8hevWpA 재생
+    { id: 'XekG8hevWpA', title: '에폭시 시공영상 (벽면/바닥)', label: '에폭시 시공영상' }, 
+    // 밑작업 영상 버튼 클릭 시 M6Aq_VVaG0s 재생
+    { id: 'M6Aq_VVaG0s', title: '밑작업 영상 (라인 그라인딩)', label: '밑작업 영상' }, 
 ];
 
 const getEmbedUrl = (videoId) => `https://www.youtube.com/embed/${videoId}?autoplay=0&mute=1&rel=0`;
@@ -220,7 +222,7 @@ export default function GroutEstimatorApp() {
   const [showModal, setShowModal] = useState(false);
   const [showMaterialModal, setShowMaterialModal] = useState(false); 
   const [showToast, setShowToast] = useState(false); 
-  // ⭐️ [수정] activeVideoIndex 대신 activeVideoId 사용. 초기값은 첫 번째 영상 ID로 설정.
+  // ⭐️ [유지] activeVideoId는 첫 번째 영상 ID로 설정.
   const [activeVideoId, setActiveVideoId] = useState(YOUTUBE_VIDEOS[0].id); 
 
   const quoteRef = useRef(null); 
@@ -669,7 +671,7 @@ export default function GroutEstimatorApp() {
   const soomgoReviewEvent = REVIEW_EVENTS.find(evt => evt.id === 'soomgo_review');
   const isSoomgoReviewApplied = selectedReviews.has('soomgo_review');
   
-  // ⭐️ [수정] 현재 활성화된 비디오 정보
+  // ⭐️ 현재 활성화된 비디오 정보
   const currentVideo = YOUTUBE_VIDEOS.find(v => v.id === activeVideoId);
   const currentEmbedUrl = getEmbedUrl(currentVideo.id);
 
@@ -678,22 +680,35 @@ export default function GroutEstimatorApp() {
     <div className={`min-h-screen bg-gray-50 t  ext-gray-800 font-sans pb-40`}>
       <GlobalStyles />
 
-      {/* 헤더: 짙은 네이비 배경 (유지) */}
+      {/* ⭐️ [수정] 헤더: 아이콘 제거 및 상담원 연결 버튼 추가 ⭐️ */}
       <header className="bg-indigo-900 text-white sticky top-0 z-20 shadow-xl">
         <div className="p-4 flex items-center justify-between max-w-md mx-auto">
-          <div className="flex items-center gap-2">
-            <TrendingUp className="h-6 w-6 text-white" /> 
+          {/* 아이콘 제거 */}
+          <div className="flex items-center"> 
             <h1 className="text-xl font-extrabold text-gray-50 tracking-wide">줄눈의미학</h1>
           </div>
-          <button onClick={() => window.location.reload()} className="text-xs bg-indigo-800 px-3 py-1 rounded-full text-white hover:bg-indigo-700 transition active:scale-95 shadow-md">
-            <RefreshCw size={12} className="inline mr-1" /> 초기화
-          </button>
+          <div className='flex gap-2'> 
+            {/* 상담원 연결 버튼 추가 */}
+            <button 
+              onClick={() => window.location.href = `tel:${PHONE_NUMBER}`} 
+              className="text-xs bg-amber-400 text-indigo-900 px-3 py-1 rounded-full font-extrabold hover:bg-amber-300 transition active:scale-95 shadow-md flex items-center"
+            >
+              <Phone size={12} className="inline mr-1" /> 상담원 연결
+            </button>
+            {/* 기존 초기화 버튼 */}
+            <button 
+              onClick={() => window.location.reload()} 
+              className="text-xs bg-indigo-800 px-3 py-1 rounded-full text-white hover:bg-indigo-700 transition active:scale-95 shadow-md flex items-center"
+            >
+              <RefreshCw size={12} className="inline mr-1" /> 초기화
+            </button>
+          </div>
         </div>
       </header>
 
       <main className="max-w-md mx-auto p-4 space-y-6">
 
-        {/* ⭐️ [수정] 동영상 섹션: 버튼 방식으로 변경 ⭐️ */}
+        {/* ⭐️ [유지] 동영상 섹션: 버튼 방식으로 변경 및 설명 문구 삭제 ⭐️ */}
         <section className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 animate-fade-in">
           <h2 className="text-lg font-extrabold flex items-center gap-2 p-4 text-gray-800 border-b border-gray-100">
             <Zap className="h-5 w-5 text-red-600" /> 시공 현장 영상
@@ -713,7 +728,7 @@ export default function GroutEstimatorApp() {
               ></iframe>
             </div>
             
-            {/* ⭐️ 버튼 영역 추가: 슬라이드(Dot) 대신 버튼으로 대체 ⭐️ */}
+            {/* ⭐️ 버튼 영역: 버튼 클릭 시 activeVideoId 업데이트 ⭐️ */}
             <div className="flex p-3 gap-3 bg-gray-50 border-t border-gray-100">
                 {YOUTUBE_VIDEOS.map((video) => (
                     <button
@@ -730,9 +745,7 @@ export default function GroutEstimatorApp() {
                 ))}
             </div>
           </div>
-          <p className="text-sm text-gray-500 p-4 pt-2">
-            **{currentVideo.title}**: 실제 시공 영상을 통해 품질을 직접 확인해보세요.
-          </p>
+          {/* ⭐️ [삭제됨] 이전에 존재했던 부설명 문구는 삭제되었습니다. ⭐️ */}
         </section>
         
         {/* --- 1. 현장 유형 섹션 (딜레이 조정: delay-150) --- */}
