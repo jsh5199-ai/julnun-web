@@ -109,29 +109,28 @@ const YOUTUBE_VIDEOS = [
 
 const getEmbedUrl = (videoId) => `https://www.youtube.com/embed/${videoId}?autoplay=0&mute=1&rel=0`;
 
-// ⭐️ [신규 데이터] 혼합 패키지 데이터 정의 (사용자 제공 데이터를 표준화) ⭐️
+// ⭐️ [신규 데이터] 혼합 패키지 데이터 정의 ⭐️
 const MIXED_PACKAGES = [
-  { id: 'P_MIX_01', price: 750000, label: '혼합패키지 01 (욕실2E/현관1P/샤워1P)', E_areas: [['bathroom_floor', 2]], P_areas: [['entrance', 1], ['shower_booth', 1]] },
-  { id: 'P_MIX_02', price: 750000, label: '혼합패키지 02 (욕실2E/현관1P/욕조1P)', E_areas: [['bathroom_floor', 2]], P_areas: [['entrance', 1], ['bathtub_wall', 1]] },
-  { id: 'P_MIX_03', price: 800000, label: '혼합패키지 03 (욕실2E/현관1P/안방벽1P)', E_areas: [['bathroom_floor', 2]], P_areas: [['entrance', 1], ['master_bath_wall', 1]] },
-  { id: 'P_MIX_04', price: 800000, label: '혼합패키지 04 (욕실2E/현관1P/공용벽1P)', E_areas: [['bathroom_floor', 2]], P_areas: [['entrance', 1], ['common_bath_wall', 1]] },
-  { id: 'P_MIX_05', price: 1050000, label: '혼합패키지 05 (욕실2E/현관1P/양쪽벽2P)', E_areas: [['bathroom_floor', 2]], P_areas: [['entrance', 1], ['master_bath_wall', 1], ['common_bath_wall', 1]] },
-  { id: 'P_MIX_06', price: 830000, label: '혼합패키지 06 (욕실2E/현관1P/샤워1P/베세2P)', E_areas: [['bathroom_floor', 2]], P_areas: [['entrance', 1], ['shower_booth', 1], ['balcony_laundry', 2]] },
-  { id: 'P_MIX_07', price: 830000, label: '혼합패키지 07 (욕실2E/현관1P/욕조1P/베세2P)', E_areas: [['bathroom_floor', 2]], P_areas: [['entrance', 1], ['bathtub_wall', 1], ['balcony_laundry', 2]] },
-  { id: 'P_MIX_08', price: 950000, label: '혼합패키지 08 (욕실2E/현관1P/샤워욕조2P/베세2P)', E_areas: [['bathroom_floor', 2]], P_areas: [['entrance', 1], ['bathtub_wall', 1], ['shower_booth', 1], ['balcony_laundry', 2]] },
-  { id: 'P_MIX_09', price: 1200000, label: '혼합패키지 09 (욕실2E/현관1P/양쪽벽2P/베세2P)', E_areas: [['bathroom_floor', 2]], P_areas: [['entrance', 1], ['master_bath_wall', 1], ['common_bath_wall', 1], ['balcony_laundry', 2]] },
-  { id: 'P_MIX_10', price: 900000, label: '혼합패키지 10 (욕실2E/샤워1E/현관1P/베세2P)', E_areas: [['bathroom_floor', 2], ['shower_booth', 1]], P_areas: [['entrance', 1], ['balcony_laundry', 2]] },
-  { id: 'P_MIX_11', price: 900000, label: '혼합패키지 11 (욕실2E/욕조1E/현관1P/베세2P)', E_areas: [['bathroom_floor', 2], ['bathtub_wall', 1]], P_areas: [['entrance', 1], ['balcony_laundry', 2]] },
-  { id: 'P_MIX_12', price: 1550000, label: '혼합패키지 12 (욕실2E/양쪽벽2E/현관1P/주방1P/베세2P)', E_areas: [['bathroom_floor', 2], ['master_bath_wall', 1], ['common_bath_wall', 1]], P_areas: [['entrance', 1], ['kitchen_wall', 1], ['balcony_laundry', 2]] },
-  { id: 'P_MIX_13', price: 1100000, label: '혼합패키지 13 (욕실2E/샤워1E/주방1E/현관1P/베세2P)', E_areas: [['bathroom_floor', 2], ['shower_booth', 1], ['kitchen_wall', 1]], P_areas: [['entrance', 1], ['balcony_laundry', 2]] },
-  { id: 'P_MIX_14', price: 1100000, label: '혼합패키지 14 (욕실2E/욕조1E/주방1E/현관1P/베세2P)', E_areas: [['bathroom_floor', 2], ['bathtub_wall', 1], ['kitchen_wall', 1]], P_areas: [['entrance', 1], ['balcony_laundry', 2]] },
+  { id: 'P_MIX_01', price: 750000, label: '혼합패키지 01', E_areas: [['bathroom_floor', 2]], P_areas: [['entrance', 1], ['shower_booth', 1]] },
+  { id: 'P_MIX_02', price: 750000, label: '혼합패키지 02', E_areas: [['bathroom_floor', 2]], P_areas: [['entrance', 1], ['bathtub_wall', 1]] },
+  { id: 'P_MIX_03', price: 800000, label: '혼합패키지 03', E_areas: [['bathroom_floor', 2]], P_areas: [['entrance', 1], ['master_bath_wall', 1]] },
+  { id: 'P_MIX_04', price: 800000, label: '혼합패키지 04', E_areas: [['bathroom_floor', 2]], P_areas: [['entrance', 1], ['common_bath_wall', 1]] },
+  { id: 'P_MIX_05', price: 1050000, label: '혼합패키지 05', E_areas: [['bathroom_floor', 2]], P_areas: [['entrance', 1], ['master_bath_wall', 1], ['common_bath_wall', 1]] },
+  { id: 'P_MIX_06', price: 830000, label: '혼합패키지 06', E_areas: [['bathroom_floor', 2]], P_areas: [['entrance', 1], ['shower_booth', 1], ['balcony_laundry', 2]] },
+  { id: 'P_MIX_07', price: 830000, label: '혼합패키지 07', E_areas: [['bathroom_floor', 2]], P_areas: [['entrance', 1], ['bathtub_wall', 1], ['balcony_laundry', 2]] },
+  { id: 'P_MIX_08', price: 950000, label: '혼합패키지 08', E_areas: [['bathroom_floor', 2]], P_areas: [['entrance', 1], ['bathtub_wall', 1], ['shower_booth', 1], ['balcony_laundry', 2]] },
+  { id: 'P_MIX_09', price: 1200000, label: '혼합패키지 09', E_areas: [['bathroom_floor', 2]], P_areas: [['entrance', 1], ['master_bath_wall', 1], ['common_bath_wall', 1], ['balcony_laundry', 2]] },
+  { id: 'P_MIX_10', price: 900000, label: '혼합패키지 10', E_areas: [['bathroom_floor', 2], ['shower_booth', 1]], P_areas: [['entrance', 1], ['balcony_laundry', 2]] },
+  { id: 'P_MIX_11', price: 900000, label: '혼합패키지 11', E_areas: [['bathroom_floor', 2], ['bathtub_wall', 1]], P_areas: [['entrance', 1], ['balcony_laundry', 2]] },
+  { id: 'P_MIX_12', price: 1550000, label: '혼합패키지 12', E_areas: [['bathroom_floor', 2], ['master_bath_wall', 1], ['common_bath_wall', 1]], P_areas: [['entrance', 1], ['kitchen_wall', 1], ['balcony_laundry', 2]] },
+  { id: 'P_MIX_13', price: 1100000, label: '혼합패키지 13', E_areas: [['bathroom_floor', 2], ['shower_booth', 1], ['kitchen_wall', 1]], P_areas: [['entrance', 1], ['balcony_laundry', 2]] },
+  { id: 'P_MIX_14', price: 1100000, label: '혼합패키지 14', E_areas: [['bathroom_floor', 2], ['bathtub_wall', 1], ['kitchen_wall', 1]], P_areas: [['entrance', 1], ['balcony_laundry', 2]] },
 ];
-
-// -----------------------------------------------------------------
-// [컴포넌트] PackageToast, Accordion, MaterialDetailModal (유지)
 // -----------------------------------------------------------------
 
 const PackageToast = ({ isVisible, onClose, label }) => {
+    const toastLabel = label || '패키지 할인'; // 안전한 기본값 설정
+    
     useEffect(() => {
         if (isVisible) {
             const timer = setTimeout(() => {
@@ -149,7 +148,7 @@ const PackageToast = ({ isVisible, onClose, label }) => {
                 <div className="flex items-center gap-2">
                     <Gift size={18} className='text-white flex-shrink-0' /> 
                     <div className="text-sm font-bold truncate">
-                        {label} 적용되었습니다!
+                        {toastLabel} 적용되었습니다! 
                     </div>
                 </div>
                 <button 
@@ -256,21 +255,26 @@ export default function GroutEstimatorApp() {
   
   // ⭐️ [신규 함수] 혼합 패키지 매칭 로직
   const findMatchingPackage = useCallback((selectionSummary) => {
-    // 1. 선택된 자재 종류 확인 (Poly, Epoxy 외 다른 자재가 선택되면 패키지 대상 제외)
-    const selectedMaterials = Object.keys(selectionSummary);
-    const validMaterials = ['poly', 'kerapoxy'];
-    if (selectedMaterials.some(m => !validMaterials.includes(m))) {
-      return null;
-    }
-
     const polySelections = selectionSummary['poly'] || {};
     const epoxySelections = selectionSummary['kerapoxy'] || {};
 
-    // 2. 모든 MIXED_PACKAGES 순회하며 매칭 확인
     for (const pkg of MIXED_PACKAGES) {
       let isMatch = true;
 
-      // 3. 패키지 요구사항과 사용자의 선택을 비교 (Poly 요구사항)
+      // 1. Poly 요구사항과 사용자의 Poly 선택 비교
+      const requiredPolyCount = pkg.P_areas.reduce((sum, [, qty]) => sum + qty, 0);
+      const selectedPolyCount = Object.values(polySelections).reduce((sum, v) => sum + v, 0);
+
+      // 2. Epoxy 요구사항과 사용자의 Epoxy 선택 비교
+      const requiredEpoxyCount = pkg.E_areas.reduce((sum, [, qty]) => sum + qty, 0);
+      const selectedEpoxyCount = Object.values(epoxySelections).reduce((sum, v) => sum + v, 0);
+
+      // 3. 총 개수 일치 확인 (필요한 총 개수와 사용자가 선택한 총 개수 비교)
+      if (selectedPolyCount + selectedEpoxyCount !== requiredPolyCount + requiredEpoxyCount) {
+        continue;
+      }
+      
+      // 4. 세부 항목 수량 일치 확인 (Poly 항목)
       for (const [id, requiredQty] of pkg.P_areas) {
         if (polySelections[id] !== requiredQty) {
           isMatch = false;
@@ -279,7 +283,7 @@ export default function GroutEstimatorApp() {
       }
       if (!isMatch) continue;
 
-      // 4. 패키지 요구사항과 사용자의 선택을 비교 (Epoxy 요구사항)
+      // 5. 세부 항목 수량 일치 확인 (Epoxy 항목)
       for (const [id, requiredQty] of pkg.E_areas) {
         if (epoxySelections[id] !== requiredQty) {
           isMatch = false;
@@ -288,21 +292,15 @@ export default function GroutEstimatorApp() {
       }
       if (!isMatch) continue;
 
-      // 5. 남는 선택 항목이 없는지 확인 (선택 항목의 총 개수가 패키지에 포함된 항목의 총 개수와 일치해야 함)
-      const totalSelectedCount = Object.values(polySelections).reduce((sum, v) => sum + v, 0) + 
-                                  Object.values(epoxySelections).reduce((sum, v) => sum + v, 0);
-      
-      const totalPackageCount = pkg.P_areas.reduce((sum, [, qty]) => sum + qty, 0) +
-                                pkg.E_areas.reduce((sum, [, qty]) => sum + qty, 0);
-
-      // 6. 항목 ID 목록도 정확히 일치하는지 추가 검증 (선택 항목 외에 다른 항목이 0개로 남아있는지 확인)
+      // 6. Poly 또는 Epoxy로 선택된 항목 중 패키지에 없는 항목이 있는지 확인 (선택한 항목 ID 목록이 패키지 항목 ID 목록과 정확히 일치해야 함)
       const selectedAreaIds = new Set([...Object.keys(polySelections), ...Object.keys(epoxySelections)]);
       const packageAreaIds = new Set([...pkg.P_areas.map(([id]) => id), ...pkg.E_areas.map(([id]) => id)]);
       
+      // 선택된 항목 ID 목록이 패키지 ID 목록에 모두 포함되어야 함 (완벽 일치)
       const isIdSetMatch = selectedAreaIds.size === packageAreaIds.size && 
                            [...selectedAreaIds].every(id => packageAreaIds.has(id));
 
-      if (totalSelectedCount === totalPackageCount && isIdSetMatch) {
+      if (isIdSetMatch) {
         return pkg; // 완벽하게 일치하는 패키지 발견
       }
     }
@@ -326,17 +324,14 @@ export default function GroutEstimatorApp() {
 
     // --- 패키지 로직 재정의 ---
     if (matchedPackage) {
-        // ⭐️ 혼합 패키지 적용 ⭐️
+        // ⭐️ 1. 혼합 패키지 적용 ⭐️
         total = matchedPackage.price;
         labelText = matchedPackage.label;
         isPackageActive = true;
         
-        // 혼합 패키지 적용 시, 모든 항목은 패키지 가격에 포함되므로, q를 0으로 초기화
+        // 혼합 패키지 적용 시, 모든 항목은 패키지 가격에 포함됨.
         ALL_AREAS.forEach(area => { q[area.id] = 0; });
         
-        // 혼합 패키지에서는 현관 무료 서비스 개념 대신 고정 가격이 적용됨.
-        // 기존 단일 소재 패키지 로직은 건너뜀.
-    
     } else {
         // --- 2. 기존 단일 소재 패키지 로직 (후순위) ---
 
@@ -349,7 +344,7 @@ export default function GroutEstimatorApp() {
         const qEntrance = q['entrance'] || 0;
         const qBathWallOne = (qMasterWall >= 1 || qCommonWall >= 1);
         const qBathWallTotal = qMasterWall + qCommonWall;
-        let packageDiscount = 0; // 기존 단일 패키지 할인을 계산
+        let packageDiscount = 0;
 
         // ... (기존 패키지 로직 삽입 - q 수량 차감 및 total 계산)
         if (selectedMaterial.id === 'poly' && qBathFloor >= 2 && qEntrance >= 1 && qBathWallTotal === 0 && qShower === 0 && qBathtub === 0) {
@@ -382,13 +377,13 @@ export default function GroutEstimatorApp() {
     }
 
 
-    // --- 3. 잔여 항목 개별 계산 (항목별 소재 가격 적용) ---
+    // --- 3. 잔여 항목 및 아이템 계산 ---
     ALL_AREAS.forEach(area => {
         const initialCount = quantities[area.id] || 0;
         
         if (initialCount === 0) return;
 
-        const count = q[area.id] || 0; // 잔여 수량
+        const count = q[area.id] || 0;
         const originalBasePrice = area.basePrice;
 
         const areaMatId = areaMaterials[area.id];
@@ -400,15 +395,14 @@ export default function GroutEstimatorApp() {
 
         let itemOriginalTotal = originalBasePrice * initialCount * currentMod * selectedHousing.multiplier;
         
-        // *************************************************************************
-        // * 혼합 패키지가 적용된 경우 (matchedPackage), 잔여 수량 (count)이 0이므로  *
-        // * 이 루프는 실행되지 않습니다. 따라서 패키지에 포함된 항목은 아래에 추가만 합니다. *
-        // *************************************************************************
-
-        if (!matchedPackage) {
+        // 혼합 패키지가 적용된 경우 (matchedPackage)에는 모든 항목을 0원 (패키지 포함)으로 추가
+        if (matchedPackage) {
+             itemizedPrices.push({
+                id: area.id, label: area.label, quantity: initialCount, unit: area.unit, originalPrice: Math.floor(itemOriginalTotal / 1000) * 1000, calculatedPrice: 0, discount: itemOriginalTotal, isFreeService: false, isPackageItem: true, isDiscount: false, materialLabel: selectedAreaMaterial ? selectedAreaMaterial.label.split('(')[0].trim() : 'N/A'
+             });
+        } else {
              // 단일 패키지 및 개별 선택 로직 적용
-            let remainingOriginalPrice = originalBasePrice * count * currentMod * selectedHousing.multiplier;
-            let remainingCalculatedPrice = remainingOriginalPrice;
+            let remainingCalculatedPrice = originalBasePrice * count * currentMod * selectedHousing.multiplier;
             let remainingDiscount = 0;
             let finalCalculatedPrice = 0;
             let finalDiscount = 0;
@@ -431,12 +425,6 @@ export default function GroutEstimatorApp() {
              // 개별 항목 가격 정보 추가
              itemizedPrices.push({
                 id: area.id, label: area.label, quantity: initialCount, unit: area.unit, originalPrice: Math.floor(itemOriginalTotal / 1000) * 1000, calculatedPrice: finalCalculatedPrice, discount: finalDiscount, isFreeService: isFreeServiceItem, isPackageItem: packageCount > 0 && !isFreeServiceItem, isDiscount: false, materialLabel: selectedAreaMaterial ? selectedAreaMaterial.label.split('(')[0].trim() : 'N/A'
-             });
-
-        } else {
-             // ⭐️ 혼합 패키지 적용 시 (matchedPackage)에는 모든 항목을 0원 (패키지 포함)으로 추가 ⭐️
-             itemizedPrices.push({
-                id: area.id, label: area.label, quantity: initialCount, unit: area.unit, originalPrice: Math.floor(itemOriginalTotal / 1000) * 1000, calculatedPrice: 0, discount: itemOriginalTotal, isFreeService: false, isPackageItem: true, isDiscount: false, materialLabel: selectedAreaMaterial ? selectedAreaMaterial.label.split('(')[0].trim() : 'N/A'
              });
         }
     });
@@ -468,8 +456,8 @@ export default function GroutEstimatorApp() {
     return { 
       price: finalPrice, 
       originalCalculatedPrice, 
-      label: matchedPackage ? matchedPackage.label : labelText, // ⭐️ 매칭된 패키지 라벨 우선 적용 ⭐️
-      isPackageActive: !!matchedPackage || isPackageActive, // 혼합 패키지 또는 기존 패키지 중 하나라도 적용되면 true
+      label: matchedPackage ? matchedPackage.label : labelText, 
+      isPackageActive: !!matchedPackage || isPackageActive,
       isFreeEntrance,
       discountAmount,
       minimumFeeApplied, 
@@ -572,7 +560,7 @@ export default function GroutEstimatorApp() {
         <section className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 animate-fade-in">
           <h2 className="text-lg font-extrabold flex items-center gap-2 p-4 text-gray-800 border-b border-gray-100">
             <Zap className="h-5 w-5 text-red-600" /> 시공 현장 영상
-          </h2>
+          </h2 >
           <div className="relative">
             <div className="aspect-video w-full">
               <iframe
