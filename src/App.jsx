@@ -229,8 +229,11 @@ export default function GroutEstimatorApp() {
 
   const SOOMGO_REVIEW_URL = 'https://www.soomgo.com/profile/users/10755579?tab=review';
   const PHONE_NUMBER = '010-7734-6709';
+  
+  // ⭐️ 최소 출장비 상수 정의
+  const MIN_FEE = 200000;
 
-  // --- calculation 로직 (유지) ---
+  // --- calculation 로직 (수정됨) ---
   const handleQuantityChange = useCallback((id, delta) => {
     setQuantities(prev => {
       const nextValue = Math.max(0, prev[id] + delta);
@@ -555,6 +558,15 @@ export default function GroutEstimatorApp() {
     });
     total -= discountAmount;
     
+    let finalPrice = Math.max(0, Math.floor(total / 1000) * 1000); // 1,000원 단위로 반올림
+    let minimumFeeApplied = false;
+
+    // ⭐️ 최소 출장비 (20만원) 적용 로직 ⭐️
+    if (finalPrice > 0 && finalPrice < MIN_FEE) {
+        finalPrice = MIN_FEE;
+        minimumFeeApplied = true;
+    }
+
     // 예상 시공 시간 계산 (기능은 유지하되, 리턴하지 않음)
     let estimatedHours = 0;
     if (totalAreaCount > 0) {
@@ -567,11 +579,12 @@ export default function GroutEstimatorApp() {
 
 
     return { 
-      price: Math.max(0, Math.floor(total / 1000) * 1000), 
+      price: finalPrice, 
       label: labelText,
       isPackageActive,
       isFreeEntrance,
       discountAmount,
+      minimumFeeApplied, // 플래그 반환
       // estimatedHours 제외
       itemizedPrices: itemizedPrices.filter(item => item.quantity > 0 || item.isDiscount),
     };
@@ -949,7 +962,7 @@ export default function GroutEstimatorApp() {
                             setShowModal(true);
                             setShowToast(false); 
                         }} 
-                        // ⭐️ [수정] className 정의 오류 수정: 버튼 스타일 복구
+                        // hasSelections가 true일 때만 렌더링되므로, disabled는 항상 false (활성화)
                         className={`w-full py-3 rounded-xl font-extrabold text-lg transition-all 
                             bg-indigo-700 text-white hover:bg-indigo-800 active:bg-indigo-900 shadow-md
                         `}
@@ -972,7 +985,7 @@ export default function GroutEstimatorApp() {
               </button>
             </div>
             
-            {/* ★★★ 캡처 전용 견적서 양식 (요청 문구 모두 삭제 적용) ★★★ */}
+            {/* ★★★ 캡처 전용 견적서 양식 ★★★ */}
             <div className="p-5 text-gray-800 bg-white overflow-y-auto max-h-[70vh]"> 
               <div ref={quoteRef} id="quote-content" className="border-4 border-indigo-700 rounded-lg p-5 space-y-3 mx-auto" style={{ width: '320px' }}>
                 
@@ -998,8 +1011,17 @@ export default function GroutEstimatorApp() {
 
                 {/* 시공 및 할인 내역 */}
                 <div className="space-y-2 text-sm border-b border-gray-200 pb-3">
-                    {/* 시공 내역 및 가격 문구 제거 */}
 
+                    {/* ⭐️ 최소 출장비 적용 문구 추가 ⭐️ */}
+                    {calculation.minimumFeeApplied && (
+                        <div className="bg-red-50/70 p-2 rounded-md border-l-4 border-red-500 text-xs font-semibold text-gray-700">
+                            <p className='flex items-center gap-1 text-red-800 font-extrabold'>
+                                <Zap size={12} className='text-red-400'/> 최소 출장비 {MIN_FEE.toLocaleString()}원 적용
+                            </p>
+                            <p className='text-[11px] ml-1'>선택하신 항목의 합계가 {MIN_FEE.toLocaleString()}원 미만이므로 최소 출장비가 적용되었습니다.</p>
+                        </div>
+                    )}
+                    
                     {/* 패키지 포함 서비스 내역 */}
                     {calculation.isPackageActive && (
                         <div className="bg-indigo-50/70 p-2 rounded-md border-l-4 border-indigo-500 text-xs font-semibold text-gray-700">
