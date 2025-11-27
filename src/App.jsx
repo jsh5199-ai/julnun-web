@@ -98,10 +98,10 @@ const FAQ_ITEMS = [
     { question: "Q5. 구축 아파트도 시공이 가능한가요?", answer: "네, 가능합니다. 기존 줄눈을 제거하는 그라인딩 작업이 추가로 필요하며, 현재 견적은 신축/구축 동일하게 적용됩니다." },
 ];
 
-// 🎥 YouTube 영상 목록 및 URL 생성 함수 (수정됨)
+// 🎥 YouTube 영상 목록 및 URL 생성 함수 (수정됨: 버튼 명칭에 맞게 업데이트)
 const YOUTUBE_VIDEOS = [
-    { id: 'XekG8hevWpA', title: '시공 현장 영상 (바닥)' }, // 기존 영상
-    { id: 'M6Aq_VVaG0s', title: '시공 현장 영상 (벽면)' }, // 새로 추가된 영상
+    { id: 'M6Aq_VVaG0s', title: '에폭시 시공영상', label: '에폭시 시공영상' }, // 이전 '시공 현장 영상 (벽면)'
+    { id: 'XekG8hevWpA', title: '밑작업 영상', label: '밑작업 영상' }, // 이전 '시공 현장 영상 (바닥)'
 ];
 
 const getEmbedUrl = (videoId) => `https://www.youtube.com/embed/${videoId}?autoplay=0&mute=1&rel=0`;
@@ -220,7 +220,8 @@ export default function GroutEstimatorApp() {
   const [showModal, setShowModal] = useState(false);
   const [showMaterialModal, setShowMaterialModal] = useState(false); 
   const [showToast, setShowToast] = useState(false); 
-  const [activeVideoIndex, setActiveVideoIndex] = useState(0); // ⭐️ 새로 추가된 상태
+  // ⭐️ [수정] activeVideoIndex 대신 activeVideoId 사용. 초기값은 첫 번째 영상 ID로 설정.
+  const [activeVideoId, setActiveVideoId] = useState(YOUTUBE_VIDEOS[0].id); 
 
   const quoteRef = useRef(null); 
 
@@ -668,8 +669,8 @@ export default function GroutEstimatorApp() {
   const soomgoReviewEvent = REVIEW_EVENTS.find(evt => evt.id === 'soomgo_review');
   const isSoomgoReviewApplied = selectedReviews.has('soomgo_review');
   
-  // ⭐️ 현재 활성화된 비디오 정보
-  const currentVideo = YOUTUBE_VIDEOS[activeVideoIndex];
+  // ⭐️ [수정] 현재 활성화된 비디오 정보
+  const currentVideo = YOUTUBE_VIDEOS.find(v => v.id === activeVideoId);
   const currentEmbedUrl = getEmbedUrl(currentVideo.id);
 
   return (
@@ -692,7 +693,7 @@ export default function GroutEstimatorApp() {
 
       <main className="max-w-md mx-auto p-4 space-y-6">
 
-        {/* ⭐️ [수정] 동영상 섹션: 슬라이드 캐러셀 방식으로 변경 ⭐️ */}
+        {/* ⭐️ [수정] 동영상 섹션: 버튼 방식으로 변경 ⭐️ */}
         <section className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 animate-fade-in">
           <h2 className="text-lg font-extrabold flex items-center gap-2 p-4 text-gray-800 border-b border-gray-100">
             <Zap className="h-5 w-5 text-red-600" /> 시공 현장 영상
@@ -712,17 +713,20 @@ export default function GroutEstimatorApp() {
               ></iframe>
             </div>
             
-            {/* 캐러셀 페이지네이션 Dot */}
-            <div className="flex justify-center items-center py-2 bg-gray-100/50">
-                {YOUTUBE_VIDEOS.map((_, index) => (
+            {/* ⭐️ 버튼 영역 추가: 슬라이드(Dot) 대신 버튼으로 대체 ⭐️ */}
+            <div className="flex p-3 gap-3 bg-gray-50 border-t border-gray-100">
+                {YOUTUBE_VIDEOS.map((video) => (
                     <button
-                        key={index}
-                        onClick={() => setActiveVideoIndex(index)}
-                        className={`w-2.5 h-2.5 mx-1 rounded-full transition-all duration-300 ${
-                            activeVideoIndex === index ? 'bg-indigo-600 w-5' : 'bg-gray-400'
+                        key={video.id}
+                        onClick={() => setActiveVideoId(video.id)}
+                        className={`flex-1 py-2 text-sm font-extrabold rounded-lg transition-all duration-300 shadow-md active:scale-[0.99] ${
+                            activeVideoId === video.id 
+                                ? 'bg-indigo-700 text-white' 
+                                : 'bg-white text-indigo-700 border-2 border-indigo-700 hover:bg-indigo-50'
                         }`}
-                        aria-label={`Video ${index + 1}`}
-                    />
+                    >
+                        {video.label}
+                    </button>
                 ))}
             </div>
           </div>
