@@ -755,7 +755,7 @@ export default function GroutEstimatorApp() {
         {/* --- 3. 원하는 시공범위를 선택해주세요 (욕실 범위) --- */}
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-300">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
-            <Bath className="h-5 w-5 text-indigo-600" /> 3. 시공 범위 선택: 욕실
+            <Bath className="h-5 w-5 text-indigo-600" /> 3. 욕실 시공범위 선택
           </h2 >
           <div className="space-y-3">
             {/* ★★★ BATHROOM_AREAS 사용 ★★★ */}
@@ -785,7 +785,7 @@ export default function GroutEstimatorApp() {
         {/* --- 3.2. 원하는 시공범위를 선택해주세요 (기타 범위) --- */}
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-300">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
-            <LayoutGrid className="h-5 w-5 text-indigo-600" /> 3. 시공 범위 선택: 현관 / 베란다 / 주방 / 거실
+            <LayoutGrid className="h-5 w-5 text-indigo-600" /> 3. 기타 시공범위 선택
           </h2 >
           <div className="space-y-3">
             {/* ★★★ OTHER_AREAS 사용 ★★★ */}
