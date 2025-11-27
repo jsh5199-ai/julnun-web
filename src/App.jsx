@@ -69,7 +69,7 @@ const MATERIALS = [
   },
 ];
 
-// ⭐️ [수정] 카테고리별로 데이터 분리 ⭐️
+// ⭐️ [수정] 카테고리별로 데이터 분리 및 베란다/세탁실 기본가 수정 ⭐️
 const BATHROOM_AREAS = [
   { id: 'entrance', label: '현관', basePrice: 50000, icon: DoorOpen, unit: '개소' },
   { id: 'bathroom_floor', label: '욕실 바닥', basePrice: 150000, icon: Bath, unit: '개소' },
@@ -80,8 +80,11 @@ const BATHROOM_AREAS = [
 ];
 
 const OTHER_AREAS = [
-  { id: 'balcony_laundry', label: '베란다/세탁실', basePrice: 80000, icon: LayoutGrid, unit: '개소', desc: '원하는 개수만큼 선택' }, 
+  // 베란다/세탁실: 폴리 10만, 에폭시 25만
+  { id: 'balcony_laundry', label: '베란다/세탁실', basePrice: 100000, icon: LayoutGrid, unit: '개소', desc: '원하는 개수만큼 선택' }, 
+  // 주방 벽면: 폴리 15만, 에폭시 25만
   { id: 'kitchen_wall', label: '주방 벽면', basePrice: 150000, icon: Utensils, unit: '구역' },
+  // 거실: 폴리 55만, 에폭시 110만
   { id: 'living_room', label: '거실 바닥', basePrice: 550000, icon: Sofa, unit: '구역', desc: '복도,주방 포함' },
 ];
 
@@ -426,7 +429,7 @@ export default function GroutEstimatorApp() {
     return null; // 매칭되는 패키지 없음
   }, [quantities]);
   
-  // 🚀 [수정] calculation 로직: 패키지 적용 시 q 초기화 범위 및 잔여 계산 로직 수정
+  // 🚀 [수정] calculation 로직: 기타 범위의 에폭시 가격 수정을 위한 특수 계수 처리
   const calculation = useMemo(() => {
     const selectedHousing = HOUSING_TYPES.find(h => h.id === housingType);
     let itemizedPrices = []; 
@@ -550,11 +553,23 @@ export default function GroutEstimatorApp() {
       
       let currentMod = selectedAreaMaterial ? selectedAreaMaterial.priceMod : 1.0;
       
-      // 특수 영역 계수 처리
-      if (area.id === 'living_room' && selectedAreaMaterial && selectedAreaMaterial.id === 'kerapoxy') currentMod = 2.0;
-      if (area.id === 'balcony_laundry' && selectedAreaMaterial && selectedAreaMaterial.id === 'kerapoxy') {
-          currentMod = 3.75; 
+      // ⭐️ [수정] 특수 영역 (기타 범위) 에폭시 계수 처리 ⭐️
+      if (selectedAreaMaterial && selectedAreaMaterial.id === 'kerapoxy') {
+          if (area.id === 'living_room') {
+              // 거실 바닥: 폴리 55만, 에폭시 110만 -> 계수 2.0
+              currentMod = 2.0; 
+          } else if (area.id === 'balcony_laundry') {
+              // 베란다/세탁실: 폴리 10만, 에폭시 25만 -> 계수 2.5
+              currentMod = 2.5; 
+          } else if (area.id === 'kitchen_wall') {
+              // 주방 벽면: 폴리 15만, 에폭시 25만 -> 계수 1.666...
+              currentMod = 250000 / 150000;
+          } else if (area.id === 'bathroom_floor' || area.id === 'shower_booth' || area.id === 'bathtub_wall' || area.id === 'master_bath_wall' || area.id === 'common_bath_wall' || area.id === 'entrance') {
+              // 욕실 및 현관: 기본 계수 1.8 적용
+              currentMod = 1.8;
+          }
       } 
+      // ⭐️ [수정 끝] ⭐️
       
       // 항목의 원래 총 가격 (initialCount 기준)
       let itemOriginalTotal = originalBasePrice * initialCount * currentMod * selectedHousing.multiplier;
