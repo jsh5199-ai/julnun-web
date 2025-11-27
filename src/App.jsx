@@ -841,7 +841,7 @@ export default function GroutEstimatorApp() {
                                     {area.desc && <span className="block text-indigo-600">{area.desc}</span>}
                                     {/* ⭐️ 현관 바닥 추천 문구 추가 ⭐️ */}
                                     {area.id === 'entrance' && (
-                                        <span className="block text-amber-500 font-bold mt-0.5">현관은 폴리아스파틱을 적극 추천합니다.</span>
+                                        <span className="block text-amber-500 font-bold mt-0.5">현관은 폴리소재를 적극 추천합니다.</span>
                                     )}
                                 </div>
                             </div>
