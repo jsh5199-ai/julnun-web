@@ -885,7 +885,7 @@ export default function GroutEstimatorApp() {
         </section>
         
         {/* --- 자주 묻는 질문 (FAQ) (딜레이 조정: delay-750) --- */}
-        <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 mt-6 animate-fade-in delay-750">
+        <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-750">
             <h2 className="text-lg font-extrabold text-gray-800 mb-2 flex items-center gap-2 border-b pb-2">
                 <HelpCircle className="h-5 w-5 text-indigo-600"/> 자주 묻는 질문
             </h2 >
@@ -943,15 +943,15 @@ export default function GroutEstimatorApp() {
                         </div>
                     </div>
 
-                    {/* 2. 견적서 보기 버튼 (색상 유지) */}
+                    {/* 2. 견적서 보기 버튼 (색상 복구 및 유지) */}
                     <button 
                         onClick={() => {
                             setShowModal(true);
                             setShowToast(false); 
                         }} 
-                        // hasSelections가 true일 때만 렌더링되므로, disabled는 항상 false (활성화)
+                        // ⭐️ [수정] className 정의 오류 수정: 버튼 스타일 복구
                         className={`w-full py-3 rounded-xl font-extrabold text-lg transition-all 
-                            'bg-indigo-700 text-white hover:bg-indigo-800 active:bg-indigo-900 shadow-md'
+                            bg-indigo-700 text-white hover:bg-indigo-800 active:bg-indigo-900 shadow-md
                         `}
                     >
                         견적서 상세보기
