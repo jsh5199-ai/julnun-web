@@ -81,7 +81,7 @@ const SERVICE_AREAS = [
 const SILICON_AREAS = [
   { id: 'silicon_bathtub', label: '욕조 테두리 교체', basePrice: 80000, icon: Eraser, unit: '개소', desc: '단독 8만 / 패키지시 5만' },
   { id: 'silicon_sink', label: '세면대+젠다이 교체', basePrice: 30000, icon: Eraser, unit: '개소', desc: '오염된 실리콘 제거 후 재시공' },
-  { id: 'silicon_living_baseboard', label: '거실/주방 걸레받이 실리콘', basePrice: 400000, icon: Sofa, unit: '구역', desc: '단독 40만 / 패키지시 35만' },
+  { id: 'silicon_living_baseboard', label: '거실 걸레받이 실리콘', basePrice: 400000, icon: Sofa, unit: '구역', desc: '단독 40만 / 패키지시 35만' },
 ];
 
 const ALL_AREAS = [...SERVICE_AREAS, ...SILICON_AREAS];
@@ -760,7 +760,7 @@ export default function GroutEstimatorApp() {
         {/* --- 3. 원하는 시공범위를 선택해주세요 (아이콘 및 선택 색상 수정) --- */}
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-300">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
-            <Calculator className="h-5 w-5 text-indigo-600" /> 3. 시공 범위 선택
+            <Calculator className="h-5 w-5 text-indigo-600" /> 3. 시공범위 선택
           </h2 >
           <div className="space-y-3">
             {SERVICE_AREAS.map((area) => {
