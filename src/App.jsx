@@ -46,7 +46,7 @@ const GlobalStyles = () => (
 );
 
 // =================================================================
-// [데이터] (유지)
+// [데이터] 카테고리별로 분리
 // =================================================================
 const HOUSING_TYPES = [
   { id: 'new', label: '신축 아파트', multiplier: 1.0 },
@@ -66,25 +66,33 @@ const MATERIALS = [
   },
 ];
 
-const SERVICE_AREAS = [
-  { id: 'entrance', label: '현관', basePrice: 50000, icon: DoorOpen, unit: '개소' },
+// ★★★ 1. 욕실 범위 항목 분리 ★★★
+const BATHROOM_AREAS = [
   { id: 'bathroom_floor', label: '욕실 바닥', basePrice: 150000, icon: Bath, unit: '개소' },
   { id: 'shower_booth', label: '샤워부스 벽 3면', basePrice: 150000, icon: Bath, unit: '구역' },
   { id: 'bathtub_wall', label: '욕조 벽 3면', basePrice: 150000, icon: Bath, unit: '구역' },
   { id: 'master_bath_wall', label: '안방욕실 벽 전체', basePrice: 300000, icon: Bath, unit: '구역' },
   { id: 'common_bath_wall', label: '공용욕실 벽 전체', basePrice: 300000, icon: Bath, unit: '구역' },
+];
+
+// ★★★ 2. 기타 범위 항목 분리 (현관, 베란다, 주방, 거실) ★★★
+const OTHER_AREAS = [
+  { id: 'entrance', label: '현관', basePrice: 50000, icon: DoorOpen, unit: '개소' },
   { id: 'balcony_laundry', label: '베란다/세탁실', basePrice: 150000, icon: LayoutGrid, unit: '개소', desc: '원하는 개수만큼 선택' },
   { id: 'kitchen_wall', label: '주방 벽면', basePrice: 150000, icon: Utensils, unit: '구역' },
   { id: 'living_room', label: '거실 바닥', basePrice: 550000, icon: Sofa, unit: '구역', desc: '복도,주방 포함' },
 ];
 
+// ★★★ 3. 실리콘 시공 영역은 별도로 유지하되, 필요하다면 재분류 ★★★
 const SILICON_AREAS = [
   { id: 'silicon_bathtub', label: '욕조 테두리 교체', basePrice: 80000, icon: Eraser, unit: '개소', desc: '단독 8만 / 패키지시 5만' },
   { id: 'silicon_sink', label: '세면대+젠다이 교체', basePrice: 30000, icon: Eraser, unit: '개소', desc: '오염된 실리콘 제거 후 재시공' },
   { id: 'silicon_living_baseboard', label: '거실/주방 걸레받이 실리콘', basePrice: 400000, icon: Sofa, unit: '구역', desc: '단독 40만 / 패키지시 35만' },
 ];
 
-const ALL_AREAS = [...SERVICE_AREAS, ...SILICON_AREAS];
+// ★★★ 4. 모든 항목은 계산을 위해 하나의 배열로 통합 (SERVICE_AREAS 대신) ★★★
+const ALL_AREAS = [...BATHROOM_AREAS, ...OTHER_AREAS, ...SILICON_AREAS];
+
 
 const REVIEW_EVENTS = [
   { id: 'soomgo_review', label: '숨고 리뷰이벤트', discount: 20000, icon: Star, desc: '시공 후기 작성 약속' },
@@ -99,7 +107,7 @@ const FAQ_ITEMS = [
 ];
 
 // =================================================================
-// [컴포넌트] PackageToast (확인하기 버튼 노란색으로 변경)
+// [컴포넌트] PackageToast 및 Modal (유지)
 // =================================================================
 const PackageToast = ({ isVisible, onClose }) => {
     useEffect(() => {
@@ -135,9 +143,6 @@ const PackageToast = ({ isVisible, onClose }) => {
     );
 };
 
-// =================================================================
-// [컴포넌트] Accordion & MaterialDetailModal (유지)
-// =================================================================
 const Accordion = ({ question, answer }) => {
     const [isOpen, setIsOpen] = useState(false);
     return (
@@ -205,7 +210,8 @@ export default function GroutEstimatorApp() {
   const [polyOption, setPolyOption] = useState('pearl');
   const [epoxyOption, setEpoxyOption] = useState('kerapoxy');
   const [quantities, setQuantities] = useState(
-    [...SERVICE_AREAS, ...SILICON_AREAS].reduce((acc, area) => ({ ...acc, [area.id]: 0 }), {})
+    // ★★★ ALL_AREAS를 사용하여 초기화
+    ALL_AREAS.reduce((acc, area) => ({ ...acc, [area.id]: 0 }), {})
   );
   const [selectedReviews, setSelectedReviews] = useState(new Set());
   const [showModal, setShowModal] = useState(false);
@@ -222,9 +228,15 @@ export default function GroutEstimatorApp() {
     setQuantities(prev => {
       const nextValue = Math.max(0, prev[id] + delta);
       const nextState = { ...prev, [id]: nextValue };
+      // 벽 전체를 선택하면 샤워부스/욕조 벽 선택 해제
       if ((id === 'master_bath_wall' || id === 'common_bath_wall') && delta > 0) {
         nextState['shower_booth'] = 0;
         nextState['bathtub_wall'] = 0;
+      }
+      // 샤워부스/욕조 벽을 선택하면 벽 전체 선택 해제
+      if ((id === 'shower_booth' || id === 'bathtub_wall') && delta > 0) {
+        nextState['master_bath_wall'] = 0;
+        nextState['common_bath_wall'] = 0;
       }
       return nextState;
     });
@@ -263,7 +275,7 @@ export default function GroutEstimatorApp() {
     let packageDiscount = 0;
     const itemizedPrices = [];
 
-    // --- 패키지 로직 (labelText 괄호 제거) ---
+    // --- 패키지 로직 (유지) ---
     
     // --- 패키지 1: 폴리 30만원 (욕실2+현관1) ---
     if (selectedMaterial.id === 'poly' && qBathFloor >= 2 && qEntrance >= 1 && qBathWallTotal === 0 && qShower === 0 && qBathtub === 0) {
@@ -408,7 +420,7 @@ export default function GroutEstimatorApp() {
 
 
     // --- 잔여 항목 및 패키지 포함 항목 모두 계산 (할인 금액 표시 방식 수정) ---
-    ALL_AREAS.forEach(area => {
+    ALL_AREAS.forEach(area => { // ★★★ ALL_AREAS 사용 유지 ★★★
         const initialCount = quantities[area.id] || 0;
         
         if (initialCount === 0) return;
@@ -660,8 +672,6 @@ export default function GroutEstimatorApp() {
         </div>
       </header>
 
-      {/* --- [삭제된 섹션] 브랜드 홍보 섹션 삭제됨 --- */}
-
       <main className="max-w-md mx-auto p-4 space-y-6">
         
         {/* --- 1. 현장 유형 섹션 (유지) --- */}
@@ -686,7 +696,7 @@ export default function GroutEstimatorApp() {
           </div>
         </section>
 
-        {/* --- 2. 시공 재료 선택 (옵션 색상 수정) --- */}
+        {/* --- 2. 시공 재료 선택 (유지) --- */}
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-150">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
             <Hammer className="h-5 w-5 text-indigo-600" /> 2. 줄눈소재 선택
@@ -731,7 +741,7 @@ export default function GroutEstimatorApp() {
               </div>
             ))}
           </div>
-          {/* --- 재료 상세 비교 버튼 영역 (색상 수정) --- */}
+          {/* --- 재료 상세 비교 버튼 영역 (유지) --- */}
           <div className="mt-5 pt-3 border-t border-gray-100 flex justify-center">
               <button 
                   onClick={() => setShowMaterialModal(true)} 
@@ -742,13 +752,44 @@ export default function GroutEstimatorApp() {
           </div>
         </section>
 
-        {/* --- 3. 원하는 시공범위를 선택해주세요 (아이콘 및 선택 색상 수정) --- */}
+        {/* --- 3. 원하는 시공범위를 선택해주세요 (욕실 범위) --- */}
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-300">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
-            <Calculator className="h-5 w-5 text-indigo-600" /> 3. 시공 범위 선택
+            <Bath className="h-5 w-5 text-indigo-600" /> 3. 시공 범위 선택: 욕실
           </h2 >
           <div className="space-y-3">
-            {SERVICE_AREAS.map((area) => {
+            {/* ★★★ BATHROOM_AREAS 사용 ★★★ */}
+            {BATHROOM_AREAS.map((area) => {
+              const Icon = area.icon;
+              const isSelected = quantities[area.id] > 0;
+              return (
+                <div key={area.id} className={`flex items-center justify-between p-3 rounded-lg border transition duration-150 ${isSelected ? 'bg-indigo-50 border-indigo-400' : 'bg-gray-50 border-gray-200 hover:bg-gray-100'}`}>
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-full shadow-sm ${isSelected ? 'bg-indigo-700 text-white' : 'bg-gray-200 text-indigo-600'}`}><Icon size={18} /></div> 
+                    <div>
+                      <div className="font-semibold text-gray-800">{area.label}</div>
+                      <div className="text-xs text-gray-500">기본 {area.basePrice.toLocaleString()}원~{area.desc && <span className="block text-indigo-600">{area.desc}</span>}</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 bg-white px-1 py-1 rounded-full shadow-md border border-gray-200">
+                    <button onClick={() => handleQuantityChange(area.id, -1)} className={`w-7 h-7 flex items-center justify-center rounded-full transition active:scale-90 text-lg font-bold ${quantities[area.id] > 0 ? 'text-indigo-600 hover:bg-gray-100' : 'text-gray-400 cursor-not-allowed'}`}>-</button> 
+                    <span className={`w-5 text-center text-sm font-bold ${quantities[area.id] > 0 ? 'text-gray-900' : 'text-gray-400'}`}>{quantities[area.id]}</span>
+                    <button onClick={() => handleQuantityChange(area.id, 1)} className="w-7 h-7 flex items-center justify-center text-indigo-600 hover:bg-gray-100 rounded-full font-bold text-lg transition active:scale-90">+</button> 
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+        
+        {/* --- 3.2. 원하는 시공범위를 선택해주세요 (기타 범위) --- */}
+        <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-300">
+          <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
+            <LayoutGrid className="h-5 w-5 text-indigo-600" /> 3. 시공 범위 선택: 현관 / 베란다 / 주방 / 거실
+          </h2 >
+          <div className="space-y-3">
+            {/* ★★★ OTHER_AREAS 사용 ★★★ */}
+            {OTHER_AREAS.map((area) => {
               const Icon = area.icon;
               const isSelected = quantities[area.id] > 0;
               return (
@@ -771,12 +812,13 @@ export default function GroutEstimatorApp() {
           </div>
         </section>
 
-        {/* --- 4. 실리콘 교체할 곳 선택 (아이콘 및 선택 색상 수정) --- */}
+        {/* --- 4. 실리콘 교체할 곳 선택 (유지) --- */}
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-450">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
             <Eraser className="h-5 w-5 text-indigo-600" /> 4. 추가 시공 (실리콘/리폼)
           </h2 >
           <div className="space-y-3">
+            {/* ★★★ SILICON_AREAS 사용 (변동 없음) ★★★ */}
             {SILICON_AREAS.map((area) => {
               const Icon = area.icon;
               const isSelected = quantities[area.id] > 0;
@@ -813,7 +855,7 @@ export default function GroutEstimatorApp() {
         </section>
 
         
-        {/* 숨고 후기 바로가기 (버튼 색상 수정) */}
+        {/* 숨고 후기 바로가기 (유지) */}
         <div className="mt-4 pt-4 border-t border-gray-200">
           <button 
             onClick={() => window.open(SOOMGO_REVIEW_URL, '_blank')}
@@ -825,12 +867,12 @@ export default function GroutEstimatorApp() {
         </div>
       </main>
 
-      {/* 하단 고정바 */}
+      {/* 하단 고정바 (유지) */}
       <>
         {/* PackageToast 위치 수정 완료 */}
         <PackageToast isVisible={showToast} onClose={handleCloseToast} />
 
-        {/* 최종 견적 하단 바 (패키지 문구 노란색으로 변경) */}
+        {/* 최종 견적 하단 바 (유지) */}
         <div className="fixed bottom-0 left-0 right-0 bg-indigo-900 shadow-2xl safe-area-bottom z-20">
             <div className="max-w-md mx-auto p-4 flex flex-col gap-2"> 
                 
@@ -878,7 +920,7 @@ export default function GroutEstimatorApp() {
         </div>
       </>
 
-      {/* 견적서 모달 */}
+      {/* 견적서 모달 (유지) */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-fade-in">
           <div className="bg-white w-full max-w-sm rounded-xl shadow-2xl overflow-hidden animate-slide-down border border-gray-200">
@@ -889,17 +931,17 @@ export default function GroutEstimatorApp() {
               </button>
             </div>
             
-            {/* ★★★ 캡처 전용 견적서 양식 (요청 문구 모두 삭제 적용) ★★★ */}
+            {/* ★★★ 캡처 전용 견적서 양식 (유지) ★★★ */}
             <div className="p-5 text-gray-800 bg-white overflow-y-auto max-h-[70vh]"> 
               <div ref={quoteRef} id="quote-content" className="border-4 border-indigo-700 rounded-lg p-5 space-y-3 mx-auto" style={{ width: '320px' }}>
                 
-                {/* 헤더 및 로고 영역 (영어 문구 제거) */}
+                {/* 헤더 및 로고 영역 (유지) */}
                 <div className="flex flex-col items-center border-b border-gray-300 pb-3 mb-3">
                     <h1 className='text-xl font-extrabold text-indigo-800 text-center'>줄눈의미학 예상 견적서</h1>
                     {/* Final Quotation Summary 제거 */}
                 </div>
 
-                {/* 기본 정보 테이블 */}
+                {/* 기본 정보 테이블 (유지) */}
                 <div className="space-y-2 border-b border-gray-200 pb-3 text-sm">
                     <div className="flex justify-between items-center">
                       <span className="font-semibold flex-shrink-0">현장 유형</span>
@@ -913,10 +955,8 @@ export default function GroutEstimatorApp() {
                     </div>
                 </div>
 
-                {/* 시공 및 할인 내역 */}
+                {/* 시공 및 할인 내역 (유지) */}
                 <div className="space-y-2 text-sm border-b border-gray-200 pb-3">
-                    {/* 시공 내역 및 가격 문구 제거 */}
-
                     {/* 패키지 포함 서비스 내역 */}
                     {calculation.isPackageActive && (
                         <div className="bg-indigo-50/70 p-2 rounded-md border-l-4 border-indigo-500 text-xs font-semibold text-gray-700">
@@ -932,7 +972,7 @@ export default function GroutEstimatorApp() {
                         </div>
                     )}
 
-                    {/* 개별 항목 루프 (할인 항목 표시 방식 수정 완료) */}
+                    {/* 개별 항목 루프 (유지) */}
                     {calculation.itemizedPrices
                         .filter(item => !item.isDiscount) 
                         .map(item => {
@@ -973,7 +1013,7 @@ export default function GroutEstimatorApp() {
                         );
                     })}
 
-                    {/* 할인 항목 루프 (패키지 할인, 리뷰 할인 등) */}
+                    {/* 할인 항목 루프 (유지) */}
                     {calculation.itemizedPrices
                         .filter(item => item.isDiscount) 
                         .map(item => (
@@ -999,20 +1039,18 @@ export default function GroutEstimatorApp() {
                     <p className="text-xs text-gray-400 text-right mt-1">VAT 별도 / 현장상황별 상이</p>
                 </div>
 
-                {/* 안내 사항 영역 (문구 제거) */}
+                {/* 안내 사항 영역 (유지) */}
                 <div className="mt-3 pt-3 border-t border-gray-200">
                     <div className='w-full py-1.5 px-2 text-center bg-gray-100 text-indigo-600 rounded-md font-bold text-[11px] shadow-sm flex items-center justify-center'>
                         참고 | 바닥 30x30cm, 벽면 30x60cm 크기 기준
                     </div>
-                    
-                    {/* 전문가와 상담 시 최종 금액이 확정됩니다. 문구 제거 */}
                 </div>
               </div>
             </div>
             
-            {/* ⭐️ [견적서 모달 하단 컨트롤 영역] ⭐️ */}
+            {/* ⭐️ [견적서 모달 하단 컨트롤 영역] ⭐️ (유지) */}
             <div className="p-4 bg-gray-50 border-t border-gray-200">
-                {/* 1. 숨고 리뷰 이벤트 버튼 (색상 및 테두리 수정) */}
+                {/* 1. 숨고 리뷰 이벤트 버튼 (유지) */}
                 {soomgoReviewEvent && (
                     <div className='mb-3'>
                         {(() => {
@@ -1023,17 +1061,13 @@ export default function GroutEstimatorApp() {
 
                             const baseClasses = "w-full py-3 rounded-xl transition font-extrabold text-sm active:scale-[0.98] shadow-lg flex items-center justify-center gap-2 relative overflow-hidden border-2";
                             
-                            // 배경색 네이비로 고정
                             const fixedBgClasses = "bg-indigo-700 text-white hover:bg-indigo-800"; 
                             
-                            // 테두리 클래스: 적용 시 노란색, 미적용 시 짙은 네이비 (배경과 동일하게)
                             const borderClasses = isApplied
                                 ? "border-amber-400" 
                                 : "border-indigo-700"; 
-                                
+                            			 
                             const iconColorClass = 'text-white'; // 아이콘 흰색 고정
-
-                            // 애니메이션 클래스 제거
 
                             const labelText = isApplied 
                                 ? `할인 적용 취소하기 (총액 +${discountAmount}원)` 
@@ -1052,8 +1086,6 @@ export default function GroutEstimatorApp() {
                         })()}
                     </div>
                 )}
-                
-                {/* 기존의 "상담 시 현장사진이 있으면 큰 도움이 됩니다.." 문구 삭제됨 */}
                 
                 <div className='grid grid-cols-2 gap-3'>
                     {/* 버튼 내부 정렬 수정 */}
