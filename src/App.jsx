@@ -93,9 +93,9 @@ const OTHER_AREAS = [
 const SERVICE_AREAS = [...BATHROOM_AREAS, ...OTHER_AREAS]; // 현관 포함됨
 
 const SILICON_AREAS = [
-  { id: 'silicon_bathtub', label: '욕조 테두리 교체', basePrice: 80000, icon: Eraser, unit: '개소', desc: '단독 8만 / 패키지시 5만' },
+  { id: 'silicon_bathtub', label: '욕조 테두리 교체', basePrice: 80000, icon: Eraser, unit: '개소', desc: '단독 8만 / 패키지시 5万' },
   { id: 'silicon_sink', label: '세면대+젠다이 교체', basePrice: 30000, icon: Eraser, unit: '개소', desc: '오염된 실리콘 제거 후 재시공' },
-  { id: 'silicon_living_baseboard', label: '거실 걸레받이 실리콘', basePrice: 400000, icon: Sofa, unit: '구역', desc: '단독 40만 / 패키지시 35만' },
+  { id: 'silicon_living_baseboard', label: '거실 걸레받이 실리콘', basePrice: 400000, icon: Sofa, unit: '구역', desc: '단독 40만 / 패키지시 35万' },
 ];
 
 const ALL_AREAS = [...SERVICE_AREAS, ...SILICON_AREAS];
@@ -685,7 +685,7 @@ export default function GroutEstimatorApp() {
       } 
       // 실리콘 시공 영역은 basePrice 그대로 사용 (아래 실리콘 할인 로직에서 처리)
       
-      // 설치 환경 배율 적용 후 천원 단위로 정수화
+      // 설치 환경 배율 적용
       const calculatedPricePerUnit = Math.floor(basePriceForCalculation * selectedHousing.multiplier);
       
       // 항목의 원래 총 가격 (initialCount 기준)
@@ -721,23 +721,19 @@ export default function GroutEstimatorApp() {
           if (area.id === 'silicon_bathtub' && initialCount >= 1 && totalAreaCount >= 3) {
               const fixedPriceTotal = 50000 * initialCount; 
               if (count > 0) { // 패키지에 포함되지 않은 항목이 있다면
-                  // originalPrice는 할인 전 가격 (80,000 * count)
-                  const nonPackageOriginalPrice = 80000 * count; 
-                  // 할인 적용된 최종 가격: (50,000 * count)
-                  const fixedPriceForRemaining = 50000 * count; 
+                  const nonPackageOriginalPrice = 80000 * count; // 8만원 단가 기준으로 남은 수량의 총액
+                  const fixedPriceForRemaining = 50000 * count; // 5만원 단가 기준으로 남은 수량의 총액
                   
                   remainingDiscount = nonPackageOriginalPrice - fixedPriceForRemaining;
                   remainingCalculatedPrice = fixedPriceForRemaining;
                   
-                  // 견적서 총 원가 표시를 위해 initialCount 기준의 8만원을 오버라이드.
-                  // *참고: 이 로직은 단독 선택 시 8만, 패키지 시 5만 할인을 반영합니다.
+                  // 견적서 총 원가 표시를 위해 initialCount 기준의 8만원 단가를 오버라이드.
                   if (initialCount === count) itemOriginalTotal = 80000 * initialCount;
               }
           } else if (area.id === 'silicon_living_baseboard' && initialCount >= 1 && totalAreaCount >= 3) {
               const fixedPriceTotal = 350000 * initialCount; 
               if (count > 0) {
-                   // originalPrice는 할인 전 가격 (400,000 * count)
-                  const nonPackageOriginalPrice = 400000 * count; 
+                  const nonPackageOriginalPrice = 400000 * count; // 40만원 단가 기준으로 남은 수량의 총액
                   
                   remainingDiscount = nonPackageOriginalPrice - fixedPriceTotal;
                   remainingCalculatedPrice = fixedPriceTotal;
