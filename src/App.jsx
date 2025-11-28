@@ -120,8 +120,6 @@ const YOUTUBE_VIDEOS = [
 const getEmbedUrl = (videoId) => `https://www.youtube.com/embed/${videoId}?autoplay=0&mute=1&rel=0`;
 
 // ⭐️ 혼합 패키지 데이터 정의 ⭐️
-// 이 패키지 정의는 이제 기타 범위 항목을 포함하지 않습니다. (오직 욕실 범위 항목만으로 패키지를 구성)
-
 // 기타 범위 ID 목록 (패키지 매칭 로직에서 제외하기 위함)
 const OTHER_AREA_IDS_FOR_PACKAGE_EXCLUSION = ['entrance', 'balcony_laundry', 'kitchen_wall', 'living_room', 'silicon_bathtub', 'silicon_sink', 'silicon_living_baseboard'];
 
@@ -133,16 +131,15 @@ const ORIGINAL_MIXED_PACKAGES = [
     { id: 'P_MIX_03_OLD', price: 800000, label: '혼합패키지 03 (구형)', E_areas: [['bathroom_floor', 2]], P_areas: [['master_bath_wall', 1]] },
     { id: 'P_MIX_04_OLD', price: 800000, label: '혼합패키지 04 (구형)', E_areas: [['bathroom_floor', 2]], P_areas: [['common_bath_wall', 1]] },
     { id: 'P_MIX_05_OLD', price: 1050000, label: '혼합패키지 05 (구형)', E_areas: [['bathroom_floor', 2]], P_areas: [['master_bath_wall', 1], ['common_bath_wall', 1]] },
-    // 기타 항목이 포함된 패키지는 모두 기타 항목을 제거하고 패키지 가격은 그대로 유지합니다.
     { id: 'P_MIX_06', price: 830000, label: '혼합패키지 06', E_areas: [['bathroom_floor', 2]], P_areas: [['shower_booth', 1]] },
     { id: 'P_MIX_07', price: 830000, label: '혼합패키지 07', E_areas: [['bathroom_floor', 2]], P_areas: [['bathtub_wall', 1]] },
     { id: 'P_MIX_08', price: 950000, label: '혼합패키지 08', E_areas: [['bathroom_floor', 2]], P_areas: [['bathtub_wall', 1], ['shower_booth', 1]] },
     { id: 'P_MIX_09', price: 1200000, label: '혼합패키지 09', E_areas: [['bathroom_floor', 2]], P_areas: [['master_bath_wall', 1], ['common_bath_wall', 1]] },
     { id: 'P_MIX_10', price: 900000, label: '혼합패키지 10', E_areas: [['bathroom_floor', 2], ['shower_booth', 1]], P_areas: [] },
     { id: 'P_MIX_11', price: 900000, label: '혼합패키지 11', E_areas: [['bathroom_floor', 2], ['bathtub_wall', 1]], P_areas: [] },
-    { id: 'P_MIX_12', price: 1550000, label: '혼합패키지 12', E_areas: [['bathroom_floor', 2], ['master_bath_wall', 1], ['common_bath_wall', 1]], P_areas: [['kitchen_wall', 1]] },
-    { id: 'P_MIX_13', price: 1100000, label: '혼합패키지 13', E_areas: [['bathroom_floor', 2], ['shower_booth', 1], ['kitchen_wall', 1]], P_areas: [] },
-    { id: 'P_MIX_14', price: 1100000, label: '혼합패키지 14', E_areas: [['bathroom_floor', 2], ['bathtub_wall', 1], ['kitchen_wall', 1]], P_areas: [] },
+    { id: 'P_MIX_12', price: 1550000, label: '혼합패키지 12', E_areas: [['bathroom_floor', 2], ['master_bath_wall', 1], ['common_bath_wall', 1]], P_areas: [] },
+    { id: 'P_MIX_13', price: 1100000, label: '혼합패키지 13', E_areas: [['bathroom_floor', 2], ['shower_booth', 1]], P_areas: [] },
+    { id: 'P_MIX_14', price: 1100000, label: '혼합패키지 14', E_areas: [['bathroom_floor', 2], ['bathtub_wall', 1]], P_areas: [] },
 ];
 
 const CUSTOM_MIXED_PACKAGES = [
@@ -473,10 +470,6 @@ export default function GroutEstimatorApp() {
         let tempEpoxySelections = { ...filteredEpoxySelections };
         let appliedAutoEntrance = false;
         
-        // 1. 패키지에 현관이 포함되어 있더라도, 필터링된 선택 목록에는 현관이 없으므로, 
-        //    현관 자동 포함/필수 항목 로직은 이 단계에서 불필요하거나, 
-        //    패키지 정의 자체에서 현관을 제외했으므로, 복잡한 자동 포함 로직을 건너뜀.
-        
         // 1.1. OR 조건 (isFlexible) 처리 (USER_P_500K, USER_E_700K)
         if (pkg.isFlexible) {
              const requiredPolyAreas = pkg.P_areas.map(([id]) => id).filter(id => id !== 'entrance');
@@ -595,9 +588,7 @@ export default function GroutEstimatorApp() {
     const matchedPackageResult = findMatchingPackage(selectionSummary, quantities);
     const matchedPackage = matchedPackageResult ? matchedPackageResult : null;
     
-    // 현관 자동 포함은 이제 패키지 매칭 로직에서 제거되었으므로, 여기서는 사용하지 않음
-    // const isAutoPackageEntrance = matchedPackageResult && matchedPackageResult.autoEntrance; 
-    const isAutoPackageEntrance = false; // 항상 false로 처리
+    const isAutoPackageEntrance = false; 
 
     // q는 계산 시 패키지에 포함되어 제외될 항목을 표시하는 임시 수량 맵
     let q = { ...quantities };
@@ -607,6 +598,9 @@ export default function GroutEstimatorApp() {
     let isFreeEntrance = false; // 현관 무료 서비스 플래그 (욕실 2곳 선택 시)
     let totalAreaCount = Object.values(quantities).reduce((sum, count) => sum + count, 0);
     
+    // 🚨 [오류 수정] packageAreas를 스코프 최상단에 선언
+    let packageAreas = []; 
+    
     // ⭐️ 2. 패키지 적용 ⭐️
     if (matchedPackage) {
       total = matchedPackage.price;
@@ -614,12 +608,12 @@ export default function GroutEstimatorApp() {
       labelText = '패키지 할인 적용 중'; 
       
       // ⭐️ 패키지에 포함된 항목만 q에서 제외 ⭐️
-      const packageAreas = getPackageAreaIds(matchedPackage);
+      packageAreas = getPackageAreaIds(matchedPackage); // 👈 여기서 값 할당
       packageAreas.forEach(id => { 
         q[id] = 0; 
       });
       
-      // 🚨 [현관 서비스 로직] 패키지 매칭 후 현관이 선택된 경우 무료 서비스로 처리 (항상 q[entrance]=0이 되도록)
+      // 현관이 선택된 경우 (패키지에 현관 포함 여부와 관계 없이) 서비스로 처리
       if (quantities['entrance'] >= 1) { 
          isFreeEntrance = true;
          q['entrance'] = 0;
@@ -627,23 +621,21 @@ export default function GroutEstimatorApp() {
     } 
     
     // ⭐️ 3. 현관 무료 서비스 적용 플래그 설정 (패키지에 포함되지 않은 경우) ⭐️
-    // 욕실 바닥 2곳 선택하면 현관 무료로 처리 (현관 수량이 1이상일 때)
+    // 개별 선택 시 욕실 2곳 선택하면 현관 무료로 처리 (현관 수량이 1이상일 때)
     if (quantities['bathroom_floor'] >= 2 && quantities['entrance'] >= 1 && !matchedPackage) {
         isFreeEntrance = true;
         isPackageActive = true;
         labelText = '패키지 할인 적용 중';
         q['entrance'] = 0; // 현관 수량 0으로 설정
-    } else if (isFreeEntrance && !matchedPackage) {
-        // 이미 위에서 q['entrance'] = 0 처리됨 (패키지 매칭 시)
     }
 
-    // ⭐️ 4. 잔여 항목 및 아이템 계산 (영역별 소재 반영) ---
+    // --- 5. 잔여 항목 및 아이템 계산 (영역별 소재 반영) ---
     ALL_AREAS.forEach(area => {
       const initialCount = quantities[area.id] || 0;
       
       if (initialCount === 0) return;
 
-      // count: 패키지/서비스에 포함되지 않은 잔여 항목 수량 (기타 범위 및 실리콘 항목은 그대로 남아 있음)
+      // count: 패키지/서비스에 포함되지 않은 잔여 항목 수량
       const count = q[area.id] || 0; 
       
       const areaMatId = area.id === 'entrance' ? 'poly' : areaMaterials[area.id];
@@ -682,7 +674,8 @@ export default function GroutEstimatorApp() {
       if (packageCount > 0 && matchedPackage && count === 0) {
               finalCalculatedPrice = 0;
               finalDiscount = itemOriginalTotal; // 원가를 할인으로 처리
-              isFreeServiceItem = area.id === 'entrance' || packageAreas.includes(area.id); // 패키지 포함 항목은 모두 서비스로 간주
+              // 현관이거나 패키지 포함 항목은 서비스로 간주
+              isFreeServiceItem = area.id === 'entrance' || packageAreas.includes(area.id); 
       } 
       // B. 현관 무료 서비스 적용 항목 (가격 0원) - 패키지 매칭이 안됐는데 현관 서비스 조건을 만족한 경우
       else if (area.id === 'entrance' && isFreeEntrance && !matchedPackage && count === 0) {
