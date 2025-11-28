@@ -113,7 +113,7 @@ const YOUTUBE_VIDEOS = [
 
 const getEmbedUrl = (videoId) => `https://www.youtube.com/embed/${videoId}?autoplay=0&mute=1&rel=0`;
 
-// ⭐️ 혼합 패키지 데이터 정의 (업데이트) ⭐️
+// ⭐️ 혼합 패키지 데이터 정의 (최종 업데이트) ⭐️
 const ORIGINAL_MIXED_PACKAGES = [
     { id: 'P_MIX_01', price: 750000, label: '혼합패키지 01', E_areas: [['bathroom_floor', 2]], P_areas: [['entrance', 1], ['shower_booth', 1]] },
     { id: 'P_MIX_02', price: 750000, label: '혼합패키지 02', E_areas: [['bathroom_floor', 2]], P_areas: [['entrance', 1], ['bathtub_wall', 1]] },
@@ -148,18 +148,16 @@ const CUSTOM_MIXED_PACKAGES = [
     },
 ];
 
-// ⭐️ [신규 요청 패키지 2종 추가] ⭐️
+// ⭐️ [요청하신 폴리 50만 패키지] 현관 포함 (P_areas에 entrance=1 유지)
 const NEW_USER_PACKAGES = [
     // 에폭시 혼합 패키지 (70만)
-    // 필수: 욕실바닥 1개(E) + (안방벽 1개(E) OR 공용벽 1개(E))
-    // 현관 1개(P) 자동 포함
     { 
         id: 'USER_E_700K_MASTER', 
         price: 700000, 
         label: '에폭시 벽면 패키지 (70만)', 
         E_areas: [['bathroom_floor', 1], ['master_bath_wall', 1]], 
         P_areas: [['entrance', 1]],
-        isFlexible: true, // OR 조건 처리를 위해 플래그 추가
+        isFlexible: true, 
         flexibleGroup: ['master_bath_wall', 'common_bath_wall']
     },
     { 
@@ -171,9 +169,7 @@ const NEW_USER_PACKAGES = [
         isFlexible: true,
         flexibleGroup: ['master_bath_wall', 'common_bath_wall']
     },
-    // 폴리 혼합 패키지 (50만)
-    // 필수: 욕실바닥 1개(P) + (안방벽 1개(P) OR 공용벽 1개(P))
-    // 현관 1개(P) 자동 포함
+    // 폴리 혼합 패키지 (50만) - 현관 포함 가격 50만원 유지 (P_areas에 entrance=1 유지)
     { 
         id: 'USER_P_500K_MASTER', 
         price: 500000, 
@@ -193,23 +189,20 @@ const NEW_USER_PACKAGES = [
         flexibleGroup: ['master_bath_wall', 'common_bath_wall']
     },
 ];
-// ⭐️ [신규 요청 패키지 2종 추가 끝] ⭐️
 
+// 기존 하드코딩 패키지 재정의 (findMatchingPackage에서만 사용됨)
 const HARDCODED_PACKAGES = [
-    // 폴리 5종 패키지 (현관, 욕실바닥2, 샤워부스, 욕조벽) - 55만원
     { id: 'POLY_550K', price: 550000, label: '폴리 5종 패키지 (55만)', P_areas: [['entrance', 1], ['bathroom_floor', 2], ['shower_booth', 1], ['bathtub_wall', 1]], E_areas: [] },
-    // 폴리 5종 벽 전체 패키지 (현관, 욕실바닥2, 안방벽전체, 공용벽전체) - 70만원
     { id: 'POLY_700K_WALLS', price: 700000, label: '폴리 벽 전체 5종 패키지 (70만)', P_areas: [['entrance', 1], ['bathroom_floor', 2], ['master_bath_wall', 1], ['common_bath_wall', 1]], E_areas: [] },
-    // 에폭시 5종 벽 전체 패키지 (현관P, 욕실바닥2E, 안방벽전체E, 공용벽전체E) - 130만원
     { id: 'EPOXY_1300K_WALLS', price: 1300000, label: '에폭시 벽 전체 5종 패키지 (130만)', P_areas: [['entrance', 1]], E_areas: [['bathroom_floor', 2], ['master_bath_wall', 1], ['common_bath_wall', 1]] },
 ];
 
 
 const MIXED_PACKAGES = [
     ...HARDCODED_PACKAGES,
+    ...NEW_USER_PACKAGES, // 사용자 정의 패키지 우선 적용
     ...ORIGINAL_MIXED_PACKAGES, 
     ...CUSTOM_MIXED_PACKAGES,
-    ...NEW_USER_PACKAGES, // ⭐️ 신규 패키지 통합 ⭐️
 ];
 
 
@@ -381,20 +374,8 @@ export default function GroutEstimatorApp() {
         }
       }
 
-      // === 2. 욕실 바닥 2곳 선택 시 현관 (entrance) 자동 선택 로직 (이건 개별 선택시만 해당) ===
-      if (id === 'bathroom_floor') {
-        const otherBathQty = newQuantities['bathroom_floor'] || 0;
-        
-        // 2개 이상 선택 시 현관을 1개로 자동 설정 (소재는 useEffect에서 'poly'로 고정됨)
-        // 패키지 매칭 로직에서 현관 자동 포함을 처리하므로, 여기서는 욕실 2개 선택 시의 '무료 현관 서비스'만 남김
-        if (otherBathQty >= 2 && (newQuantities['entrance'] || 0) === 0) {
-            // 현관 자동 선택 없이, 계산 로직에서 isFreeEntrance 플래그를 통해 무료 처리만 할 것임.
-            // 여기서는 수량만 조절함.
-            // newQuantities['entrance'] = 1; 
-            // setAreaMaterials(prevMat => ({ ...prevMat, 'entrance': 'poly' })); 
-        } 
-      }
-      
+      // 2. 욕실 바닥 2곳 선택 시 현관 자동 선택 로직은 calculation에서 처리함.
+
       return newQuantities;
     });
   }, []);
@@ -450,7 +431,7 @@ export default function GroutEstimatorApp() {
     return summary;
   }, []);
     
-  // ⭐️ [수정] 혼합 패키지 매칭 로직 (OR 조건 및 현관 자동 포함 강화) ⭐️
+  // ⭐️ [유지] 혼합 패키지 매칭 로직 (OR 조건 및 현관 자동 포함 강화) ⭐️
   const findMatchingPackage = useCallback((selectionSummary, quantities) => {
     const polySelections = selectionSummary['poly'] || {};
     const epoxySelections = selectionSummary['kerapoxy'] || {};
@@ -459,13 +440,14 @@ export default function GroutEstimatorApp() {
                              Object.values(epoxySelections).reduce((sum, v) => sum + v, 0);
     if (totalSelectedCount === 0) return null;
 
-    // 패키지 ID를 기준으로 정렬하여, 하드코딩된 패키지 -> 요청 패키지 -> 기존 패키지 순으로 우선순위를 부여
+    // 패키지 ID를 기준으로 정렬하여, 사용자 정의 패키지 -> 하드코딩된 패키지 -> 기존 패키지 순으로 우선순위를 부여
     const sortedPackages = MIXED_PACKAGES.sort((a, b) => {
-        if (a.id.startsWith('POLY_') && !b.id.startsWith('POLY_')) return -1;
-        if (b.id.startsWith('POLY_') && !a.id.startsWith('POLY_')) return 1;
-        if (a.id.startsWith('USER_') && !b.id.startsWith('USER_')) return -1;
+        if (a.id.startsWith('USER_') && !b.id.startsWith('USER_')) return -1; // USER_ 우선
         if (b.id.startsWith('USER_') && !a.id.startsWith('USER_')) return 1;
-        return 0; // 나머지 순서 유지
+
+        if (a.id.startsWith('POLY_') && !b.id.startsWith('POLY_')) return -1; // POLY_ 우선
+        if (b.id.startsWith('POLY_') && !a.id.startsWith('POLY_')) return 1;
+        return 0; 
     });
     
     for (const pkg of sortedPackages) {
@@ -498,11 +480,9 @@ export default function GroutEstimatorApp() {
 
             // 현관 제외, 나머지 항목이 정확히 일치하는 경우
             if (otherPolyMatch && epoxyMatch) {
-                // 이 시점에서는 항목 종류만 일치하고, 추가로 선택한 항목이 없는지 최종 확인이 필요함 (아래 2번에서 처리)
                 tempPolySelections['entrance'] = 1; // 현관 자동 포함 (임시 적용)
                 appliedAutoEntrance = true;
             } else {
-                 // 현관 자동 포함 조건에 미달하면 다음 패키지로 넘어감
                  continue;
             }
         }
@@ -518,7 +498,10 @@ export default function GroutEstimatorApp() {
              // OR 조건 항목들이 모두 선택되어 있으면 안됨 (Master Wall + Common Wall 동시 선택 방지)
              const flexibleSelectedCount = pkg.flexibleGroup.filter(id => selectedAreas.has(id)).length;
              
-             if (matchesRequired && flexibleSelectedCount === 1) {
+             // 유연 패키지의 필수 항목은 2개 (욕실바닥1 + 벽전체1) + 현관(자동/선택)
+             const isQuantityMatch = requiredAreas.length === 2 && flexibleSelectedCount === 1;
+
+             if (isQuantityMatch && matchesRequired) {
                  // 2. 항목 ID 목록의 '완벽한 일치' 확인 (추가 선택 방지)
                  const packageAreaIds = new Set(getPackageAreaIds(pkg));
                  const finalSelectedAreaIds = new Set([...Object.keys(tempPolySelections).filter(id => tempPolySelections[id] > 0), ...Object.keys(tempEpoxySelections).filter(id => tempEpoxySelections[id] > 0)]);
@@ -530,7 +513,7 @@ export default function GroutEstimatorApp() {
                     return { ...pkg, autoEntrance: appliedAutoEntrance }; 
                  }
              }
-             continue; // OR 조건 미충족 또는 항목 불일치
+             continue; 
         }
         
         // 1.2. 일반 패키지 Quantities Match
@@ -600,12 +583,14 @@ export default function GroutEstimatorApp() {
         q[id] = 0; 
       });
       
-      if(isAutoPackageEntrance) {
+      // 패키지에 현관이 포함되어 있다면 무료 서비스로 간주 (가격 0원)
+      if(packageAreas.includes('entrance')) {
          isFreeEntrance = true;
       }
     } 
     
     // ⭐️ 3. 현관 무료 서비스 적용 플래그 설정 (패키지에 포함되지 않은 경우) ⭐️
+    // 개별 선택 시 욕실 2곳 선택하면 현관 무료로 처리 (현관 수량이 1이상일 때)
     if (quantities['bathroom_floor'] >= 2 && quantities['entrance'] >= 1 && !matchedPackage) {
         isFreeEntrance = true;
         isPackageActive = true;
@@ -661,8 +646,10 @@ export default function GroutEstimatorApp() {
       if (packageCount > 0 && matchedPackage && count === 0) {
               finalCalculatedPrice = 0;
               finalDiscount = Math.floor(itemOriginalTotal / 1000) * 1000;
+              // 패키지에 포함된 현관은 isFreeService=true로 표시
+              isFreeServiceItem = area.id === 'entrance';
       } 
-      // B. 현관 무료 서비스 적용 항목 (가격 0원)
+      // B. 현관 무료 서비스 적용 항목 (가격 0원) - 패키지 매칭이 안됐는데 현관 서비스 조건을 만족한 경우
       else if (area.id === 'entrance' && isFreeEntrance && !matchedPackage && count === 0) {
               finalCalculatedPrice = 0;
               finalDiscount = Math.floor(itemOriginalTotal / 1000) * 1000;
@@ -1258,7 +1245,7 @@ export default function GroutEstimatorApp() {
                             </p>
                             <ul className='list-disc list-inside text-[11px] ml-1 space-y-0.5 text-left'>
                                 <li>패키지 포함 영역이 할인 적용되었습니다.</li>
-                                {(calculation.isFreeEntrance || isAutoPackageEntrance) && <li>현관 바닥 서비스 (폴리아스파틱)</li>}
+                                {calculation.isFreeEntrance && <li>현관 바닥 서비스 (폴리아스파틱)</li>}
                             </ul>
                         </div>
                     )}
