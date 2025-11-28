@@ -575,6 +575,7 @@ export default function GroutEstimatorApp() {
                     if (pkg.id.includes('MASTER') && matchedFlexibleItem !== 'master_bath_wall') flexibleMatch = false;
                     if (pkg.id.includes('COMMON') && matchedFlexibleItem !== 'common_bath_wall') flexibleMatch = false;
                 }
+
              }
              
              if (baseMatch && flexibleMatch) {
@@ -908,7 +909,7 @@ export default function GroutEstimatorApp() {
   const currentEmbedUrl = getEmbedUrl(currentVideo.id);
 
 
-  // ⭐️ [유지] 컴포넌트: 개별 소재 선택 버튼 (현관 제외)
+  // ⭐️ [수정] 컴포넌트: 개별 소재 선택 버튼 (중복 렌더링 코드 제거)
   const MaterialSelectButtons = ({ areaId, currentMat, onChange, isQuantitySelected }) => {
     
     if (areaId === 'entrance') {
@@ -1388,32 +1389,25 @@ export default function GroutEstimatorApp() {
 
                     {/* ⭐️ 항목별 테이블 시작 ⭐️ */}
                     <div className="mt-3">
-                        {/* 🚨 [수정] '금액' 텍스트 제거 🚨 */}
-                        <div className="grid grid-cols-12 font-extrabold text-xs text-gray-500 border-b border-gray-300 pb-1">
-                            <span className="col-span-6 pl-1">시공 내역</span>
-                            <span className="col-span-2 text-center">소재</span>
-                            <span className="col-span-2 text-center">수량</span>
-                            <span className="col-span-2 text-right pr-1"></span> {/* 금액 텍스트 제거 */}
+                        {/* 🚨 [수정] '금액' 컬럼 제거 🚨 */}
+                        <div className="grid grid-cols-10 font-extrabold text-xs text-gray-500 border-b border-gray-300 pb-1">
+                            <span className="col-span-5 pl-1">시공 내역</span>
+                            <span className="col-span-3 text-center">소재</span>
+                            <span className="col-span-2 text-right pr-1">수량</span>
                         </div>
 
-                        {/* 🚨 [재수정] 모든 시공 내역 항목을 표시하고, 금액이 0원일 경우 빈칸 처리 🚨 */}
+                        {/* 🚨 [재수정] 항목별 가격 정보 완전 제거 🚨 */}
                         {calculation.itemizedPrices
                             .filter(item => !item.isDiscount) // 할인 항목(리뷰)만 제외
                             .map(item => {
-
-                            const finalPriceText = item.calculatedPrice > 0 
-                                ? `${item.calculatedPrice.toLocaleString()}원` 
-                                : ''; // 0원인 경우 빈칸 처리
-                            const priceColorClass = item.calculatedPrice > 0 ? 'text-indigo-600' : 'text-gray-500';
-
                             return (
-                                <div key={item.id} className="grid grid-cols-12 items-center text-gray-800 py-1 border-b border-gray-100 last:border-b-0">
+                                <div key={item.id} className="grid grid-cols-10 items-center text-gray-800 py-1 border-b border-gray-100 last:border-b-0">
                                     
                                     {/* 1. 시공 내역 (항목명 + 할인 정보) */}
-                                    <div className="col-span-6 flex flex-col pl-1 break-words">
+                                    <div className="col-span-5 flex flex-col pl-1 break-words">
                                         <span className="font-semibold text-gray-700 text-sm">{item.label}</span>
+                                        {/* 개별 항목 할인액 (실리콘 패키지 할인)만 표시 */}
                                         {(item.discount > 0 && item.calculatedPrice > 0) && (
-                                            // 실리콘/리폼 항목 할인액 표시
                                              <span className='text-xs text-indigo-500 font-bold'>
                                                  (-{(item.originalPrice - item.calculatedPrice).toLocaleString()}원 할인)
                                              </span>
@@ -1421,18 +1415,13 @@ export default function GroutEstimatorApp() {
                                     </div>
                                     
                                     {/* 2. 소재 */}
-                                    <span className="col-span-2 text-center font-bold text-[10px] text-indigo-500">
+                                    <span className="col-span-3 text-center font-bold text-[10px] text-indigo-500">
                                         {item.materialLabel}
                                     </span>
 
                                     {/* 3. 수량 */}
-                                    <span className="col-span-2 text-center text-sm font-semibold text-gray-600">
+                                    <span className="col-span-2 text-right text-sm font-semibold text-gray-600 pr-1">
                                         {item.quantity}{item.unit}
-                                    </span>
-                                    
-                                    {/* 4. 금액 */}
-                                    <span className={`col-span-2 text-right text-sm font-bold pr-1 ${priceColorClass}`}> 
-                                        {finalPriceText}
                                     </span>
                                 </div>
                             );
