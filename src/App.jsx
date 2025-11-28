@@ -430,12 +430,7 @@ export default function GroutEstimatorApp() {
       } 
       // bathroom_floor가 2개 미만으로 줄어든 경우 AND 현관이 1로 자동 설정되어 있었을 때 -> 현관을 0으로 해제
       else if (bathroomFloorCount < 2 && prev['bathroom_floor'] >= 2 && prev['entrance'] === 1 && newQuantities['entrance'] === 1) {
-          // 단, 사용자가 직접 현관을 선택했는지 확인하는 로직은 복잡하므로,
-          // 여기서는 '자동 선택되었을 가능성이 높은 경우'에만 해제합니다.
-          // 사용자가 명시적으로 현관을 +1 한 경우를 구분하기 어렵기 때문에
-          // `bathroom_floor < 2` 이고 `entrance > 0` 이면 현관을 유지하고,
-          // `bathroom_floor < 2` 이고 `entrance === 1` 인 상태에서 `bathroom_floor`의 수량이 변경되어 2 미만이 될 경우만 0으로 처리합니다.
-          // (간단화를 위해, 현재 로직에서는 현관을 직접 +1 했을 때와의 구분을 생략하고 해제 로직만 적용합니다.)
+          // 간편화를 위해, 현재 로직에서는 현관을 직접 +1 했을 때와의 구분을 생략하고 해제 로직만 적용합니다.
           if (newQuantities['entrance'] === 1) {
               newQuantities['entrance'] = 0;
           }
@@ -961,7 +956,7 @@ export default function GroutEstimatorApp() {
             const currentMat = area.id === 'entrance' ? 'poly' : areaMaterials[area.id];
 
             // 🚨 현관 자동 선택 시 표시될 안내 문구
-            const isEntranceAutoSelected = area.id === 'entrance' && quantities['bathroom_floor'] >= 2 && !calculation.matchedPackage;
+            const isEntranceAutoSelected = area.id === 'entrance' && quantities['bathroom_floor'] >= 2 && !calculation.matchedPackage && quantities['entrance'] === 1;
             const extraEntranceInfo = isEntranceAutoSelected ? <span className="block text-amber-600 font-bold mt-0.5">욕실 바닥 2곳 선택 시 자동 선택!</span> : null;
 
             return (
@@ -984,7 +979,9 @@ export default function GroutEstimatorApp() {
                         <div className="flex items-center gap-1 bg-white px-1 py-1 rounded-full shadow-md border border-gray-200">
                             <button 
                                 onClick={() => handleQuantityChange(area.id, -1)} 
-                                className={`w-7 h-7 flex items-center justify-center rounded-full transition active:scale-90 text-lg font-bold ${quantities[area.id] > 0 ? 'text-indigo-600 hover:bg-gray-100' : 'text-gray-400 cursor-not-allowed'}`}
+                                disabled={isEntranceAutoSelected && area.id === 'entrance'}
+                                className={`w-7 h-7 flex items-center justify-center rounded-full transition active:scale-90 text-lg font-bold 
+                                    ${(quantities[area.id] > 0 && !(isEntranceAutoSelected && area.id === 'entrance')) ? 'text-indigo-600 hover:bg-gray-100' : 'text-gray-400 cursor-not-allowed'}`}
                             >-</button> 
                             <span className={`w-5 text-center text-sm font-bold ${quantities[area.id] > 0 ? 'text-gray-900' : 'text-gray-400'}`}>{quantities[area.id]}</span>
                             <button 
@@ -1447,26 +1444,10 @@ export default function GroutEstimatorApp() {
                         ))}
                 </div>
 
-                {/* 총 정가 및 할인 혜택 표시 영역 (추가) */}
-                <div className="pt-3 text-center border-t border-gray-200 space-y-2">
-                     <div className="flex justify-between items-end text-sm">
-                        <span className='font-semibold text-gray-500'>총 정가 합계</span>
-                        {/* 패키지 및 모든 할인이 적용되지 않은 순수 정가 */}
-                        <span className="text-right line-through text-gray-500 font-medium">
-                            {calculation.priceBeforeAllDiscount.toLocaleString()}원
-                        </span>
-                    </div>
-                    <div className="flex justify-between items-end border-b border-dashed border-red-300 pb-2 text-sm">
-                        <span className='font-semibold text-red-500 flex items-center gap-1'><TrendingUp size={14}/> 총 할인 혜택</span>
-                        {/* 총 할인액 */}
-                        <span className="text-right font-bold text-red-500">
-                            -{calculation.discountAmount.toLocaleString()}원
-                        </span>
-                    </div>
-                </div>
+                {/* 🚨 [삭제 완료] 총 정가 및 할인 혜택 표시 영역 제거 🚨 */}
                 
                 {/* 총 합계 영역 (유지) */}
-                <div className="pt-3 text-center"> 
+                <div className="pt-3 text-center border-t border-gray-200"> 
                     
                     <div className="flex justify-between items-end"> 
                         <span className='text-base font-semibold text-gray-800'>최종 결제 금액</span>
