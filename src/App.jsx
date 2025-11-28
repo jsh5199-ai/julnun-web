@@ -844,17 +844,9 @@ export default function GroutEstimatorApp() {
     setShowToast(false);
   }, []);
 
-  // --- 기타 핸들러 (견적서 저장 기능 보강) ---
+  // --- 기타 핸들러 (유지) ---
   const handleImageSave = async () => {
       if (quoteRef.current) {
-        // 🚨 [수정된 로직] 팝업 차단 회피를 위해 팝업 창을 먼저 열고, 비동기 캡처 수행
-        const newWindow = window.open('about:blank', '_blank');
-        
-        if (!newWindow) {
-             alert('팝업 차단이 되어 있어 새 창을 열 수 없습니다. 팝업 차단을 해제해 주세요.');
-             return;
-        }
-
         try {
             // html2canvas 옵션 설정 (높은 해상도를 위해 scale 사용)
             const canvas = await html2canvas(quoteRef.current, {
@@ -865,21 +857,18 @@ export default function GroutEstimatorApp() {
             });
             const image = canvas.toDataURL('image/png');
             
-            // 새 창에 이미지를 띄우고, 사용자에게 수동 저장을 안내합니다.
-            newWindow.document.write('<html><head><title>견적서 저장</title></head><body>');
-            newWindow.document.write('<img src="' + image + '" alt="견적서 이미지" style="width:100%; height:auto; display:block;">');
-            newWindow.document.write('<h3 style="text-align:center; color:red;">[다운로드 안내] 이미지를 길게(터치) 눌러 수동으로 저장해주세요.</h3>');
-            newWindow.document.write('</body></html>');
-            newWindow.document.close();
-            
-            alert('새 창에 견적서 이미지가 생성되었습니다. 이미지를 길게(터치) 눌러 수동으로 저장해주세요.');
-            
+            // 다운로드 링크 생성 및 클릭
+            const link = document.createElement('a');
+            link.href = image;
+            link.download = `줄눈의미학_견적서_${new Date().toISOString().slice(0, 10)}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            alert('견적서 이미지가 저장되었습니다!');
         } catch (error) {
             console.error('Error saving image:', error);
-            if (newWindow) {
-                 newWindow.close(); // 오류 발생 시 열었던 창 닫기
-            }
-            alert('이미지 저장 중 오류가 발생했습니다. 브라우저 설정(팝업 차단 등)을 확인해주세요.');
+            // 캡처 오류 시 안내 문구를 더 명확히 표시
+            alert('이미지 저장 중 오류가 발생했습니다. 브라우저 설정을 확인해주세요.');
         }
       }
   };
@@ -968,6 +957,10 @@ export default function GroutEstimatorApp() {
                             <button 
                                 onClick={() => {
                                     handleQuantityChange(area.id, 1);
+                                    if (quantities[area.id] === 0) {
+                                        // 현관이 아닌 경우에만 기본 소재를 따라가게 함
+                                        handleAreaMaterialChange(area.id, area.id === 'entrance' ? 'poly' : material);
+                                    }
                                 }} 
                                 className="w-7 h-7 flex items-center justify-center text-indigo-600 hover:bg-gray-100 rounded-full font-bold text-lg transition active:scale-90"
                             >+</button> 
@@ -1293,6 +1286,7 @@ export default function GroutEstimatorApp() {
                             className={`w-full py-3 rounded-xl font-extrabold text-sm transition-all 
                                 bg-yellow-400 text-gray-800 hover:bg-yellow-500 active:bg-yellow-600 shadow-md flex items-center justify-center
                             `}
+                            // onClick 핸들러 대신 href를 사용하여 앱 환경에서 안정적으로 카카오톡 앱을 호출하도록 유도
                         >
                             카톡 예약 문의
                         </a>
@@ -1328,6 +1322,7 @@ export default function GroutEstimatorApp() {
                       <span className="font-semibold flex-shrink-0">현장 유형</span>
                       <span className='text-right font-medium flex-shrink-0'>{HOUSING_TYPES.find(h => h.id === housingType).label}</span>
                     </div>
+                    {/* 🚨 [삭제 완료] '기본 재료' 항목 제거 됨 🚨 */}
                 </div>
 
                 {/* 시공 및 할인 내역 */}
@@ -1367,7 +1362,7 @@ export default function GroutEstimatorApp() {
                         return (
                             <div key={item.id} className="flex flex-col text-gray-800 pl-2 pr-1 pt-1 border-b border-gray-100 last:border-b-0">
                                 
-                                {/* 🚨 [수정] 항목 이름과 수량 라인 */}
+                                {/* 🚨 [수정] 항목 이름과 소재 라벨 분리 배치 🚨 */}
                                 <div className="flex justify-between items-center w-full">
                                     <span className={`w-7/12 font-semibold text-gray-700 text-sm break-words`}>
                                         <span className="text-gray-400 mr-1">-</span>
@@ -1379,10 +1374,9 @@ export default function GroutEstimatorApp() {
                                         {item.calculatedPrice > 0 ? `${finalPriceText}원` : (item.isFreeService ? '🎁 서비스 포함' : '👑 패키지 포함')}
                                     </span>
                                 </div>
-                                
-                                {/* 🚨 [수정] 소재 라벨을 다음 줄에 배치 */}
-                                <div className='flex justify-start items-center w-full'>
+                                <div className='flex justify-between items-center w-full'>
                                      <span className='text-indigo-500 text-[10px] ml-3 font-extrabold break-all'>({item.materialLabel})</span>
+                                     <span className='w-5/12'></span> {/* 공백 유지 */}
                                 </div>
                                 
                                 {/* 할인이 발생한 경우에만 할인액 표시 */}
@@ -1415,6 +1409,8 @@ export default function GroutEstimatorApp() {
                             </div>
                         ))}
                 </div>
+
+                {/* 🚨 [삭제 완료] 총 할인 금액 표시 영역 제거됨 🚨 */}
                 
                 {/* 총 합계 영역 (유지) */}
                 <div className="pt-3 text-center"> 
@@ -1497,7 +1493,7 @@ export default function GroutEstimatorApp() {
       )}
       
       {/* 재료 상세 비교 모달 표시 */}
-      {showMaterialModal && <MaterialDetailModal onClose={() => setShowModal(false)} />}
+      {showMaterialModal && <MaterialDetailModal onClose={() => setShowMaterialModal(false)} />}
     </div>
   );
 }
