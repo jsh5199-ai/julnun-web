@@ -667,26 +667,26 @@ export default function GroutEstimatorApp() {
       const areaMatId = area.id === 'entrance' ? 'poly' : areaMaterials[area.id];
       const isEpoxy = areaMatId === 'kerapoxy';
       
-      let basePriceForCalculation = area.basePrice;
+      let finalUnitBasePrice = area.basePrice; // 환경 배율 적용 전의 최종 단가
       
       // 🚨 [수정] 소재에 따른 최종 단가 설정 🚨
       if (area.id === 'balcony_laundry') {
-          basePriceForCalculation = isEpoxy ? 250000 : 100000; // Poly 10만 / Epoxy 25만
+          finalUnitBasePrice = isEpoxy ? 250000 : 100000; // Poly 10만 / Epoxy 25만
       } else if (area.id === 'kitchen_wall') {
-          basePriceForCalculation = isEpoxy ? 250000 : 150000; // Poly 15만 / Epoxy 25만
+          finalUnitBasePrice = isEpoxy ? 250000 : 150000; // Poly 15만 / Epoxy 25만
       } else if (area.id === 'living_room') {
-          basePriceForCalculation = isEpoxy ? 1100000 : 550000; // Poly 55만 / Epoxy 110만
+          finalUnitBasePrice = isEpoxy ? 1100000 : 550000; // Poly 55만 / Epoxy 110만
       } else if (area.id === 'entrance') {
           // 현관은 항상 Poly 가격으로 고정
-          basePriceForCalculation = 50000;
+          finalUnitBasePrice = 50000;
       } else if (BATHROOM_AREAS.some(a => a.id === area.id)) {
           // 욕실 영역 (바닥, 벽면 등): 기본 단가에 소재별 계수 적용 (Poly 1.0, Epoxy 1.8)
-          basePriceForCalculation = area.basePrice * (isEpoxy ? 1.8 : 1.0);
+          finalUnitBasePrice = area.basePrice * (isEpoxy ? 1.8 : 1.0);
       } 
-      // 실리콘 시공 영역은 basePrice 그대로 사용 (아래 실리콘 할인 로직에서 처리)
+      // 실리콘 시공 영역은 area.basePrice 그대로 사용 (아래 실리콘 할인 로직에서 처리)
       
-      // 설치 환경 배율 적용
-      const calculatedPricePerUnit = Math.floor(basePriceForCalculation * selectedHousing.multiplier);
+      // 환경 배율 적용 후 잔여 항목에 대한 단가를 정수화
+      const calculatedPricePerUnit = Math.floor(finalUnitBasePrice * selectedHousing.multiplier);
       
       // 항목의 원래 총 가격 (initialCount 기준)
       let itemOriginalTotal = calculatedPricePerUnit * initialCount;
@@ -717,17 +717,16 @@ export default function GroutEstimatorApp() {
           let remainingCalculatedPrice = remainingOriginalTotal;
           let remainingDiscount = 0;
           
-          // 🚨 실리콘/리폼 패키지 할인 적용 🚨 (잔여 수량(count)이 아닌, initialCount 기준으로 할인 적용)
+          // 🚨 실리콘/리폼 패키지 할인 적용 🚨 
           if (area.id === 'silicon_bathtub' && initialCount >= 1 && totalAreaCount >= 3) {
               const fixedPriceTotal = 50000 * initialCount; 
-              if (count > 0) { // 패키지에 포함되지 않은 항목이 있다면
+              if (count > 0) { 
                   const nonPackageOriginalPrice = 80000 * count; // 8만원 단가 기준으로 남은 수량의 총액
                   const fixedPriceForRemaining = 50000 * count; // 5만원 단가 기준으로 남은 수량의 총액
                   
                   remainingDiscount = nonPackageOriginalPrice - fixedPriceForRemaining;
                   remainingCalculatedPrice = fixedPriceForRemaining;
                   
-                  // 견적서 총 원가 표시를 위해 initialCount 기준의 8만원 단가를 오버라이드.
                   if (initialCount === count) itemOriginalTotal = 80000 * initialCount;
               }
           } else if (area.id === 'silicon_living_baseboard' && initialCount >= 1 && totalAreaCount >= 3) {
