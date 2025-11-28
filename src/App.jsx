@@ -521,11 +521,27 @@ export default function GroutEstimatorApp() {
              if (isPolyFlexiblePackage) {
                 // Poly 패키지는 Poly 항목에서 1개만 선택되었고, Epoxy 항목은 선택되지 않았는지 확인
                 flexibleMatch = flexibleSelectedPolyCount === 1 && flexibleSelectedEpoxyCount === 0;
+
+                // 추가: 패키지 ID에 해당하는 항목이 정확히 Poly로 선택되었는지 확인
+                if (flexibleMatch) {
+                    const matchedFlexibleItem = pkg.flexibleGroup.find(id => tempPolySelections[id] > 0);
+                    if (pkg.id.includes('MASTER') && matchedFlexibleItem !== 'master_bath_wall') flexibleMatch = false;
+                    if (pkg.id.includes('COMMON') && matchedFlexibleItem !== 'common_bath_wall') flexibleMatch = false;
+                }
+
              } else if (isEpoxyFlexiblePackage) {
                 // Epoxy 패키지는 Epoxy 항목에서 1개만 선택되었고, Poly 항목은 선택되지 않았는지 확인
                 flexibleMatch = flexibleSelectedEpoxyCount === 1 && flexibleSelectedPolyCount === 0;
-             }
 
+                // 추가: 패키지 ID에 해당하는 항목이 정확히 Epoxy로 선택되었는지 확인
+                if (flexibleMatch) {
+                    const matchedFlexibleItem = pkg.flexibleGroup.find(id => tempEpoxySelections[id] > 0);
+                    if (pkg.id.includes('MASTER') && matchedFlexibleItem !== 'master_bath_wall') flexibleMatch = false;
+                    if (pkg.id.includes('COMMON') && matchedFlexibleItem !== 'common_bath_wall') flexibleMatch = false;
+                }
+             }
+             
+             // BaseMatch와 FlexibleMatch 모두 충족해야 패키지 매칭 성공
              if (baseMatch && flexibleMatch) {
                  // 2. 항목 ID 목록의 '완벽한 일치' 확인 (추가 선택 방지)
                  const packageAreaIds = new Set(getPackageAreaIds(pkg));
@@ -601,7 +617,8 @@ export default function GroutEstimatorApp() {
     if (matchedPackage) {
       total = matchedPackage.price;
       isPackageActive = true;
-      labelText = matchedPackage.label || '패키지 할인 적용 중'; 
+      // 🚨 [수정된 부분] 패키지 이름 대신 고정 문구 사용
+      labelText = '패키지 할인 적용 중'; 
       
       // ⭐️ 패키지에 포함된 항목만 q에서 제외 ⭐️
       const packageAreas = getPackageAreaIds(matchedPackage);
@@ -620,7 +637,8 @@ export default function GroutEstimatorApp() {
     if (quantities['bathroom_floor'] >= 2 && quantities['entrance'] >= 1 && !matchedPackage) {
         isFreeEntrance = true;
         isPackageActive = true;
-        labelText = '현관 서비스 포함';
+        // 🚨 [수정된 부분] 현관 서비스도 고정 문구 사용
+        labelText = '패키지 할인 적용 중';
     }
 
     // ⭐️ 4. 현관 무료 서비스가 적용될 경우 잔여 수량 (q)에서 현관을 제외 ⭐️
