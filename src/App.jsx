@@ -120,7 +120,6 @@ const YOUTUBE_VIDEOS = [
 const getEmbedUrl = (videoId) => `https://www.youtube.com/embed/${videoId}?autoplay=0&mute=1&rel=0`;
 
 // ⭐️ 혼합 패키지 데이터 정의 ⭐️
-// 기타 범위 ID 목록 (패키지 매칭 로직에서 제외하기 위함)
 const OTHER_AREA_IDS_FOR_PACKAGE_EXCLUSION = ['entrance', 'balcony_laundry', 'kitchen_wall', 'living_room', 'silicon_bathtub', 'silicon_sink', 'silicon_living_baseboard'];
 
 
@@ -135,9 +134,9 @@ const ORIGINAL_MIXED_PACKAGES = [
     { id: 'P_MIX_07', price: 830000, label: '혼합패키지 07', E_areas: [['bathroom_floor', 2]], P_areas: [['bathtub_wall', 1]] },
     { id: 'P_MIX_08', price: 950000, label: '혼합패키지 08', E_areas: [['bathroom_floor', 2]], P_areas: [['bathtub_wall', 1], ['shower_booth', 1]] },
     { id: 'P_MIX_09', price: 1200000, label: '혼합패키지 09', E_areas: [['bathroom_floor', 2]], P_areas: [['master_bath_wall', 1], ['common_bath_wall', 1]] },
+    // 🚨 P_MIX_12 제거 (155만 중복 문제 해결)
     { id: 'P_MIX_10', price: 900000, label: '혼합패키지 10', E_areas: [['bathroom_floor', 2], ['shower_booth', 1]], P_areas: [] },
     { id: 'P_MIX_11', price: 900000, label: '혼합패키지 11', E_areas: [['bathroom_floor', 2], ['bathtub_wall', 1]], P_areas: [] },
-    { id: 'P_MIX_12', price: 1550000, label: '혼합패키지 12', E_areas: [['bathroom_floor', 2], ['master_bath_wall', 1], ['common_bath_wall', 1]], P_areas: [] },
     { id: 'P_MIX_13', price: 1100000, label: '혼합패키지 13', E_areas: [['bathroom_floor', 2], ['shower_booth', 1]], P_areas: [] },
     { id: 'P_MIX_14', price: 1100000, label: '혼합패키지 14', E_areas: [['bathroom_floor', 2], ['bathtub_wall', 1]], P_areas: [] },
 ];
@@ -440,7 +439,7 @@ export default function GroutEstimatorApp() {
     return summary;
   }, [areaMaterials]);
     
-  // ⭐️ [수정] 혼합 패키지 매칭 로직 (기타 범위 항목을 무시하고 욕실만으로 매칭) ⭐️
+  // ⭐️ [유지] 혼합 패키지 매칭 로직 (기타 범위 항목을 무시하고 욕실만으로 매칭) ⭐️
   const findMatchingPackage = useCallback((selectionSummary, quantities) => {
     
     // 🚨 기타 범위 및 실리콘 항목을 임시 선택 목록에서 제외 🚨
@@ -598,7 +597,7 @@ export default function GroutEstimatorApp() {
     let isFreeEntrance = false; // 현관 무료 서비스 플래그 (욕실 2곳 선택 시)
     let totalAreaCount = Object.values(quantities).reduce((sum, count) => sum + count, 0);
     
-    // 🚨 [오류 수정] packageAreas를 스코프 최상단에 선언
+    // 🚨 [오류 수정] packageAreas를 스코프 최상단에 선언 (ReferenceError 방지)
     let packageAreas = []; 
     
     // ⭐️ 2. 패키지 적용 ⭐️
