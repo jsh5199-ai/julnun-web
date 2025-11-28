@@ -686,7 +686,7 @@ export default function GroutEstimatorApp() {
       } else if (area.id === 'kitchen_wall') {
           finalUnitBasePrice = isEpoxy ? 250000 : 150000; // Poly 15만 / Epoxy 25만
       } else if (area.id === 'living_room') {
-          finalUnitBasePrice = isEpoxy ? 1100000 : 550000; // Poly 55万 / Epoxy 110만
+          finalUnitBasePrice = isEpoxy ? 1100000 : 550000; // Poly 55만 / Epoxy 110만
       } else if (area.id === 'entrance') {
           finalUnitBasePrice = 50000; // 현관은 Poly 5만 고정
       } else if (BATHROOM_AREAS.some(a => a.id === area.id)) {
@@ -790,6 +790,13 @@ export default function GroutEstimatorApp() {
     });
     total -= discountAmount;
     
+    // ⭐️ [추가 로직] 총 할인액 계산 ⭐️
+    const totalItemDiscount = itemizedPrices
+        .filter(item => !item.isDiscount && item.calculatedPrice === 0) // 패키지/서비스로 0원 처리된 항목
+        .reduce((sum, item) => sum + item.originalPrice, 0);
+        
+    const totalFinalDiscount = totalItemDiscount + discountAmount;
+    
     // 최종 가격도 천원 단위로 내림
     let originalCalculatedPrice = Math.max(0, Math.floor(total / 1000) * 1000);
     
@@ -808,7 +815,7 @@ export default function GroutEstimatorApp() {
       label: labelText, 
       isPackageActive: isPackageActive,
       isFreeEntrance: isFreeEntrance,
-      discountAmount,
+      discountAmount: totalFinalDiscount, // 총 할인액
       minimumFeeApplied, 
       itemizedPrices: itemizedPrices.filter(item => item.quantity > 0 || item.isDiscount),
     };
@@ -1273,7 +1280,6 @@ export default function GroutEstimatorApp() {
                             className={`w-full py-3 rounded-xl font-extrabold text-sm transition-all 
                                 bg-yellow-400 text-gray-800 hover:bg-yellow-500 active:bg-yellow-600 shadow-md flex items-center justify-center
                             `}
-                            // onClick 핸들러 대신 href를 사용하여 앱 환경에서 안정적으로 카카오톡 앱을 호출하도록 유도
                         >
                             카톡 예약 문의
                         </a>
@@ -1296,7 +1302,7 @@ export default function GroutEstimatorApp() {
             
             {/* ★★★ 캡처 전용 견적서 양식 ★★★ */}
             <div className="p-5 text-gray-800 bg-white overflow-y-auto max-h-[70vh]"> 
-              <div ref={quoteRef} id="quote-content" className="border-4 border-indigo-700 rounded-lg p-5 space-y-3 mx-auto" style={{ width: '320px' }}>
+              <div ref={quoteRef} id="quote-content" className="rounded-lg p-5 space-y-3 mx-auto" style={{ width: '320px' }}>
                 
                 {/* 헤더 및 로고 영역 (영어 문구 제거) */}
                 <div className="flex flex-col items-center border-b border-gray-300 pb-3 mb-3">
@@ -1401,6 +1407,14 @@ export default function GroutEstimatorApp() {
                         ))}
                 </div>
 
+                {/* ⭐️ [추가] 총 할인 금액 표시 영역 ⭐️ */}
+                {calculation.discountAmount > 0 && (
+                    <div className="mt-3 pt-3 border-t border-gray-200 flex justify-between items-center text-sm font-extrabold text-indigo-700">
+                        <span>총 할인 금액</span>
+                        <span className="text-xl">-{calculation.discountAmount.toLocaleString()}원</span>
+                    </div>
+                )}
+                
                 {/* 총 합계 영역 (유지) */}
                 <div className="pt-3 text-center"> 
                     
@@ -1412,7 +1426,7 @@ export default function GroutEstimatorApp() {
                     <p className="text-xs text-gray-400 text-right mt-1">VAT 별도 / 현장상황별 상이</p>
                 </div>
 
-                {/* 안내 사항 영역 (문구 제거) */}
+                {/* 안내 사항 영역 (문구만 남김) */}
                 <div className="mt-3 pt-3 border-t border-gray-200">
                     <div className='w-full py-1.5 px-2 text-center bg-gray-100 text-indigo-600 rounded-md font-bold text-[11px] shadow-sm flex items-center justify-center'>
                         참고 | 바닥 30x30cm, 벽면 30x60cm 크기 기준
