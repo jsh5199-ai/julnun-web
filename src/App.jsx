@@ -132,7 +132,7 @@ const ORIGINAL_MIXED_PACKAGES = [
     { id: 'P_MIX_02', price: 750000, label: '혼합패키지 02', E_areas: [['bathroom_floor', 2]], P_areas: [['bathtub_wall', 1]] },
     { id: 'P_MIX_03_OLD', price: 800000, label: '혼합패키지 03 (구형)', E_areas: [['bathroom_floor', 2]], P_areas: [['master_bath_wall', 1]] },
     { id: 'P_MIX_04_OLD', price: 800000, label: '혼합패키지 04 (구형)', E_areas: [['bathroom_floor', 2]], P_areas: [['common_bath_wall', 1]] },
-    { id: 'P_MIX_05_OLD', price: 1050000, label: '혼합패키지 05 (구형)', E_areas: [['bathroom_floor', 2], ['master_bath_wall', 1], ['common_bath_wall', 1]] },
+    { id: 'P_MIX_05_OLD', price: 1050000, label: '혼합패키지 05 (구형)', E_areas: [['bathroom_floor', 2]], P_areas: [['master_bath_wall', 1], ['common_bath_wall', 1]] },
     { id: 'P_MIX_06', price: 830000, label: '혼합패키지 06', E_areas: [['bathroom_floor', 2]], P_areas: [['shower_booth', 1]] },
     { id: 'P_MIX_07', price: 830000, label: '혼합패키지 07', E_areas: [['bathroom_floor', 2]], P_areas: [['bathtub_wall', 1]] },
     { id: 'P_MIX_08', price: 950000, label: '혼합패키지 08', E_areas: [['bathroom_floor', 2]], P_areas: [['bathtub_wall', 1], ['shower_booth', 1]] },
@@ -969,7 +969,7 @@ export default function GroutEstimatorApp() {
                             <div>
                                 <div className="font-semibold text-gray-800">{area.label}</div>
                                 <div className="text-xs text-gray-500">
-                                     {/* 기본 가격과 상세 설명 제거됨 */}
+                                     {/* 기본 가격과 상세 설명 모두 제거됨 */}
                                     {area.id === 'entrance' && (
                                         <span className="block text-green-600 font-bold mt-0.5">폴리아스파틱 소재 고정</span>
                                     )}
@@ -1184,7 +1184,7 @@ export default function GroutEstimatorApp() {
 
         </section>
 
-        {/* --- 4. 실리콘 교체할 곳 선택 (잔여 가격 제거됨) --- */}
+        {/* --- 4. 실리콘 교체할 곳 선택 (완전 제거) --- */}
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-600">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
             <Eraser className="h-5 w-5 text-indigo-600" /> 4. 실리콘 시공
@@ -1464,7 +1464,7 @@ export default function GroutEstimatorApp() {
                     <div className="flex justify-between items-end"> 
                         <span className='text-base font-semibold text-gray-800'>최종 결제 금액</span>
                         <div className="text-right">
-                            <span className="text-3xl font-extrabold text-indigo-700">{calculation.price.toLocaleString()}원</span>
+                            <span className="text-3xl font-extrabold text-indigo-700">{calculation.price.toLocaleString()}</span>
                         </div>
                     </div>
                     <p className="text-xs text-gray-400 text-right mt-1">VAT 별도 / 현장상황별 상이</p>
