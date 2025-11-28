@@ -69,7 +69,7 @@ const MATERIALS = [
   },
 ];
 
-// 🚨 [수정] 현관 범위 제거 🚨
+// 욕실 범위 (현관 제외)
 const BATHROOM_AREAS = [
   { id: 'bathroom_floor', label: '욕실 바닥', basePrice: 150000, icon: Bath, unit: '개소' },
   { id: 'shower_booth', label: '샤워부스 벽 3면', basePrice: 150000, icon: Bath, unit: '구역' },
@@ -78,11 +78,15 @@ const BATHROOM_AREAS = [
   { id: 'common_bath_wall', label: '공용욕실 벽 전체', basePrice: 300000, icon: Bath, unit: '구역' },
 ];
 
-// 🚨 [수정] 현관 범위 추가 🚨
+// 기타 범위 (현관 포함)
 const OTHER_AREAS = [
-  { id: 'entrance', label: '현관', basePrice: 50000, icon: DoorOpen, unit: '개소' }, // 현관 추가
+  // 현관은 Poly 5만 기준이지만, 소재 가격 계산은 basePrice 대신 특수 가격을 따름
+  { id: 'entrance', label: '현관', basePrice: 50000, icon: DoorOpen, unit: '개소' }, 
+  // 베란다/세탁실: Poly 10만, Epoxy 25만
   { id: 'balcony_laundry', label: '베란다/세탁실', basePrice: 100000, icon: LayoutGrid, unit: '개소', desc: '원하는 개수만큼 선택' }, 
+  // 주방 벽면: Poly 15만, Epoxy 25만
   { id: 'kitchen_wall', label: '주방 벽면', basePrice: 150000, icon: Utensils, unit: '구역' },
+  // 거실: Poly 55만, Epoxy 110만
   { id: 'living_room', label: '거실 바닥', basePrice: 550000, icon: Sofa, unit: '구역', desc: '복도,주방 포함' },
 ];
 
@@ -433,7 +437,7 @@ export default function GroutEstimatorApp() {
     return summary;
   }, [areaMaterials]);
     
-  // ⭐️ [수정] 혼합 패키지 매칭 로직 (OR 조건 및 현관 자동 포함 강화) ⭐️
+  // ⭐️ [유지] 혼합 패키지 매칭 로직 (OR 조건 및 현관 자동 포함 강화) ⭐️
   const findMatchingPackage = useCallback((selectionSummary, quantities) => {
     const polySelections = selectionSummary['poly'] || {};
     const epoxySelections = selectionSummary['kerapoxy'] || {};
@@ -596,7 +600,7 @@ export default function GroutEstimatorApp() {
   }, [quantities, areaMaterials]); // areaMaterials를 종속성 배열에 추가하여 정확한 소재 판단
 
 
-  // 🚀 [최종] calculation 로직: 모든 패키지를 findMatchingPackage로 통합
+  // 🚀 [수정] calculation 로직: 특수 영역 가격을 명시적으로 계산하도록 수정 
   const calculation = useMemo(() => {
     const selectedHousing = HOUSING_TYPES.find(h => h.id === housingType);
     let itemizedPrices = []; 
@@ -619,7 +623,7 @@ export default function GroutEstimatorApp() {
     if (matchedPackage) {
       total = matchedPackage.price;
       isPackageActive = true;
-      // 🚨 [수정된 부분] 패키지 이름 대신 고정 문구 사용
+      // 패키지 이름 대신 고정 문구 사용
       labelText = '패키지 할인 적용 중'; 
       
       // ⭐️ 패키지에 포함된 항목만 q에서 제외 ⭐️
@@ -639,7 +643,7 @@ export default function GroutEstimatorApp() {
     if (quantities['bathroom_floor'] >= 2 && quantities['entrance'] >= 1 && !matchedPackage) {
         isFreeEntrance = true;
         isPackageActive = true;
-        // 🚨 [수정된 부분] 현관 서비스도 고정 문구 사용
+        // 현관 서비스도 고정 문구 사용
         labelText = '패키지 할인 적용 중';
     }
 
@@ -658,29 +662,34 @@ export default function GroutEstimatorApp() {
 
       // count: 패키지/서비스에 포함되지 않은 잔여 항목 수량
       const count = q[area.id] || 0; 
-      const originalBasePrice = area.basePrice;
-
+      
       // ⭐️ 현관은 강제 Poly 아스파틱 ⭐️
       const areaMatId = area.id === 'entrance' ? 'poly' : areaMaterials[area.id];
-      const selectedAreaMaterial = MATERIALS.find(m => m.id === areaMatId);
+      const isEpoxy = areaMatId === 'kerapoxy';
       
-      let currentMod = selectedAreaMaterial ? selectedAreaMaterial.priceMod : 1.0;
+      let basePriceForCalculation = area.basePrice;
+      let calculatedPricePerUnit = area.basePrice * selectedHousing.multiplier;
       
-      // ⭐️ 특수 영역 (기타 범위) 에폭시 계수 처리 ⭐️
-      if (selectedAreaMaterial && selectedAreaMaterial.id === 'kerapoxy') {
-          if (area.id === 'living_room') {
-              currentMod = 2.0; 
-          } else if (area.id === 'balcony_laundry') {
-              currentMod = 2.5; 
-          } else if (area.id === 'kitchen_wall') {
-              currentMod = 250000 / 150000; // 정확한 비율 계산
-          } else if (area.id === 'bathroom_floor' || area.id === 'shower_booth' || area.id === 'bathtub_wall' || area.id === 'master_bath_wall' || area.id === 'common_bath_wall' || area.id === 'entrance') {
-              currentMod = 1.8;
-          }
+      // 🚨 [수정] 특수 영역 가격 오버라이드 로직 적용 🚨
+      if (area.id === 'balcony_laundry') {
+          basePriceForCalculation = isEpoxy ? 250000 : 100000;
+      } else if (area.id === 'kitchen_wall') {
+          basePriceForCalculation = isEpoxy ? 250000 : 150000;
+      } else if (area.id === 'living_room') {
+          basePriceForCalculation = isEpoxy ? 1100000 : 550000;
+      } else if (area.id === 'entrance') {
+          // 현관은 항상 Poly 가격
+          basePriceForCalculation = 50000;
+      } else if (BATHROOM_AREAS.some(a => a.id === area.id)) {
+          // 욕실 영역 (Poly 1.0, Epoxy 1.8)
+          basePriceForCalculation = area.basePrice * (isEpoxy ? 1.8 : 1.0);
       } 
+      // 실리콘 시공 영역은 basePrice 그대로 사용 (아래 실리콘 할인 로직에서 처리)
+      
+      calculatedPricePerUnit = Math.floor(basePriceForCalculation * selectedHousing.multiplier / 1000) * 1000;
       
       // 항목의 원래 총 가격 (initialCount 기준)
-      let itemOriginalTotal = originalBasePrice * initialCount * currentMod * selectedHousing.multiplier;
+      let itemOriginalTotal = calculatedPricePerUnit * initialCount;
       
       let finalCalculatedPrice = 0;
       let finalDiscount = 0;
@@ -691,44 +700,51 @@ export default function GroutEstimatorApp() {
       // A. 패키지 적용 항목 (가격 0원)
       if (packageCount > 0 && matchedPackage && count === 0) {
               finalCalculatedPrice = 0;
-              finalDiscount = Math.floor(itemOriginalTotal / 1000) * 1000;
+              finalDiscount = itemOriginalTotal; // 원가를 할인으로 처리
               // 패키지에 포함된 현관은 isFreeService=true로 표시
               isFreeServiceItem = area.id === 'entrance';
       } 
       // B. 현관 무료 서비스 적용 항목 (가격 0원) - 패키지 매칭이 안됐는데 현관 서비스 조건을 만족한 경우
       else if (area.id === 'entrance' && isFreeEntrance && !matchedPackage && count === 0) {
               finalCalculatedPrice = 0;
-              finalDiscount = Math.floor(itemOriginalTotal / 1000) * 1000;
+              finalDiscount = itemOriginalTotal; // 원가를 할인으로 처리
               isFreeServiceItem = true;
       }
       // C. 개별 선택 항목 (패키지/서비스에 포함되지 않은 잔여 수량에 대한 계산 및 실리콘 할인 적용)
       else {
           // 남은 수량(count)에 대해서만 계산
-          let remainingOriginalBasePrice = originalBasePrice * currentMod * selectedHousing.multiplier;
-          let remainingOriginalTotal = remainingOriginalBasePrice * count;
+          let remainingOriginalTotal = calculatedPricePerUnit * count;
           let remainingCalculatedPrice = remainingOriginalTotal;
           let remainingDiscount = 0;
           
-          // 실리콘/리폼 패키지 할인 (잔여 수량(count)이 아닌, initialCount 기준으로 할인 적용)
+          // 🚨 실리콘/리폼 패키지 할인 적용 🚨 (잔여 수량(count)이 아닌, initialCount 기준으로 할인 적용)
           if (area.id === 'silicon_bathtub' && initialCount >= 1 && totalAreaCount >= 3) {
-              let fixedPrice = 50000 * initialCount; 
+              const fixedPriceTotal = 50000 * initialCount; 
               if (count > 0) { // 패키지에 포함되지 않은 항목이 있다면
-                  remainingDiscount = (originalBasePrice * initialCount) - fixedPrice;
-                  remainingCalculatedPrice = fixedPrice;
+                  remainingDiscount = itemOriginalTotal - fixedPriceTotal; // 초기 원가 기준 할인액
+                  remainingCalculatedPrice = fixedPriceTotal;
+                  itemOriginalTotal = fixedPriceTotal; // 견적서 원가 표시를 위해 오버라이드
               }
           } else if (area.id === 'silicon_living_baseboard' && initialCount >= 1 && totalAreaCount >= 3) {
-              let fixedPrice = 350000 * initialCount; 
+              const fixedPriceTotal = 350000 * initialCount; 
               if (count > 0) {
-                  remainingDiscount = (originalBasePrice * initialCount) - fixedPrice;
-                  remainingCalculatedPrice = fixedPrice;
+                  remainingDiscount = itemOriginalTotal - fixedPriceTotal; // 초기 원가 기준 할인액
+                  remainingCalculatedPrice = fixedPriceTotal;
+                  itemOriginalTotal = fixedPriceTotal; // 견적서 원가 표시를 위해 오버라이드
               }
           }
           
           // 최종 가격을 total에 합산
-          finalCalculatedPrice = Math.floor(remainingCalculatedPrice / 1000) * 1000; 
-          finalDiscount = Math.floor(remainingDiscount / 1000) * 1000; 
+          finalCalculatedPrice = remainingCalculatedPrice; 
+          finalDiscount = remainingDiscount; 
           total += finalCalculatedPrice;
       }
+      
+      // 가격을 천 단위로 반올림/내림 없이 정수로 변환 (최종 가격은 이미 계산 단계에서 천 단위로 맞춤)
+      finalCalculatedPrice = Math.floor(finalCalculatedPrice);
+      itemOriginalTotal = Math.floor(itemOriginalTotal);
+      finalDiscount = Math.floor(finalDiscount);
+
 
       // 개별 항목 가격 정보 추가
       itemizedPrices.push({
@@ -736,14 +752,14 @@ export default function GroutEstimatorApp() {
           label: area.label, 
           quantity: initialCount, 
           unit: area.unit, 
-          originalPrice: Math.floor(itemOriginalTotal / 1000) * 1000, 
+          originalPrice: itemOriginalTotal, 
           calculatedPrice: finalCalculatedPrice, 
           discount: finalDiscount, 
           isFreeService: isFreeServiceItem, 
           // 패키지 또는 서비스 적용 시 true
           isPackageItem: packageCount > 0 || (area.id === 'silicon_bathtub' && totalAreaCount >= 3) || (area.id === 'silicon_living_baseboard' && totalAreaCount >= 3), 
           isDiscount: false, 
-          materialLabel: selectedAreaMaterial ? selectedAreaMaterial.label.split('(')[0].trim() : 'N/A'
+          materialLabel: areaMatId === 'poly' ? 'Poly' : 'Epoxy'
         });
     });
     
@@ -757,7 +773,7 @@ export default function GroutEstimatorApp() {
     });
     total -= discountAmount;
     
-    let originalCalculatedPrice = Math.max(0, Math.floor(total / 1000) * 1000);
+    let originalCalculatedPrice = Math.max(0, Math.floor(total));
     
     let finalPrice = originalCalculatedPrice; 
     let minimumFeeApplied = false;
@@ -1096,7 +1112,7 @@ export default function GroutEstimatorApp() {
           
           {/* B. 기타 범위 (현관/주방/베란다) */}
           <h3 className="text-base font-extrabold flex items-center gap-2 mb-3 mt-4 text-gray-700">
-            <LayoutGrid size={16} className="text-indigo-500" /> B. 기타 범위
+            <LayoutGrid size={16} className="text-indigo-500" /> B. 기타 범위 (현관 포함)
           </h3>
           {renderAreaList(OTHER_AREAS)}
 
