@@ -32,9 +32,11 @@ const GlobalStyles = () => (
     }
     .shine-effect {
         /* 네이비 계열 배경에 맞게 흰색 빛깔로 조정 */
-        background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
+        background: #facc15; /* Amber-400 고정 */
+        background-image: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.7) 50%, rgba(255,255,255,0) 100%);
         background-size: 200% 100%;
-        animation: shine 5s infinite;
+        animation: shine 3s infinite;
+        color: #1e3a8a; /* Indigo-900 */
     }
     
     .animate-fade-in { animation: fadeIn 0.5s ease-out; }
@@ -1202,7 +1204,6 @@ export default function GroutEstimatorApp() {
                             <div className={`p-2 rounded-full shadow-sm ${isSelected ? 'bg-indigo-500 text-white' : 'bg-gray-200 text-indigo-600'}`}><Icon size={18} /></div> 
                             <div>
                                 <div className="font-semibold text-gray-800">{area.label}</div>
-                                {/* 기본 가격 및 가격 설명만 남김 */}
                                 <div className="text-xs text-gray-500">{area.desc && <span className="block text-indigo-600">{area.desc}</span>}</div> 
                             </div>
                         </div>
@@ -1353,17 +1354,12 @@ export default function GroutEstimatorApp() {
                     <h1 className='text-xl font-extrabold text-indigo-800 text-center'>줄눈의미학 예상 견적서</h1>
                 </div>
 
-                {/* 기본 정보 테이블 */}
-                <div className="space-y-2 border-b border-gray-200 pb-3 text-sm">
-                    <div className="flex justify-between items-center">
-                      <span className="font-semibold flex-shrink-0">현장 유형</span>
-                      <span className='text-right font-medium flex-shrink-0'>{HOUSING_TYPES.find(h => h.id === housingType).label}</span>
-                    </div>
-                </div>
-
+                {/* 기본 정보 테이블 (현장 유형 제거됨) */}
+                
                 {/* ⭐️ [수정] 시공 및 할인 내역 - 테이블 구조로 변경 ⭐️ */}
                 <div className="space-y-2 text-sm border-b border-gray-200 pb-3">
-
+                    {/* 현장 유형 제거됨. 이 부분은 이제 패키지/최소비용 정보 아래에만 표시됩니다. */}
+                    
                     {/* ⭐️ 최소 출장비 적용 문구 추가 ⭐️ */}
                     {calculation.minimumFeeApplied && (
                         <div className="bg-red-50/70 p-2 rounded-md border-l-4 border-red-500 text-xs font-semibold text-gray-700">
@@ -1477,7 +1473,7 @@ export default function GroutEstimatorApp() {
             
             {/* ⭐️ [견적서 모달 하단 컨트롤 영역] ⭐️ */}
             <div className="p-4 bg-gray-50 border-t border-gray-200">
-                {/* 1. 숨고 리뷰 이벤트 버튼 (색상 및 테두리 수정) */}
+                {/* 1. 숨고 리뷰 이벤트 버튼 (디자인 강화) */}
                 {soomgoReviewEvent && (
                     <div className='mb-3'>
                         {(() => {
@@ -1487,12 +1483,15 @@ export default function GroutEstimatorApp() {
                             const Icon = isApplied ? CheckCircle2 : Sparkles;
 
                             const baseClasses = "w-full py-3 rounded-xl transition font-extrabold text-sm active:scale-[0.98] shadow-lg flex items-center justify-center gap-2 relative overflow-hidden border-2";
-                            const fixedBgClasses = "bg-indigo-700 text-white hover:bg-indigo-800"; 
-                            const borderClasses = isApplied
-                                ? "border-amber-400" 
-                                : "border-indigo-700"; 
-                                
-                            const iconColorClass = 'text-white'; 
+                            
+                            const activeClasses = "bg-indigo-700 text-white border-amber-400";
+                            const inactiveClasses = "bg-amber-400 text-indigo-900 border-indigo-700 hover:bg-amber-300";
+
+                            const finalClasses = isApplied
+                                ? activeClasses
+                                : `${inactiveClasses} shine-effect`; // 빛나는 효과 적용
+
+                            const iconColorClass = isApplied ? 'text-white' : 'text-indigo-900'; 
 
                             const labelText = isApplied 
                                 ? `할인 적용 취소하기 (총액 +${discountAmount}원)` 
@@ -1501,7 +1500,7 @@ export default function GroutEstimatorApp() {
                             return (
                                 <button
                                     onClick={() => toggleReview(evt.id)}
-                                    className={`${baseClasses} ${fixedBgClasses} ${borderClasses}`}
+                                    className={`${baseClasses} ${finalClasses}`}
                                 >
                                     <Icon size={18} fill="currentColor" className={iconColorClass}/>
                                     <span>{labelText}</span>
