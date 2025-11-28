@@ -80,14 +80,14 @@ const BATHROOM_AREAS = [
 
 // 기타 범위 (현관 포함)
 const OTHER_AREAS = [
-  // 현관은 Poly 5만 기준이지만, 소재 가격 계산은 basePrice 대신 특수 가격을 따름
+  // 현관: Poly 5만
   { id: 'entrance', label: '현관', basePrice: 50000, icon: DoorOpen, unit: '개소' }, 
   // 베란다/세탁실: Poly 10만, Epoxy 25만
-  { id: 'balcony_laundry', label: '베란다/세탁실', basePrice: 100000, icon: LayoutGrid, unit: '개소', desc: '원하는 개수만큼 선택' }, 
+  { id: 'balcony_laundry', label: '베란다/세탁실', basePrice: 100000, icon: LayoutGrid, unit: '개소', desc: 'Poly 10만 / Epoxy 25만' }, 
   // 주방 벽면: Poly 15만, Epoxy 25만
-  { id: 'kitchen_wall', label: '주방 벽면', basePrice: 150000, icon: Utensils, unit: '구역' },
+  { id: 'kitchen_wall', label: '주방 벽면', basePrice: 150000, icon: Utensils, unit: '구역', desc: 'Poly 15만 / Epoxy 25만' },
   // 거실: Poly 55만, Epoxy 110만
-  { id: 'living_room', label: '거실 바닥', basePrice: 550000, icon: Sofa, unit: '구역', desc: '복도,주방 포함' },
+  { id: 'living_room', label: '거실 바닥', basePrice: 550000, icon: Sofa, unit: '구역', desc: 'Poly 55만 / Epoxy 110만 (복도,주방 포함)' },
 ];
 
 const SERVICE_AREAS = [...BATHROOM_AREAS, ...OTHER_AREAS]; // 현관 포함됨
@@ -600,7 +600,7 @@ export default function GroutEstimatorApp() {
   }, [quantities, areaMaterials]); // areaMaterials를 종속성 배열에 추가하여 정확한 소재 판단
 
 
-  // 🚀 [수정] calculation 로직: 특수 영역 가격을 명시적으로 계산하도록 수정 
+  // 🚀 [최종] calculation 로직: 특수 영역 가격을 명시적으로 계산하도록 수정 
   const calculation = useMemo(() => {
     const selectedHousing = HOUSING_TYPES.find(h => h.id === housingType);
     let itemizedPrices = []; 
@@ -668,25 +668,25 @@ export default function GroutEstimatorApp() {
       const isEpoxy = areaMatId === 'kerapoxy';
       
       let basePriceForCalculation = area.basePrice;
-      let calculatedPricePerUnit = area.basePrice * selectedHousing.multiplier;
       
-      // 🚨 [수정] 특수 영역 가격 오버라이드 로직 적용 🚨
+      // 🚨 [수정] 소재에 따른 최종 단가 설정 🚨
       if (area.id === 'balcony_laundry') {
-          basePriceForCalculation = isEpoxy ? 250000 : 100000;
+          basePriceForCalculation = isEpoxy ? 250000 : 100000; // Poly 10만 / Epoxy 25만
       } else if (area.id === 'kitchen_wall') {
-          basePriceForCalculation = isEpoxy ? 250000 : 150000;
+          basePriceForCalculation = isEpoxy ? 250000 : 150000; // Poly 15만 / Epoxy 25만
       } else if (area.id === 'living_room') {
-          basePriceForCalculation = isEpoxy ? 1100000 : 550000;
+          basePriceForCalculation = isEpoxy ? 1100000 : 550000; // Poly 55만 / Epoxy 110만
       } else if (area.id === 'entrance') {
-          // 현관은 항상 Poly 가격
+          // 현관은 항상 Poly 가격으로 고정
           basePriceForCalculation = 50000;
       } else if (BATHROOM_AREAS.some(a => a.id === area.id)) {
-          // 욕실 영역 (Poly 1.0, Epoxy 1.8)
+          // 욕실 영역 (바닥, 벽면 등): 기본 단가에 소재별 계수 적용 (Poly 1.0, Epoxy 1.8)
           basePriceForCalculation = area.basePrice * (isEpoxy ? 1.8 : 1.0);
       } 
       // 실리콘 시공 영역은 basePrice 그대로 사용 (아래 실리콘 할인 로직에서 처리)
       
-      calculatedPricePerUnit = Math.floor(basePriceForCalculation * selectedHousing.multiplier / 1000) * 1000;
+      // 설치 환경 배율 적용 후 천원 단위로 정수화
+      const calculatedPricePerUnit = Math.floor(basePriceForCalculation * selectedHousing.multiplier);
       
       // 항목의 원래 총 가격 (initialCount 기준)
       let itemOriginalTotal = calculatedPricePerUnit * initialCount;
@@ -721,16 +721,28 @@ export default function GroutEstimatorApp() {
           if (area.id === 'silicon_bathtub' && initialCount >= 1 && totalAreaCount >= 3) {
               const fixedPriceTotal = 50000 * initialCount; 
               if (count > 0) { // 패키지에 포함되지 않은 항목이 있다면
-                  remainingDiscount = itemOriginalTotal - fixedPriceTotal; // 초기 원가 기준 할인액
-                  remainingCalculatedPrice = fixedPriceTotal;
-                  itemOriginalTotal = fixedPriceTotal; // 견적서 원가 표시를 위해 오버라이드
+                  // originalPrice는 할인 전 가격 (80,000 * count)
+                  const nonPackageOriginalPrice = 80000 * count; 
+                  // 할인 적용된 최종 가격: (50,000 * count)
+                  const fixedPriceForRemaining = 50000 * count; 
+                  
+                  remainingDiscount = nonPackageOriginalPrice - fixedPriceForRemaining;
+                  remainingCalculatedPrice = fixedPriceForRemaining;
+                  
+                  // 견적서 총 원가 표시를 위해 initialCount 기준의 8만원을 오버라이드.
+                  // *참고: 이 로직은 단독 선택 시 8만, 패키지 시 5만 할인을 반영합니다.
+                  if (initialCount === count) itemOriginalTotal = 80000 * initialCount;
               }
           } else if (area.id === 'silicon_living_baseboard' && initialCount >= 1 && totalAreaCount >= 3) {
               const fixedPriceTotal = 350000 * initialCount; 
               if (count > 0) {
-                  remainingDiscount = itemOriginalTotal - fixedPriceTotal; // 초기 원가 기준 할인액
+                   // originalPrice는 할인 전 가격 (400,000 * count)
+                  const nonPackageOriginalPrice = 400000 * count; 
+                  
+                  remainingDiscount = nonPackageOriginalPrice - fixedPriceTotal;
                   remainingCalculatedPrice = fixedPriceTotal;
-                  itemOriginalTotal = fixedPriceTotal; // 견적서 원가 표시를 위해 오버라이드
+                  
+                  if (initialCount === count) itemOriginalTotal = 400000 * initialCount;
               }
           }
           
@@ -740,10 +752,10 @@ export default function GroutEstimatorApp() {
           total += finalCalculatedPrice;
       }
       
-      // 가격을 천 단위로 반올림/내림 없이 정수로 변환 (최종 가격은 이미 계산 단계에서 천 단위로 맞춤)
-      finalCalculatedPrice = Math.floor(finalCalculatedPrice);
-      itemOriginalTotal = Math.floor(itemOriginalTotal);
-      finalDiscount = Math.floor(finalDiscount);
+      // 가격을 천 단위로 내림 (견적서 표기용)
+      finalCalculatedPrice = Math.floor(finalCalculatedPrice / 1000) * 1000;
+      itemOriginalTotal = Math.floor(itemOriginalTotal / 1000) * 1000;
+      finalDiscount = Math.floor(finalDiscount / 1000) * 1000;
 
 
       // 개별 항목 가격 정보 추가
@@ -773,7 +785,8 @@ export default function GroutEstimatorApp() {
     });
     total -= discountAmount;
     
-    let originalCalculatedPrice = Math.max(0, Math.floor(total));
+    // 최종 가격도 천원 단위로 내림
+    let originalCalculatedPrice = Math.max(0, Math.floor(total / 1000) * 1000);
     
     let finalPrice = originalCalculatedPrice; 
     let minimumFeeApplied = false;
