@@ -148,7 +148,7 @@ const CUSTOM_MIXED_PACKAGES = [
     },
 ];
 
-// ⭐️ [요청하신 폴리 50만 패키지] 현관 포함 (P_areas에 entrance=1 유지)
+// ⭐️ [요청하신 패키지 4종] ⭐️
 const NEW_USER_PACKAGES = [
     // 에폭시 혼합 패키지 (70만)
     { 
@@ -169,7 +169,7 @@ const NEW_USER_PACKAGES = [
         isFlexible: true,
         flexibleGroup: ['master_bath_wall', 'common_bath_wall']
     },
-    // 폴리 혼합 패키지 (50만) - 현관 포함 가격 50만원 유지 (P_areas에 entrance=1 유지)
+    // 폴리 혼합 패키지 (50만) - 현관 포함 가격 50만원 유지
     { 
         id: 'USER_P_500K_MASTER', 
         price: 500000, 
@@ -190,7 +190,7 @@ const NEW_USER_PACKAGES = [
     },
 ];
 
-// 기존 하드코딩 패키지 재정의 (findMatchingPackage에서만 사용됨)
+// 기존 하드코딩 패키지 재정의 
 const HARDCODED_PACKAGES = [
     { id: 'POLY_550K', price: 550000, label: '폴리 5종 패키지 (55만)', P_areas: [['entrance', 1], ['bathroom_floor', 2], ['shower_booth', 1], ['bathtub_wall', 1]], E_areas: [] },
     { id: 'POLY_700K_WALLS', price: 700000, label: '폴리 벽 전체 5종 패키지 (70만)', P_areas: [['entrance', 1], ['bathroom_floor', 2], ['master_bath_wall', 1], ['common_bath_wall', 1]], E_areas: [] },
@@ -199,10 +199,10 @@ const HARDCODED_PACKAGES = [
 
 
 const MIXED_PACKAGES = [
-    ...HARDCODED_PACKAGES,
-    ...NEW_USER_PACKAGES, // 사용자 정의 패키지 우선 적용
-    ...ORIGINAL_MIXED_PACKAGES, 
+    ...NEW_USER_PACKAGES, // 사용자 정의 패키지 최우선
     ...CUSTOM_MIXED_PACKAGES,
+    ...ORIGINAL_MIXED_PACKAGES, 
+    ...HARDCODED_PACKAGES,
 ];
 
 
@@ -429,9 +429,9 @@ export default function GroutEstimatorApp() {
     }
     
     return summary;
-  }, []);
+  }, [areaMaterials]);
     
-  // ⭐️ [유지] 혼합 패키지 매칭 로직 (OR 조건 및 현관 자동 포함 강화) ⭐️
+  // ⭐️ [수정] 혼합 패키지 매칭 로직 (OR 조건 및 현관 자동 포함 강화) ⭐️
   const findMatchingPackage = useCallback((selectionSummary, quantities) => {
     const polySelections = selectionSummary['poly'] || {};
     const epoxySelections = selectionSummary['kerapoxy'] || {};
@@ -440,28 +440,21 @@ export default function GroutEstimatorApp() {
                              Object.values(epoxySelections).reduce((sum, v) => sum + v, 0);
     if (totalSelectedCount === 0) return null;
 
-    // 패키지 ID를 기준으로 정렬하여, 사용자 정의 패키지 -> 하드코딩된 패키지 -> 기존 패키지 순으로 우선순위를 부여
-    const sortedPackages = MIXED_PACKAGES.sort((a, b) => {
-        if (a.id.startsWith('USER_') && !b.id.startsWith('USER_')) return -1; // USER_ 우선
-        if (b.id.startsWith('USER_') && !a.id.startsWith('USER_')) return 1;
-
-        if (a.id.startsWith('POLY_') && !b.id.startsWith('POLY_')) return -1; // POLY_ 우선
-        if (b.id.startsWith('POLY_') && !a.id.startsWith('POLY_')) return 1;
-        return 0; 
-    });
+    // 패키지 ID를 기준으로 정렬: NEW_USER_PACKAGES > CUSTOM_MIXED_PACKAGES > ORIGINAL_MIXED_PACKAGES > HARDCODED_PACKAGES
+    const sortedPackages = MIXED_PACKAGES; 
     
     for (const pkg of sortedPackages) {
         let tempPolySelections = { ...polySelections };
         let tempEpoxySelections = { ...epoxySelections };
         let appliedAutoEntrance = false;
         
-        // 1. 패키지에 현관(entrance)이 필수 (1개)인데, 사용자가 선택하지 않은 경우 자동 포함 조건 체크
+        // 1. 현관 자동 포함 조건 체크 (현관이 패키지 필수 항목이고, 사용자가 선택하지 않은 경우)
         const requiredEntrance = pkg.P_areas.find(([id]) => id === 'entrance');
         const isEntranceSelected = quantities['entrance'] > 0;
 
         if (requiredEntrance && requiredEntrance[1] === 1 && !isEntranceSelected) {
             
-            // 현관을 제외한 나머지 Poly/Epoxy 항목들이 정확히 일치하는지 확인
+            // 현관을 제외한 나머지 Poly/Epoxy 항목들의 수량 일치 확인
             let otherPolyMatch = true;
             for (const [id, requiredQty] of pkg.P_areas) {
                 if (id !== 'entrance' && (tempPolySelections[id] || 0) !== requiredQty) { 
@@ -487,21 +480,53 @@ export default function GroutEstimatorApp() {
             }
         }
         
-        // 1.1. OR 조건 (isFlexible) 처리 (신규 사용자 패키지 로직)
+        // 1.1. OR 조건 (isFlexible) 처리 (USER_P_500K, USER_E_700K)
         if (pkg.isFlexible) {
-             const requiredAreas = [...pkg.P_areas.map(([id]) => id), ...pkg.E_areas.map(([id]) => id)].filter(id => id !== 'entrance');
-             const selectedAreas = new Set([...Object.keys(tempPolySelections), ...Object.keys(tempEpoxySelections)].filter(id => id !== 'entrance' && quantities[id] > 0));
+             const requiredPolyAreas = pkg.P_areas.map(([id]) => id).filter(id => id !== 'entrance');
+             const requiredEpoxyAreas = pkg.E_areas.map(([id]) => id);
              
-             // 필수 항목을 모두 포함하고, 추가 항목이 없는지 확인
-             const matchesRequired = requiredAreas.every(id => selectedAreas.has(id));
-
-             // OR 조건 항목들이 모두 선택되어 있으면 안됨 (Master Wall + Common Wall 동시 선택 방지)
-             const flexibleSelectedCount = pkg.flexibleGroup.filter(id => selectedAreas.has(id)).length;
+             // ⭐️ 필수 항목 (현관 제외) 소재/수량 일치 여부 확인 (OR 조건 항목 제외) ⭐️
+             let baseMatch = true;
              
-             // 유연 패키지의 필수 항목은 2개 (욕실바닥1 + 벽전체1) + 현관(자동/선택)
-             const isQuantityMatch = requiredAreas.length === 2 && flexibleSelectedCount === 1;
+             // Poly 항목 체크 (현관과 FlexibleGroup 제외)
+             for (const id of requiredPolyAreas.filter(id => !pkg.flexibleGroup.includes(id) && id !== 'entrance')) {
+                const requiredQty = pkg.P_areas.find(([pkId]) => pkId === id)[1];
+                if ((tempPolySelections[id] || 0) !== requiredQty) {
+                    baseMatch = false;
+                    break;
+                }
+             }
+             if (!baseMatch) continue;
 
-             if (isQuantityMatch && matchesRequired) {
+             // Epoxy 항목 체크 (FlexibleGroup 제외)
+             for (const id of requiredEpoxyAreas.filter(id => !pkg.flexibleGroup.includes(id))) {
+                const requiredQty = pkg.E_areas.find(([pkId]) => pkId === id)[1];
+                if ((tempEpoxySelections[id] || 0) !== requiredQty) {
+                    baseMatch = false;
+                    break;
+                }
+             }
+             if (!baseMatch) continue;
+
+
+             // ⭐️ OR 조건 항목 매칭 및 소재 일치/충돌 방지 ⭐️
+             const flexibleSelectedPolyCount = pkg.flexibleGroup.filter(id => tempPolySelections[id] > 0).length;
+             const flexibleSelectedEpoxyCount = pkg.flexibleGroup.filter(id => tempEpoxySelections[id] > 0).length;
+             
+             const isPolyFlexiblePackage = pkg.id.startsWith('USER_P_');
+             const isEpoxyFlexiblePackage = pkg.id.startsWith('USER_E_');
+
+             let flexibleMatch = false;
+
+             if (isPolyFlexiblePackage) {
+                // Poly 패키지는 Poly 항목에서 1개만 선택되었고, Epoxy 항목은 선택되지 않았는지 확인
+                flexibleMatch = flexibleSelectedPolyCount === 1 && flexibleSelectedEpoxyCount === 0;
+             } else if (isEpoxyFlexiblePackage) {
+                // Epoxy 패키지는 Epoxy 항목에서 1개만 선택되었고, Poly 항목은 선택되지 않았는지 확인
+                flexibleMatch = flexibleSelectedEpoxyCount === 1 && flexibleSelectedPolyCount === 0;
+             }
+
+             if (baseMatch && flexibleMatch) {
                  // 2. 항목 ID 목록의 '완벽한 일치' 확인 (추가 선택 방지)
                  const packageAreaIds = new Set(getPackageAreaIds(pkg));
                  const finalSelectedAreaIds = new Set([...Object.keys(tempPolySelections).filter(id => tempPolySelections[id] > 0), ...Object.keys(tempEpoxySelections).filter(id => tempEpoxySelections[id] > 0)]);
@@ -516,10 +541,10 @@ export default function GroutEstimatorApp() {
              continue; 
         }
         
-        // 1.2. 일반 패키지 Quantities Match
+        // 1.2. 일반 패키지 Quantities Match (OR 조건이 없는 일반/혼합 패키지)
         let isMatch = true;
         
-        // Poly Quantities Match (임시 선택 사용)
+        // Poly Quantities Match
         for (const [id, requiredQty] of pkg.P_areas) {
           if ((tempPolySelections[id] || 0) !== requiredQty) { 
             isMatch = false;
@@ -528,7 +553,7 @@ export default function GroutEstimatorApp() {
         }
         if (!isMatch) continue;
 
-        // Epoxy Quantities Match (임시 선택 사용)
+        // Epoxy Quantities Match
         for (const [id, requiredQty] of pkg.E_areas) {
           if ((tempEpoxySelections[id] || 0) !== requiredQty) { 
             isMatch = false;
@@ -550,8 +575,9 @@ export default function GroutEstimatorApp() {
     }
 
     return null; // 매칭되는 패키지 없음
-  }, [quantities]);
-    
+  }, [quantities, areaMaterials]); // areaMaterials를 종속성 배열에 추가하여 정확한 소재 판단
+
+
   // 🚀 [최종] calculation 로직: 모든 패키지를 findMatchingPackage로 통합
   const calculation = useMemo(() => {
     const selectedHousing = HOUSING_TYPES.find(h => h.id === housingType);
