@@ -745,7 +745,7 @@ export default function GroutEstimatorApp() {
                   const nonPackageOriginalPrice = 400000 * count; 
                   
                   remainingDiscount = nonPackageOriginalPrice - fixedPriceTotal;
-                  remainingCalculatedPrice = fixedPriceTotal;
+                  remainingCalculatedPrice = fixedPriceForRemaining;
                   
                   if (initialCount === count) itemOriginalTotal = 400000 * initialCount;
               }
@@ -1215,17 +1215,18 @@ export default function GroutEstimatorApp() {
                     <div className='flex items-center justify-between w-full text-white'> 
                         
                         {/* 좌측: 금액 정보 (총 예상 견적 문구 화이트 강조) */}
-                        <div className='flex flex-col items-start gap-1'> {/* 🚨 [수정] flex-col로 변경하여 수직 배치 준비 */}
+                        <div className='flex flex-col items-start gap-1'> 
                             <span className='text-sm font-semibold text-white'>총 예상 견적</span>
-                            <div className='flex items-end gap-1'>
+                            <div className="flex items-end gap-1">
                                 {/* 2. 최종 적용 가격 */}
                                 <span className="text-3xl font-extrabold text-white">{calculation.price.toLocaleString()}</span>
                                 <span className="text-base font-normal text-white">원</span>
                             </div>
                         </div>
                         
-                        {/* 우측: 패키지/최소비용 라벨 (새로운 우측 빈 공간) */}
-                        <div className='flex flex-col items-end justify-start h-full pt-1'> 
+                        {/* 🚨 [수정] 우측: 패키지/최소비용 라벨 (새로운 우측 빈 공간) 🚨 */}
+                        <div className='flex flex-col items-end justify-end h-full pt-1'> 
+                            
                             {/* A. 최소 출장비 적용 안내 (Clock 아이콘) */}
                             {calculation.minimumFeeApplied && (
                                 <div className="flex items-center justify-end gap-1 text-xs font-bold text-red-300 mb-0.5 whitespace-nowrap">
