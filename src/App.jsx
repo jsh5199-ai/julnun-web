@@ -83,11 +83,11 @@ const BATHROOM_AREAS = [
 
 // 기타 범위 (현관 포함)
 const OTHER_AREAS = [
-  // 현관: Poly 5만
+  // 현관: Poly 5万
   { id: 'entrance', label: '현관', basePrice: 50000, icon: DoorOpen, unit: '개소' }, 
-  // 베란다/세탁실: Poly 10만, Epoxy 25만
+  // 베란다/세탁실: Poly 10만, Epoxy 25万
   { id: 'balcony_laundry', label: '베란다/세탁실', basePrice: 100000, icon: LayoutGrid, unit: '개소', desc: 'Poly 10만 / Epoxy 25만' }, 
-  // 주방 벽면: Poly 15만, Epoxy 25만
+  // 주방 벽면: Poly 15만, Epoxy 25万
   { id: 'kitchen_wall', label: '주방 벽면', basePrice: 150000, icon: Utensils, unit: '구역', desc: 'Poly 15만 / Epoxy 25만' },
   // 거실: Poly 55만, Epoxy 110만
   { id: 'living_room', label: '거실 바닥', basePrice: 550000, icon: Sofa, unit: '구역', desc: 'Poly 55만 / Epoxy 110만 (복도,주방 포함)' },
@@ -745,7 +745,7 @@ export default function GroutEstimatorApp() {
                   const nonPackageOriginalPrice = 400000 * count; 
                   
                   remainingDiscount = nonPackageOriginalPrice - fixedPriceTotal;
-                  remainingCalculatedPrice = fixedPriceForRemaining;
+                  remainingCalculatedPrice = fixedPriceTotal;
                   
                   if (initialCount === count) itemOriginalTotal = 400000 * initialCount;
               }
@@ -1267,7 +1267,7 @@ export default function GroutEstimatorApp() {
                             견적서 확인
                         </button>
                         
-                        {/* 🚨 [수정] 카카오톡 예약 문의 버튼: <a> 태그를 사용하여 네이티브 이동 유도 🚨 */}
+                        {/* 카카오톡 예약 문의 버튼 */}
                         <a 
                             href={KAKAO_CHAT_URL} 
                             target="_blank" 
