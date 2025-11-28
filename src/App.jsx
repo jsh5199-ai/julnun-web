@@ -745,7 +745,7 @@ export default function GroutEstimatorApp() {
                   const nonPackageOriginalPrice = 400000 * count; 
                   
                   remainingDiscount = nonPackageOriginalPrice - fixedPriceTotal;
-                  remainingCalculatedPrice = fixedPriceTotal;
+                  remainingCalculatedPrice = fixedPriceForRemaining;
                   
                   if (initialCount === count) itemOriginalTotal = 400000 * initialCount;
               }
@@ -791,10 +791,17 @@ export default function GroutEstimatorApp() {
     total -= discountAmount;
     
     // ⭐️ [추가 로직] 총 할인액 계산 ⭐️
+    // 1. 패키지/서비스로 0원 처리된 항목의 원가 합계 (항목별 할인 효과)
     const totalItemDiscount = itemizedPrices
-        .filter(item => !item.isDiscount && item.calculatedPrice === 0) // 패키지/서비스로 0원 처리된 항목
-        .reduce((sum, item) => sum + item.originalPrice, 0);
+        .filter(item => !item.isDiscount)
+        .reduce((sum, item) => sum + (item.originalPrice - item.calculatedPrice), 0);
         
+    // 2. 패키지 적용으로 인한 가격 할인액 (패키지 할인가 - 항목별 정가)
+    const packageDiscount = (matchedPackage && matchedPackage.price < total) 
+        ? total - matchedPackage.price 
+        : 0;
+
+    // 3. 총 할인액: 항목별 할인 효과 + 리뷰 할인액
     const totalFinalDiscount = totalItemDiscount + discountAmount;
     
     // 최종 가격도 천원 단위로 내림
@@ -808,10 +815,13 @@ export default function GroutEstimatorApp() {
         minimumFeeApplied = true;
     }
 
-
+    // 🚨 [새로 계산] 패키지 적용 전 총 정가 (최소출장비, 리뷰할인 미적용 순수 합계)
+    const priceBeforeAllDiscount = itemizedPrices.reduce((sum, item) => sum + (item.isDiscount ? 0 : item.originalPrice), 0) + discountAmount;
+    
     return { 
       price: finalPrice, 
       originalCalculatedPrice, 
+      priceBeforeAllDiscount, // 패키지 및 모든 할인이 적용되지 않은 순수 정가
       label: labelText, 
       isPackageActive: isPackageActive,
       isFreeEntrance: isFreeEntrance,
@@ -1280,6 +1290,7 @@ export default function GroutEstimatorApp() {
                             className={`w-full py-3 rounded-xl font-extrabold text-sm transition-all 
                                 bg-yellow-400 text-gray-800 hover:bg-yellow-500 active:bg-yellow-600 shadow-md flex items-center justify-center
                             `}
+                            // onClick 핸들러 대신 href를 사용하여 앱 환경에서 안정적으로 카카오톡 앱을 호출하도록 유도
                         >
                             카톡 예약 문의
                         </a>
@@ -1409,16 +1420,19 @@ export default function GroutEstimatorApp() {
 
                 {/* ⭐️ [추가] 총 할인 금액 표시 영역 ⭐️ */}
                 {calculation.discountAmount > 0 && (
-                    <div className="mt-3 pt-3 border-t border-gray-200 flex justify-between items-center text-sm font-extrabold text-indigo-700">
-                        <span>총 할인 금액</span>
-                        <span className="text-xl">-{calculation.discountAmount.toLocaleString()}원</span>
+                    <div className="mt-3 pt-3 flex justify-between items-center border-t border-gray-200">
+                        <div className='flex items-center gap-1 text-sm font-extrabold text-gray-700'>
+                            <TrendingUp size={16} className='text-green-500'/> 총 할인 효과
+                        </div>
+                        <span className="text-lg font-extrabold text-green-600">- {calculation.discountAmount.toLocaleString()}원</span>
                     </div>
                 )}
-                
+
                 {/* 총 합계 영역 (유지) */}
                 <div className="pt-3 text-center"> 
                     
-                    <div className="flex justify-end items-end"> 
+                    <div className="flex justify-between items-end"> 
+                        <span className='text-base font-semibold text-gray-800'>최종 결제 금액</span>
                         <div className="text-right">
                             <span className="text-3xl font-extrabold text-indigo-700">{calculation.price.toLocaleString()}원</span>
                         </div>
