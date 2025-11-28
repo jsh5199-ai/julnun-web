@@ -1286,6 +1286,7 @@ export default function GroutEstimatorApp() {
                             className={`w-full py-3 rounded-xl font-extrabold text-sm transition-all 
                                 bg-yellow-400 text-gray-800 hover:bg-yellow-500 active:bg-yellow-600 shadow-md flex items-center justify-center
                             `}
+                            // onClick 핸들러 대신 href를 사용하여 앱 환경에서 안정적으로 카카오톡 앱을 호출하도록 유도
                         >
                             카톡 예약 문의
                         </a>
@@ -1321,12 +1322,7 @@ export default function GroutEstimatorApp() {
                       <span className="font-semibold flex-shrink-0">현장 유형</span>
                       <span className='text-right font-medium flex-shrink-0'>{HOUSING_TYPES.find(h => h.id === housingType).label}</span>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="font-semibold flex-shrink-0 pr-2">기본 재료</span> 
-                      <span className="font-bold text-indigo-600 text-right flex-shrink-0">
-                        {MATERIALS.find(m => m.id === material).label} ({material === 'poly' ? (polyOption === 'pearl' ? '펄' : '무펄') : (epoxyOption === 'kerapoxy' ? '케라폭시' : '스타라이크')})
-                      </span>
-                    </div>
+                    {/* 🚨 [삭제 완료] '기본 재료' 항목 제거 됨 🚨 */}
                 </div>
 
                 {/* 시공 및 할인 내역 */}
@@ -1366,20 +1362,21 @@ export default function GroutEstimatorApp() {
                         return (
                             <div key={item.id} className="flex flex-col text-gray-800 pl-2 pr-1 pt-1 border-b border-gray-100 last:border-b-0">
                                 
-                                {/* 항목 이름 및 수량 (w-3/5 -> w-7/12로 변경) */}
-                                <div className="flex justify-between items-center">
+                                {/* 🚨 [수정] 항목 이름과 소재 라벨 분리 배치 🚨 */}
+                                <div className="flex justify-between items-center w-full">
                                     <span className={`w-7/12 font-semibold text-gray-700 text-sm break-words`}>
                                         <span className="text-gray-400 mr-1">-</span>
                                         {item.label} 
                                         {item.quantity > 0 && <span className="text-gray-400 text-xs font-normal"> x {item.quantity}</span>}
-                                        {/* ⭐️ 영역별 소재 라벨 추가 (text-[10px] -> text-[9px]로 변경) ⭐️ */}
-                                        <span className='text-indigo-500 text-[9px] ml-1 font-extrabold break-all'>({item.materialLabel})</span>
                                     </span>
-                                    
-                                    {/* 최종 적용 가격 (w-2/5 -> w-5/12로 변경) */}
+                                    {/* 최종 적용 가격 */}
                                     <span className={`text-right w-5/12 font-bold text-sm ${item.calculatedPrice > 0 ? 'text-indigo-600' : 'text-gray-500'}`}> 
                                         {item.calculatedPrice > 0 ? `${finalPriceText}원` : (item.isFreeService ? '🎁 서비스 포함' : '👑 패키지 포함')}
                                     </span>
+                                </div>
+                                <div className='flex justify-between items-center w-full'>
+                                     <span className='text-indigo-500 text-[10px] ml-3 font-extrabold break-all'>({item.materialLabel})</span>
+                                     <span className='w-5/12'></span> {/* 공백 유지 */}
                                 </div>
                                 
                                 {/* 할인이 발생한 경우에만 할인액 표시 */}
@@ -1412,6 +1409,8 @@ export default function GroutEstimatorApp() {
                             </div>
                         ))}
                 </div>
+
+                {/* 🚨 [삭제 완료] 총 할인 금액 표시 영역 제거됨 🚨 */}
                 
                 {/* 총 합계 영역 (유지) */}
                 <div className="pt-3 text-center"> 
