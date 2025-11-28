@@ -132,7 +132,7 @@ const ORIGINAL_MIXED_PACKAGES = [
     { id: 'P_MIX_02', price: 750000, label: '혼합패키지 02', E_areas: [['bathroom_floor', 2]], P_areas: [['bathtub_wall', 1]] },
     { id: 'P_MIX_03_OLD', price: 800000, label: '혼합패키지 03 (구형)', E_areas: [['bathroom_floor', 2]], P_areas: [['master_bath_wall', 1]] },
     { id: 'P_MIX_04_OLD', price: 800000, label: '혼합패키지 04 (구형)', E_areas: [['bathroom_floor', 2]], P_areas: [['common_bath_wall', 1]] },
-    { id: 'P_MIX_05_OLD', price: 1050000, label: '혼합패키지 05 (구형)', E_areas: [['bathroom_floor', 2]], P_areas: [['master_bath_wall', 1], ['common_bath_wall', 1]] },
+    { id: 'P_MIX_05_OLD', price: 1050000, label: '혼합패키지 05 (구형)', E_areas: [['bathroom_floor', 2], ['master_bath_wall', 1], ['common_bath_wall', 1]] },
     { id: 'P_MIX_06', price: 830000, label: '혼합패키지 06', E_areas: [['bathroom_floor', 2]], P_areas: [['shower_booth', 1]] },
     { id: 'P_MIX_07', price: 830000, label: '혼합패키지 07', E_areas: [['bathroom_floor', 2]], P_areas: [['bathtub_wall', 1]] },
     { id: 'P_MIX_08', price: 950000, label: '혼합패키지 08', E_areas: [['bathroom_floor', 2]], P_areas: [['bathtub_wall', 1], ['shower_booth', 1]] },
@@ -609,7 +609,7 @@ export default function GroutEstimatorApp() {
           if ((tempEpoxySelections[id] || 0) !== requiredQty) { 
             isMatch = false;
             break;
-          }
+        }
         }
         if (!isMatch) continue;
 
@@ -986,7 +986,7 @@ export default function GroutEstimatorApp() {
                             >-</button> 
                             <span className={`w-5 text-center text-sm font-bold ${quantities[area.id] > 0 ? 'text-gray-900' : 'text-gray-400'}`}>{quantities[area.id]}</span>
                             <button 
-                                 onClick={() => {
+                                onClick={() => {
                                     handleQuantityChange(area.id, 1);
                                     if (quantities[area.id] === 0) {
                                         // 현관이 아닌 경우에만 기본 소재를 따라가게 함
@@ -1184,7 +1184,7 @@ export default function GroutEstimatorApp() {
 
         </section>
 
-        {/* --- 4. 실리콘 교체할 곳 선택 (기본 가격만 제거) --- */}
+        {/* --- 4. 실리콘 교체할 곳 선택 (잔여 가격 제거됨) --- */}
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-600">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
             <Eraser className="h-5 w-5 text-indigo-600" /> 4. 실리콘 시공
@@ -1201,7 +1201,7 @@ export default function GroutEstimatorApp() {
                             <div className={`p-2 rounded-full shadow-sm ${isSelected ? 'bg-indigo-500 text-white' : 'bg-gray-200 text-indigo-600'}`}><Icon size={18} /></div> 
                             <div>
                                 <div className="font-semibold text-gray-800">{area.label}</div>
-                                 {/* 기본 가격 정보 제거됨 (basePrice.toLocaleString() 제거) */}
+                                {/* 기본 가격 및 가격 설명만 남김 */}
                                 <div className="text-xs text-gray-500">{area.desc && <span className="block text-indigo-600">{area.desc}</span>}</div> 
                             </div>
                         </div>
