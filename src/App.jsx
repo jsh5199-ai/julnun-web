@@ -686,7 +686,7 @@ export default function GroutEstimatorApp() {
       } else if (area.id === 'kitchen_wall') {
           finalUnitBasePrice = isEpoxy ? 250000 : 150000; // Poly 15만 / Epoxy 25만
       } else if (area.id === 'living_room') {
-          finalUnitBasePrice = isEpoxy ? 1100000 : 550000; // Poly 55만 / Epoxy 110만
+          finalUnitBasePrice = isEpoxy ? 1100000 : 550000; // Poly 55万 / Epoxy 110만
       } else if (area.id === 'entrance') {
           finalUnitBasePrice = 50000; // 현관은 Poly 5만 고정
       } else if (BATHROOM_AREAS.some(a => a.id === area.id)) {
@@ -745,7 +745,7 @@ export default function GroutEstimatorApp() {
                   const nonPackageOriginalPrice = 400000 * count; 
                   
                   remainingDiscount = nonPackageOriginalPrice - fixedPriceTotal;
-                  remainingCalculatedPrice = fixedPriceForRemaining;
+                  remainingCalculatedPrice = fixedPriceTotal;
                   
                   if (initialCount === count) itemOriginalTotal = 400000 * initialCount;
               }
@@ -1000,7 +1000,7 @@ export default function GroutEstimatorApp() {
       <main className="max-w-md mx-auto p-4 space-y-6">
 
         {/* ⭐️ [유지] 동영상 섹션 ⭐️ */}
-        <section className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 animate-fade-in">
+        <section className="bg-white rounded-xl shadow-lg border border-gray-100 animate-fade-in">
           <h2 className="text-lg font-extrabold flex items-center gap-2 p-4 text-gray-800 border-b border-gray-100">
             <Zap className="h-5 w-5 text-red-600" /> 시공 현장 영상
           </h2 >
@@ -1273,6 +1273,7 @@ export default function GroutEstimatorApp() {
                             className={`w-full py-3 rounded-xl font-extrabold text-sm transition-all 
                                 bg-yellow-400 text-gray-800 hover:bg-yellow-500 active:bg-yellow-600 shadow-md flex items-center justify-center
                             `}
+                            // onClick 핸들러 대신 href를 사용하여 앱 환경에서 안정적으로 카카오톡 앱을 호출하도록 유도
                         >
                             카톡 예약 문의
                         </a>
@@ -1412,27 +1413,10 @@ export default function GroutEstimatorApp() {
                 </div>
 
                 {/* 안내 사항 영역 (문구 제거) */}
-                <div className='w-full py-1.5 px-2 text-center bg-gray-100 text-indigo-600 rounded-md font-bold text-[11px] shadow-sm flex items-center justify-center mt-3 pt-3 border-t border-gray-200'>
-                    참고 | 바닥 30x30cm, 벽면 30x60cm 크기 기준
-                </div>
-
-                {/* ⭐️ [견적서 모달 하단 버튼] ⭐️ */}
-                <div className='grid grid-cols-3 gap-3 mt-3'> 
-                    
-                    <button onClick={handleImageSave} className="flex items-center justify-center gap-1 bg-indigo-600 text-white py-3 rounded-lg font-bold hover:bg-indigo-700 transition text-sm active:scale-95 shadow-md"> 
-                        <ImageIcon size={16} /> <span>견적서 저장</span>
-                    </button>
-                    
-                    <button onClick={() => window.open(KAKAO_CHAT_URL, '_blank')} className="flex items-center justify-center gap-1 bg-yellow-400 text-gray-800 py-3 rounded-lg font-bold hover:bg-yellow-500 transition shadow-md text-sm active:scale-95"> 
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-chat-fill" viewBox="0 0 16 16">
-                          <path d="M8 15c4.418 0 8-3.134 8-7s-3.582-7-8-7-8 3.134-8 7 3.582 7 8 7zm4.25-5.5a1 1 0 0 0-1-1h-6.5a1 1 0 0 0 0 2h6.5a1 1 0 0 0 1-1z"/>
-                        </svg> 
-                        <span>카톡 문의</span>
-                    </button>
-                    
-                    <button onClick={() => window.location.href = `tel:${PHONE_NUMBER}`} className="flex items-center justify-center gap-1 bg-indigo-700 text-white py-3 rounded-lg font-bold hover:bg-indigo-800 transition shadow-md text-sm active:scale-95"> 
-                        <Phone size={16} /> <span>전화 상담</span>
-                    </button>
+                <div className="mt-3 pt-3 border-t border-gray-200">
+                    <div className='w-full py-1.5 px-2 text-center bg-gray-100 text-indigo-600 rounded-md font-bold text-[11px] shadow-sm flex items-center justify-center'>
+                        참고 | 바닥 30x30cm, 벽면 30x60cm 크기 기준
+                    </div>
                 </div>
               </div>
             </div>
