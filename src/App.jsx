@@ -745,7 +745,7 @@ export default function GroutEstimatorApp() {
                   const nonPackageOriginalPrice = 400000 * count; 
                   
                   remainingDiscount = nonPackageOriginalPrice - fixedPriceTotal;
-                  remainingCalculatedPrice = fixedPriceForRemaining;
+                  remainingCalculatedPrice = fixedPriceTotal;
                   
                   if (initialCount === count) itemOriginalTotal = 400000 * initialCount;
               }
@@ -844,7 +844,7 @@ export default function GroutEstimatorApp() {
     setShowToast(false);
   }, []);
 
-  // --- 기타 핸들러 (유지) ---
+  // --- 기타 핸들러 (견적서 저장 기능 보강) ---
   const handleImageSave = async () => {
       if (quoteRef.current) {
         try {
@@ -856,19 +856,36 @@ export default function GroutEstimatorApp() {
                 backgroundColor: '#ffffff'
             });
             const image = canvas.toDataURL('image/png');
+            const filename = `줄눈의미학_견적서_${new Date().toISOString().slice(0, 10)}.png`;
+
+            // 1. IE/Edge (레거시) 지원 확인
+            if (window.navigator.msSaveOrOpenBlob) {
+                canvas.toBlob((blob) => {
+                    window.navigator.msSaveOrOpenBlob(blob, filename);
+                });
+            } 
+            // 2. 일반 브라우저 (Chrome, Safari, Firefox)
+            else {
+                const link = document.createElement('a');
+                link.href = image;
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
             
-            // 다운로드 링크 생성 및 클릭
-            const link = document.createElement('a');
-            link.href = image;
-            link.download = `줄눈의미학_견적서_${new Date().toISOString().slice(0, 10)}.png`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            alert('견적서 이미지가 저장되었습니다!');
+            alert('견적서 이미지가 저장되었습니다! 다운로드 폴더를 확인해주세요.');
         } catch (error) {
             console.error('Error saving image:', error);
-            // 캡처 오류 시 안내 문구를 더 명확히 표시
-            alert('이미지 저장 중 오류가 발생했습니다. 브라우저 설정을 확인해주세요.');
+            // 🚨 다운로드 실패 시 수동 저장을 안내하는 최종적인 방법
+            if (quoteRef.current) {
+                 const canvas = await html2canvas(quoteRef.current, { scale: 3, backgroundColor: '#ffffff' });
+                 const imgData = canvas.toDataURL('image/png');
+                 const newWindow = window.open('about:blank', '_blank');
+                 newWindow.document.write('<img src="' + imgData + '" alt="견적서 이미지" style="width:100%; height:auto;">');
+                 newWindow.document.write('<h3 style="text-align:center; color:red;">[다운로드 실패] 이미지를 길게 눌러 저장해주세요.</h3>');
+            }
+            alert('이미지 자동 저장 중 오류가 발생했습니다. 새 창이 열리면 이미지를 길게(터치) 눌러 수동으로 저장해주세요.');
         }
       }
   };
@@ -1362,7 +1379,7 @@ export default function GroutEstimatorApp() {
                         return (
                             <div key={item.id} className="flex flex-col text-gray-800 pl-2 pr-1 pt-1 border-b border-gray-100 last:border-b-0">
                                 
-                                {/* 🚨 [수정] 항목 이름과 소재 라벨 분리 배치 🚨 */}
+                                {/* 🚨 [수정] 항목 이름과 수량 라인 */}
                                 <div className="flex justify-between items-center w-full">
                                     <span className={`w-7/12 font-semibold text-gray-700 text-sm break-words`}>
                                         <span className="text-gray-400 mr-1">-</span>
@@ -1374,9 +1391,10 @@ export default function GroutEstimatorApp() {
                                         {item.calculatedPrice > 0 ? `${finalPriceText}원` : (item.isFreeService ? '🎁 서비스 포함' : '👑 패키지 포함')}
                                     </span>
                                 </div>
-                                <div className='flex justify-between items-center w-full'>
+                                
+                                {/* 🚨 [수정] 소재 라벨을 다음 줄에 배치 */}
+                                <div className='flex justify-start items-center w-full'>
                                      <span className='text-indigo-500 text-[10px] ml-3 font-extrabold break-all'>({item.materialLabel})</span>
-                                     <span className='w-5/12'></span> {/* 공백 유지 */}
                                 </div>
                                 
                                 {/* 할인이 발생한 경우에만 할인액 표시 */}
@@ -1409,8 +1427,6 @@ export default function GroutEstimatorApp() {
                             </div>
                         ))}
                 </div>
-
-                {/* 🚨 [삭제 완료] 총 할인 금액 표시 영역 제거됨 🚨 */}
                 
                 {/* 총 합계 영역 (유지) */}
                 <div className="pt-3 text-center"> 
