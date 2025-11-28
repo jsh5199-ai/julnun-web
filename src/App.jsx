@@ -1473,7 +1473,7 @@ export default function GroutEstimatorApp() {
                 {/* 안내 사항 영역 (문구만 남김) */}
                 <div className="mt-3 pt-3 border-t border-gray-200">
                     <div className='w-full py-1.5 px-2 text-center bg-gray-100 text-indigo-600 rounded-md font-bold text-[11px] shadow-sm flex items-center justify-center'>
-                        참고 | 바닥 30x30cm, 벽면 30x60cm 크기 기준
+                        바닥 30x30cm, 벽면 30x60cm 크기 기준
                     </div>
                 </div>
               </div>
