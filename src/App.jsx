@@ -89,7 +89,7 @@ const OTHER_AREAS = [
   { id: 'balcony_laundry', label: '베란다/세탁실', basePrice: 100000, icon: LayoutGrid, unit: '개소', desc: 'Poly 10만 / Epoxy 25만' }, 
   // 주방 벽면: Poly 15만, Epoxy 25万
   { id: 'kitchen_wall', label: '주방 벽면', basePrice: 150000, icon: Utensils, unit: '구역', desc: 'Poly 15만 / Epoxy 25만' },
-  // 거실: Poly 55만, Epoxy 110万
+  // 거실: Poly 55만, Epoxy 110만
   { id: 'living_room', label: '거실 바닥', basePrice: 550000, icon: Sofa, unit: '구역', desc: 'Poly 55만 / Epoxy 110만 (복도,주방 포함)' },
 ];
 
@@ -1395,13 +1395,15 @@ export default function GroutEstimatorApp() {
                             <span className="col-span-2 text-right pr-1">금액</span>
                         </div>
 
-                        {/* 🚨 [수정] calculatedPrice가 0보다 큰 항목만 필터링하여 '서비스/패키지' 항목 제거 🚨 */}
+                        {/* 🚨 [재수정] 모든 시공 내역 항목을 표시하고, 금액이 0원일 경우 빈칸 처리 🚨 */}
                         {calculation.itemizedPrices
-                            .filter(item => !item.isDiscount && item.calculatedPrice > 0) 
+                            .filter(item => !item.isDiscount) // 할인 항목(리뷰)만 제외
                             .map(item => {
 
-                            const finalPriceText = item.calculatedPrice.toLocaleString() + '원';
-                            const priceColorClass = 'text-indigo-600';
+                            const finalPriceText = item.calculatedPrice > 0 
+                                ? `${item.calculatedPrice.toLocaleString()}원` 
+                                : ''; // 0원인 경우 빈칸 처리
+                            const priceColorClass = item.calculatedPrice > 0 ? 'text-indigo-600' : 'text-gray-500';
 
                             return (
                                 <div key={item.id} className="grid grid-cols-12 items-center text-gray-800 py-1 border-b border-gray-100 last:border-b-0">
