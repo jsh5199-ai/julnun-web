@@ -85,9 +85,9 @@ const BATHROOM_AREAS = [
 const OTHER_AREAS = [
   // 현관: Poly 5만
   { id: 'entrance', label: '현관', basePrice: 50000, icon: DoorOpen, unit: '개소' }, 
-  // 베란다/세탁실: Poly 10만, Epoxy 25만
+  // 베란다/세탁실: Poly 10만, Epoxy 25万
   { id: 'balcony_laundry', label: '베란다/세탁실', basePrice: 100000, icon: LayoutGrid, unit: '개소', desc: 'Poly 10만 / Epoxy 25만' }, 
-  // 주방 벽면: Poly 15만, Epoxy 25만
+  // 주방 벽면: Poly 15만, Epoxy 25万
   { id: 'kitchen_wall', label: '주방 벽면', basePrice: 150000, icon: Utensils, unit: '구역', desc: 'Poly 15만 / Epoxy 25만' },
   // 거실: Poly 55만, Epoxy 110만
   { id: 'living_room', label: '거실 바닥', basePrice: 550000, icon: Sofa, unit: '구역', desc: 'Poly 55만 / Epoxy 110만 (복도,주방 포함)' },
@@ -867,7 +867,7 @@ export default function GroutEstimatorApp() {
     setShowToast(false);
   }, []);
 
-  // --- 기타 핸들러 (유지) ---
+  // --- 기타 핸들러 (수정된 로직 적용) ---
   const handleImageSave = async () => {
       if (quoteRef.current) {
         try {
@@ -880,14 +880,16 @@ export default function GroutEstimatorApp() {
             });
             const image = canvas.toDataURL('image/png');
             
-            // 다운로드 링크 생성 및 클릭
+            // 🚨 [강제 다운로드 로직 복구 및 개선] 🚨
             const link = document.createElement('a');
             link.href = image;
             link.download = `줄눈의미학_견적서_${new Date().toISOString().slice(0, 10)}.png`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            alert('견적서 이미지가 저장되었습니다!');
+            
+            // 다운로드 시작 알림
+            alert('✅ 견적서 다운로드가 시작되었습니다!\n\n**파일이 다운로드 폴더에 저장되었는지 확인해주세요.**');
         } catch (error) {
             console.error('Error saving image:', error);
             // 캡처 오류 시 안내 문구를 더 명확히 표시
@@ -1424,7 +1426,6 @@ export default function GroutEstimatorApp() {
                                         </span>
                                     </div>
                                 )}
-                                
                             </div>
                         );
                     })}
