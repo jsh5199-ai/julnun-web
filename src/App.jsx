@@ -69,8 +69,8 @@ const MATERIALS = [
   },
 ];
 
+// 🚨 [수정] 현관 범위 제거 🚨
 const BATHROOM_AREAS = [
-  { id: 'entrance', label: '현관', basePrice: 50000, icon: DoorOpen, unit: '개소' },
   { id: 'bathroom_floor', label: '욕실 바닥', basePrice: 150000, icon: Bath, unit: '개소' },
   { id: 'shower_booth', label: '샤워부스 벽 3면', basePrice: 150000, icon: Bath, unit: '구역' },
   { id: 'bathtub_wall', label: '욕조 벽 3면', basePrice: 150000, icon: Bath, unit: '구역' },
@@ -78,13 +78,15 @@ const BATHROOM_AREAS = [
   { id: 'common_bath_wall', label: '공용욕실 벽 전체', basePrice: 300000, icon: Bath, unit: '구역' },
 ];
 
+// 🚨 [수정] 현관 범위 추가 🚨
 const OTHER_AREAS = [
+  { id: 'entrance', label: '현관', basePrice: 50000, icon: DoorOpen, unit: '개소' }, // 현관 추가
   { id: 'balcony_laundry', label: '베란다/세탁실', basePrice: 100000, icon: LayoutGrid, unit: '개소', desc: '원하는 개수만큼 선택' }, 
   { id: 'kitchen_wall', label: '주방 벽면', basePrice: 150000, icon: Utensils, unit: '구역' },
   { id: 'living_room', label: '거실 바닥', basePrice: 550000, icon: Sofa, unit: '구역', desc: '복도,주방 포함' },
 ];
 
-const SERVICE_AREAS = [...BATHROOM_AREAS, ...OTHER_AREAS];
+const SERVICE_AREAS = [...BATHROOM_AREAS, ...OTHER_AREAS]; // 현관 포함됨
 
 const SILICON_AREAS = [
   { id: 'silicon_bathtub', label: '욕조 테두리 교체', basePrice: 80000, icon: Eraser, unit: '개소', desc: '단독 8만 / 패키지시 5만' },
@@ -1086,15 +1088,15 @@ export default function GroutEstimatorApp() {
           
           {/* A. 욕실 범위 */}
           <h3 className="text-base font-extrabold flex items-center gap-2 mb-3 mt-4 text-gray-700">
-            <Bath size={16} className="text-indigo-500" /> A. 욕실 및 현관 범위
+            <Bath size={16} className="text-indigo-500" /> A. 욕실 범위
           </h3>
           {renderAreaList(BATHROOM_AREAS)}
 
           <div className="border-t border-gray-100 mt-4 pt-4"></div>
           
-          {/* B. 기타 범위 (주방/베란다) */}
+          {/* B. 기타 범위 (현관/주방/베란다) */}
           <h3 className="text-base font-extrabold flex items-center gap-2 mb-3 mt-4 text-gray-700">
-            <LayoutGrid size={16} className="text-indigo-500" /> B. 기타 범위
+            <LayoutGrid size={16} className="text-indigo-500" /> B. 기타 범위 (현관 포함)
           </h3>
           {renderAreaList(OTHER_AREAS)}
 
