@@ -25,13 +25,11 @@ const GlobalStyles = () => (
       0%, 100% { box-shadow: 0 0 0 0 rgba(100, 116, 139, 0.4); } 
       50% { box-shadow: 0 0 0 8px rgba(100, 116, 139, 0); } 
     }
-    /* 리뷰 버튼 애니메이션 복구 */
     @keyframes shine { 
         0% { background-position: -200% 0; }
         100% { background-position: 200% 0; }
     }
     .shine-effect {
-        /* 네이비 계열 배경에 맞게 흰색 빛깔로 조정 */
         background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
         background-size: 200% 100%;
         animation: shine 5s infinite;
@@ -43,11 +41,16 @@ const GlobalStyles = () => (
     
     .selection-box { transition: all 0.2s ease-in-out; }
     .selection-selected {
-      border: 3px solid #374151; /* Gray-700 대신 Darker Indigo 느낌의 색상 */
-      background-color: #f3f4f6; /* Gray-100 */
+      border: 3px solid #374151;
+      background-color: #f3f4f6;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
     }
     .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom); }
+    /* 견적 페이지용 스타일 추가 */
+    .quote-page-enter { opacity: 0; transform: translateY(100%); }
+    .quote-page-enter-active { opacity: 1; transform: translateY(0); transition: opacity 300ms, transform 300ms; }
+    .quote-page-exit { opacity: 1; transform: translateY(0); }
+    .quote-page-exit-active { opacity: 0; transform: translateY(100%); transition: opacity 300ms, transform 300ms; }
   `}</style>
 );
 
@@ -126,7 +129,7 @@ const getEmbedUrl = (videoId) => `https://www.youtube.com/embed/${videoId}?autop
 const OTHER_AREA_IDS_FOR_PACKAGE_EXCLUSION = ['entrance', 'balcony_laundry', 'kitchen_wall', 'living_room', 'silicon_bathtub', 'silicon_sink', 'silicon_living_baseboard'];
 
 
-// ⭐️ 패키지 정의 시, 기타 범위를 포함하지 않도록 변경
+// ⭐️ 패키지 정의 시, 기타 범위를 포함하지 않도록 변경 (원래 데이터 유지)
 const ORIGINAL_MIXED_PACKAGES = [
     { id: 'P_MIX_01', price: 750000, label: '혼합패키지 01', E_areas: [['bathroom_floor', 2]], P_areas: [['shower_booth', 1]] },
     { id: 'P_MIX_02', price: 750000, label: '혼합패키지 02', E_areas: [['bathroom_floor', 2]], P_areas: [['bathtub_wall', 1]] },
@@ -258,7 +261,7 @@ const getPackageAreaIds = (pkg) => [
 ];
 
 // =================================================================
-// [컴포넌트] (유지)
+// [컴포넌트] (유지 및 신규)
 // =================================================================
 
 const PackageToast = ({ isVisible, onClose, label }) => {
@@ -358,6 +361,265 @@ const Accordion = ({ question, answer }) => {
     );
 };
 
+// =================================================================
+// 🚨 [신규] QuotePage 컴포넌트: 전체 화면 견적서 페이지 🚨
+// =================================================================
+
+const QuotePage = ({ calculation, onClose, soomgoReviewEvent, isSoomgoReviewApplied, toggleReview, KAKAO_CHAT_URL, PHONE_NUMBER }) => {
+    const quoteRef = useRef(null);
+
+    // ⭐️ 이미지 저장 핸들러 (새 탭에 띄우기) ⭐️
+    const handleImageSave = async () => {
+        if (quoteRef.current) {
+            try {
+                // 고해상도 캡처를 위해 scale 3 적용
+                const canvas = await html2canvas(quoteRef.current, {
+                    scale: 3, 
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: '#ffffff'
+                });
+                const image = canvas.toDataURL('image/png');
+                
+                // 새 탭을 열어 이미지를 표시하여 수동 저장을 유도
+                const newTab = window.open();
+                if (newTab) {
+                    newTab.document.write(`
+                        <html>
+                        <head>
+                            <title>줄눈의미학 견적서</title>
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                            <style>body{margin:0; background-color:#ffffff; display:flex; justify-content:center; padding: 10px;}</style>
+                        </head>
+                        <body>
+                            <img src="${image}" alt="줄눈의미학 견적서" style="max-width:100%; height:auto; border: 1px solid #ccc;">
+                        </body>
+                        </html>
+                    `);
+                    newTab.document.title = "줄눈의미학 견적서";
+                    newTab.document.close();
+                    
+                    alert('새 탭에 견적서 이미지가 열렸습니다. 열린 이미지 위에 손가락을 길게 눌러(Long Press) 저장해 주세요!');
+                } else {
+                    alert('새 창/탭 열기가 브라우저에 의해 차단되었습니다. 브라우저 설정을 확인해주세요.');
+                }
+
+            } catch (error) {
+                console.error('Error opening image tab:', error);
+                alert('이미지 생성에 실패했습니다. 견적서 내용을 캡처하거나 카톡으로 문의해 주세요.');
+            }
+        }
+    };
+    
+    // 현장 유형 라벨 찾기
+    const housingTypeLabel = HOUSING_TYPES.find(h => h.id === calculation.housingType).label;
+
+
+    return (
+        <div className="fixed inset-0 bg-gray-50 z-50 overflow-y-auto animate-fade-in quote-page-enter-active">
+            {/* 상단 헤더 */}
+            <header className="bg-indigo-700 p-4 text-white flex justify-between items-center sticky top-0 z-10 shadow-lg">
+                <h3 className="font-extrabold text-lg flex items-center gap-2">
+                    <CheckCircle2 className="h-5 w-5 text-white" /> 예상 견적서
+                </h3>
+                <button onClick={onClose} className="text-white/80 hover:text-white transition active:scale-95">
+                    <X size={20} />
+                </button>
+            </header>
+
+            {/* 견적서 내용 (캡처 영역) */}
+            <div className="p-4 text-gray-800 flex justify-center">
+                <div ref={quoteRef} id="quote-content" className="rounded-lg p-5 space-y-3 bg-white shadow-xl border border-gray-200" style={{ width: '340px' }}>
+                    
+                    {/* 헤더 및 로고 영역 */}
+                    <div className="flex flex-col items-center border-b border-gray-300 pb-3 mb-3">
+                        <h1 className='text-xl font-extrabold text-indigo-800 text-center'>줄눈의미학 예상 견적서</h1>
+                    </div>
+
+                    {/* 기본 정보 테이블 */}
+                    <div className="space-y-2 border-b border-gray-200 pb-3 text-sm">
+                        <div className="flex justify-between items-center">
+                            <span className="font-semibold flex-shrink-0">현장 유형</span>
+                            <span className='text-right font-medium flex-shrink-0'>{housingTypeLabel}</span>
+                        </div>
+                    </div>
+
+                    {/* 시공 및 할인 내역 */}
+                    <div className="space-y-2 text-sm border-b border-gray-200 pb-3">
+
+                        {/* ⭐️ 최소 출장비 적용 문구 추가 ⭐️ */}
+                        {calculation.minimumFeeApplied && (
+                            <div className="bg-red-50/70 p-2 rounded-md border-l-4 border-red-500 text-xs font-semibold text-gray-700">
+                                <p className='flex items-center gap-1 text-red-800 font-extrabold'>
+                                    <Zap size={12} className='text-red-400'/> 최소 출장비 {MIN_FEE.toLocaleString()}원 적용
+                                </p>
+                                <p className='text-[11px] ml-1'>선택하신 항목의 합계가 {MIN_FEE.toLocaleString()}원 미만이므로 최소 출장비가 적용되었습니다.</p>
+                            </div>
+                        )}
+                        
+                        {/* 패키지 포함 서비스 내역 */}
+                        {calculation.isPackageActive && (
+                            <div className="bg-indigo-50/70 p-2 rounded-md border-l-4 border-indigo-500 text-xs font-semibold text-gray-700">
+                                <p className='flex items-center gap-1 text-indigo-800 font-extrabold mb-1'>
+                                    <Crown size={12} className='text-indigo-400'/> {calculation.label} 
+                                </p>
+                                <ul className='list-disc list-inside text-[11px] ml-1 space-y-0.5 text-left'>
+                                    <li>패키지 포함 영역이 할인 적용되었습니다.</li>
+                                    {calculation.isFreeEntrance && <li>현관 바닥 서비스 (폴리아스파틱)</li>}
+                                </ul>
+                            </div>
+                        )}
+
+                        {/* 개별 항목 루프 */}
+                        {calculation.itemizedPrices
+                            .filter(item => !item.isDiscount) 
+                            .map(item => {
+                            
+                            const finalPriceText = item.calculatedPrice.toLocaleString();
+                            
+                            return (
+                                <div key={item.id} className="flex flex-col text-gray-800 pl-2 pr-1 pt-1 border-b border-gray-100 last:border-b-0">
+                                    
+                                    {/* 항목 이름과 소재 라벨 분리 배치 */}
+                                    <div className="flex justify-between items-center w-full">
+                                        <span className={`w-7/12 font-semibold text-gray-700 text-sm break-words`}>
+                                            <span className="text-gray-400 mr-1">-</span>
+                                            {item.label} 
+                                            {item.quantity > 0 && <span className="text-gray-400 text-xs font-normal"> x {item.quantity}</span>}
+                                        </span>
+                                        {/* 최종 적용 가격 */}
+                                        <span className={`text-right w-5/12 font-bold text-sm ${item.calculatedPrice > 0 ? 'text-indigo-600' : 'text-gray-500'}`}> 
+                                            {item.calculatedPrice > 0 ? `${finalPriceText}원` : (item.isFreeService ? '🎁 서비스 포함' : '👑 패키지 포함')}
+                                        </span>
+                                    </div>
+                                    <div className='flex justify-between items-center w-full'>
+                                           <span className='text-indigo-500 text-[10px] ml-3 font-extrabold break-all'>({item.materialLabel})</span>
+                                           <span className='w-5/12'></span> {/* 공백 유지 */}
+                                    </div>
+                                    
+                                    {/* 할인이 발생한 경우에만 할인액 표시 */}
+                                    {(item.discount > 0 && item.calculatedPrice > 0) && (
+                                        <div className="flex justify-between items-center text-xs text-gray-500 mt-0.5 pb-1 pl-3">
+                                            <span className='font-normal'>
+                                                {item.isFreeService ? '🎁 서비스 할인 적용' : '✨ 항목 할인 적용'}
+                                            </span>
+                                            <span className="font-semibold text-indigo-600">
+                                                -{(item.originalPrice - item.calculatedPrice).toLocaleString()}원
+                                            </span>
+                                        </div>
+                                    )}
+                                    
+                                </div>
+                            );
+                        })}
+
+                        {/* 할인 항목 루프 (리뷰 할인 등) */}
+                        {calculation.itemizedPrices
+                            .filter(item => item.isDiscount) 
+                            .map(item => (
+                                <div key={item.id} className="flex justify-between items-center text-indigo-600 font-semibold pl-2 pr-1 py-1 border-b border-gray-100 last:border-b-0">
+                                    <span className={`w-3/5 flex items-center`}>
+                                        <Gift size={12} className='inline mr-1'/> {item.label} 
+                                    </span>
+                                    <span className={`text-right w-2/5`}>
+                                        -{item.originalPrice.toLocaleString()}원
+                                    </span>
+                                </div>
+                            ))}
+                    </div>
+
+                    {/* 총 합계 영역 */}
+                    <div className="pt-3 text-center"> 
+                        
+                        <div className="flex justify-between items-end"> 
+                            <span className='text-base font-semibold text-gray-800'>최종 결제 금액</span>
+                            <div className="text-right">
+                                <span className="text-3xl font-extrabold text-indigo-700">{calculation.price.toLocaleString()}원</span>
+                            </div>
+                        </div>
+                        <p className="text-xs text-gray-400 text-right mt-1">VAT 별도 / 현장상황별 상이</p>
+                    </div>
+
+                    {/* 안내 사항 영역 */}
+                    <div className="mt-3 pt-3 border-t border-gray-200">
+                        <div className='w-full py-1.5 px-2 text-center bg-gray-100 text-indigo-600 rounded-md font-bold text-[11px] shadow-sm flex items-center justify-center'>
+                            참고 | 바닥 30x30cm, 벽면 30x60cm 크기 기준
+                        </div>
+                        <div className="mt-3 bg-red-50 p-2 rounded-md border-l-4 border-red-400 text-xs font-medium text-gray-600">
+                            🚨 **이미지 저장 유의:** 저장이 실패하면 견적서 이미지 위에 **손가락을 길게 눌러(Long Press)** 수동으로 저장해 주세요.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            {/* 하단 컨트롤 영역 */}
+            <div className="p-4 bg-white border-t border-gray-200 sticky bottom-0 safe-area-bottom">
+                
+                {/* 1. 숨고 리뷰 이벤트 버튼 */}
+                {soomgoReviewEvent && (
+                    <div className='mb-3'>
+                        {(() => {
+                            const evt = soomgoReviewEvent;
+                            const isApplied = isSoomgoReviewApplied;
+                            const discountAmount = evt.discount.toLocaleString();
+                            const Icon = isApplied ? CheckCircle2 : Sparkles;
+
+                            const baseClasses = "w-full py-3 rounded-xl transition font-extrabold text-sm active:scale-[0.98] shadow-lg flex items-center justify-center gap-2 relative overflow-hidden border-2";
+                            const fixedBgClasses = "bg-indigo-700 text-white hover:bg-indigo-800"; 
+                            const borderClasses = isApplied
+                                ? "border-amber-400" 
+                                : "border-indigo-700"; 
+                                
+                            const iconColorClass = 'text-white'; 
+
+                            const labelText = isApplied 
+                                ? `할인 적용 취소하기 (총액 +${discountAmount}원)` 
+                                : `숨고 리뷰 약속하고 ${discountAmount}원 할인받기!`;
+
+                            return (
+                                <button
+                                    onClick={() => toggleReview(evt.id)}
+                                    className={`${baseClasses} ${fixedBgClasses} ${borderClasses}`}
+                                >
+                                    <Icon size={18} fill="currentColor" className={iconColorClass}/>
+                                    <span>{labelText}</span>
+                                </button>
+                            );
+                        })()}
+                    </div>
+                )}
+                
+                <div className='grid grid-cols-3 gap-3'> 
+                    
+                    <button onClick={handleImageSave} className="flex items-center justify-center gap-1 bg-indigo-600 text-white py-3 rounded-lg font-bold hover:bg-indigo-700 transition text-sm active:scale-95 shadow-md"> 
+                        <ImageIcon size={16} /> <span>견적서 저장</span>
+                    </button>
+                    
+                    <a 
+                        href={KAKAO_CHAT_URL} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="flex items-center justify-center gap-1 bg-yellow-400 text-gray-800 py-3 rounded-lg font-bold hover:bg-yellow-500 transition shadow-md text-sm active:scale-95"
+                    > 
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-chat-fill" viewBox="0 0 16 16">
+                            <path d="M8 15c4.418 0 8-3.134 8-7s-3.582-7-8-7-8 3.134-8 7 3.582 7 8 7zm4.25-5.5a1 1 0 0 0-1-1h-6.5a1 1 0 0 0 0 2h6.5a1 1 0 0 0 1-1z"/>
+                        </svg> 
+                        <span>카톡 문의</span>
+                    </a>
+                    
+                    <button onClick={() => window.location.href = `tel:${PHONE_NUMBER}`} className="flex items-center justify-center gap-1 bg-indigo-700 text-white py-3 rounded-lg font-bold hover:bg-indigo-800 transition shadow-md text-sm active:scale-95"> 
+                        <Phone size={16} /> <span>전화 상담</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+
+// =================================================================
+// 🚀 GroutEstimatorApp 컴포넌트 (메인) 🚀
+// =================================================================
 
 export default function GroutEstimatorApp() {
   const [housingType, setHousingType] = useState('new');
@@ -372,12 +634,12 @@ export default function GroutEstimatorApp() {
   );
     
   const [selectedReviews, setSelectedReviews] = useState(new Set());
-  const [showModal, setShowModal] = useState(false);
   const [showMaterialModal, setShowMaterialModal] = useState(false); 
   const [showToast, setShowToast] = useState(false); 
   const [activeVideoId, setActiveVideoId] = useState(YOUTUBE_VIDEOS[0].id); 
-
-  const quoteRef = useRef(null); 
+  
+  // 🚨 [수정] showModal 대신 showQuotePage 사용 🚨
+  const [showQuotePage, setShowQuotePage] = useState(false);
 
   const SOOMGO_REVIEW_URL = 'https://www.soomgo.com/profile/users/10755579?tab=review';
   const PHONE_NUMBER = '010-7734-6709';
@@ -386,7 +648,7 @@ export default function GroutEstimatorApp() {
   useEffect(() => {
     // 현관이 선택된 경우, 소재를 'poly'로 강제합니다.
     if (quantities['entrance'] > 0 && areaMaterials['entrance'] !== 'poly') {
-        setAreaMaterials(prev => ({ ...prev, 'entrance': 'poly' }));
+      setAreaMaterials(prev => ({ ...prev, 'entrance': 'poly' }));
     }
   }, [quantities, areaMaterials]);
 
@@ -419,8 +681,6 @@ export default function GroutEstimatorApp() {
           newQuantities['common_bath_wall'] = 0;
         }
       }
-
-      // 2. 욕실 바닥 2곳 선택 시 현관 자동 선택 로직은 calculation에서 처리함.
 
       return newQuantities;
     });
@@ -495,7 +755,7 @@ export default function GroutEstimatorApp() {
     const filteredEpoxySelections = filterSelections(selectionSummary['kerapoxy'] || {});
     
     const totalSelectedCount = Object.values(filteredPolySelections).reduce((sum, v) => sum + v, 0) + 
-                             Object.values(filteredEpoxySelections).reduce((sum, v) => sum + v, 0);
+                               Object.values(filteredEpoxySelections).reduce((sum, v) => sum + v, 0);
     
     // 선택된 욕실 항목이 없으면 패키지 매칭 시도 안 함
     if (totalSelectedCount === 0) return null;
@@ -615,7 +875,7 @@ export default function GroutEstimatorApp() {
   }, [quantities, areaMaterials]);
 
 
-  // 🚀 [최종] calculation 로직: 특수 영역 가격을 명시적으로 계산하도록 수정 
+  // 🚀 [최종] calculation 로직
   const calculation = useMemo(() => {
     const selectedHousing = HOUSING_TYPES.find(h => h.id === housingType);
     let itemizedPrices = []; 
@@ -625,9 +885,6 @@ export default function GroutEstimatorApp() {
     const matchedPackageResult = findMatchingPackage(selectionSummary, quantities);
     const matchedPackage = matchedPackageResult ? matchedPackageResult : null;
     
-    const isAutoPackageEntrance = false; 
-
-    // q는 계산 시 패키지에 포함되어 제외될 항목을 표시하는 임시 수량 맵
     let q = { ...quantities };
     let total = 0;
     let labelText = null;
@@ -635,7 +892,6 @@ export default function GroutEstimatorApp() {
     let isFreeEntrance = false; // 현관 무료 서비스 플래그 (욕실 2곳 선택 시)
     let totalAreaCount = Object.values(quantities).reduce((sum, count) => sum + count, 0);
     
-    // 🚨 [오류 수정] packageAreas를 스코프 최상단에 선언 (ReferenceError 방지)
     let packageAreas = []; 
     
     // ⭐️ 2. 패키지 적용 ⭐️
@@ -645,15 +901,15 @@ export default function GroutEstimatorApp() {
       labelText = '패키지 할인 적용 중'; 
       
       // ⭐️ 패키지에 포함된 항목만 q에서 제외 ⭐️
-      packageAreas = getPackageAreaIds(matchedPackage); // 👈 여기서 값 할당
+      packageAreas = getPackageAreaIds(matchedPackage);
       packageAreas.forEach(id => { 
         q[id] = 0; 
       });
       
       // 현관이 선택된 경우 (패키지에 현관 포함 여부와 관계 없이) 서비스로 처리
       if (quantities['entrance'] >= 1) { 
-         isFreeEntrance = true;
-         q['entrance'] = 0;
+          isFreeEntrance = true;
+          q['entrance'] = 0;
       }
     } 
     
@@ -662,7 +918,7 @@ export default function GroutEstimatorApp() {
     if (quantities['bathroom_floor'] >= 2 && quantities['entrance'] >= 1 && !matchedPackage) {
         isFreeEntrance = true;
         isPackageActive = true;
-        labelText = '패키지 할인 적용 중';
+        labelText = '현관 서비스 적용 중'; // 패키지 라벨과 구분
         q['entrance'] = 0; // 현관 수량 0으로 설정
     }
 
@@ -678,7 +934,7 @@ export default function GroutEstimatorApp() {
       const areaMatId = area.id === 'entrance' ? 'poly' : areaMaterials[area.id];
       const isEpoxy = areaMatId === 'kerapoxy';
       
-      let finalUnitBasePrice = area.basePrice; // 환경 배율 적용 전의 최종 단가
+      let finalUnitBasePrice = area.basePrice; 
       
       // 🚨 [수정] 소재에 따른 최종 단가 설정 🚨
       if (area.id === 'balcony_laundry') {
@@ -693,7 +949,6 @@ export default function GroutEstimatorApp() {
           // 욕실 영역 (바닥, 벽면 등): 기본 단가에 소재별 계수 적용 (Poly 1.0, Epoxy 1.8)
           finalUnitBasePrice = area.basePrice * (isEpoxy ? 1.8 : 1.0);
       } 
-      // 실리콘 시공 영역은 area.basePrice 그대로 사용 (아래 실리콘 할인 로직에서 처리)
       
       // 환경 배율 적용 후 잔여 항목에 대한 단가를 정수화
       const calculatedPricePerUnit = Math.floor(finalUnitBasePrice * selectedHousing.multiplier);
@@ -723,30 +978,34 @@ export default function GroutEstimatorApp() {
       // C. 개별 선택 항목 (패키지/서비스에 포함되지 않은 잔여 수량에 대한 계산 및 실리콘 할인 적용)
       else {
           // 남은 수량(count)에 대해서만 계산
-          let remainingOriginalTotal = calculatedPricePerUnit * count;
+          let remainingOriginalUnitPrice = calculatedPricePerUnit;
+          let remainingOriginalTotal = remainingOriginalUnitPrice * count;
           let remainingCalculatedPrice = remainingOriginalTotal;
           let remainingDiscount = 0;
           
           // 🚨 실리콘/리폼 패키지 할인 적용 🚨 
           if (area.id === 'silicon_bathtub' && initialCount >= 1 && totalAreaCount >= 3) {
-              const fixedPriceTotal = 50000 * initialCount; 
               if (count > 0) { 
+                  // 단독 8만, 패키지시 5만
                   const nonPackageOriginalPrice = 80000 * count; 
                   const fixedPriceForRemaining = 50000 * count; 
                   
                   remainingDiscount = nonPackageOriginalPrice - fixedPriceForRemaining;
                   remainingCalculatedPrice = fixedPriceForRemaining;
                   
+                  // 견적서 표기용 원가 (할인 전 가격) 재조정
                   if (initialCount === count) itemOriginalTotal = 80000 * initialCount;
               }
           } else if (area.id === 'silicon_living_baseboard' && initialCount >= 1 && totalAreaCount >= 3) {
-              const fixedPriceTotal = 350000 * initialCount; 
               if (count > 0) {
+                  // 단독 40만, 패키지시 35만
                   const nonPackageOriginalPrice = 400000 * count; 
+                  const fixedPriceForRemaining = 350000 * count; 
                   
-                  remainingDiscount = nonPackageOriginalPrice - fixedPriceTotal;
+                  remainingDiscount = nonPackageOriginalPrice - fixedPriceForRemaining;
                   remainingCalculatedPrice = fixedPriceForRemaining;
                   
+                  // 견적서 표기용 원가 (할인 전 가격) 재조정
                   if (initialCount === count) itemOriginalTotal = 400000 * initialCount;
               }
           }
@@ -777,7 +1036,7 @@ export default function GroutEstimatorApp() {
           isPackageItem: packageCount > 0 || (area.id === 'silicon_bathtub' && totalAreaCount >= 3) || (area.id === 'silicon_living_baseboard' && totalAreaCount >= 3), 
           isDiscount: false, 
           materialLabel: areaMatId === 'poly' ? 'Poly' : 'Epoxy'
-        });
+      });
     });
     
     // --- 리뷰 할인 적용 (유지) ---
@@ -791,7 +1050,6 @@ export default function GroutEstimatorApp() {
     total -= discountAmount;
     
     // ⭐️ [추가 로직] 총 할인액 계산 ⭐️
-    // 1. 패키지/서비스로 0원 처리된 항목의 원가 합계 (항목별 할인 효과)
     const totalItemDiscount = itemizedPrices
         .filter(item => !item.isDiscount)
         .reduce((sum, item) => sum + (item.originalPrice - item.calculatedPrice), 0);
@@ -810,7 +1068,7 @@ export default function GroutEstimatorApp() {
         minimumFeeApplied = true;
     }
 
-    // 🚨 [새로 계산] 패키지 적용 전 총 정가 (최소출장비, 리뷰할인 미적용 순수 합계)
+    // 🚨 [새로 계산] 패키지 적용 전 총 정가 
     const priceBeforeAllDiscount = itemizedPrices.reduce((sum, item) => sum + (item.isDiscount ? 0 : item.originalPrice), 0) + discountAmount;
     
     return { 
@@ -823,6 +1081,7 @@ export default function GroutEstimatorApp() {
       discountAmount: totalFinalDiscount, // 총 할인액
       minimumFeeApplied, 
       itemizedPrices: itemizedPrices.filter(item => item.quantity > 0 || item.isDiscount),
+      housingType: housingType, // 견적서 페이지에 전달하기 위해 추가
     };
 
   }, [quantities, selectedReviews, housingType, areaMaterials, getSelectionSummary, findMatchingPackage]);
@@ -843,36 +1102,6 @@ export default function GroutEstimatorApp() {
   const handleCloseToast = useCallback(() => {
     setShowToast(false);
   }, []);
-
-  // --- 기타 핸들러 (유지) ---
-  const handleImageSave = async () => {
-      if (quoteRef.current) {
-        try {
-            // html2canvas 옵션 설정 (높은 해상도를 위해 scale 사용)
-            const canvas = await html2canvas(quoteRef.current, {
-                scale: 3, // 캡처 해상도 3배 증가
-                useCORS: true,
-                allowTaint: true,
-                backgroundColor: '#ffffff'
-            });
-            const image = canvas.toDataURL('image/png');
-            
-            // 다운로드 링크 생성 및 클릭
-            const link = document.createElement('a');
-            link.href = image;
-            link.download = `줄눈의미학_견적서_${new Date().toISOString().slice(0, 10)}.png`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            alert('견적서 이미지가 저장되었습니다!');
-        } catch (error) {
-            console.error('Error saving image:', error);
-            // 캡처 오류 시 안내 문구를 더 명확히 표시
-            alert('이미지 저장 중 오류가 발생했습니다. 브라우저 설정을 확인해주세요.');
-        }
-      }
-  };
-
 
   const hasSelections = Object.values(quantities).some(v => v > 0);
   const selectedMaterialData = MATERIALS.find(m => m.id === material);
@@ -1237,7 +1466,7 @@ export default function GroutEstimatorApp() {
                             </div>
                         </div>
                         
-                        {/* 🚨 [수정] 우측: 패키지/최소비용 라벨 (새로운 우측 빈 공간) 🚨 */}
+                        {/* 🚨 [수정] 우측: 패키지/최소비용 라벨 🚨 */}
                         <div className='flex flex-col items-end justify-end h-full pt-1'> 
                             
                             {/* A. 최소 출장비 적용 안내 (Clock 아이콘) */}
@@ -1265,11 +1494,11 @@ export default function GroutEstimatorApp() {
 
                     {/* 2. 견적서 확인 및 카카오톡 문의 버튼 (한 줄 배치) */}
                     <div className='grid grid-cols-2 gap-3'>
-                        {/* 견적서 확인 버튼 */}
+                        {/* 견적서 확인 버튼 (Full Page 호출) */}
                         <button 
                             onClick={() => {
-                                setShowModal(true);
-                                setShowToast(false); 
+                                setShowQuotePage(true);
+                                handleCloseToast(); 
                             }} 
                             className={`w-full py-3 rounded-xl font-extrabold text-sm transition-all 
                                 bg-indigo-700 text-white hover:bg-indigo-800 active:bg-indigo-900 shadow-md
@@ -1286,7 +1515,6 @@ export default function GroutEstimatorApp() {
                             className={`w-full py-3 rounded-xl font-extrabold text-sm transition-all 
                                 bg-yellow-400 text-gray-800 hover:bg-yellow-500 active:bg-yellow-600 shadow-md flex items-center justify-center
                             `}
-                            // onClick 핸들러 대신 href를 사용하여 앱 환경에서 안정적으로 카카오톡 앱을 호출하도록 유도
                         >
                             카톡 예약 문의
                         </a>
@@ -1296,200 +1524,17 @@ export default function GroutEstimatorApp() {
         )}
       </>
 
-      {/* 견적서 모달 */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white w-full max-w-sm rounded-xl shadow-2xl overflow-hidden animate-slide-down border border-gray-200">
-            <div className="bg-indigo-700 p-4 text-white flex justify-between items-center">
-              <h3 className="font-extrabold text-lg flex items-center gap-2"><CheckCircle2 className="h-5 w-5 text-white" /> 줄눈의미학</h3> 
-              <button onClick={() => setShowModal(false)} className="text-white/80 hover:text-white transition active:scale-95">
-                <X size={20} />
-              </button>
-            </div>
-            
-            {/* ★★★ 캡처 전용 견적서 양식 ★★★ */}
-            <div className="p-5 text-gray-800 bg-white overflow-y-auto max-h-[70vh]"> 
-              <div ref={quoteRef} id="quote-content" className="rounded-lg p-5 space-y-3 mx-auto" style={{ width: '320px' }}>
-                
-                {/* 헤더 및 로고 영역 (영어 문구 제거) */}
-                <div className="flex flex-col items-center border-b border-gray-300 pb-3 mb-3">
-                    <h1 className='text-xl font-extrabold text-indigo-800 text-center'>줄눈의미학 예상 견적서</h1>
-                </div>
-
-                {/* 기본 정보 테이블 */}
-                <div className="space-y-2 border-b border-gray-200 pb-3 text-sm">
-                    <div className="flex justify-between items-center">
-                      <span className="font-semibold flex-shrink-0">현장 유형</span>
-                      <span className='text-right font-medium flex-shrink-0'>{HOUSING_TYPES.find(h => h.id === housingType).label}</span>
-                    </div>
-                    {/* 🚨 [삭제 완료] '기본 재료' 항목 제거 됨 🚨 */}
-                </div>
-
-                {/* 시공 및 할인 내역 */}
-                <div className="space-y-2 text-sm border-b border-gray-200 pb-3">
-
-                    {/* ⭐️ 최소 출장비 적용 문구 추가 ⭐️ */}
-                    {calculation.minimumFeeApplied && (
-                        <div className="bg-red-50/70 p-2 rounded-md border-l-4 border-red-500 text-xs font-semibold text-gray-700">
-                            <p className='flex items-center gap-1 text-red-800 font-extrabold'>
-                                <Zap size={12} className='text-red-400'/> 최소 출장비 {MIN_FEE.toLocaleString()}원 적용
-                            </p>
-                            <p className='text-[11px] ml-1'>선택하신 항목의 합계가 {MIN_FEE.toLocaleString()}원 미만이므로 최소 출장비가 적용되었습니다.</p>
-                        </div>
-                    )}
-                    
-                    {/* 패키지 포함 서비스 내역 */}
-                    {calculation.isPackageActive && (
-                        <div className="bg-indigo-50/70 p-2 rounded-md border-l-4 border-indigo-500 text-xs font-semibold text-gray-700">
-                            <p className='flex items-center gap-1 text-indigo-800 font-extrabold mb-1'>
-                                <Crown size={12} className='text-indigo-400'/> {calculation.label} 
-                            </p>
-                            <ul className='list-disc list-inside text-[11px] ml-1 space-y-0.5 text-left'>
-                                <li>패키지 포함 영역이 할인 적용되었습니다.</li>
-                                {calculation.isFreeEntrance && <li>현관 바닥 서비스 (폴리아스파틱)</li>}
-                            </ul>
-                        </div>
-                    )}
-
-                    {/* 개별 항목 루프 (할인 항목 표시 방식 수정 완료) */}
-                    {calculation.itemizedPrices
-                        .filter(item => !item.isDiscount) 
-                        .map(item => {
-                        
-                        const isDiscounted = item.discount > 0 && !item.isPackageItem;
-                        const finalPriceText = item.calculatedPrice.toLocaleString();
-                        
-                        return (
-                            <div key={item.id} className="flex flex-col text-gray-800 pl-2 pr-1 pt-1 border-b border-gray-100 last:border-b-0">
-                                
-                                {/* 🚨 [수정] 항목 이름과 소재 라벨 분리 배치 🚨 */}
-                                <div className="flex justify-between items-center w-full">
-                                    <span className={`w-7/12 font-semibold text-gray-700 text-sm break-words`}>
-                                        <span className="text-gray-400 mr-1">-</span>
-                                        {item.label} 
-                                        {item.quantity > 0 && <span className="text-gray-400 text-xs font-normal"> x {item.quantity}</span>}
-                                    </span>
-                                    {/* 최종 적용 가격 */}
-                                    <span className={`text-right w-5/12 font-bold text-sm ${item.calculatedPrice > 0 ? 'text-indigo-600' : 'text-gray-500'}`}> 
-                                        {item.calculatedPrice > 0 ? `${finalPriceText}원` : (item.isFreeService ? '🎁 서비스 포함' : '👑 패키지 포함')}
-                                    </span>
-                                </div>
-                                <div className='flex justify-between items-center w-full'>
-                                     <span className='text-indigo-500 text-[10px] ml-3 font-extrabold break-all'>({item.materialLabel})</span>
-                                     <span className='w-5/12'></span> {/* 공백 유지 */}
-                                </div>
-                                
-                                {/* 할인이 발생한 경우에만 할인액 표시 */}
-                                {(isDiscounted || item.isFreeService) && item.discount > 0 && (
-                                    <div className="flex justify-between items-center text-xs text-gray-500 mt-0.5 pb-1 pl-3">
-                                        <span className='font-normal'>
-                                            {item.isFreeService ? '🎁 서비스 할인 적용' : '✨ 항목 할인 적용'}
-                                        </span>
-                                        <span className="font-semibold text-indigo-600">
-                                            -{(item.originalPrice - item.calculatedPrice).toLocaleString()}원
-                                        </span>
-                                    </div>
-                                )}
-                                
-                            </div>
-                        );
-                    })}
-
-                    {/* 할인 항목 루프 (리뷰 할인 등) */}
-                    {calculation.itemizedPrices
-                        .filter(item => item.isDiscount) 
-                        .map(item => (
-                            <div key={item.id} className="flex justify-between items-center text-indigo-600 font-semibold pl-2 pr-1 py-1 border-b border-gray-100 last:border-b-0">
-                                <span className={`w-3/5 flex items-center`}>
-                                    <Gift size={12} className='inline mr-1'/> {item.label} 
-                                </span>
-                                <span className={`text-right w-2/5`}>
-                                    -{item.originalPrice.toLocaleString()}원
-                                </span>
-                            </div>
-                        ))}
-                </div>
-
-                {/* 🚨 [삭제 완료] 총 할인 금액 표시 영역 제거됨 🚨 */}
-                
-                {/* 총 합계 영역 (유지) */}
-                <div className="pt-3 text-center"> 
-                    
-                    <div className="flex justify-between items-end"> 
-                        <span className='text-base font-semibold text-gray-800'>최종 결제 금액</span>
-                        <div className="text-right">
-                            <span className="text-3xl font-extrabold text-indigo-700">{calculation.price.toLocaleString()}원</span>
-                        </div>
-                    </div>
-                    <p className="text-xs text-gray-400 text-right mt-1">VAT 별도 / 현장상황별 상이</p>
-                </div>
-
-                {/* 안내 사항 영역 (문구만 남김) */}
-                <div className="mt-3 pt-3 border-t border-gray-200">
-                    <div className='w-full py-1.5 px-2 text-center bg-gray-100 text-indigo-600 rounded-md font-bold text-[11px] shadow-sm flex items-center justify-center'>
-                        참고 | 바닥 30x30cm, 벽면 30x60cm 크기 기준
-                    </div>
-                </div>
-              </div>
-            </div>
-            
-            {/* ⭐️ [견적서 모달 하단 컨트롤 영역] ⭐️ */}
-            <div className="p-4 bg-gray-50 border-t border-gray-200">
-                {/* 1. 숨고 리뷰 이벤트 버튼 (색상 및 테두리 수정) */}
-                {soomgoReviewEvent && (
-                    <div className='mb-3'>
-                        {(() => {
-                            const evt = soomgoReviewEvent;
-                            const isApplied = isSoomgoReviewApplied;
-                            const discountAmount = evt.discount.toLocaleString();
-                            const Icon = isApplied ? CheckCircle2 : Sparkles;
-
-                            const baseClasses = "w-full py-3 rounded-xl transition font-extrabold text-sm active:scale-[0.98] shadow-lg flex items-center justify-center gap-2 relative overflow-hidden border-2";
-                            const fixedBgClasses = "bg-indigo-700 text-white hover:bg-indigo-800"; 
-                            const borderClasses = isApplied
-                                ? "border-amber-400" 
-                                : "border-indigo-700"; 
-                                
-                            const iconColorClass = 'text-white'; 
-
-                            const labelText = isApplied 
-                                ? `할인 적용 취소하기 (총액 +${discountAmount}원)` 
-                                : `숨고 리뷰 약속하고 ${discountAmount}원 할인받기!`;
-
-                            return (
-                                <button
-                                    onClick={() => toggleReview(evt.id)}
-                                    className={`${baseClasses} ${fixedBgClasses} ${borderClasses}`}
-                                >
-                                    <Icon size={18} fill="currentColor" className={iconColorClass}/>
-                                    <span>{labelText}</span>
-                                </button>
-                            );
-                        })()}
-                    </div>
-                )}
-                
-                <div className='grid grid-cols-3 gap-3'> 
-                    
-                    <button onClick={handleImageSave} className="flex items-center justify-center gap-1 bg-indigo-600 text-white py-3 rounded-lg font-bold hover:bg-indigo-700 transition text-sm active:scale-95 shadow-md"> 
-                        <ImageIcon size={16} /> <span>견적서 저장</span>
-                    </button>
-                    
-                    <button onClick={() => window.open(KAKAO_CHAT_URL, '_blank')} className="flex items-center justify-center gap-1 bg-yellow-400 text-gray-800 py-3 rounded-lg font-bold hover:bg-yellow-500 transition shadow-md text-sm active:scale-95"> 
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-chat-fill" viewBox="0 0 16 16">
-                          <path d="M8 15c4.418 0 8-3.134 8-7s-3.582-7-8-7-8 3.134-8 7 3.582 7 8 7zm4.25-5.5a1 1 0 0 0-1-1h-6.5a1 1 0 0 0 0 2h6.5a1 1 0 0 0 1-1z"/>
-                        </svg> 
-                        <span>카톡 문의</span>
-                    </button>
-                    
-                    <button onClick={() => window.location.href = `tel:${PHONE_NUMBER}`} className="flex items-center justify-center gap-1 bg-indigo-700 text-white py-3 rounded-lg font-bold hover:bg-indigo-800 transition shadow-md text-sm active:scale-95"> 
-                        <Phone size={16} /> <span>전화 상담</span>
-                    </button>
-                </div>
-            </div>
-            {/* ⭐️ [견적서 모달 하단 컨트롤 영역 끝] ⭐️ */}
-          </div>
-        </div>
+      {/* 🚨 [신규] 전체 화면 견적 페이지 렌더링 🚨 */}
+      {showQuotePage && (
+          <QuotePage
+              calculation={calculation}
+              onClose={() => setShowQuotePage(false)}
+              soomgoReviewEvent={soomgoReviewEvent}
+              isSoomgoReviewApplied={isSoomgoReviewApplied}
+              toggleReview={toggleReview}
+              KAKAO_CHAT_URL={KAKAO_CHAT_URL}
+              PHONE_NUMBER={PHONE_NUMBER}
+          />
       )}
       
       {/* 재료 상세 비교 모달 표시 */}
