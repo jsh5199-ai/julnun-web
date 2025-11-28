@@ -745,7 +745,7 @@ export default function GroutEstimatorApp() {
                   const nonPackageOriginalPrice = 400000 * count; 
                   
                   remainingDiscount = nonPackageOriginalPrice - fixedPriceTotal;
-                  remainingCalculatedPrice = fixedPriceTotal;
+                  remainingCalculatedPrice = fixedPriceForRemaining;
                   
                   if (initialCount === count) itemOriginalTotal = 400000 * initialCount;
               }
@@ -867,6 +867,7 @@ export default function GroutEstimatorApp() {
             alert('견적서 이미지가 저장되었습니다!');
         } catch (error) {
             console.error('Error saving image:', error);
+            // 캡처 오류 시 안내 문구를 더 명확히 표시
             alert('이미지 저장 중 오류가 발생했습니다. 브라우저 설정을 확인해주세요.');
         }
       }
@@ -956,6 +957,10 @@ export default function GroutEstimatorApp() {
                             <button 
                                 onClick={() => {
                                     handleQuantityChange(area.id, 1);
+                                    if (quantities[area.id] === 0) {
+                                        // 현관이 아닌 경우에만 기본 소재를 따라가게 함
+                                        handleAreaMaterialChange(area.id, area.id === 'entrance' ? 'poly' : material);
+                                    }
                                 }} 
                                 className="w-7 h-7 flex items-center justify-center text-indigo-600 hover:bg-gray-100 rounded-full font-bold text-lg transition active:scale-90"
                             >+</button> 
@@ -1281,7 +1286,6 @@ export default function GroutEstimatorApp() {
                             className={`w-full py-3 rounded-xl font-extrabold text-sm transition-all 
                                 bg-yellow-400 text-gray-800 hover:bg-yellow-500 active:bg-yellow-600 shadow-md flex items-center justify-center
                             `}
-                            // onClick 핸들러 대신 href를 사용하여 앱 환경에서 안정적으로 카카오톡 앱을 호출하도록 유도
                         >
                             카톡 예약 문의
                         </a>
@@ -1408,16 +1412,6 @@ export default function GroutEstimatorApp() {
                             </div>
                         ))}
                 </div>
-
-                {/* ⭐️ [추가] 총 할인 금액 표시 영역 ⭐️ */}
-                {calculation.discountAmount > 0 && (
-                    <div className="mt-3 pt-3 flex justify-between items-center border-t border-gray-200">
-                        <div className='flex items-center gap-1 text-sm font-extrabold text-gray-700'>
-                            <TrendingUp size={16} className='text-green-500'/> 총 할인 효과
-                        </div>
-                        <span className="text-lg font-extrabold text-green-600">- {calculation.discountAmount.toLocaleString()}원</span>
-                    </div>
-                )}
                 
                 {/* 총 합계 영역 (유지) */}
                 <div className="pt-3 text-center"> 
