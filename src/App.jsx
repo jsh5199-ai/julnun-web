@@ -174,7 +174,7 @@ const NEW_USER_PACKAGES = [
     { 
         id: 'USER_E_700K_COMMON', 
         price: 700000, 
-        label: '에폭시 벽면 패키지 (70万)', 
+        label: '에폭시 벽면 패키지 (70만)', 
         E_areas: [['bathroom_floor', 1], ['common_bath_wall', 1]], 
         P_areas: [],
         isFlexible: true,
@@ -857,21 +857,23 @@ export default function GroutEstimatorApp() {
             });
             const image = canvas.toDataURL('image/png');
             
-            // 다운로드 링크 생성 및 클릭
+            // 🚨 [수정] 자동 다운로드 시도 (대부분의 브라우저 지원)
             const link = document.createElement('a');
             link.href = image;
             link.download = `줄눈의미학_견적서_${new Date().toISOString().slice(0, 10)}.png`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+            
             alert('견적서 이미지가 저장되었습니다! 다운로드 폴더를 확인해주세요.');
         } catch (error) {
             console.error('Error saving image:', error);
-            // 🚨 다운로드 실패 시 수동 저장을 안내하는 최종적인 방법
+            // 🚨 다운로드 실패 시 수동 저장을 안내하는 최종적인 방법 🚨
             if (quoteRef.current) {
                  const canvas = await html2canvas(quoteRef.current, { scale: 3, backgroundColor: '#ffffff' });
                  const imgData = canvas.toDataURL('image/png');
                  const newWindow = window.open('about:blank', '_blank');
+                 // 새 창에 이미지를 띄우고, 사용자에게 수동 저장을 안내합니다.
                  newWindow.document.write('<img src="' + imgData + '" alt="견적서 이미지" style="width:100%; height:auto;">');
                  newWindow.document.write('<h3 style="text-align:center; color:red;">[다운로드 실패] 이미지를 길게(터치) 눌러 수동으로 저장해주세요.</h3>');
             }
@@ -964,10 +966,6 @@ export default function GroutEstimatorApp() {
                             <button 
                                 onClick={() => {
                                     handleQuantityChange(area.id, 1);
-                                    if (quantities[area.id] === 0) {
-                                        // 현관이 아닌 경우에만 기본 소재를 따라가게 함
-                                        handleAreaMaterialChange(area.id, area.id === 'entrance' ? 'poly' : material);
-                                    }
                                 }} 
                                 className="w-7 h-7 flex items-center justify-center text-indigo-600 hover:bg-gray-100 rounded-full font-bold text-lg transition active:scale-90"
                             >+</button> 
@@ -1293,7 +1291,6 @@ export default function GroutEstimatorApp() {
                             className={`w-full py-3 rounded-xl font-extrabold text-sm transition-all 
                                 bg-yellow-400 text-gray-800 hover:bg-yellow-500 active:bg-yellow-600 shadow-md flex items-center justify-center
                             `}
-                            // onClick 핸들러 대신 href를 사용하여 앱 환경에서 안정적으로 카카오톡 앱을 호출하도록 유도
                         >
                             카톡 예약 문의
                         </a>
