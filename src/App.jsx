@@ -134,7 +134,6 @@ const ORIGINAL_MIXED_PACKAGES = [
     { id: 'P_MIX_07', price: 830000, label: '혼합패키지 07', E_areas: [['bathroom_floor', 2]], P_areas: [['bathtub_wall', 1]] },
     { id: 'P_MIX_08', price: 950000, label: '혼합패키지 08', E_areas: [['bathroom_floor', 2]], P_areas: [['bathtub_wall', 1], ['shower_booth', 1]] },
     { id: 'P_MIX_09', price: 1200000, label: '혼합패키지 09', E_areas: [['bathroom_floor', 2]], P_areas: [['master_bath_wall', 1], ['common_bath_wall', 1]] },
-    // 🚨 P_MIX_12 제거 (155만 중복 문제 해결)
     { id: 'P_MIX_10', price: 900000, label: '혼합패키지 10', E_areas: [['bathroom_floor', 2], ['shower_booth', 1]], P_areas: [] },
     { id: 'P_MIX_11', price: 900000, label: '혼합패키지 11', E_areas: [['bathroom_floor', 2], ['bathtub_wall', 1]], P_areas: [] },
     { id: 'P_MIX_13', price: 1100000, label: '혼합패키지 13', E_areas: [['bathroom_floor', 2], ['shower_booth', 1]], P_areas: [] },
@@ -152,14 +151,14 @@ const CUSTOM_MIXED_PACKAGES = [
     { 
         id: 'P_MIX_NEW_B', 
         price: 1150000, 
-        label: '혼합벽면B (바닥/공용벽E, 안방벽P) 115만', 
+        label: '혼합벽면B (바닥/공용벽E, 안방벽P) 115万', 
         E_areas: [['bathroom_floor', 2], ['common_bath_wall', 1]], 
         P_areas: [['master_bath_wall', 1]] 
     },
 ];
 
 const NEW_USER_PACKAGES = [
-    // 에폭시 혼합 패키지 (70만) - 현관 제외
+    // 에폭시 혼합 패키지 (70만) - 현관 제외 (기존 유지)
     { 
         id: 'USER_E_700K_MASTER', 
         price: 700000, 
@@ -178,7 +177,7 @@ const NEW_USER_PACKAGES = [
         isFlexible: true,
         flexibleGroup: ['master_bath_wall', 'common_bath_wall']
     },
-    // 폴리 혼합 패키지 (50만) - 현관 제외
+    // 폴리 혼합 패키지 (50만) - 현관 제외 (기존 유지)
     { 
         id: 'USER_P_500K_MASTER', 
         price: 500000, 
@@ -196,6 +195,42 @@ const NEW_USER_PACKAGES = [
         P_areas: [['bathroom_floor', 1], ['common_bath_wall', 1]],
         isFlexible: true,
         flexibleGroup: ['master_bath_wall', 'common_bath_wall']
+    },
+    // 🚨 [신규 추가 1] 욕실 바닥 2곳 에폭시 55만 고정
+    { 
+        id: 'USER_E_550K_FLOOR_2', 
+        price: 550000, 
+        label: '에폭시 바닥 2곳 (55만)', 
+        E_areas: [['bathroom_floor', 2]], 
+        P_areas: [],
+        isFlexible: false,
+    },
+    // 🚨 [신규 추가 2] 욕실 바닥 2곳 + 샤워부스 벽 3면 에폭시 80만 고정
+    { 
+        id: 'USER_E_800K_FLOOR2_SHOWER1', 
+        price: 800000, 
+        label: '에폭시 바닥 2곳 + 샤워벽 1곳 (80만)', 
+        E_areas: [['bathroom_floor', 2], ['shower_booth', 1]], 
+        P_areas: [],
+        isFlexible: false,
+    },
+    // 🚨 [신규 추가 3] 욕실 바닥 1곳 + 샤워부스 벽 3면 에폭시 55만 고정
+    { 
+        id: 'USER_E_550K_FLOOR1_SHOWER1', 
+        price: 550000, 
+        label: '에폭시 바닥 1곳 + 샤워벽 1곳 (55만)', 
+        E_areas: [['bathroom_floor', 1], ['shower_booth', 1]], 
+        P_areas: [],
+        isFlexible: false,
+    },
+    // 🚨 [기존 유지] 욕실 바닥 1곳 에폭시 35만 고정 패키지 
+    { 
+        id: 'USER_E_350K_BATH', 
+        price: 350000, 
+        label: '에폭시 바닥 1곳 (35만)', 
+        E_areas: [['bathroom_floor', 1]], 
+        P_areas: [],
+        isFlexible: false,
     },
 ];
 
