@@ -11,7 +11,7 @@ const delay = ms => new Promise(res => setTimeout(res, ms));
 const MIN_FEE = 200000;
 
 // 🚨 [수정] 카카오톡 채널 URL 정의 🚨
-const KAKAO_CHAT_URL = 'https://pf.kakao.com/_jAxnyn/chat'; // <-- 제공해주신 URL 적용
+const KAKAO_CHAT_URL = 'https://pf.kakao.com/_jAxnyn/chat'; // <-- 요청하신 URL 반영 완료
 
 // =================================================================
 // [스타일] 애니메이션 정의 (유지)
@@ -199,7 +199,7 @@ const NEW_USER_PACKAGES = [
         isFlexible: true,
         flexibleGroup: ['master_bath_wall', 'common_bath_wall']
     },
-    // 🚨 [신규 추가] 욕실 바닥 2곳 에폭시 55만 고정
+    // 🚨 [신규 추가 1] 욕실 바닥 2곳 에폭시 55만 고정
     { 
         id: 'USER_E_550K_FLOOR_2', 
         price: 550000, 
@@ -208,7 +208,7 @@ const NEW_USER_PACKAGES = [
         P_areas: [],
         isFlexible: false,
     },
-    // 🚨 [신규 추가] 욕실 바닥 2곳 + 샤워부스 벽 3면 에폭시 80만 고정
+    // 🚨 [신규 추가 2] 욕실 바닥 2곳 + 샤워부스 벽 3면 에폭시 80만 고정
     { 
         id: 'USER_E_800K_FLOOR2_SHOWER1', 
         price: 800000, 
@@ -217,7 +217,7 @@ const NEW_USER_PACKAGES = [
         P_areas: [],
         isFlexible: false,
     },
-    // 🚨 [신규 추가] 욕실 바닥 1곳 + 샤워부스 벽 3면 에폭시 55만 고정
+    // 🚨 [신규 추가 3] 욕실 바닥 1곳 + 샤워부스 벽 3면 에폭시 55만 고정
     { 
         id: 'USER_E_550K_FLOOR1_SHOWER1', 
         price: 550000, 
@@ -1252,28 +1252,31 @@ export default function GroutEstimatorApp() {
                         </div>
                     </div>
 
-                    {/* 2. 견적서 보기 버튼 (색상 복구 및 유지) */}
-                    <button 
-                        onClick={() => {
-                            setShowModal(true);
-                            setShowToast(false); 
-                        }} 
-                        // hasSelections가 true일 때만 렌더링되므로, disabled는 항상 false (활성화)
-                        className={`w-full py-3 rounded-xl font-extrabold text-lg transition-all 
-                            bg-indigo-700 text-white hover:bg-indigo-800 active:bg-indigo-900 shadow-md
-                        `}
-                    >
-                        견적서 상세보기
-                    </button>
-                    {/* 🚨 [추가] 카카오톡 상담 버튼 🚨 */}
-                    <button 
-                        onClick={() => window.open(KAKAO_CHAT_URL, '_blank')}
-                        className={`w-full py-3 rounded-xl font-extrabold text-lg transition-all 
-                            bg-yellow-400 text-gray-800 hover:bg-yellow-500 active:bg-yellow-600 shadow-md mt-2
-                        `}
-                    >
-                        카카오톡 예약 문의
-                    </button>
+                    {/* 2. 견적서 확인 및 카카오톡 문의 버튼 (한 줄 배치) */}
+                    <div className='grid grid-cols-2 gap-3'>
+                        {/* 견적서 확인 버튼 */}
+                        <button 
+                            onClick={() => {
+                                setShowModal(true);
+                                setShowToast(false); 
+                            }} 
+                            className={`w-full py-3 rounded-xl font-extrabold text-sm transition-all 
+                                bg-indigo-700 text-white hover:bg-indigo-800 active:bg-indigo-900 shadow-md
+                            `}
+                        >
+                            견적서 확인
+                        </button>
+                        
+                        {/* 카카오톡 예약 문의 버튼 */}
+                        <button 
+                            onClick={() => window.open(KAKAO_CHAT_URL, '_blank')}
+                            className={`w-full py-3 rounded-xl font-extrabold text-sm transition-all 
+                                bg-yellow-400 text-gray-800 hover:bg-yellow-500 active:bg-yellow-600 shadow-md
+                            `}
+                        >
+                            카톡 예약 문의
+                        </button>
+                    </div>
                 </div>
             </div>
         )}
@@ -1459,7 +1462,6 @@ export default function GroutEstimatorApp() {
                         <ImageIcon size={16} /> <span>견적서 저장</span>
                     </button>
                     
-                    {/* 🚨 [추가] 카카오톡 버튼 */}
                     <button onClick={() => window.open(KAKAO_CHAT_URL, '_blank')} className="flex items-center justify-center gap-1 bg-yellow-400 text-gray-800 py-3 rounded-lg font-bold hover:bg-yellow-500 transition shadow-md text-sm active:scale-95"> 
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-chat-fill" viewBox="0 0 16 16">
                           <path d="M8 15c4.418 0 8-3.134 8-7s-3.582-7-8-7-8 3.134-8 7 3.582 7 8 7zm4.25-5.5a1 1 0 0 0-1-1h-6.5a1 1 0 0 0 0 2h6.5a1 1 0 0 0 1-1z"/>
@@ -1467,7 +1469,6 @@ export default function GroutEstimatorApp() {
                         <span>카톡 문의</span>
                     </button>
                     
-                    {/* 🚨 [수정] 전화 상담 버튼 */}
                     <button onClick={() => window.location.href = `tel:${PHONE_NUMBER}`} className="flex items-center justify-center gap-1 bg-indigo-700 text-white py-3 rounded-lg font-bold hover:bg-indigo-800 transition shadow-md text-sm active:scale-95"> 
                         <Phone size={16} /> <span>전화 상담</span>
                     </button>
