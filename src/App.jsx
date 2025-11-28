@@ -174,7 +174,7 @@ const NEW_USER_PACKAGES = [
     { 
         id: 'USER_E_700K_COMMON', 
         price: 700000, 
-        label: '에폭시 벽면 패키지 (70만)', 
+        label: '에폭시 벽면 패키지 (70万)', 
         E_areas: [['bathroom_floor', 1], ['common_bath_wall', 1]], 
         P_areas: [],
         isFlexible: true,
@@ -856,24 +856,14 @@ export default function GroutEstimatorApp() {
                 backgroundColor: '#ffffff'
             });
             const image = canvas.toDataURL('image/png');
-            const filename = `줄눈의미학_견적서_${new Date().toISOString().slice(0, 10)}.png`;
-
-            // 1. IE/Edge (레거시) 지원 확인
-            if (window.navigator.msSaveOrOpenBlob) {
-                canvas.toBlob((blob) => {
-                    window.navigator.msSaveOrOpenBlob(blob, filename);
-                });
-            } 
-            // 2. 일반 브라우저 (Chrome, Safari, Firefox)
-            else {
-                const link = document.createElement('a');
-                link.href = image;
-                link.download = filename;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            }
             
+            // 다운로드 링크 생성 및 클릭
+            const link = document.createElement('a');
+            link.href = image;
+            link.download = `줄눈의미학_견적서_${new Date().toISOString().slice(0, 10)}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
             alert('견적서 이미지가 저장되었습니다! 다운로드 폴더를 확인해주세요.');
         } catch (error) {
             console.error('Error saving image:', error);
@@ -883,7 +873,7 @@ export default function GroutEstimatorApp() {
                  const imgData = canvas.toDataURL('image/png');
                  const newWindow = window.open('about:blank', '_blank');
                  newWindow.document.write('<img src="' + imgData + '" alt="견적서 이미지" style="width:100%; height:auto;">');
-                 newWindow.document.write('<h3 style="text-align:center; color:red;">[다운로드 실패] 이미지를 길게 눌러 저장해주세요.</h3>');
+                 newWindow.document.write('<h3 style="text-align:center; color:red;">[다운로드 실패] 이미지를 길게(터치) 눌러 수동으로 저장해주세요.</h3>');
             }
             alert('이미지 자동 저장 중 오류가 발생했습니다. 새 창이 열리면 이미지를 길게(터치) 눌러 수동으로 저장해주세요.');
         }
@@ -1339,7 +1329,6 @@ export default function GroutEstimatorApp() {
                       <span className="font-semibold flex-shrink-0">현장 유형</span>
                       <span className='text-right font-medium flex-shrink-0'>{HOUSING_TYPES.find(h => h.id === housingType).label}</span>
                     </div>
-                    {/* 🚨 [삭제 완료] '기본 재료' 항목 제거 됨 🚨 */}
                 </div>
 
                 {/* 시공 및 할인 내역 */}
@@ -1509,7 +1498,7 @@ export default function GroutEstimatorApp() {
       )}
       
       {/* 재료 상세 비교 모달 표시 */}
-      {showMaterialModal && <MaterialDetailModal onClose={() => setShowMaterialModal(false)} />}
+      {showMaterialModal && <MaterialDetailModal onClose={() => setShowModal(false)} />}
     </div>
   );
 }
