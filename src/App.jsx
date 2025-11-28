@@ -83,12 +83,12 @@ const BATHROOM_AREAS = [
 
 // 기타 범위 (현관 포함)
 const OTHER_AREAS = [
-  // 현관: Poly 5万
+  // 현관: Poly 5만
   { id: 'entrance', label: '현관', basePrice: 50000, icon: DoorOpen, unit: '개소' }, 
-  // 베란다/세탁실: Poly 10만, Epoxy 25万
+  // 베란다/세탁실: Poly 10만, Epoxy 25만
   { id: 'balcony_laundry', label: '베란다/세탁실', basePrice: 100000, icon: LayoutGrid, unit: '개소', desc: 'Poly 10만 / Epoxy 25만' }, 
-  // 주방 벽면: Poly 15만, Epoxy 25万
-  { id: 'kitchen_wall', label: '주방 벽면', basePrice: 150000, icon: Utensils, unit: '구역', desc: 'Poly 15만 / Epoxy 25만' },
+  // 주방 벽면: Poly 15만, Epoxy 25만
+  { id: 'kitchen_wall', label: '주방 벽면', basePrice: 150000, icon: Utensils, unit: '구역', desc: 'Poly 15万 / Epoxy 25만' },
   // 거실: Poly 55만, Epoxy 110만
   { id: 'living_room', label: '거실 바닥', basePrice: 550000, icon: Sofa, unit: '구역', desc: 'Poly 55만 / Epoxy 110만 (복도,주방 포함)' },
 ];
@@ -1000,7 +1000,7 @@ export default function GroutEstimatorApp() {
       <main className="max-w-md mx-auto p-4 space-y-6">
 
         {/* ⭐️ [유지] 동영상 섹션 ⭐️ */}
-        <section className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 animate-fade-in">
+        <section className="bg-white rounded-xl shadow-lg border border-gray-100 animate-fade-in">
           <h2 className="text-lg font-extrabold flex items-center gap-2 p-4 text-gray-800 border-b border-gray-100">
             <Zap className="h-5 w-5 text-red-600" /> 시공 현장 영상
           </h2 >
