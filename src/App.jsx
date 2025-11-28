@@ -745,7 +745,7 @@ export default function GroutEstimatorApp() {
                   const nonPackageOriginalPrice = 400000 * count; 
                   
                   remainingDiscount = nonPackageOriginalPrice - fixedPriceTotal;
-                  remainingCalculatedPrice = fixedPriceForRemaining;
+                  remainingCalculatedPrice = fixedPriceTotal;
                   
                   if (initialCount === count) itemOriginalTotal = 400000 * initialCount;
               }
@@ -796,12 +796,7 @@ export default function GroutEstimatorApp() {
         .filter(item => !item.isDiscount)
         .reduce((sum, item) => sum + (item.originalPrice - item.calculatedPrice), 0);
         
-    // 2. 패키지 적용으로 인한 가격 할인액 (패키지 할인가 - 항목별 정가)
-    const packageDiscount = (matchedPackage && matchedPackage.price < total) 
-        ? total - matchedPackage.price 
-        : 0;
-
-    // 3. 총 할인액: 항목별 할인 효과 + 리뷰 할인액
+    // 2. 총 할인액: 항목별 할인 효과 + 리뷰 할인액
     const totalFinalDiscount = totalItemDiscount + discountAmount;
     
     // 최종 가격도 천원 단위로 내림
@@ -872,7 +867,7 @@ export default function GroutEstimatorApp() {
             alert('견적서 이미지가 저장되었습니다!');
         } catch (error) {
             console.error('Error saving image:', error);
-            alert('이미지 저장 중 오류가 발생했습니다.');
+            alert('이미지 저장 중 오류가 발생했습니다. 브라우저 설정을 확인해주세요.');
         }
       }
   };
@@ -961,10 +956,6 @@ export default function GroutEstimatorApp() {
                             <button 
                                 onClick={() => {
                                     handleQuantityChange(area.id, 1);
-                                    if (quantities[area.id] === 0) {
-                                        // 현관이 아닌 경우에만 기본 소재를 따라가게 함
-                                        handleAreaMaterialChange(area.id, area.id === 'entrance' ? 'poly' : material);
-                                    }
                                 }} 
                                 className="w-7 h-7 flex items-center justify-center text-indigo-600 hover:bg-gray-100 rounded-full font-bold text-lg transition active:scale-90"
                             >+</button> 
@@ -1427,7 +1418,7 @@ export default function GroutEstimatorApp() {
                         <span className="text-lg font-extrabold text-green-600">- {calculation.discountAmount.toLocaleString()}원</span>
                     </div>
                 )}
-
+                
                 {/* 총 합계 영역 (유지) */}
                 <div className="pt-3 text-center"> 
                     
