@@ -88,7 +88,7 @@ const OTHER_AREAS = [
   // 베란다/세탁실: Poly 10만, Epoxy 25만
   { id: 'balcony_laundry', label: '베란다/세탁실', basePrice: 100000, icon: LayoutGrid, unit: '개소', desc: 'Poly 10만 / Epoxy 25만' }, 
   // 주방 벽면: Poly 15만, Epoxy 25만
-  { id: 'kitchen_wall', label: '주방 벽면', basePrice: 150000, icon: Utensils, unit: '구역', desc: 'Poly 15万 / Epoxy 25만' },
+  { id: 'kitchen_wall', label: '주방 벽면', basePrice: 150000, icon: Utensils, unit: '구역', desc: 'Poly 15만 / Epoxy 25만' },
   // 거실: Poly 55만, Epoxy 110만
   { id: 'living_room', label: '거실 바닥', basePrice: 550000, icon: Sofa, unit: '구역', desc: 'Poly 55만 / Epoxy 110만 (복도,주방 포함)' },
 ];
@@ -1000,7 +1000,7 @@ export default function GroutEstimatorApp() {
       <main className="max-w-md mx-auto p-4 space-y-6">
 
         {/* ⭐️ [유지] 동영상 섹션 ⭐️ */}
-        <section className="bg-white rounded-xl shadow-lg border border-gray-100 animate-fade-in">
+        <section className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 animate-fade-in">
           <h2 className="text-lg font-extrabold flex items-center gap-2 p-4 text-gray-800 border-b border-gray-100">
             <Zap className="h-5 w-5 text-red-600" /> 시공 현장 영상
           </h2 >
@@ -1215,37 +1215,34 @@ export default function GroutEstimatorApp() {
                     <div className='flex items-center justify-between w-full text-white'> 
                         
                         {/* 좌측: 금액 정보 (총 예상 견적 문구 화이트 강조) */}
-                        <div className='flex items-center gap-2'>
+                        <div className='flex flex-col items-start gap-1'> {/* 🚨 [수정] flex-col로 변경하여 수직 배치 준비 */}
                             <span className='text-sm font-semibold text-white'>총 예상 견적</span>
-                            <div className="flex flex-col items-end gap-0.5">
-                                
-                                {/* 🚨 [수정] 최소 출장비 적용 시, 작은 뱃지로 표시 🚨 */}
-                                {calculation.minimumFeeApplied && (
-                                    <div className="flex items-center gap-1 bg-red-500/80 text-white px-2 py-0.5 rounded-full text-xs font-semibold">
-                                        <Clock size={12} /> 최소 출장비 적용
-                                    </div>
-                                )}
-                                
-                                {/* 1. 최소 출장비 적용 시, 원래 가격 스트라이크 아웃 */}
-                                {calculation.minimumFeeApplied && (
-                                    <span className="text-xs text-gray-400 line-through font-normal">
-                                        {calculation.originalCalculatedPrice.toLocaleString()}원
-                                    </span>
-                                )}
-                                
+                            <div className='flex items-end gap-1'>
                                 {/* 2. 최종 적용 가격 */}
-                                <div className="flex items-end gap-1">
-                                    <span className="text-3xl font-extrabold text-white">{calculation.price.toLocaleString()}</span>
-                                    <span className="text-base font-normal text-white">원</span>
-                                </div>
+                                <span className="text-3xl font-extrabold text-white">{calculation.price.toLocaleString()}</span>
+                                <span className="text-base font-normal text-white">원</span>
                             </div>
                         </div>
                         
-                        {/* 우측: 패키지 라벨만 표시 (노란색으로 변경) */}
-                        <div className='flex flex-col items-end'>
-                            {/* A. 패키지 적용 라벨 (패키지 적용 시 노란색 텍스트로 표시) */}
+                        {/* 우측: 패키지/최소비용 라벨 (새로운 우측 빈 공간) */}
+                        <div className='flex flex-col items-end justify-start h-full pt-1'> 
+                            {/* A. 최소 출장비 적용 안내 (Clock 아이콘) */}
+                            {calculation.minimumFeeApplied && (
+                                <div className="flex items-center justify-end gap-1 text-xs font-bold text-red-300 mb-0.5 whitespace-nowrap">
+                                    <Clock size={12} className='inline mr-0.5 text-red-300'/> 최소 출장비 적용
+                                </div>
+                            )}
+                            
+                            {/* B. 원래 금액 스트라이크 아웃 */}
+                            {calculation.minimumFeeApplied && (
+                                <span className="text-xs text-gray-400 line-through font-normal whitespace-nowrap">
+                                    {calculation.originalCalculatedPrice.toLocaleString()}원
+                                </span>
+                            )}
+
+                            {/* C. 패키지 적용 라벨 */}
                             {calculation.label && (
-                                <div className="text-xs font-bold text-amber-300 mb-0.5 whitespace-nowrap">
+                                <div className="text-xs font-bold text-amber-300 whitespace-nowrap">
                                     <Crown size={12} className='inline mr-1 text-amber-300'/> {calculation.label}
                                 </div>
                             )}
@@ -1275,7 +1272,6 @@ export default function GroutEstimatorApp() {
                             className={`w-full py-3 rounded-xl font-extrabold text-sm transition-all 
                                 bg-yellow-400 text-gray-800 hover:bg-yellow-500 active:bg-yellow-600 shadow-md flex items-center justify-center
                             `}
-                            // onClick 핸들러 대신 href를 사용하여 앱 환경에서 안정적으로 카카오톡 앱을 호출하도록 유도
                         >
                             카톡 예약 문의
                         </a>
