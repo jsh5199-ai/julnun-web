@@ -1211,13 +1211,6 @@ export default function GroutEstimatorApp() {
             <div className="fixed bottom-0 left-0 right-0 bg-indigo-900 shadow-2xl safe-area-bottom z-20 animate-slide-down">
                 <div className="max-w-md mx-auto p-4 flex flex-col gap-2"> 
                     
-                    {/* ⭐️ 최소 출장비 버튼/뱃지 추가 ⭐️ */}
-                    {calculation.minimumFeeApplied && (
-                        <div className="bg-red-500 text-white p-2 rounded-lg font-extrabold text-xs text-center shadow-lg flex items-center justify-center gap-1">
-                            <Clock size={16} /> 최소 출장비 {MIN_FEE.toLocaleString()}원 적용
-                        </div>
-                    )}
-
                     {/* 1. 금액 및 정보 영역 */}
                     <div className='flex items-center justify-between w-full text-white'> 
                         
@@ -1225,6 +1218,13 @@ export default function GroutEstimatorApp() {
                         <div className='flex items-center gap-2'>
                             <span className='text-sm font-semibold text-white'>총 예상 견적</span>
                             <div className="flex flex-col items-end gap-0.5">
+                                
+                                {/* 🚨 [수정] 최소 출장비 적용 시, 작은 뱃지로 표시 🚨 */}
+                                {calculation.minimumFeeApplied && (
+                                    <div className="flex items-center gap-1 bg-red-500/80 text-white px-2 py-0.5 rounded-full text-xs font-semibold">
+                                        <Clock size={12} /> 최소 출장비 적용
+                                    </div>
+                                )}
                                 
                                 {/* 1. 최소 출장비 적용 시, 원래 가격 스트라이크 아웃 */}
                                 {calculation.minimumFeeApplied && (
@@ -1426,17 +1426,12 @@ export default function GroutEstimatorApp() {
                         <ImageIcon size={16} /> <span>견적서 저장</span>
                     </button>
                     
-                    <a 
-                        href={KAKAO_CHAT_URL} 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        className={`w-full py-3 rounded-lg font-bold text-sm bg-yellow-400 text-gray-800 hover:bg-yellow-500 transition shadow-md flex items-center justify-center`}
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-chat-fill mr-1" viewBox="0 0 16 16">
+                    <button onClick={() => window.open(KAKAO_CHAT_URL, '_blank')} className="flex items-center justify-center gap-1 bg-yellow-400 text-gray-800 py-3 rounded-lg font-bold hover:bg-yellow-500 transition shadow-md text-sm active:scale-95"> 
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-chat-fill" viewBox="0 0 16 16">
                           <path d="M8 15c4.418 0 8-3.134 8-7s-3.582-7-8-7-8 3.134-8 7 3.582 7 8 7zm4.25-5.5a1 1 0 0 0-1-1h-6.5a1 1 0 0 0 0 2h6.5a1 1 0 0 0 1-1z"/>
-                        </svg>
+                        </svg> 
                         <span>카톡 문의</span>
-                    </a>
+                    </button>
                     
                     <button onClick={() => window.location.href = `tel:${PHONE_NUMBER}`} className="flex items-center justify-center gap-1 bg-indigo-700 text-white py-3 rounded-lg font-bold hover:bg-indigo-800 transition shadow-md text-sm active:scale-95"> 
                         <Phone size={16} /> <span>전화 상담</span>
