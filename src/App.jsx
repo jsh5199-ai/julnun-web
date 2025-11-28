@@ -745,7 +745,7 @@ export default function GroutEstimatorApp() {
                   const nonPackageOriginalPrice = 400000 * count; 
                   
                   remainingDiscount = nonPackageOriginalPrice - fixedPriceTotal;
-                  remainingCalculatedPrice = fixedPriceTotal;
+                  remainingCalculatedPrice = fixedPriceForRemaining;
                   
                   if (initialCount === count) itemOriginalTotal = 400000 * initialCount;
               }
@@ -847,6 +847,14 @@ export default function GroutEstimatorApp() {
   // --- 기타 핸들러 (견적서 저장 기능 보강) ---
   const handleImageSave = async () => {
       if (quoteRef.current) {
+        // 🚨 [수정된 로직] 팝업 차단 회피를 위해 팝업 창을 먼저 열고, 비동기 캡처 수행
+        const newWindow = window.open('about:blank', '_blank');
+        
+        if (!newWindow) {
+             alert('팝업 차단이 되어 있어 새 창을 열 수 없습니다. 팝업 차단을 해제해 주세요.');
+             return;
+        }
+
         try {
             // html2canvas 옵션 설정 (높은 해상도를 위해 scale 사용)
             const canvas = await html2canvas(quoteRef.current, {
@@ -857,21 +865,21 @@ export default function GroutEstimatorApp() {
             });
             const image = canvas.toDataURL('image/png');
             
-            // 🚨 [최종 수정] 자동 다운로드 로직 제거하고, 수동 저장 로직만 남김 🚨
-            
             // 새 창에 이미지를 띄우고, 사용자에게 수동 저장을 안내합니다.
-            const newWindow = window.open('about:blank', '_blank');
-            if (newWindow) {
-                 newWindow.document.write('<img src="' + image + '" alt="견적서 이미지" style="width:100%; height:auto; display:block;">');
-                 newWindow.document.write('<h3 style="text-align:center; color:red;">[다운로드 안내] 이미지를 길게(터치) 눌러 수동으로 저장해주세요.</h3>');
-                 newWindow.document.close();
-            } else {
-                 alert('팝업 차단이 되어 있어 새 창을 열 수 없습니다. 팝업 차단을 해제해 주세요.');
-            }
+            newWindow.document.write('<html><head><title>견적서 저장</title></head><body>');
+            newWindow.document.write('<img src="' + image + '" alt="견적서 이미지" style="width:100%; height:auto; display:block;">');
+            newWindow.document.write('<h3 style="text-align:center; color:red;">[다운로드 안내] 이미지를 길게(터치) 눌러 수동으로 저장해주세요.</h3>');
+            newWindow.document.write('</body></html>');
+            newWindow.document.close();
+            
+            alert('새 창에 견적서 이미지가 생성되었습니다. 이미지를 길게(터치) 눌러 수동으로 저장해주세요.');
             
         } catch (error) {
             console.error('Error saving image:', error);
-            alert('이미지 저장 중 오류가 발생했습니다. 브라우저 설정을 확인해주세요.');
+            if (newWindow) {
+                 newWindow.close(); // 오류 발생 시 열었던 창 닫기
+            }
+            alert('이미지 저장 중 오류가 발생했습니다. 브라우저 설정(팝업 차단 등)을 확인해주세요.');
         }
       }
   };
@@ -1320,7 +1328,6 @@ export default function GroutEstimatorApp() {
                       <span className="font-semibold flex-shrink-0">현장 유형</span>
                       <span className='text-right font-medium flex-shrink-0'>{HOUSING_TYPES.find(h => h.id === housingType).label}</span>
                     </div>
-                    {/* 🚨 [삭제 완료] '기본 재료' 항목 제거 됨 🚨 */}
                 </div>
 
                 {/* 시공 및 할인 내역 */}
