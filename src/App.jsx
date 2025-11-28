@@ -1388,11 +1388,12 @@ export default function GroutEstimatorApp() {
 
                     {/* ⭐️ 항목별 테이블 시작 ⭐️ */}
                     <div className="mt-3">
+                        {/* 🚨 [수정] '금액' 텍스트 제거 🚨 */}
                         <div className="grid grid-cols-12 font-extrabold text-xs text-gray-500 border-b border-gray-300 pb-1">
                             <span className="col-span-6 pl-1">시공 내역</span>
                             <span className="col-span-2 text-center">소재</span>
                             <span className="col-span-2 text-center">수량</span>
-                            <span className="col-span-2 text-right pr-1">금액</span>
+                            <span className="col-span-2 text-right pr-1"></span> {/* 금액 텍스트 제거 */}
                         </div>
 
                         {/* 🚨 [재수정] 모든 시공 내역 항목을 표시하고, 금액이 0원일 경우 빈칸 처리 🚨 */}
