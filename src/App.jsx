@@ -1184,7 +1184,7 @@ export default function GroutEstimatorApp() {
 
         </section>
 
-        {/* --- 4. 실리콘 교체할 곳 선택 (완전 제거) --- */}
+        {/* --- 4. 실리콘 교체할 곳 선택 (잔여 가격 제거됨) --- */}
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-600">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
             <Eraser className="h-5 w-5 text-indigo-600" /> 4. 실리콘 시공
@@ -1464,23 +1464,24 @@ export default function GroutEstimatorApp() {
                     <div className="flex justify-between items-end"> 
                         <span className='text-base font-semibold text-gray-800'>최종 결제 금액</span>
                         <div className="text-right">
-                            <span className="text-3xl font-extrabold text-indigo-700">{calculation.price.toLocaleString()}</span>
+                            <span className="text-3xl font-extrabold text-indigo-700">{calculation.price.toLocaleString()}원</span>
                         </div>
                     </div>
                     <p className="text-xs text-gray-400 text-right mt-1">VAT 별도 / 현장상황별 상이</p>
                 </div>
 
-                {/* 안내 사항 영역 (문구만 남김) */}
-                <div className="mt-3 pt-3 border-t border-gray-200">
+                {/* 안내 사항 영역 (문구 디자인 통일) */}
+                <div className="mt-3 pt-3 border-t border-gray-200 space-y-2">
                     <div className='w-full py-1.5 px-2 text-center bg-gray-100 text-indigo-600 rounded-md font-bold text-[11px] shadow-sm flex items-center justify-center'>
                         바닥 30x30cm, 벽면 30x60cm 크기 기준
                     </div>
-                    {/* ▼▼▼ 요청하신 문구 추가됨 ▼▼▼ */}
-                    <div className='w-full text-center text-[10px] text-gray-500 mt-2 font-medium space-y-0.5'>
-                        <p>재시공(셀프포함)은 별도문의</p>
-                        <p>조각타일 및 대리석은 시공불가</p>
+                    {/* ▼▼▼ 요청하신 문구 디자인 통일 ▼▼▼ */}
+                    <div className='w-full py-1.5 px-2 text-center bg-gray-100 text-indigo-600 rounded-md font-bold text-[11px] shadow-sm flex items-center justify-center'>
+                        재시공(셀프포함)은 별도문의
                     </div>
-                    {/* ▲▲▲ 요청하신 문구 추가됨 ▲▲▲ */}
+                    <div className='w-full py-1.5 px-2 text-center bg-gray-100 text-indigo-600 rounded-md font-bold text-[11px] shadow-sm flex items-center justify-center'>
+                        조각타일 및 대리석은 시공불가
+                    </div>
                 </div>
               </div>
             </div>
