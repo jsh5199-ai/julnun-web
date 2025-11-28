@@ -10,9 +10,8 @@ const delay = ms => new Promise(res => setTimeout(res, ms));
 // ⭐️ 최소 출장비 상수 정의
 const MIN_FEE = 200000;
 
-// 🚨 [수정] 카카오톡 채널 URL 정의 (HTTP 프로토콜 명시) 🚨
-// 웹뷰에서 카톡 앱 실행 인식을 돕기 위해 http로 변경하거나, window.open 대신 anchor tag 사용
-const KAKAO_CHAT_URL = 'http://pf.kakao.com/_jAxnyn/chat'; 
+// 🚨 [수정] 카카오톡 채널 URL 정의 🚨
+const KAKAO_CHAT_URL = 'http://pf.kakao.com/_jAxnYn/chat'; // <-- 요청하신 URL 반영 완료
 
 // =================================================================
 // [스타일] 애니메이션 정의 (유지)
@@ -746,7 +745,7 @@ export default function GroutEstimatorApp() {
                   const nonPackageOriginalPrice = 400000 * count; 
                   
                   remainingDiscount = nonPackageOriginalPrice - fixedPriceTotal;
-                  remainingCalculatedPrice = fixedPriceTotal;
+                  remainingCalculatedPrice = fixedPriceForRemaining;
                   
                   if (initialCount === count) itemOriginalTotal = 400000 * initialCount;
               }
@@ -1416,29 +1415,32 @@ export default function GroutEstimatorApp() {
                 </div>
 
                 {/* 안내 사항 영역 (문구 제거) */}
-                <div className="mt-3 pt-3 border-t border-gray-200">
-                    <div className='grid grid-cols-3 gap-3'> 
+                <div className='w-full py-1.5 px-2 text-center bg-gray-100 text-indigo-600 rounded-md font-bold text-[11px] shadow-sm flex items-center justify-center mt-3 pt-3 border-t border-gray-200'>
+                    참고 | 바닥 30x30cm, 벽면 30x60cm 크기 기준
+                </div>
+
+                {/* ⭐️ [견적서 모달 하단 버튼] ⭐️ */}
+                <div className='grid grid-cols-3 gap-3 mt-3'> 
                     
-                        <button onClick={handleImageSave} className="flex items-center justify-center gap-1 bg-indigo-600 text-white py-3 rounded-lg font-bold hover:bg-indigo-700 transition text-sm active:scale-95 shadow-md"> 
-                            <ImageIcon size={16} /> <span>견적서 저장</span>
-                        </button>
-                        
-                        <a 
-                            href={KAKAO_CHAT_URL} 
-                            target="_blank" 
-                            rel="noopener noreferrer" 
-                            className={`w-full py-3 rounded-lg font-bold text-sm bg-yellow-400 text-gray-800 hover:bg-yellow-500 transition shadow-md flex items-center justify-center`}
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-chat-fill mr-1" viewBox="0 0 16 16">
-                              <path d="M8 15c4.418 0 8-3.134 8-7s-3.582-7-8-7-8 3.134-8 7 3.582 7 8 7zm4.25-5.5a1 1 0 0 0-1-1h-6.5a1 1 0 0 0 0 2h6.5a1 1 0 0 0 1-1z"/>
-                            </svg>
-                            <span>카톡 문의</span>
-                        </a>
-                        
-                        <button onClick={() => window.location.href = `tel:${PHONE_NUMBER}`} className="flex items-center justify-center gap-1 bg-indigo-700 text-white py-3 rounded-lg font-bold hover:bg-indigo-800 transition shadow-md text-sm active:scale-95"> 
-                            <Phone size={16} /> <span>전화 상담</span>
-                        </button>
-                    </div>
+                    <button onClick={handleImageSave} className="flex items-center justify-center gap-1 bg-indigo-600 text-white py-3 rounded-lg font-bold hover:bg-indigo-700 transition text-sm active:scale-95 shadow-md"> 
+                        <ImageIcon size={16} /> <span>견적서 저장</span>
+                    </button>
+                    
+                    <a 
+                        href={KAKAO_CHAT_URL} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className={`w-full py-3 rounded-lg font-bold text-sm bg-yellow-400 text-gray-800 hover:bg-yellow-500 transition shadow-md flex items-center justify-center`}
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-chat-fill mr-1" viewBox="0 0 16 16">
+                          <path d="M8 15c4.418 0 8-3.134 8-7s-3.582-7-8-7-8 3.134-8 7 3.582 7 8 7zm4.25-5.5a1 1 0 0 0-1-1h-6.5a1 1 0 0 0 0 2h6.5a1 1 0 0 0 1-1z"/>
+                        </svg>
+                        <span>카톡 문의</span>
+                    </a>
+                    
+                    <button onClick={() => window.location.href = `tel:${PHONE_NUMBER}`} className="flex items-center justify-center gap-1 bg-indigo-700 text-white py-3 rounded-lg font-bold hover:bg-indigo-800 transition shadow-md text-sm active:scale-95"> 
+                        <Phone size={16} /> <span>전화 상담</span>
+                    </button>
                 </div>
               </div>
             </div>
