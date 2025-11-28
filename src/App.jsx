@@ -1143,7 +1143,7 @@ export default function GroutEstimatorApp() {
           
           {/* B. 기타 범위 (현관/주방/베란다) */}
           <h3 className="text-base font-extrabold flex items-center gap-2 mb-3 mt-4 text-gray-700">
-            <LayoutGrid size={16} className="text-indigo-500" /> B. 기타 범위 (현관 포함)
+            <LayoutGrid size={16} className="text-indigo-500" /> B. 기타 범위
           </h3>
           {renderAreaList(OTHER_AREAS)}
 
