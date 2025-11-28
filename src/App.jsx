@@ -816,7 +816,7 @@ export default function GroutEstimatorApp() {
     const totalFinalDiscount = totalItemDiscount + discountAmount;
     
     // 최종 가격도 천원 단위로 내림
-    let originalCalculatedPrice = Math.max(0, Math.floor(total / 1000) * 1000);
+    let originalCalculatedPrice = Math.max(0, Math.floor(total / 1000) * 1000); // <-- 🚨 수정 완료 🚨
     
     let finalPrice = originalCalculatedPrice; 
     let minimumFeeApplied = false;
@@ -1020,7 +1020,7 @@ export default function GroutEstimatorApp() {
 
 
   return (
-    <div className={`min-h-screen bg-gray-50 text-gray-800 font-sans pb-40`}>
+    <div className={`min-h-screen bg-gray-50 d-gray-800 font-sans pb-40`}>
       <GlobalStyles />
 
       {/* ⭐️ [유지] 헤더 ⭐️ */}
@@ -1454,6 +1454,7 @@ export default function GroutEstimatorApp() {
                             ))}
                     </div>
                 </div>
+
                 
                 {/* 총 합계 영역 (유지) */}
                 <div className="pt-3 text-center border-t border-gray-200"> 
