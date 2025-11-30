@@ -59,7 +59,7 @@ const rgbToHex = (r, g, b) => {
 
 
 // =================================================================
-// [스타일] 애니메이션 정의 (유지 및 Tip용 추가)
+// [스타일] 애니메이션 정의 (유지)
 // =================================================================
 const GlobalStyles = () => (
     <style>{`
@@ -230,29 +230,6 @@ const getPackageAreaIds = (pkg) => [
     ...pkg.P_areas.map(([id]) => id),
     ...pkg.E_areas.map(([id]) => id),
 ];
-
-// =================================================================
-// ⭐️ [신규/유지] 색상 헬퍼 함수 - 파일당 단 한 번만 선언 ⭐️
-// =================================================================
-
-// HEX 코드를 RGB 객체로 변환
-const hexToRgb = (hex) => {
-    if (!hex || hex.length !== 7) return { r: 0, g: 0, b: 0 };
-    const bigint = parseInt(hex.slice(1), 16);
-    const r = (bigint >> 16) & 255;
-    const g = (bigint >> 8) & 255;
-    const b = bigint & 255;
-    return { r, g, b };
-};
-
-// RGB 객체를 HEX 코드로 변환
-const rgbToHex = (r, g, b) => {
-    r = Math.round(Math.max(0, Math.min(255, r))).toString(16);
-    g = Math.round(Math.max(0, Math.min(255, g))).toString(16);
-    b = Math.round(Math.max(0, Math.min(255, b))).toString(16);
-    return `#${r.length === 1 ? '0' + r : r}${g.length === 1 ? '0' + g : g}${b.length === 1 ? '0' + b : b}`;
-};
-
 
 // =================================================================
 // [컴포넌트] (패키지 토스트, 모달, 아코디언 등 유지)
@@ -533,11 +510,9 @@ const ColorPalette = React.memo(({ selectedGroutColor, handleColorSelect, finalS
             </div>
 
             {/* ⭐️ [최종 업데이트] 줄눈 색상 선택 팁 문구 (강조 및 흐름 개선) ⭐️ */}
-            <div className='mt-4 p-3 bg-yellow-100 rounded-lg shadow-md border border-yellow-300 animate-attention'>
-                <p className='text-sm text-yellow-800 text-center mt-1.5 leading-snug font-semibold'>
-                    팁: 색상은 타일톤보다 한톤 어둡게 시공할 경우<br className="sm:hidden" /> 관리가 쉽고, 청소주기가 길어집니다.
-                </p>
-            </div>
+            <p className='text-xs text-indigo-600 mt-4 text-center font-semibold'>
+                팁: 색상은 타일톤보다 한톤 어둡게 시공할 경우<br className="sm:hidden" /> 관리가 쉽고, 청소주기가 길어집니다.
+            </p>
             
             <p className='text-xs text-gray-500 mt-3 text-center'>
                 * 화면 해상도에 따라 실제 색상과 차이가 있을 수 있습니다.
