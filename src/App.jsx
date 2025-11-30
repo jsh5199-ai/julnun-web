@@ -106,7 +106,7 @@ const OTHER_AREAS = [
   { id: 'balcony_laundry', label: '베란다/세탁실', basePrice: 100000, icon: LayoutGrid, unit: '개소', desc: 'Poly 10만 / Epoxy 25만' }, 
   // 주방 벽면: Poly 15만, Epoxy 25만
   { id: 'kitchen_wall', label: '주방 벽면', basePrice: 150000, icon: Utensils, unit: '구역', desc: 'Poly 15만 / Epoxy 25만' },
-  // 거실: Poly 55만, Epoxy 110만
+  // 거실: Poly 55만, Epoxy 110万
   { id: 'living_room', label: '거실 바닥', basePrice: 550000, icon: Sofa, unit: '구역', desc: 'Poly 55만 / Epoxy 110만 (복도,주방 포함)' },
 ];
 
@@ -381,9 +381,9 @@ const ColorPalette = ({ selectedColorId, onSelect }) => {
 
     // 타일 본체 색상은 흰색으로 고정
     const TILE_COLOR = '#ffffff'; 
-    // 줄눈 틈새 너비 (2px)와 타일 너비 (50px)를 설정하여 패턴 생성
-    const TILE_SIZE = 50; // 타일 + 줄눈 총 크기
-    const GROUT_WIDTH = 2; // 줄눈 선 너비 (2px)
+    // 🚨 [수정] 줄눈 선 너비 증가 및 타일 크기 조정 🚨
+    const GROUT_WIDTH = 4; // 줄눈 선 너비 (4px)
+    const TILE_SIZE = 54; // 타일 + 줄눈 총 크기 (50px 타일 + 4px 줄눈)
 
     return (
         <div className='mt-5 pt-3 border-t border-gray-100 animate-fade-in'>
