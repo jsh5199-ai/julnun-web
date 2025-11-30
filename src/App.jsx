@@ -353,7 +353,7 @@ const ColorPalette = React.memo(({ selectedGroutColor, handleColorSelect, finalS
     return (
         <div className='mt-5 pt-3 border-t border-gray-100 animate-fade-in'>
             <h3 className="text-base font-extrabold flex items-center gap-2 mb-3 text-gray-800">
-                <Palette className="h-4 w-4 text-indigo-600" /> 2-1. 줄눈 색상 선택 및 밝기 조절
+                <Palette className="h-4 w-4 text-indigo-600" /> 2-1. 줄눈 색상 미리보기
             </h3>
 
             {/* 시뮬레이션 컨테이너 */}
@@ -479,7 +479,7 @@ const ColorPalette = React.memo(({ selectedGroutColor, handleColorSelect, finalS
             `}</style>
             <div className='mt-5 pt-3 border-t border-gray-100'>
                 <h4 className="text-sm font-extrabold flex items-center gap-2 mb-3 text-gray-700">
-                    <TrendingUp className="h-4 w-4 text-indigo-600" /> 밝기 조절 (톤 변경)
+                    <TrendingUp className="h-4 w-4 text-indigo-600" /> 밝기 조색
                 </h4>
                 <div className='flex items-center justify-between gap-3'>
                     <span className='text-sm font-bold text-gray-600 w-12 text-left'>어둡게</span>
@@ -512,12 +512,12 @@ const ColorPalette = React.memo(({ selectedGroutColor, handleColorSelect, finalS
             {/* ⭐️ [최종 업데이트] 줄눈 색상 선택 팁 문구 (강조 및 흐름 개선) ⭐️ */}
             <div className='mt-4 p-3 bg-yellow-100 rounded-lg shadow-md border border-yellow-300 animate-attention'>
                 <p className='text-sm text-gray-800 text-center leading-snug font-semibold'>
-                    <Zap size={16} className='inline mr-1 text-yellow-600'/> 팁: 색상은 타일톤보다 한톤 어둡게 시공할 경우<br className="sm:hidden" /> 관리가 쉽고, 청소주기가 길어집니다.
+                    <Zap size={16} className='inline mr-1 text-yellow-600'/> 팁: 타일톤보다 한톤 어둡게 시공하면 관리에 용이합니다.
                 </p>
             </div>
             
             <p className='text-xs text-gray-500 mt-3 text-center'>
-                * 화면 해상도에 따라 실제 색상과 차이가 있을 수 있습니다.
+                * 타일의 간격/음영 조명에 따라 색상차이가 있을 수 있습니다.
             </p>
         </div>
     );
