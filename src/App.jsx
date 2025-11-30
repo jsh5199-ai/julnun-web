@@ -310,37 +310,34 @@ const ColorPalette = ({ selectedColorId, onSelect }) => {
     // 타일 본체 색상은 흰색으로 고정
     const TILE_COLOR = '#ffffff'; 
     
-    // 🚨 [수정된 변수] 줄눈 선 너비 및 위치 조정 🚨
-    const GROUT_LINE_WIDTH = 12; // 줄눈 선 너비 (가운데 십자 모양의 굵기)
-    const TILE_DEMO_SIZE = 400; // 데모 영역 전체 크기 (임의 설정)
+    // 🚨 [수정된 변수] 줄눈 선 너비 유지 🚨
+    const GROUT_LINE_WIDTH = 12; 
+    const TILE_DEMO_SIZE = 400; 
     const lineHalf = GROUT_LINE_WIDTH / 2;
 
     const groutPattern = selectedColorData.code;
     const tilePattern = TILE_COLOR;
     
-    // 💡 에폭시 질감 효과를 위한 미세한 하이라이트/음영 그라데이션 추가 💡
-    // 에폭시 광택을 중앙에 미세하게 적용 (선택 색상을 기준으로 밝게)
-    const highlightColor = `color-mix(in srgb, ${groutPattern}, white 30%)`;
-    const depthColor = `color-mix(in srgb, ${groutPattern}, black 10%)`;
-
-    // 중앙 십자 줄눈선 CSS 배경 이미지 생성
+    // 💡 [수정] 에폭시/무광 질감을 위한 미세한 음영 효과만 추가 💡
+    const depthColor = `color-mix(in srgb, ${groutPattern}, black 15%)`; // 그림자 느낌
+    // 중앙은 메인 색상으로 유지하여 광택 제거
     
-    // 1. 가로줄 (to bottom) - 광택 효과 추가
+    // 1. 가로줄 (to bottom) - 음영 효과만 적용
     const horizontalGradient = `linear-gradient(to bottom, 
                                     transparent 0%, 
                                     transparent calc(50% - ${lineHalf}px), 
                                     ${depthColor} calc(50% - ${lineHalf}px), 
-                                    ${highlightColor} 50%, /* 중앙 하이라이트 */
+                                    ${groutPattern} 50%, /* 중앙 메인 색상 유지 (광택 제거) */
                                     ${depthColor} calc(50% + ${lineHalf}px), 
                                     transparent calc(50% + ${lineHalf}px), 
                                     transparent 100%)`;
 
-    // 2. 세로줄 (to right) - 광택 효과 추가
+    // 2. 세로줄 (to right) - 음영 효과만 적용
     const verticalGradient = `linear-gradient(to right, 
                                     transparent 0%, 
                                     transparent calc(50% - ${lineHalf}px), 
                                     ${depthColor} calc(50% - ${lineHalf}px), 
-                                    ${highlightColor} 50%, /* 중앙 하이라이트 */
+                                    ${groutPattern} 50%, /* 중앙 메인 색상 유지 (광택 제거) */
                                     ${depthColor} calc(50% + ${lineHalf}px), 
                                     transparent calc(50% + ${lineHalf}px), 
                                     transparent 100%)`;
@@ -368,10 +365,8 @@ const ColorPalette = ({ selectedColorId, onSelect }) => {
                     <div 
                         className="absolute inset-0 opacity-100 transition-colors duration-300"
                         style={{
-                            // 🚨 [수정 완료] 가로줄과 세로줄이 모두 표시되도록 수정 🚨
-                            // background-color는 타일 색상과 동일하게 유지하여 투명한 부분은 타일색이 나오게 함
                             backgroundColor: TILE_COLOR,
-                            // 가로 그라디언트(horizontalGradient)와 세로 그라디언트(verticalGradient)를 겹쳐서 십자 모양 생성
+                            // 가로 그라디언트와 세로 그라디언트를 겹쳐서 십자 모양 생성
                             backgroundImage: `${horizontalGradient}, ${verticalGradient}`,
                             backgroundSize: '100% 100%',
                             backgroundRepeat: 'no-repeat',
@@ -1289,18 +1284,22 @@ export default function GroutEstimatorApp() {
                         <div className="flex items-center gap-1 bg-white px-1 py-1 rounded-full shadow-md">
                             <button 
                                 onClick={() => handleQuantityChange(area.id, -1)} 
-                                // 🚨 [오류 해결] isEntranceAutoSelected 정의가 없으므로 임시로 disabled 제거 🚨
-                                // disabled={isEntranceAutoSelected && area.id === 'entrance'}
-                                className={`w-7 h-7 flex items-center justify-center rounded-full transition active:scale-90 text-lg font-bold ${quantities[area.id] > 0 ? 'text-indigo-600 hover:bg-gray-100' : 'text-gray-400 cursor-not-allowed'}`}
+                                disabled={isEntranceAutoSelected && area.id === 'entrance'}
+                                // ⭐️ [유지] hover:bg-gray-100 추가하여 클릭 효과 강조 ⭐️
+                                className={`w-7 h-7 flex items-center justify-center rounded-full transition active:scale-90 text-lg font-bold 
+                                    ${(quantities[area.id] > 0 && !(isEntranceAutoSelected && area.id === 'entrance')) ? 'text-indigo-600 hover:bg-gray-100' : 'text-gray-400 cursor-not-allowed'}`}
                             >-</button> 
                             <span className={`w-5 text-center text-sm font-bold ${quantities[area.id] > 0 ? 'text-gray-900' : 'text-gray-400'}`}>{quantities[area.id]}</span>
                             <button 
                                 onClick={() => {
                                     handleQuantityChange(area.id, 1);
                                 }} 
-                                // 🚨 [오류 해결] isEntranceAutoSelected 정의가 없으므로 임시로 disabled 제거 🚨
-                                // disabled={isEntranceAutoSelected && area.id === 'entrance'}
-                                className="w-7 h-7 flex items-center justify-center text-indigo-600 hover:bg-gray-100 rounded-full font-bold text-lg transition active:scale-90"
+                                // 현관이 자동 선택 상태인 경우 + 버튼 비활성화 (수동 조작 방지)
+                                disabled={isEntranceAutoSelected && area.id === 'entrance'}
+                                // ⭐️ [유지] hover:bg-gray-100 추가하여 클릭 효과 강조 ⭐️
+                                className={`w-7 h-7 flex items-center justify-center rounded-full font-bold text-lg transition active:scale-90
+                                    ${isEntranceAutoSelected && area.id === 'entrance' ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'text-indigo-600 hover:bg-gray-100'}
+                                `}
                             >+</button> 
                         </div>
                     </div>
