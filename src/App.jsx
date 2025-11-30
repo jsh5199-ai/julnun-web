@@ -14,16 +14,21 @@ const MIN_FEE = 200000;
 const KAKAO_CHAT_URL = 'http://pf.kakao.com/_jAxnYn/chat';
 
 // =================================================================
-// [스타일] 애니메이션 정의 (유지)
+// [스타일] 애니메이션 정의 (수정)
 // =================================================================
 const GlobalStyles = () => (
   <style>{`
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes slideUpFadeOut { 0% { opacity: 1; transform: translateY(0); } 80% { opacity: 1; transform: translateY(-10px); } 100% { opacity: 0; transform: translateY(-20px); } }
+    /* 🚨 [수정] 전문적인 Pulse 애니메이션을 에폭시 색상(인디고)에 맞게 조정 🚨 */
     @keyframes professionalPulse { 
-      0%, 100% { box-shadow: 0 0 0 0 rgba(100, 116, 139, 0.4); } 
-      50% { box-shadow: 0 0 0 8px rgba(100, 116, 139, 0); } 
+      0% { box-shadow: 0 0 0 0 rgba(49, 46, 129, 0.5); }  /* Indigo-900 */
+      50% { box-shadow: 0 0 0 10px rgba(49, 46, 129, 0); } /* 확장되는 그림자 제거 */
+      100% { box-shadow: 0 0 0 0 rgba(49, 46, 129, 0.5); } 
+    }
+    .professional-pulse-animation {
+      animation: professionalPulse 2s infinite;
     }
     /* 리뷰 버튼 애니메이션 복구 */
     @keyframes shine { 
@@ -36,7 +41,7 @@ const GlobalStyles = () => (
         background-image: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.7) 50%, rgba(255,255,255,0) 100%);
         background-size: 200% 100%;
         animation: shine 3s infinite;
-        color: #1e3a8a; /* Indigo-900 */
+        color: #1e3a8a; /* Indigo-900 */
     }
     
     .animate-fade-in { animation: fadeIn 0.5s ease-out; }
@@ -399,7 +404,7 @@ export default function GroutEstimatorApp() {
       const currentQty = prev[id] || 0;
       let newQty = Math.max(0, currentQty + delta);
       
-      const newQuantities = { ...prev, [id]: newQty };
+      let newQuantities = { ...prev, [id]: newQty };
 
       // === 1. 더 넓은 영역 선택 시 작은 영역 제외 로직 (유지) ===
       if (newQty > 0) {
@@ -972,7 +977,7 @@ export default function GroutEstimatorApp() {
                             <div>
                                 <div className="font-semibold text-gray-800">{area.label}</div>
                                 <div className="text-xs text-gray-500">
-                                     {/* 기본 가격과 상세 설명 모두 제거됨 */}
+                                     {/* 기본 가격과 상세 설명 모두 제거됨 */}
                                     {area.id === 'entrance' && (
                                         <span className="block text-green-600 font-bold mt-0.5">폴리아스파틱 소재 고정</span>
                                     )}
@@ -1114,45 +1119,55 @@ export default function GroutEstimatorApp() {
             <Hammer className="h-5 w-5 text-indigo-600" /> 2. 줄눈소재 안내
           </h2 >
           <div className="space-y-4">
-            {MATERIALS.map((item) => (
-              <div key={item.id} className="animate-fade-in">
-                <div onClick={() => setMaterial(item.id)} className={`flex items-center p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 selection-box active:scale-[0.99] ${item.id === material ? 'border-indigo-700 bg-gray-100 shadow-md' : 'border-gray-300 bg-white hover:border-indigo-400'}`}>
-                  <div className="flex-1">
-                    <div className="flex justify-between items-center">
-                      <div className='flex items-center gap-3'>
-                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mr-2 transition ${item.id === material ? 'border-indigo-600' : 'border-gray-400'}`}>
-                          {item.id === material && <CheckCircle2 size={12} className="text-indigo-600" />}
+            {MATERIALS.map((item) => {
+                const isSelected = item.id === material;
+                // 🚨 [추가] 에폭시 선택 시 프리미엄 애니메이션 클래스 🚨
+                const premiumClasses = isSelected && item.id === 'kerapoxy' ? 'professional-pulse-animation border-indigo-700 shadow-2xl' : '';
+                
+                return (
+                  <div key={item.id} className="animate-fade-in">
+                    <div onClick={() => setMaterial(item.id)} className={`flex items-center p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 selection-box active:scale-[0.99] ${
+                        isSelected
+                            ? `border-indigo-700 bg-gray-100 shadow-md ${premiumClasses}` 
+                            : 'border-gray-300 bg-white hover:border-indigo-400'
+                    }`}>
+                      <div className="flex-1">
+                        <div className="flex justify-between items-center">
+                          <div className='flex items-center gap-3'>
+                            <div className="w-5 h-5 rounded-full border-2 flex items-center justify-center mr-2 transition border-indigo-700">
+                              {isSelected && <CheckCircle2 size={12} className="text-indigo-600" />}
+                            </div>
+                            <span className="font-bold text-gray-800">{item.label}</span>
+                          </div>
+                          <span className={`text-xs font-bold px-3 py-1 rounded-full ${item.badgeColor}`}>
+                            {item.badge}
+                          </span>
                         </div>
-                        <span className="font-bold text-gray-800">{item.label}</span>
+                        <p className="text-xs text-gray-500 mt-1 pl-7">{item.description}</p>
                       </div>
-                      <span className={`text-xs font-bold px-3 py-1 rounded-full ${item.badgeColor}`}>
-                        {item.badge}
-                      </span>
                     </div>
-                    <p className="text-xs text-gray-500 mt-1 pl-7">{item.description}</p>
+                    {/* 나머지 옵션 부분 유지 */}
+                    {item.id === 'poly' && isSelected && (
+                      <div className="mt-2 ml-6 pl-4 border-l-2 border-indigo-300 space-y-2 animate-slide-down bg-gray-50/50 p-3 rounded-md">
+                        <div className="text-xs font-bold text-indigo-700 flex items-center gap-1"><Palette size={12} /> 옵션 선택 (펄 유무)</div>
+                        <div className="flex gap-2">
+                          <button onClick={() => setPolyOption('pearl')} className={`flex-1 py-2 text-sm rounded-md border transition-all ${polyOption === 'pearl' ? 'bg-indigo-700 text-white border-indigo-700 font-bold shadow-md' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-100'}`}>펄</button>
+                          <button onClick={() => setPolyOption('no_pearl')} className={`flex-1 py-2 text-sm rounded-md border transition-all ${polyOption === 'no_pearl' ? 'bg-indigo-700 text-white border-indigo-700 font-bold shadow-md' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-100'}`}>무펄</button>
+                        </div>
+                      </div>
+                    )}
+                    {item.id === 'kerapoxy' && isSelected && (
+                      <div className="mt-2 ml-6 pl-4 border-l-2 border-indigo-500 space-y-2 animate-slide-down bg-indigo-50/50 p-3 rounded-md"> 
+                        <div className="text-xs font-bold text-indigo-700 flex items-center gap-1"><Crown size={12} /> 옵션 선택 (브랜드)</div> 
+                        <div className="flex gap-2">
+                          <button onClick={() => setEpoxyOption('kerapoxy')} className={`flex-1 py-2 text-sm rounded-md border transition-all ${epoxyOption === 'kerapoxy' ? 'bg-indigo-700 text-white border-indigo-700 font-bold shadow-md' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-100'}`}>케라폭시</button> 
+                          <button onClick={() => setEpoxyOption('starlike')} className={`flex-1 py-2 text-sm rounded-md border transition-all ${epoxyOption === 'starlike' ? 'bg-indigo-700 text-white border-indigo-700 font-bold shadow-md' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-100'}`}>스타라이크</button> 
+                        </div>
+                      </div>
+                    )}
                   </div>
-                </div>
-                {/* 나머지 옵션 부분 유지 */}
-                {item.id === 'poly' && item.id === material && (
-                  <div className="mt-2 ml-6 pl-4 border-l-2 border-indigo-300 space-y-2 animate-slide-down bg-gray-50/50 p-3 rounded-md">
-                    <div className="text-xs font-bold text-indigo-700 flex items-center gap-1"><Palette size={12} /> 옵션 선택 (펄 유무)</div>
-                    <div className="flex gap-2">
-                      <button onClick={() => setPolyOption('pearl')} className={`flex-1 py-2 text-sm rounded-md border transition-all ${polyOption === 'pearl' ? 'bg-indigo-700 text-white border-indigo-700 font-bold shadow-md' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-100'}`}>펄</button>
-                      <button onClick={() => setPolyOption('no_pearl')} className={`flex-1 py-2 text-sm rounded-md border transition-all ${polyOption === 'no_pearl' ? 'bg-indigo-700 text-white border-indigo-700 font-bold shadow-md' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-100'}`}>무펄</button>
-                    </div>
-                  </div>
-                )}
-                {item.id === 'kerapoxy' && item.id === material && (
-                  <div className="mt-2 ml-6 pl-4 border-l-2 border-indigo-500 space-y-2 animate-slide-down bg-indigo-50/50 p-3 rounded-md"> 
-                    <div className="text-xs font-bold text-indigo-700 flex items-center gap-1"><Crown size={12} /> 옵션 선택 (브랜드)</div> 
-                    <div className="flex gap-2">
-                      <button onClick={() => setEpoxyOption('kerapoxy')} className={`flex-1 py-2 text-sm rounded-md border transition-all ${epoxyOption === 'kerapoxy' ? 'bg-indigo-700 text-white border-indigo-700 font-bold shadow-md' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-100'}`}>케라폭시</button> 
-                      <button onClick={() => setEpoxyOption('starlike')} className={`flex-1 py-2 text-sm rounded-md border transition-all ${epoxyOption === 'starlike' ? 'bg-indigo-700 text-white border-indigo-700 font-bold shadow-md' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-100'}`}>스타라이크</button> 
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
+                );
+            })}
           </div>
           {/* --- 재료 상세 비교 버튼 영역 (유지) --- */}
           <div className="mt-5 pt-3 border-t border-gray-100 flex justify-center">
@@ -1355,11 +1370,11 @@ export default function GroutEstimatorApp() {
                 </div>
 
                 {/* 기본 정보 테이블 (현장 유형 제거됨) */}
-                
+                
                 {/* ⭐️ [수정] 시공 및 할인 내역 - 테이블 구조로 변경 ⭐️ */}
                 <div className="space-y-2 text-sm border-b border-gray-200 pb-3">
-                    {/* 현장 유형 제거됨. 이 부분은 이제 패키지/최소비용 정보 아래에만 표시됩니다. */}
-                    
+                    {/* 현장 유형 제거됨. 이 부분은 이제 패키지/최소비용 정보 아래에만 표시됩니다. */}
+                    
                     {/* ⭐️ 최소 출장비 적용 문구 추가 ⭐️ */}
                     {calculation.minimumFeeApplied && (
                         <div className="bg-red-50/70 p-2 rounded-md border-l-4 border-red-500 text-xs font-semibold text-gray-700">
@@ -1483,9 +1498,9 @@ export default function GroutEstimatorApp() {
                             const Icon = isApplied ? CheckCircle2 : Sparkles;
 
                             const baseClasses = "w-full py-3 rounded-xl transition font-extrabold text-sm active:scale-[0.98] shadow-lg flex items-center justify-center gap-2 relative overflow-hidden border-2";
-                            
-                            const activeClasses = "bg-indigo-700 text-white border-amber-400";
-                            const inactiveClasses = "bg-amber-400 text-indigo-900 border-indigo-700 hover:bg-amber-300";
+                            
+                            const activeClasses = "bg-indigo-700 text-white border-amber-400";
+                            const inactiveClasses = "bg-amber-400 text-indigo-900 border-indigo-700 hover:bg-amber-300";
 
                             const finalClasses = isApplied
                                 ? activeClasses
