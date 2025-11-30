@@ -325,7 +325,7 @@ const Accordion = ({ question, answer }) => {
 
 
 // ⭐️ [업데이트] ColorPalette 컴포넌트 ⭐️
-const ColorPalette = React.memo(({ selectedGroutColor, setSelectedGroutColor, finalSelectedColorData, onTileImageUpload, tileImageURL, brightnessLevel, setBrightnessLevel }) => {
+const ColorPalette = React.memo(({ selectedGroutColor, handleColorSelect, finalSelectedColorData, onTileImageUpload, tileImageURL, brightnessLevel, setBrightnessLevel }) => {
     const GROUT_LINE_WIDTH = 12;
 
     const effectiveTileImageURL = (tileImageURL && tileImageURL !== DEFAULT_TILE_IMAGE_URL)
@@ -334,6 +334,42 @@ const ColorPalette = React.memo(({ selectedGroutColor, setSelectedGroutColor, fi
 
     // 현재 선택된 기본 색상 데이터
     const baseColorData = GROUT_COLORS.find(c => c.id === selectedGroutColor) || GROUT_COLORS[0];
+
+    // 밝기 레벨 텍스트 계산
+    const displayLevel = Math.abs(brightnessLevel - 50) * 2; // 0 (50) -> 0, 100 (100) -> 100
+    const displayTone = brightnessLevel > 50 ? '밝게 톤업' : brightnessLevel < 50 ? '어둡게 톤다운' : '원본 색상';
+    const displaySign = brightnessLevel === 50 ? '' : brightnessLevel > 50 ? '+' : '-';
+    
+    // 슬라이더 색상 커스텀 스타일 (밝기 레벨에 따라 게이지 색상 변경)
+    const getSliderBackground = () => {
+        // 50%를 기준으로 양쪽으로 그라데이션이 퍼지도록 설정
+        const currentPercentage = brightnessLevel / 100 * 100; // 0~100
+        const fillToCenter = brightnessLevel < 50 ? 50 : currentPercentage;
+        const fillFromCenter = brightnessLevel > 50 ? 50 : 100 - currentPercentage;
+
+        // 중앙(50%)을 0% 기준으로 변환
+        const valueFromCenter = Math.abs(brightnessLevel - 50) * 2;
+        
+        let color1, color2;
+        if (brightnessLevel > 50) { // 밝게
+            color1 = baseColorData.code;
+            color2 = BRIGHT_MODIFIER_COLOR.code;
+        } else if (brightnessLevel < 50) { // 어둡게
+            color1 = DARK_MODIFIER_COLOR.code;
+            color2 = baseColorData.code;
+        } else { // 원본 (중앙)
+            color1 = baseColorData.code;
+            color2 = baseColorData.code;
+        }
+        
+        // 게이지 배경 스타일을 CSS 변수를 사용하여 계산
+        return {
+             '--range-progress': `${valueFromCenter}%`,
+             '--range-base-color': baseColorData.code,
+             '--range-modifier-color': brightnessLevel > 50 ? BRIGHT_MODIFIER_COLOR.code : DARK_MODIFIER_COLOR.code,
+             '--range-level': brightnessLevel
+        };
+    };
 
     return (
         <div className='mt-5 pt-3 border-t border-gray-100 animate-fade-in'>
@@ -400,7 +436,7 @@ const ColorPalette = React.memo(({ selectedGroutColor, setSelectedGroutColor, fi
             <div className={`p-3 rounded-lg shadow-md mb-3 border border-gray-200`} style={{ backgroundColor: finalSelectedColorData.code }}>
                 <p className={`text-sm font-bold ${finalSelectedColorData.isDark ? 'text-white' : 'text-gray-900'} flex items-center justify-between`}>
                     <span className='truncate'>선택 색상: {baseColorData.label} </span>
-                    <span className='text-xs font-normal ml-2'>밝기 레벨: {brightnessLevel}%</span>
+                    <span className='text-xs font-normal ml-2'>밝기 레벨: {displaySign}{displayLevel}%</span>
                     <CheckCircle2 size={16} className={`ml-2 flex-shrink-0 ${finalSelectedColorData.isDark ? 'text-amber-400' : 'text-indigo-700'}`}/>
                 </p>
             </div>
@@ -410,7 +446,7 @@ const ColorPalette = React.memo(({ selectedGroutColor, setSelectedGroutColor, fi
                 {GROUT_COLORS.map((color) => (
                     <button
                         key={color.id}
-                        onClick={() => setSelectedGroutColor(color.id)}
+                        onClick={() => handleColorSelect(color.id)} // 새로운 핸들러 사용
                         className={`aspect-square rounded-lg transition-all duration-200 shadow-md flex items-center justify-center p-1 relative hover:scale-[1.02] active:scale-[0.98] ${
                             selectedGroutColor === color.id
                                 ? 'ring-4 ring-offset-2 ring-indigo-500' // 선택 시 링 효과
@@ -428,13 +464,46 @@ const ColorPalette = React.memo(({ selectedGroutColor, setSelectedGroutColor, fi
             </div>
 
 
-            {/* ⭐️ [신규] 밝기 조절 게이지 (슬라이더) ⭐️ */}
+            {/* ⭐️ [업데이트] 밝기 조절 게이지 (슬라이더) ⭐️ */}
+            <style>{`
+                /* 커스텀 슬라이더 스타일링 */
+                .brightness-slider::-webkit-slider-runnable-track {
+                    background: linear-gradient(to right, 
+                        ${DARK_MODIFIER_COLOR.code},
+                        ${baseColorData.code} 50%,
+                        ${BRIGHT_MODIFIER_COLOR.code}
+                    );
+                    border-radius: 4px;
+                    height: 8px;
+                }
+                .brightness-slider::-moz-range-track {
+                    background: linear-gradient(to right, 
+                        ${DARK_MODIFIER_COLOR.code},
+                        ${baseColorData.code} 50%,
+                        ${BRIGHT_MODIFIER_COLOR.code}
+                    );
+                    border-radius: 4px;
+                    height: 8px;
+                }
+                .brightness-slider::-webkit-slider-thumb {
+                    -webkit-appearance: none;
+                    appearance: none;
+                    width: 20px;
+                    height: 20px;
+                    background: ${finalSelectedColorData.code};
+                    border: 3px solid ${finalSelectedColorData.isDark ? BRIGHT_MODIFIER_COLOR.code : DARK_MODIFIER_COLOR.code};
+                    border-radius: 50%;
+                    cursor: pointer;
+                    margin-top: -6px; /* 트랙 중앙에 오도록 조정 */
+                    box-shadow: 0 0 5px rgba(0,0,0,0.3);
+                }
+            `}</style>
             <div className='mt-5 pt-3 border-t border-gray-100'>
-                <h4 className="text-sm font-extrabold flex items-center gap-2 mb-2 text-gray-700">
+                <h4 className="text-sm font-extrabold flex items-center gap-2 mb-3 text-gray-700">
                     <TrendingUp className="h-4 w-4 text-indigo-600" /> 밝기 조절 (톤 변경)
                 </h4>
                 <div className='flex items-center justify-between gap-3'>
-                    <span className='text-xs font-bold text-gray-500'>119번</span>
+                    <span className='text-sm font-bold text-gray-600 w-12 text-left'>어둡게</span>
                     
                     <input
                         type="range"
@@ -443,14 +512,13 @@ const ColorPalette = React.memo(({ selectedGroutColor, setSelectedGroutColor, fi
                         step="10" // 10% 단위로 조절
                         value={brightnessLevel}
                         onChange={(e) => setBrightnessLevel(parseInt(e.target.value, 10))}
-                        className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer range-lg"
-                        style={{ accentColor: finalSelectedColorData.code }}
+                        className="flex-1 h-2 rounded-lg appearance-none cursor-pointer brightness-slider"
                     />
 
-                    <span className='text-xs font-bold text-gray-500'>화이트</span>
+                    <span className='text-sm font-bold text-gray-600 w-12 text-right'>밝게</span>
                 </div>
                 <p className='text-xs text-gray-500 mt-2 text-center'>
-                    * 밝기 레벨 {brightnessLevel}% 적용 중 ({brightnessLevel > 50 ? '선택 색상 + 화이트 톤업' : brightnessLevel < 50 ? '선택 색상 + 119번 톤다운' : '선택 색상 원본'})
+                    * 현재 밝기 레벨: <span className='font-bold text-indigo-600'>{displaySign}{displayLevel}%</span> ({displayTone}) 적용 중
                 </p>
             </div>
 
@@ -479,7 +547,7 @@ export default function App() {
     
     // ⭐️ [복원] 단일 색상 선택 상태
     const [selectedGroutColor, setSelectedGroutColor] = useState(GROUT_COLORS[0].id);
-    // ⭐️ [신규] 밝기 레벨 상태 (0: 119번, 50: 원본, 100: 화이트)
+    // ⭐️ [업데이트] 밝기 레벨 상태 (50: 원본, 0: 119번 100%, 100: 화이트 100%)
     const [brightnessLevel, setBrightnessLevel] = useState(50);
     const [tileImageURL, setTileImageURL] = useState(DEFAULT_TILE_IMAGE_URL);
     
@@ -500,6 +568,13 @@ export default function App() {
 
     const SOOMGO_REVIEW_URL = 'https://www.soomgo.com/profile/users/10755579?tab=review';
     const PHONE_NUMBER = '010-7734-6709';
+
+    // ⭐️ [신규 핸들러] 색상 선택 시 밝기 레벨을 50 (0% 톤 조절)로 초기화
+    const handleColorSelect = useCallback((colorId) => {
+        setSelectedGroutColor(colorId);
+        setBrightnessLevel(50); 
+    }, []);
+
 
     useEffect(() => {
         if (quantities['entrance'] > 0 && areaMaterials['entrance'] !== 'poly') {
@@ -1204,7 +1279,7 @@ export default function App() {
                     {/* ⭐️ [업데이트] 색상 선택 및 밝기 조절 팔레트 ⭐️ */}
                     <ColorPalette
                         selectedGroutColor={selectedGroutColor}
-                        setSelectedGroutColor={setSelectedGroutColor}
+                        handleColorSelect={handleColorSelect} // 업데이트된 핸들러 사용
                         finalSelectedColorData={finalSelectedColorData}
                         onTileImageUpload={handleTileImageUpload}
                         tileImageURL={tileImageURL}
