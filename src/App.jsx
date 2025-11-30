@@ -324,130 +324,128 @@ const Accordion = ({ question, answer }) => {
 };
 
 
-// ⭐️ [신규] 조색 컨트롤 컴포넌트 ⭐️
+// ⭐️ [업데이트] BlenderControl 컴포넌트 (목록 선택 및 게이지 조정) ⭐️
 const BlenderControl = ({ index, blend, blendedColors, setBlendedColors, GROUT_COLORS }) => {
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [isColorSelectionOpen, setIsColorSelectionOpen] = useState(false);
     const selectedColor = GROUT_COLORS.find(c => c.id === blend.id);
 
     // 비율 변경 핸들러: 비율 합계를 100%로 유지하며 자동 조정
     const handleRatioChange = useCallback((newRatio) => {
         newRatio = Math.max(0, Math.min(100, newRatio));
-        
-        // 현재 항목 제외한 나머지 비율 합계
+
         const currentSumExcludingSelf = blendedColors.reduce((sum, item, i) => sum + (i === index ? 0 : item.ratio), 0);
 
         if (newRatio + currentSumExcludingSelf > 100) {
-            // 새 비율과 나머지 합계가 100%를 초과하는 경우: 
-            // 새로운 비율을 초과하지 않는 선에서 최대 비율로 조정하고, 나머지를 100 - newRatio로 재조정
             const maxNewRatio = 100 - currentSumExcludingSelf;
             if (maxNewRatio < newRatio) {
                 newRatio = maxNewRatio;
             }
         }
-        
+
         const newColors = blendedColors.map((item, i) => {
             if (i === index) {
                 return { ...item, ratio: newRatio };
             }
-            return item; // 일단 비율을 변경하지 않음
+            return item;
         });
-        
+
         const currentSum = newColors.reduce((sum, item) => sum + item.ratio, 0);
         const difference = 100 - currentSum;
-        
+
         if (difference !== 0) {
-            // 비율이 100%가 아니면 다른 항목에서 조정
             const otherIndices = newColors.map((_, i) => i).filter(i => i !== index);
             const otherSum = otherIndices.reduce((sum, i) => sum + newColors[i].ratio, 0);
 
             if (otherSum > 0) {
-                // 다른 항목들의 비율에 비례하여 조정
                 otherIndices.forEach(i => {
                     const proportion = newColors[i].ratio / otherSum;
                     newColors[i].ratio = Math.max(0, newColors[i].ratio + Math.round(difference * proportion));
                 });
             } else if (otherIndices.length > 0) {
-                 // 다른 항목들의 비율이 0인 경우, 첫 번째 다른 항목에 모든 차이 반영
                  newColors[otherIndices[0]].ratio = Math.max(0, newColors[otherIndices[0]].ratio + difference);
             }
         }
-        
-        // 최종적으로 합계 100% 보장 (반올림 오차 보정)
+
         const finalSum = newColors.reduce((sum, item) => sum + item.ratio, 0);
         if (finalSum !== 100 && newColors.length > 0) {
             const diff = 100 - finalSum;
-            newColors[0].ratio += diff; 
+            newColors[0].ratio += diff;
         }
 
         setBlendedColors(newColors);
 
     }, [index, blendedColors, setBlendedColors]);
 
-    // 색상 변경 핸들러
+    // 색상 선택 핸들러
     const handleColorSelect = useCallback((colorId) => {
         setBlendedColors(blendedColors.map((item, i) =>
             i === index ? { ...item, id: colorId } : item
         ));
-        setIsDropdownOpen(false);
+        setIsColorSelectionOpen(false); // 선택 후 목록 닫기
     }, [index, blendedColors, setBlendedColors]);
 
-    // 10% 단위 증감 버튼
     const canDecrease = blend.ratio > 0;
     const canIncrease = blendedColors.reduce((sum, item, i) => sum + (i !== index ? item.ratio : 0), 0) < 100;
-    
-    return (
-        <div className="flex items-center gap-3 p-3 border rounded-lg shadow-sm bg-gray-50 animate-slide-down">
-            <div className='font-bold text-sm text-gray-700 w-4'>{index + 1}.</div>
-            
-            {/* 1. 색상 선택 드롭다운 */}
-            <div className="relative w-1/2">
-                <button
-                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                    className={`w-full py-2 px-3 rounded-lg flex items-center justify-between transition active:scale-[0.98] border-2 font-semibold text-sm ${selectedColor.isDark ? 'bg-gray-800 text-white border-gray-700' : 'bg-white text-gray-800 border-gray-200 hover:bg-gray-100'}`}
-                    style={{ backgroundColor: selectedColor.code, color: selectedColor.isDark ? '#fff' : '#1f2937' }}
-                >
-                    <span className='truncate'>{selectedColor.label}</span>
-                    <ChevronDown size={14} className={`transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
-                </button>
-                {isDropdownOpen && (
-                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-xl max-h-48 overflow-y-auto">
-                        <div className="grid grid-cols-3 gap-2 p-2">
-                            {GROUT_COLORS.map(color => (
-                                <button
-                                    key={color.id}
-                                    onClick={() => handleColorSelect(color.id)}
-                                    className={`p-1 text-xs rounded-md font-semibold text-center transition hover:scale-[1.05] ${color.id === blend.id ? 'ring-2 ring-indigo-500' : ''}`}
-                                    style={{ backgroundColor: color.code, color: color.isDark ? '#fff' : '#1f2937' }}
-                                >
-                                    {color.label}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                )}
-            </div>
-            
-            {/* 2. 비율 (10% 단위) 컨트롤 */}
-            <div className="flex items-center w-1/2 justify-end gap-1">
-                 {/* ▼ 버튼 */}
-                 <button
-                    onClick={() => handleRatioChange(blend.ratio - 10)}
-                    disabled={!canDecrease}
-                    className={`w-7 h-7 flex items-center justify-center rounded-full transition active:scale-90 text-lg font-bold ${canDecrease ? 'text-indigo-600 hover:bg-gray-200' : 'text-gray-300 cursor-not-allowed'}`}
-                >-</button>
 
-                {/* 비율 표시 */}
-                <div className="text-sm font-bold text-gray-900 px-2 py-1 bg-white rounded-md shadow-inner w-12 text-center">
-                    {blend.ratio}%
+    return (
+        <div className="flex flex-col p-3 border rounded-lg shadow-sm bg-gray-50 animate-slide-down">
+            <div className='flex items-center gap-3'>
+                <div className='font-bold text-sm text-gray-700 w-4'>{index + 1}.</div>
+
+                {/* 1. 색상 선택 버튼 (목록 토글) */}
+                <div className="relative w-1/2">
+                    <button
+                        onClick={() => setIsColorSelectionOpen(!isColorSelectionOpen)}
+                        className={`w-full py-2 px-3 rounded-lg flex items-center justify-between transition active:scale-[0.98] border-2 font-semibold text-sm shadow-md ${selectedColor.isDark ? 'bg-gray-800 text-white border-gray-700' : 'bg-white text-gray-800 border-gray-200 hover:bg-gray-100'}`}
+                        style={{ backgroundColor: selectedColor.code, color: selectedColor.isDark ? '#fff' : '#1f2937' }}
+                    >
+                        <span className='truncate'>{selectedColor.label}</span>
+                        <ChevronDown size={14} className={`transition-transform ${isColorSelectionOpen ? 'rotate-180' : ''}`} />
+                    </button>
                 </div>
 
-                {/* ▲ 버튼 */}
-                <button
-                    onClick={() => handleRatioChange(blend.ratio + 10)}
-                    disabled={!canIncrease}
-                    className={`w-7 h-7 flex items-center justify-center rounded-full font-bold text-lg transition active:scale-90 ${canIncrease ? 'text-indigo-600 hover:bg-gray-200' : 'text-gray-300 cursor-not-allowed'}`}
-                >+</button>
+                {/* 2. 비율 (10% 단위) 컨트롤 */}
+                <div className="flex items-center w-1/2 justify-end gap-1">
+                    {/* ▼ 버튼 */}
+                    <button
+                        onClick={() => handleRatioChange(blend.ratio - 10)}
+                        disabled={!canDecrease}
+                        className={`w-7 h-7 flex items-center justify-center rounded-full transition active:scale-90 text-lg font-bold ${canDecrease ? 'text-indigo-600 hover:bg-gray-200' : 'text-gray-300 cursor-not-allowed'}`}
+                    >-</button>
+
+                    {/* 비율 표시 */}
+                    <div className="text-sm font-bold text-gray-900 px-2 py-1 bg-white rounded-md shadow-inner w-12 text-center">
+                        {blend.ratio}%
+                    </div>
+
+                    {/* ▲ 버튼 */}
+                    <button
+                        onClick={() => handleRatioChange(blend.ratio + 10)}
+                        disabled={!canIncrease}
+                        className={`w-7 h-7 flex items-center justify-center rounded-full font-bold text-lg transition active:scale-90 ${canIncrease ? 'text-indigo-600 hover:bg-gray-200' : 'text-gray-300 cursor-not-allowed'}`}
+                    >+</button>
+                </div>
             </div>
+
+            {/* ⭐️ 색상 선택 목록 (토글 시 표시) ⭐️ */}
+            {isColorSelectionOpen && (
+                <div className="mt-3 pt-3 border-t border-gray-200 animate-slide-down">
+                    <p className='text-xs font-semibold text-gray-600 mb-2'>색상 선택:</p>
+                    <div className="grid grid-cols-5 gap-2 max-h-48 overflow-y-auto pr-1">
+                        {GROUT_COLORS.map(color => (
+                            <button
+                                key={color.id}
+                                onClick={() => handleColorSelect(color.id)}
+                                className={`aspect-square rounded-md font-semibold text-center transition hover:scale-[1.05] relative shadow-sm ${color.id === blend.id ? 'ring-4 ring-indigo-500 ring-offset-2' : ''}`}
+                                style={{ backgroundColor: color.code }}
+                            >
+                                <span className={`absolute bottom-0 text-[8px] font-bold py-[1px] px-1 rounded-t-sm ${color.isDark ? 'bg-white/80 text-gray-900' : 'bg-gray-900/80 text-white'}`}>{color.label}</span>
+                                {color.id === blend.id && <CheckCircle2 size={16} className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 ${color.isDark ? 'text-amber-400' : 'text-indigo-700'}`}/>}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
@@ -565,7 +563,7 @@ export default function App() {
     const [material, setMaterial] = useState('poly');
     const [polyOption, setPolyOption] = useState('pearl');
     const [epoxyOption, setEpoxyOption] = useState('kerapoxy');
-    
+
     // ⭐️ [신규 상태] 조색 색상 및 비율
     const [blendedColors, setBlendedColors] = useState([
         { id: 'white', ratio: 50 },
@@ -1007,7 +1005,7 @@ export default function App() {
     const currentVideo = YOUTUBE_VIDEOS.find(v => v.id === activeVideoId);
     const currentEmbedUrl = getEmbedUrl(currentVideo.id);
 
-    // ⭐️ [신규] 최종 조색 색상 계산 useMemo ⭐️
+    // ⭐️ [조색 로직 useMemo] ⭐️
     const calculateBlendedColor = useCallback((blendedList) => {
         let totalR = 0;
         let totalG = 0;
@@ -1024,18 +1022,17 @@ export default function App() {
             }
         });
 
-        // 결과 HEX 코드가 항상 #FFCCAA 형태를 갖도록 보장
         return rgbToHex(totalR, totalG, totalB);
     }, []);
-    
+
     const finalBlendedColorCode = useMemo(() => calculateBlendedColor(blendedColors), [blendedColors, calculateBlendedColor]);
-    
+
     const finalSelectedColorData = useMemo(() => {
         const code = finalBlendedColorCode;
         if (!code) return GROUT_COLORS[0];
         const { r, g, b } = hexToRgb(code);
         // 밝기 계산 (ITU-R BT.709 기준)
-        const brightness = (r * 0.2126 + g * 0.7152 + b * 0.0722); 
+        const brightness = (r * 0.2126 + g * 0.7152 + b * 0.0722);
         return {
             id: 'blended',
             code: code,
