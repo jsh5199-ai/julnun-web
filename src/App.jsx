@@ -175,7 +175,7 @@ const getPackageAreaIds = (pkg) => [
 ];
 
 // =================================================================
-// [컴포넌트] ColorPalette (줄눈 시뮬레이션 로직 전면 교체)
+// [컴포넌트] ColorPalette (줄눈 시뮬레이션 로직 - 십자형으로 재수정)
 // =================================================================
 
 const ColorPalette = ({ selectedColors, onToggleColor, onUpdateRatio, onTileImageUpload, tileImageURL }) => {
@@ -198,48 +198,51 @@ const ColorPalette = ({ selectedColors, onToggleColor, onUpdateRatio, onTileImag
         isDark: hexToRgb(mixedColorCode).r * 0.299 + hexToRgb(mixedColorCode).g * 0.587 + hexToRgb(mixedColorCode).b * 0.114 < 128
     };
 
-    // 2. 시뮬레이션 스타일 정의 (radial-gradient 방식으로 전면 교체)
-    const TILE_COLOR = '#ffffff'; 
+    // 2. 시뮬레이션 스타일 정의 (십자형 줄눈으로 전면 재수정)
+    const TILE_COLOR = '#ffffff'; // 타일 기본 색상 (타일 이미지 없을 시)
     
-    // 🚨 [새로운 방식] 타일 한 칸의 크기 (CSS px)
+    // 🚨🚨 [새로운 방식] 타일 한 칸의 크기 (CSS px)
     const TILE_SIZE = 150; 
-    // 🚨 [새로운 방식] 줄눈 라인의 굵기 (CSS px)
-    const GROUT_LINE_WIDTH = 12; 
+    // 🚨🚨 [새로운 방식] 줄눈 라인의 굵기 (CSS px)
+    const GROUT_LINE_WIDTH = 10; 
     
     const groutPattern = mixedColorCode;
     const simulationBackgroundStyle = tileImageURL 
         ? { backgroundImage: `url(${tileImageURL})`, backgroundSize: 'cover', backgroundPosition: 'center' }
         : { backgroundColor: TILE_COLOR };
     
-    // ⭐️⭐️⭐️ [새로운 줄눈 생성 로직] ⭐️⭐️⭐️
-    // 타일 중앙에 타일 색상(투명), 바깥쪽에 줄눈 색상을 가지는 방사형 그라데이션 패턴 생성
-    const patternSize = TILE_SIZE + GROUT_LINE_WIDTH;
-    const tileRadius = TILE_SIZE / 2;
+    // ⭐️⭐️⭐️ [십자형 줄눈 생성 로직 - 재수정 버전] ⭐️⭐️⭐️
+    const patternUnitSize = TILE_SIZE + GROUT_LINE_WIDTH;
+    const groutWidth = GROUT_LINE_WIDTH;
+
+    // 수평/수직 패턴을 명확히 분리하여 십자 형태로 만듭니다.
+    const verticalPattern = `
+        repeating-linear-gradient(
+            to right,
+            ${groutPattern}, ${groutPattern} ${groutWidth}px, 
+            ${TILE_COLOR} ${groutWidth}px, ${TILE_COLOR} ${patternUnitSize}px
+        )
+    `;
     
-    const repeatingRadialGradient = `
-        repeating-radial-gradient(
-            circle at center, 
-            transparent 0, transparent ${tileRadius}px, 
-            ${groutPattern} ${tileRadius}px, ${groutPattern} ${patternSize / 2}px
+    const horizontalPattern = `
+        repeating-linear-gradient(
+            to bottom,
+            ${groutPattern}, ${groutPattern} ${groutWidth}px, 
+            ${TILE_COLOR} ${groutWidth}px, ${TILE_COLOR} ${patternUnitSize}px
         )
     `;
 
-    const repeatingLinearGradient = `
-        repeating-linear-gradient(to right, ${groutPattern}, ${groutPattern} ${GROUT_LINE_WIDTH}px, transparent ${GROUT_LINE_WIDTH}px, transparent ${patternSize}px),
-        repeating-linear-gradient(to bottom, ${groutPattern}, ${groutPattern} ${GROUT_LINE_WIDTH}px, transparent ${GROUT_LINE_WIDTH}px, transparent ${patternSize}px)
-    `;
-    
     const groutOverlayStyle = {
-        // [수정] 배경색을 투명으로 설정하여 타일 이미지가 보이도록 함
-        backgroundColor: 'transparent',
-        // [수정] 타일 크기 간격으로 패턴을 반복
-        backgroundImage: repeatingLinearGradient,
-        backgroundSize: `${patternSize}px ${patternSize}px`,
+        // 타일 이미지가 있을 경우 타일 색상이 아닌 투명으로 설정하여 이미지가 보이도록 합니다.
+        backgroundColor: tileImageURL ? 'transparent' : TILE_COLOR, 
+        // 수직 패턴과 수평 패턴을 겹쳐서 십자형을 만들고, 타일 크기만큼 반복합니다.
+        backgroundImage: `${verticalPattern}, ${horizontalPattern}`,
+        backgroundSize: `${patternUnitSize}px ${patternUnitSize}px`, 
         backgroundPosition: `0 0`,
-        backgroundRepeat: 'repeat',
-        pointerEvents: 'none', // 클릭 방지
+        backgroundRepeat: 'repeat', 
+        pointerEvents: 'none',
     };
-    // ⭐️⭐️⭐️ [새로운 줄눈 생성 로직 끝] ⭐️⭐️⭐️
+    // ⭐️⭐️⭐️ [십자형 줄눈 생성 로직 끝] ⭐️⭐️⭐️
 
 
     const totalRatio = selectedColors.reduce((sum, c) => sum + c.ratio, 0);
@@ -270,7 +273,7 @@ const ColorPalette = ({ selectedColors, onToggleColor, onUpdateRatio, onTileImag
                     // 타일 베이스 색상/이미지
                     style={simulationBackgroundStyle}
                 >
-                    {/* ⭐️ 줄눈 패턴 오버레이 레이어 (전면 재구성) ⭐️ */}
+                    {/* ⭐️ 줄눈 패턴 오버레이 레이어 (십자형으로 재구성) ⭐️ */}
                     <div 
                         className="absolute inset-0 opacity-100 transition-colors duration-300"
                         style={groutOverlayStyle}
@@ -350,7 +353,7 @@ const ColorPalette = ({ selectedColors, onToggleColor, onUpdateRatio, onTileImag
                                 <span className='w-4 h-4 rounded-full border border-gray-300' style={{ backgroundColor: primaryColorData.code }}></span>
                                 **{primaryColorData.label}** 비율 (기준)
                             </span>
-                            <span className='text-2xl font-extrabold text-indigo-700'>{primaryColor.ratio}%</span>
+                            <span className='2xl font-extrabold text-indigo-700'>{primaryColor.ratio}%</span>
                         </div>
                         
                         <input
