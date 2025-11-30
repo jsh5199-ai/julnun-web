@@ -200,7 +200,8 @@ const ColorPalette = ({ selectedColors, onToggleColor, onUpdateRatio, onTileImag
 
     // 2. 시뮬레이션 스타일 정의
     const TILE_COLOR = '#ffffff'; 
-    const GROUT_LINE_WIDTH = 12; 
+    // 🚨 [수정] 줄눈 선 굵기를 16px로 증가시켜 가시성 확보
+    const GROUT_LINE_WIDTH = 16; 
     const lineHalf = GROUT_LINE_WIDTH / 2;
 
     const groutPattern = mixedColorCode;
