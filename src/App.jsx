@@ -303,7 +303,7 @@ const Accordion = ({ question, answer }) => {
     );
 };
 
-// ⭐️ [수정된 컴포넌트] ColorPalette: 줄눈선 1개만 보이도록 수정 ⭐️
+// ⭐️ [최종 수정된 컴포넌트] ColorPalette: 줄눈선 1개만 보이도록 강제 설정 ⭐️
 const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, onTileImageReset, tileImageURL }) => {
     const selectedColorData = GROUT_COLORS.find(c => c.id === selectedColorId);
 
@@ -316,6 +316,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, onTileImag
     const groutPattern = selectedColorData.code;
     
     // 1. 가로줄 (to bottom) - 순수 단색 적용
+    // calc(50% - X)와 calc(50% + X)를 사용하여 중앙에 선을 만듭니다.
     const horizontalGradient = `linear-gradient(to bottom, 
                                     transparent 0%, 
                                     transparent calc(50% - ${lineHalf}px), 
@@ -356,16 +357,15 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, onTileImag
                     {/* 타일 베이스 (업로드 이미지 위에 줄눈 선을 겹칠 준비) */}
                     <div className="absolute inset-0" style={{ backgroundImage: simulationBackgroundStyle.backgroundImage, backgroundSize: simulationBackgroundStyle.backgroundSize, backgroundPosition: simulationBackgroundStyle.backgroundPosition }}></div>
                     
-                    {/* ⭐️ [수정됨] 줄눈 선 시뮬레이션 레이어 (가로+세로 1줄씩) ⭐️ */}
+                    {/* ⭐️ 줄눈 선 시뮬레이션 레이어 (가로+세로 1줄씩) ⭐️ */}
                     <div 
                         className="absolute inset-0 opacity-100 transition-colors duration-300"
                         style={{
                             backgroundColor: 'transparent', 
                             backgroundImage: `${horizontalGradient}, ${verticalGradient}`,
-                            // 👇 배경 크기를 100% 100%로 유지하고, 반복을 금지하여 중앙에 1개의 십자선만 표시
                             backgroundSize: '100% 100%',
                             backgroundPosition: 'center center',
-                            backgroundRepeat: 'no-repeat', // 👈 이 속성 추가
+                            backgroundRepeat: 'no-repeat',
                             backgroundBlendMode: 'normal' 
                         }}
                     >
@@ -1033,6 +1033,7 @@ export default function GroutEstimatorApp() {
                 {mat.label.split('(')[0].trim()}
               </button>
             ))}
+            
           </div>
         </div>
     );
@@ -1249,7 +1250,7 @@ export default function GroutEstimatorApp() {
             ))}
           </div>
           
-          {/* ⭐️ [수정] ColorPalette에 초기화 핸들러 전달 ⭐️ */}
+          {/* ⭐️ [최종 수정된 ColorPalette 컴포넌트 사용] ⭐️ */}
           <ColorPalette 
               selectedColorId={selectedGroutColor} 
               onSelect={setSelectedGroutColor} 
@@ -1461,7 +1462,20 @@ export default function GroutEstimatorApp() {
                     <h1 className='text-xl font-extrabold text-indigo-800 text-center'>줄눈의미학 예상 견적서</h1>
                 </div>
 
-                {/* 기본 정보 테이블 (현장 유형 제거됨) */}
+                {/* 선택 색상 정보 추가 */}
+                {(() => {
+                    const selectedColorData = GROUT_COLORS.find(c => c.id === selectedGroutColor);
+                    return (
+                        <div className="flex justify-between items-center text-sm border-b border-gray-200 pb-2">
+                            <span className='font-semibold text-gray-700'>선택 줄눈색상</span>
+                            <div className='flex items-center gap-2'>
+                                <span className='font-bold text-gray-800'>{selectedColorData.label}</span>
+                                <div className='w-4 h-4 rounded-full shadow-sm border border-gray-300' style={{ backgroundColor: selectedColorData.code }}></div>
+                            </div>
+                        </div>
+                    );
+                })()}
+
                 
                 {/* ⭐️ [유지] 시공 및 할인 내역 - 테이블 구조로 변경 ⭐️ */}
                 <div className="space-y-2 text-sm border-b border-gray-200 pb-3">
