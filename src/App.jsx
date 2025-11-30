@@ -422,6 +422,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
             </div>
             <p className='text-xs text-gray-500 mt-3 text-center'>
                 * 화면 해상도에 따라 실제 색상과 차이가 있을 수 있습니다.
+                * 시공 시 타일간격, 조명에 따라 차이가 있을 수 있습니다.
             </p>
         </div>
     );
