@@ -103,7 +103,7 @@ const OTHER_AREAS = [
   // 현관: Poly 5만
   { id: 'entrance', label: '현관', basePrice: 50000, icon: DoorOpen, unit: '개소' }, 
   // 베란다/세탁실: Poly 10만, Epoxy 25만
-  { id: 'balcony_laundry', label: '베란다/세탁실', basePrice: 100000, icon: LayoutGrid, unit: '개소', desc: 'Poly 10万 / Epoxy 25만' }, 
+  { id: 'balcony_laundry', label: '베란다/세탁실', basePrice: 100000, icon: LayoutGrid, unit: '개소', desc: 'Poly 10만 / Epoxy 25만' }, 
   // 주방 벽면: Poly 15만, Epoxy 25만
   { id: 'kitchen_wall', label: '주방 벽면', basePrice: 150000, icon: Utensils, unit: '구역', desc: 'Poly 15만 / Epoxy 25만' },
   // 거실: Poly 55만, Epoxy 110万
@@ -305,7 +305,7 @@ const Accordion = ({ question, answer }) => {
 
 // ⭐️ [확장된 컴포넌트] 색상 선택 팔레트 및 시뮬레이션 렌더링 ⭐️
 const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageURL }) => {
-    // 🚨 오류 수정 반영: selectedColorData를 찾지 못하면 GROUT_COLORS[0]을 기본값으로 설정하여 'code' undefined 오류 방지
+    // 🚨 오류 수정: selectedColorData를 찾지 못하면 GROUT_COLORS[0]을 기본값으로 설정
     const selectedColorData = GROUT_COLORS.find(c => c.id === selectedColorId) || GROUT_COLORS[0];
 
     // 타일 본체 색상은 기본적으로 흰색으로 고정 (이미지 없을 경우)
@@ -348,7 +348,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                 <Palette className="h-4 w-4 text-indigo-600" /> 2-1. 줄눈 색상 미리보기 및 선택
             </h3>
             
-            {/* 🚨🚨 줄눈 시뮬레이션 영역 - 테두리 및 패딩 제거 (요청 사항 반영) 🚨🚨 */}
+            {/* 🚨🚨 줄눈 시뮬레이션 영역 - 테두리 및 패딩 제거 🚨🚨 */}
             <div className={`transition-all duration-300`} style={simulationBackgroundStyle}>
                 
                 {/* ⭐️ 시뮬레이션 컨테이너: 테두리 및 max-h 제거, 부모에 꽉 차게 조정 ⭐️ */}
@@ -1438,27 +1438,7 @@ export default function App() {
             
             {/* ★★★ 캡처 전용 견적서 양식 ★★★ */}
             <div className="p-5 text-gray-800 bg-white overflow-y-auto max-h-[70vh]"> 
-              <div ref={quoteRef} id="quote-content" className="rounded-lg p-5 space-y-3 mx-auto relative" style={{ width: '320px' }}>
-                
-                {/* ⭐️⭐️⭐️ 워터마크 레이어 추가 (무단 사용 방지) ⭐️⭐️⭐️ */}
-                <div 
-                    style={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%) rotate(-30deg)',
-                        opacity: 0.15, // 불투명도 조절
-                        pointerEvents: 'none', // 클릭 이벤트 무시
-                        color: '#1e3a8a', // Indigo-900 (헤더 색상과 맞춤)
-                        fontSize: '24px',
-                        fontWeight: '900',
-                        zIndex: 100,
-                        whiteSpace: 'nowrap',
-                    }}
-                >
-                    줄눈의미학 | {PHONE_NUMBER}
-                </div>
-                {/* ⭐️⭐️⭐️ 워터마크 레이어 끝 ⭐️⭐️⭐️ */}
+              <div ref={quoteRef} id="quote-content" className="rounded-lg p-5 space-y-3 mx-auto" style={{ width: '320px' }}>
                 
                 {/* 헤더 및 로고 영역 (영어 문구 제거) */}
                 <div className="flex flex-col items-center border-b border-gray-300 pb-3 mb-3">
