@@ -20,7 +20,7 @@ const GROUT_COLORS = [
   { id: 'sand_brown', code: '#887965', label: '미학 브라운1', isDark: true },
   { id: 'vintage_brown', code: '#96877e', label: '미학 브라운2', isDark: true },
   { id: 'oat_brown', code: '#b0a9a4', label: '미학 브라운3', isDark: false },
-  { id: 'burnt_brown', code: '#827e7b', label: '미학 브라운4', isDark: true },
+  { id: 'burnt_brown', code: '#8b8784', label: '미학 브라운4', isDark: true },
   { id: 'silver_gray', code: '#afb0aa', label: '미학 그레이1', isDark: false },
   { id: 'medium_gray', code: '#848685', label: '미학 그레이2', isDark: true },
   { id: 'dark_gray', code: '#565556', label: '미학 그레이3', isDark: true },
