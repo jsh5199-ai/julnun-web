@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
-import html2canvas from 'html2canvas';
+import html2canvas from 'html2canvas'; 
 import {
   Calculator, Home, Bath, DoorOpen, Utensils, LayoutGrid,
   CheckCircle2, Info, RefreshCw, Phone, Sparkles, Hammer, Sofa, Palette, Crown, Gift, Eraser, Star, X, ChevronDown, HelpCircle, Zap, TrendingUp, Clock, Image as ImageIcon
@@ -70,14 +70,14 @@ const GlobalStyles = () => (
     }
     .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom); }
     
-    /* ⭐️ [수정] 워터마크 스타일 - 크기 160px로 2배 확대, 투명도 1로 원본 사용 ⭐️ */
+    /* ⭐️ [최종 수정] 워터마크 스타일: 크기 160px, 투명도 1, 반복 적용 ⭐️ */
     .watermark-layer {
         position: absolute;
         inset: 0;
         z-index: 5;
         opacity: 1; /* 투명도 제거 (원본 그대로) */
-        background-image: url('/images/logo.png'); /* 파일 경로 기반 */
-        background-size: 160px; /* 원본 80px에서 2배 확대 */
+        background-image: url('/images/logo.png'); /* public/images/logo.png 경로 확인 필요 */
+        background-size: 160px; /* 2배 확대 */
         background-repeat: repeat; /* 반복하여 양을 늘림 */
         background-position: center;
     }
@@ -357,7 +357,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                         }}
                     ></div>
                     
-                    {/* ⭐️ 2. 워터마크 레이어 (수정된 CSS 클래스 적용) ⭐️ */}
+                    {/* ⭐️ 2. 워터마크 레이어 (CSS 클래스 적용) ⭐️ */}
                     <div className="watermark-layer"></div>
 
                     {/* ⭐️ 3. 줄눈 십자가 (HTML Div로 직접 그림) - z-index 10 (최상단) ⭐️ */}
@@ -398,7 +398,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
             
             {/* 타일 이미지 업로드 버튼 */}
             <div className='mb-4'>
-                <input type="file" id="tileFileInput" accept="image/*" onChange={onTileImageUpload} style={{ display: 'none' }} />
+                <input type="file" id="tileFileInput" accept="image/*" onChange={handleTileImageUpload} style={{ display: 'none' }} />
                 <label htmlFor="tileFileInput" className="w-full py-2.5 px-4 bg-indigo-600 text-white rounded-lg font-bold text-sm hover:bg-indigo-700 transition shadow-md cursor-pointer flex items-center justify-center gap-2">
                     <ImageIcon size={16} /> 내 타일 사진 첨부하여 미리보기
                 </label>
@@ -1007,7 +1007,7 @@ export default function App() {
             >
               <RefreshCw size={12} className="inline mr-1" /> 초기화
             </button>
-          </div>
+        </b>
         </div>
       </header>
 
@@ -1068,7 +1068,7 @@ export default function App() {
                 <div className="text-base font-semibold">{type.label}</div>
               </button>
             ))}
-          </div>
+        </b>
         </section>
 
         {/* ⭐️ --- 2. 줄눈소재 안내 (소재/옵션 선택 및 색상 팔레트 포함) --- ⭐️ */}
@@ -1330,17 +1330,20 @@ export default function App() {
             
             {/* ★★★ 캡처 전용 견적서 양식 ★★★ */}
             <div className="p-5 text-gray-800 bg-white overflow-y-auto max-h-[70vh]"> 
-              <div ref={quoteRef} id="quote-content" className="rounded-lg p-5 space-y-3 mx-auto" style={{ width: '320px' }}>
-                
-                {/* 헤더 및 로고 영역 (영어 문구 제거) */}
-                <div className="flex flex-col items-center border-b border-gray-300 pb-3 mb-3">
+              <div ref={quoteRef} id="quote-content" className="rounded-lg p-5 space-y-3 mx-auto relative" style={{ width: '320px' }}>
+                
+                 {/* ⭐️ [수정된 부분] 견적서 캡처 영역에 워터마크 레이어 추가 ⭐️ */}
+                 <div className="watermark-layer" style={{ opacity: 0.15, backgroundSize: '160px', zIndex: 1 }}></div>
+                
+                {/* 헤더 및 로고 영역 (z-index 10으로 콘텐츠를 워터마크 위로 올림) */}
+                <div className="flex flex-col items-center border-b border-gray-300 pb-3 mb-3 relative z-10">
                     <h1 className='text-xl font-extrabold text-indigo-800 text-center'>줄눈의미학 예상 견적서</h1>
                 </div>
 
-                {/* 기본 정보 테이블 (현장 유형 제거됨) */}
+                {/* 기본 정보 테이블 (z-index 10으로 콘텐츠를 워터마크 위로 올림) */}
                 
-                {/* ⭐️ [유지] 시공 및 할인 내역 - 테이블 구조로 변경 ⭐️ */}
-                <div className="space-y-2 text-sm border-b border-gray-200 pb-3">
+                {/* ⭐️ [유지] 시공 및 할인 내역 - 테이블 구조로 변경 (z-index 10) ⭐️ */}
+                <div className="space-y-2 text-sm border-b border-gray-200 pb-3 relative z-10">
                     {/* 현장 유형 제거됨. 이 부분은 이제 패키지/최소비용 정보 아래에만 표시됩니다. */}
                     
                     {/* ⭐️ 최소 출장비 적용 문구 추가 ⭐️ */}
@@ -1427,7 +1430,7 @@ export default function App() {
 
                 
                 {/* 총 합계 영역 (유지) */}
-                <div className="pt-3 text-center border-t border-gray-200"> 
+                <div className="pt-3 text-center border-t border-gray-200 relative z-10"> 
                     
                     <div className="flex justify-between items-end"> 
                         <span className='text-base font-semibold text-gray-800'>최종 결제 금액</span>
@@ -1439,7 +1442,7 @@ export default function App() {
                 </div>
 
                 {/* 안내 사항 영역 (문구 디자인 통일) */}
-                <div className="mt-3 pt-3 border-t border-gray-200 space-y-2">
+                <div className="mt-3 pt-3 border-t border-gray-200 space-y-2 relative z-10">
                     <div className='w-full py-1.5 px-2 text-center bg-gray-100 text-indigo-600 rounded-md font-bold text-[11px] shadow-sm flex items-center justify-center'>
                         바닥 30x30cm, 벽면 30x60cm 크기 기준
                     </div>
