@@ -118,7 +118,14 @@ const SERVICE_AREAS = [...BATHROOM_AREAS, ...OTHER_AREAS];
 const SILICON_AREAS = [
   // 🚨 [수정] 단가 문구 제거
   { id: 'silicon_bathtub', label: '욕조 테두리 교체', basePrice: 80000, icon: Eraser, unit: '개소', desc: '' },
-  { id: 'silicon_sink', label: '세면대+젠다이 교체', basePrice: 30000, icon: Eraser, unit: '개소', desc: '오염된 실리콘 제거 후 재시공' },
+  { 
+    id: 'silicon_sink', 
+    label: '세면대+젠다이 교체', 
+    basePrice: 30000, 
+    icon: Eraser, 
+    unit: '개소', 
+    desc: '' // 요청에 따라 문구 삭제
+  },
   // 🚨 [수정] 단가 문구 제거
   { id: 'silicon_living_baseboard', label: '거실 걸레받이 실리콘', basePrice: 400000, icon: Sofa, unit: '구역', desc: '' },
 ];
@@ -653,7 +660,7 @@ export default function App() {
     let labelText = null;
     let isPackageActive = false; 
     let isFreeEntrance = false;
-    let totalAreaCount = Object.values(quantities).filter(v => v > 0).length;
+    let totalAreaCount = Object.values(quantities).some(v => v > 0) ? Object.keys(quantities).filter(k => quantities[k] > 0).length : 0;
     
     let packageAreas = []; 
     
@@ -719,7 +726,8 @@ export default function App() {
           let remainingCalculatedPrice = remainingOriginalTotal;
           let remainingDiscount = 0;
           
-          if (area.id === 'silicon_bathtub' && initialCount >= 1 && totalAreaCount >= 3) {
+          // 실리콘 항목 할인 로직 (총 시공 영역 3개 이상일 때)
+          if (area.id === 'silicon_bathtub' && totalAreaCount >= 3) {
               const nonPackageOriginalPrice = 80000 * count; 
               const fixedPriceForRemaining = 50000 * count; 
               if (count > 0) {
@@ -727,7 +735,7 @@ export default function App() {
                   remainingCalculatedPrice = fixedPriceForRemaining;
               }
               if (initialCount === count) itemOriginalTotal = 80000 * initialCount;
-          } else if (area.id === 'silicon_living_baseboard' && initialCount >= 1 && totalAreaCount >= 3) {
+          } else if (area.id === 'silicon_living_baseboard' && totalAreaCount >= 3) {
               const nonPackageOriginalPrice = 400000 * count; 
               const fixedPriceForRemaining = 350000 * count; 
               if (count > 0) {
@@ -735,6 +743,8 @@ export default function App() {
                   remainingCalculatedPrice = fixedPriceForRemaining;
               }
               if (initialCount === count) itemOriginalTotal = 400000 * initialCount;
+          } else if (area.id === 'silicon_sink') { // 세면대+젠다이 교체는 단가 30,000원으로 고정
+              remainingCalculatedPrice = 30000 * count;
           }
           finalCalculatedPrice = remainingCalculatedPrice; 
           finalDiscount = remainingDiscount; 
@@ -756,7 +766,7 @@ export default function App() {
           isFreeService: isFreeServiceItem, 
           isPackageItem: packageCount > 0 || (area.id === 'silicon_bathtub' && totalAreaCount >= 3) || (area.id === 'silicon_living_baseboard' && totalAreaCount >= 3), 
           isDiscount: false, 
-          materialLabel: areaMatId === 'poly' ? 'Poly' : 'Epoxy'
+          materialLabel: ['silicon_bathtub', 'silicon_sink', 'silicon_living_baseboard'].includes(area.id) ? 'Silicon' : (areaMatId === 'poly' ? 'Poly' : 'Epoxy')
       });
     });
     
@@ -870,6 +880,15 @@ export default function App() {
             <div className='mt-2 pt-2 border-t border-gray-100'>
                 <div className="text-xs font-bold text-green-700 bg-green-100 p-1.5 rounded-md text-center">
                     현관은 폴리아스파틱 (Poly) 고정입니다.
+                </div>
+            </div>
+        );
+    }
+    if (['silicon_bathtub', 'silicon_sink', 'silicon_living_baseboard'].includes(areaId)) {
+        return (
+            <div className='mt-2 pt-2 border-t border-gray-100'>
+                <div className="text-xs font-bold text-green-700 bg-green-100 p-1.5 rounded-md text-center">
+                    실리콘 시공은 별도 소재입니다.
                 </div>
             </div>
         );
