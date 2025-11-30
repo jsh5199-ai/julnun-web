@@ -8,7 +8,7 @@ import {
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
 // =================================================================
-// ⭐️ 상수 정의 및 기본 이미지 경로 (GROUT_COLORS 업데이트됨)
+// ⭐️ 상수 정의 및 기본 이미지 경로
 // =================================================================
 const MIN_FEE = 200000;
 const KAKAO_CHAT_URL = 'http://pf.kakao.com/_jAxnYn/chat';
@@ -382,7 +382,6 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                 </div>
             </div>
             {/* 🚨🚨 줄눈 시뮬레이션 영역 끝 🚨🚨 */}
-            
 
             {/* ⭐️ [수정] 선택 색상 이름 표시 (유지) ⭐️ */}
             <div className={`p-3 rounded-lg shadow-md mb-3 border border-gray-200`} style={{ backgroundColor: groutPattern }}>
@@ -417,7 +416,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                         {selectedColorId === color.id && (
                             <CheckCircle2 size={24} className={`absolute ${color.isDark ? 'text-amber-400' : 'text-indigo-700'} drop-shadow-md`} />
                         )}
-                        <span className={`absolute bottom-0 text-[8px] font-bold py-[1px] px-1 rounded-t-sm ${color.isDark ? 'bg-white/80 text-gray-900' : 'bg-gray-900/80 text-white'}`}>{color.label.split(' ')[0]}</span>
+                        <span className={`absolute bottom-0 text-[8px] font-bold py-[1px] px-1 rounded-t-sm ${color.isDark ? 'bg-white/80 text-gray-900' : 'bg-gray-900/80 text-white'}`}>{color.label}</span>
                     </button>
                 ))}
             </div>
@@ -685,7 +684,7 @@ export default function App() {
           if ((tempEpoxySelections[id] || 0) !== requiredQty) { 
             isMatch = false;
             break;
-        }
+          }
         }
         if (!isMatch) continue;
 
@@ -1541,13 +1540,8 @@ export default function App() {
                 </div>
 
                 
-                {/* 총 합계 영역 (총 할인액 추가) */}
+                {/* 총 합계 영역 (유지) */}
                 <div className="pt-3 text-center border-t border-gray-200"> 
-                    
-                    <div className="flex justify-between items-end mb-1 text-sm">
-                        <span className='font-semibold text-gray-600'>총 할인 혜택</span>
-                        <span className='font-extrabold text-red-600'><TrendingUp size={16} className='inline mr-1 rotate-180'/> {calculation.discountAmount.toLocaleString()}원</span>
-                    </div>
                     
                     <div className="flex justify-between items-end"> 
                         <span className='text-base font-semibold text-gray-800'>최종 결제 금액</span>
