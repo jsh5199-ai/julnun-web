@@ -375,9 +375,15 @@ const Accordion = ({ question, answer }) => {
     );
 };
 
-// ⭐️ [신규 컴포넌트] 색상 선택 팔레트 렌더링 ⭐️
+// ⭐️ [확장된 컴포넌트] 색상 선택 팔레트 및 시뮬레이션 렌더링 ⭐️
 const ColorPalette = ({ selectedColorId, onSelect }) => {
     const selectedColorData = GROUT_COLORS.find(c => c.id === selectedColorId);
+
+    // 타일 본체 색상은 흰색으로 고정
+    const TILE_COLOR = '#ffffff'; 
+    // 줄눈 틈새 너비 (2px)와 타일 너비 (50px)를 설정하여 패턴 생성
+    const TILE_SIZE = 50; // 타일 + 줄눈 총 크기
+    const GROUT_WIDTH = 2; // 줄눈 선 너비 (2px)
 
     return (
         <div className='mt-5 pt-3 border-t border-gray-100 animate-fade-in'>
@@ -385,10 +391,48 @@ const ColorPalette = ({ selectedColorId, onSelect }) => {
                 <Palette className="h-4 w-4 text-indigo-600" /> 2-1. 줄눈 색상 미리보기 및 선택
             </h3>
             
-            {/* 1. 선택된 색상 표시 */}
-            <div className={`p-3 rounded-lg shadow-md mb-3`} style={{ backgroundColor: selectedColorData.code }}>
+            {/* 🚨🚨 줄눈 시뮬레이션 영역 (CSS 패턴으로 줄눈 선만 색상 변경) 🚨🚨 */}
+            <div className={`p-4 rounded-lg shadow-lg mb-4 border border-gray-300 transition-all duration-300`} style={{ backgroundColor: TILE_COLOR }}>
+                <h4 className="text-sm font-semibold text-gray-700 mb-2">선택 색상 시공 미리보기 (흰색 타일 기준)</h4>
+                
+                {/* ⭐️ 시뮬레이션 컨테이너: 타일 본체(흰색) 위에 줄눈선(선택 색상)을 덮습니다. ⭐️ */}
+                <div className="w-full aspect-square max-h-40 mx-auto overflow-hidden relative border-2 border-gray-300 rounded-md">
+                    
+                    {/* 타일 베이스 (흰색으로 고정) */}
+                    <div className="absolute inset-0 bg-white"></div>
+                    
+                    {/* ⭐️ 줄눈 선 시뮬레이션 레이어 ⭐️ */}
+                    <div 
+                        className="absolute inset-0 opacity-100 transition-colors duration-300"
+                        style={{
+                            // 배경색은 타일 본체색 (이후 그라디언트 패턴을 위해 설정)
+                            backgroundColor: TILE_COLOR, 
+                            backgroundImage: `
+                                /* 가로 줄눈 선 패턴 */
+                                repeating-linear-gradient(to right, ${selectedColorData.code} 0px, ${selectedColorData.code} ${GROUT_WIDTH}px, ${TILE_COLOR} ${GROUT_WIDTH}px, ${TILE_COLOR} ${TILE_SIZE}px),
+                                /* 세로 줄눈 선 패턴 */
+                                repeating-linear-gradient(to bottom, ${selectedColorData.code} 0px, ${selectedColorData.code} ${GROUT_WIDTH}px, ${TILE_COLOR} ${GROUT_WIDTH}px, ${TILE_COLOR} ${TILE_SIZE}px)
+                            `,
+                            backgroundSize: `${TILE_SIZE}px ${TILE_SIZE}px`,
+                            backgroundBlendMode: 'multiply' // 줄눈이 겹치는 부분의 색상을 부드럽게 처리
+                        }}
+                    >
+                        {/* 텍스트는 줄눈 영역 위에 띄워서 대비 확인용 */}
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
+                             <span className={`text-xs font-bold px-2 py-1 rounded-full shadow-sm ${selectedColorData.isDark ? 'bg-white/90 text-gray-900' : 'bg-gray-900/90 text-white'}`}>
+                                {selectedColorData.label} 적용
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {/* 🚨🚨 줄눈 시뮬레이션 영역 끝 🚨🚨 */}
+
+
+            {/* 1. 선택된 색상 이름 표시 */}
+            <div className={`p-3 rounded-lg shadow-md mb-3 border border-gray-200`} style={{ backgroundColor: selectedColorData.code }}>
                 <p className={`text-sm font-bold ${selectedColorData.isDark ? 'text-white' : 'text-gray-900'} flex items-center justify-between`}>
-                    <span className='truncate'>{selectedColorData.label} ({selectedColorData.code})</span>
+                    <span className='truncate'>현재 선택 색상: {selectedColorData.label} ({selectedColorData.code})</span>
                     <CheckCircle2 size={16} className={`ml-2 flex-shrink-0 ${selectedColorData.isDark ? 'text-amber-400' : 'text-indigo-700'}`}/>
                 </p>
             </div>
@@ -999,11 +1043,9 @@ export default function GroutEstimatorApp() {
                 }}
                 // ⭐️ [유지] 배경색 강조 ⭐️
                 className={`flex-1 py-1 text-xs font-semibold rounded-md transition-all active:scale-95 shadow-sm 
-                  ${isQuantitySelected
-                    ? (currentMat === mat.id 
-                      ? 'bg-indigo-700 text-white shadow-lg' // 선택 시 배경색 강조
-                      : 'bg-indigo-100 text-gray-700 hover:bg-indigo-200') // 비선택 시 배경색 및 호버 효과
-                    : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                  ${currentMat === mat.id 
+                    ? 'bg-indigo-700 text-white shadow-lg' // 선택 시 배경색 강조
+                    : 'bg-indigo-100 text-gray-700 hover:bg-indigo-200' // 비선택 시 배경색 및 호버 효과
                   }`}
               >
                 {mat.label.split('(')[0].trim()}
@@ -1228,7 +1270,7 @@ export default function GroutEstimatorApp() {
             ))}
           </div>
           
-          {/* ⭐️ [신규 추가] 색상 선택 팔레트 (독립 섹션) ⭐️ */}
+          {/* ⭐️ [신규 추가] 색상 선택 팔레트 (시뮬레이션 포함) ⭐️ */}
           <ColorPalette selectedColorId={selectedGroutColor} onSelect={setSelectedGroutColor} />
 
           {/* --- 재료 상세 비교 버튼 영역 (유지) --- */}
