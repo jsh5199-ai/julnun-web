@@ -59,7 +59,7 @@ const rgbToHex = (r, g, b) => {
 
 
 // =================================================================
-// [스타일] 애니메이션 정의 (유지)
+// [스타일] 애니메이션 정의 (유지 및 Tip용 추가)
 // =================================================================
 const GlobalStyles = () => (
     <style>{`
@@ -232,7 +232,7 @@ const getPackageAreaIds = (pkg) => [
 ];
 
 // =================================================================
-// [컴포넌트] (패키지 토스트, 모달, 아코디언 등 복구)
+// [컴포넌트] (패키지 토스트, 모달, 아코디언 등 유지)
 // =================================================================
 
 const PackageToast = ({ isVisible, onClose, label }) => {
@@ -311,7 +311,6 @@ const MaterialDetailModal = ({ onClose }) => (
     </div>
 );
 
-// ⭐️ [복구] Accordion 컴포넌트 정의 ⭐️
 const Accordion = ({ question, answer }) => {
     const [isOpen, setIsOpen] = useState(false);
 
@@ -334,20 +333,27 @@ const Accordion = ({ question, answer }) => {
 };
 
 
-// ⭐️ [복구] ColorPalette 컴포넌트 (단일 선택으로 복원) ⭐️
-const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageURL }) => {
-    const selectedColorData = GROUT_COLORS.find(c => c.id === selectedColorId) || GROUT_COLORS[0];
+// ⭐️ [신규/수정] ColorPalette 컴포넌트 (밝기 조절 기능 포함) ⭐️
+const ColorPalette = React.memo(({ selectedGroutColor, handleColorSelect, finalSelectedColorData, onTileImageUpload, tileImageURL, brightnessLevel, setBrightnessLevel }) => {
     const GROUT_LINE_WIDTH = 12;
 
-    // 타일 배경 URL 결정 (이미지가 없으면 기본 이미지)
     const effectiveTileImageURL = (tileImageURL && tileImageURL !== DEFAULT_TILE_IMAGE_URL)
         ? tileImageURL
         : DEFAULT_TILE_IMAGE_URL;
 
+    // 현재 선택된 기본 색상 데이터
+    const baseColorData = GROUT_COLORS.find(c => c.id === selectedGroutColor) || GROUT_COLORS[0];
+
+    // 밝기 레벨 텍스트 계산
+    const displayLevel = Math.abs(brightnessLevel - 50) * 2; // 0 (50) -> 0, 100 (100) -> 100
+    const displayTone = brightnessLevel > 50 ? '밝게 톤업' : brightnessLevel < 50 ? '어둡게 톤다운' : '원본 색상';
+    const displaySign = brightnessLevel === 50 ? '' : brightnessLevel > 50 ? '+' : '-';
+    
+
     return (
         <div className='mt-5 pt-3 border-t border-gray-100 animate-fade-in'>
             <h3 className="text-base font-extrabold flex items-center gap-2 mb-3 text-gray-800">
-                <Palette className="h-4 w-4 text-indigo-600" /> 2-1. 줄눈 색상 미리보기 및 선택
+                <Palette className="h-4 w-4 text-indigo-600" /> 2-1. 줄눈 색상 선택 및 밝기 조절
             </h3>
 
             {/* 시뮬레이션 컨테이너 */}
@@ -379,22 +385,25 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                     >
                     </div>
 
-                    {/* ⭐️ 3. 줄눈 십자가 ⭐️ */}
+                    {/* ⭐️ 3. 줄눈 십자가 (밝기 조절 색상 적용) - z-index 10 (최상단) ⭐️ */}
+
+                    {/* 세로 줄 */}
                     <div
                         className="absolute top-0 bottom-0 left-1/2"
                         style={{
                             width: `${GROUT_LINE_WIDTH}px`,
-                            backgroundColor: selectedColorData.code,
+                            backgroundColor: finalSelectedColorData.code,
                             transform: 'translateX(-50%)',
                             zIndex: 10,
                         }}
                     ></div>
 
+                    {/* 가로 줄 */}
                     <div
                         className="absolute left-0 right-0 top-1/2"
                         style={{
                             height: `${GROUT_LINE_WIDTH}px`,
-                            backgroundColor: selectedColorData.code,
+                            backgroundColor: finalSelectedColorData.code,
                             transform: 'translateY(-50%)',
                             zIndex: 10,
                         }}
@@ -402,19 +411,95 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                 </div>
             </div>
 
-            {/* 선택 색상 이름 표시 */}
-            <div className={`p-3 rounded-lg shadow-md mb-3 border border-gray-200`} style={{ backgroundColor: selectedColorData.code }}>
-                <p className={`text-sm font-bold ${selectedColorData.isDark ? 'text-white' : 'text-gray-900'} flex items-center justify-between`}>
-                    <span className='truncate'>현재 선택 색상: {selectedColorData.label}</span>
-                    <CheckCircle2 size={16} className={`ml-2 flex-shrink-0 ${selectedColorData.isDark ? 'text-amber-400' : 'text-indigo-700'}`}/>
+            {/* 최종 색상 이름 표시 */}
+            <div className={`p-3 rounded-lg shadow-md mb-3 border border-gray-200`} style={{ backgroundColor: finalSelectedColorData.code }}>
+                <p className={`text-sm font-bold ${finalSelectedColorData.isDark ? 'text-white' : 'text-gray-900'} flex items-center justify-between`}>
+                    <span className='truncate'>선택 색상: {baseColorData.label} </span>
+                    <span className='text-xs font-normal ml-2'>밝기 레벨: {displaySign}{displayLevel}%</span>
+                    <CheckCircle2 size={16} className={`ml-2 flex-shrink-0 ${finalSelectedColorData.isDark ? 'text-amber-400' : 'text-indigo-700'}`}/>
                 </p>
             </div>
-            
-            {/* 팁 문구 (초기 디자인 복구) */}
-            <p className='text-xs text-indigo-600 mt-4 text-center font-semibold'>
-                팁: 색상은 타일톤보다 한톤 어둡게 시공할 경우 관리가 쉽고, 청소주기가 길어집니다.
-            </p>
-            
+
+            {/* 단일 색상 선택 버튼 그리드 */}
+            <div className='grid grid-cols-5 sm:grid-cols-5 gap-3'>
+                {GROUT_COLORS.map((color) => (
+                    <button
+                        key={color.id}
+                        onClick={() => handleColorSelect(color.id)} 
+                        className={`aspect-square rounded-lg transition-all duration-200 shadow-md flex items-center justify-center p-1 relative hover:scale-[1.02] active:scale-[0.98] ${
+                            selectedGroutColor === color.id
+                                ? 'ring-4 ring-offset-2 ring-indigo-500' 
+                                : 'hover:shadow-lg'
+                        }`}
+                        style={{ backgroundColor: color.code }}
+                        title={color.label}
+                    >
+                        {selectedGroutColor === color.id && (
+                            <CheckCircle2 size={24} className={`absolute ${color.isDark ? 'text-amber-400' : 'text-indigo-700'} drop-shadow-md`} />
+                        )}
+                        <span className={`absolute bottom-0 text-[8px] font-bold py-[1px] px-1 rounded-t-sm ${color.isDark ? 'bg-white/80 text-gray-900' : 'bg-gray-900/80 text-white'}`}>{color.label}</span>
+                    </button>
+                ))}
+            </div>
+
+
+            {/* ⭐️ [업데이트] 밝기 조절 게이지 (슬라이더) - step=10 및 문구 유지 ⭐️ */}
+            <style>{`
+                /* 커스텀 슬라이더 스타일링 */
+                .brightness-slider::-webkit-slider-runnable-track {
+                    background: linear-gradient(to right, 
+                        ${DARK_MODIFIER_COLOR.code},
+                        ${baseColorData.code} 50%,
+                        ${BRIGHT_MODIFIER_COLOR.code}
+                    );
+                    border-radius: 4px;
+                    height: 8px;
+                }
+                .brightness-slider::-moz-range-track {
+                    background: linear-gradient(to right, 
+                        ${DARK_MODIFIER_COLOR.code},
+                        ${baseColorData.code} 50%,
+                        ${BRIGHT_MODIFIER_COLOR.code}
+                    );
+                    border-radius: 4px;
+                    height: 8px;
+                }
+                .brightness-slider::-webkit-slider-thumb {
+                    -webkit-appearance: none;
+                    appearance: none;
+                    width: 20px;
+                    height: 20px;
+                    background: ${finalSelectedColorData.code};
+                    border: 3px solid ${finalSelectedColorData.isDark ? BRIGHT_MODIFIER_COLOR.code : DARK_MODIFIER_COLOR.code};
+                    border-radius: 50%;
+                    cursor: pointer;
+                    margin-top: -6px; /* 트랙 중앙에 오도록 조정 */
+                    box-shadow: 0 0 5px rgba(0,0,0,0.3);
+                }
+            `}</style>
+            <div className='mt-5 pt-3 border-t border-gray-100'>
+                <h4 className="text-sm font-extrabold flex items-center gap-2 mb-3 text-gray-700">
+                    <TrendingUp className="h-4 w-4 text-indigo-600" /> 밝기 조절 (톤 변경)
+                </h4>
+                <div className='flex items-center justify-between gap-3'>
+                    <span className='text-sm font-bold text-gray-600 w-12 text-left'>어둡게</span>
+                    
+                    <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        step="10" 
+                        value={brightnessLevel}
+                        onChange={(e) => setBrightnessLevel(parseInt(e.target.value, 10))}
+                        className="flex-1 h-2 rounded-lg appearance-none cursor-pointer brightness-slider"
+                    />
+
+                    <span className='text-sm font-bold text-gray-600 w-12 text-right'>밝게</span>
+                </div>
+                <p className='text-xs text-gray-500 mt-2 text-center'>
+                    * 현재 밝기 레벨: <span className='font-bold text-indigo-600'>{displaySign}{displayLevel}%</span> ({displayTone}) 적용 중
+                </p>
+            </div>
 
             {/* 타일 이미지 업로드 버튼 */}
             <div className='mb-4 mt-5'>
@@ -424,44 +509,31 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                 </label>
             </div>
 
-            {/* 색상 선택 버튼 그리드 */}
-            <div className='grid grid-cols-5 sm:grid-cols-5 gap-3'>
-                {GROUT_COLORS.map((color) => (
-                    <button
-                        key={color.id}
-                        onClick={() => onSelect(color.id)}
-                        className={`aspect-square rounded-lg transition-all duration-200 shadow-md flex items-center justify-center p-1 relative hover:scale-[1.02] active:scale-[0.98] ${
-                            selectedColorId === color.id
-                                ? 'ring-4 ring-offset-2 ring-indigo-500' // 선택 시 링 효과
-                                : 'hover:shadow-lg'
-                        }`}
-                        style={{ backgroundColor: color.code }}
-                        title={color.label}
-                    >
-                        {selectedColorId === color.id && (
-                            <CheckCircle2 size={24} className={`absolute ${color.isDark ? 'text-amber-400' : 'text-indigo-700'} drop-shadow-md`} />
-                        )}
-                        <span className={`absolute bottom-0 text-[8px] font-bold py-[1px] px-1 rounded-t-sm ${color.isDark ? 'bg-white/80 text-gray-900' : 'bg-gray-900/80 text-white'}`}>{color.label}</span>
-                    </button>
-                ))}
+            {/* ⭐️ [최종 업데이트] 줄눈 색상 선택 팁 문구 (강조 및 흐름 개선) ⭐️ */}
+            <div className='mt-4 p-3 bg-yellow-100 rounded-lg shadow-md border border-yellow-300 animate-attention'>
+                <p className='text-sm text-gray-800 text-center leading-snug font-semibold'>
+                    <Zap size={16} className='inline mr-1 text-yellow-600'/> 팁: 색상은 타일톤보다 한톤 어둡게 시공할 경우<br className="sm:hidden" /> 관리가 쉽고, 청소주기가 길어집니다.
+                </p>
             </div>
+            
             <p className='text-xs text-gray-500 mt-3 text-center'>
                 * 화면 해상도에 따라 실제 색상과 차이가 있을 수 있습니다.
             </p>
         </div>
     );
-};
+});
 
 
-// ⭐️ [App Main] - 최종 복구 버전 ⭐️
+// ⭐️ [App Main] - 기존 기능 및 로직 복원됨 ⭐️
 export default function App() {
     const [housingType, setHousingType] = useState('new');
     const [material, setMaterial] = useState('poly');
     const [polyOption, setPolyOption] = useState('pearl');
     const [epoxyOption, setEpoxyOption] = useState('kerapoxy');
     
-    // ⭐️ [복구] 단일 색상 선택 상태
+    // ⭐️ [유지] 색상 관련 상태
     const [selectedGroutColor, setSelectedGroutColor] = useState(GROUT_COLORS[0].id);
+    const [brightnessLevel, setBrightnessLevel] = useState(50);
     const [tileImageURL, setTileImageURL] = useState(DEFAULT_TILE_IMAGE_URL);
     
     // 수량 및 재료 상태 (유지)
@@ -483,9 +555,10 @@ export default function App() {
     const SOOMGO_REVIEW_URL = 'https://www.soomgo.com/profile/users/10755579?tab=review';
     const PHONE_NUMBER = '010-7734-6709';
 
-    // ⭐️ [복구] 단일 색상 선택 핸들러
+    // ⭐️ [유지] 색상 선택 핸들러: 색상 변경 시 밝기 초기화
     const handleColorSelect = useCallback((colorId) => {
         setSelectedGroutColor(colorId);
+        setBrightnessLevel(50); 
     }, []);
 
 
@@ -905,7 +978,54 @@ export default function App() {
     const currentVideo = YOUTUBE_VIDEOS.find(v => v.id === activeVideoId);
     const currentEmbedUrl = getEmbedUrl(currentVideo.id);
 
-    // ⭐️ [복구] MaterialSelectButtons 컴포넌트 ⭐️
+    // ⭐️ [유지] 밝기 조절에 따른 최종 색상 계산 로직 ⭐️
+    const calculateBrightnessAdjustedColor = useCallback((baseColorId, level) => {
+        const baseColor = GROUT_COLORS.find(c => c.id === baseColorId) || GROUT_COLORS[0];
+        const baseRgb = hexToRgb(baseColor.code);
+
+        // 50: 원본 색상
+        if (level === 50) return baseColor.code;
+
+        let modifierColor;
+        let baseRatio, modifierRatio;
+
+        if (level > 50) { // 밝게 (화이트로 톤업)
+            modifierColor = BRIGHT_MODIFIER_COLOR;
+            // 50% (원본) 에서 100% (화이트)까지 0% ~ 100% 비율 사용
+            modifierRatio = (level - 50) * 2; // 레벨 100일 때 100%
+            baseRatio = 100 - modifierRatio;
+        } else { // 어둡게 (119번/차콜로 톤다운)
+            modifierColor = DARK_MODIFIER_COLOR;
+            // 50% (원본) 에서 0% (119번)까지 0% ~ 100% 비율 사용
+            modifierRatio = (50 - level) * 2; // 레벨 0일 때 100%
+            baseRatio = 100 - modifierRatio;
+        }
+
+        const modifierRgb = hexToRgb(modifierColor.code);
+
+        const finalR = (baseRgb.r * baseRatio + modifierRgb.r * modifierRatio) / 100;
+        const finalG = (baseRgb.g * baseRatio + modifierRgb.g * modifierRatio) / 100;
+        const finalB = (baseRgb.b * baseRatio + modifierRgb.b * modifierRatio) / 100;
+
+        return rgbToHex(finalR, finalG, finalB);
+    }, []);
+
+    const finalBlendedColorCode = useMemo(() => calculateBrightnessAdjustedColor(selectedGroutColor, brightnessLevel), [selectedGroutColor, brightnessLevel, calculateBrightnessAdjustedColor]);
+
+    const finalSelectedColorData = useMemo(() => {
+        const code = finalBlendedColorCode;
+        if (!code) return GROUT_COLORS[0];
+        const { r, g, b } = hexToRgb(code);
+        const brightness = (r * 0.2126 + g * 0.7152 + b * 0.0722);
+        return {
+            id: 'adjusted',
+            code: code,
+            label: '밝기조절',
+            isDark: brightness < 128
+        };
+    }, [finalBlendedColorCode]);
+
+
     const MaterialSelectButtons = ({ areaId, currentMat, onChange, isQuantitySelected }) => {
         if (areaId === 'entrance') {
             return (
@@ -949,7 +1069,6 @@ export default function App() {
         );
     };
 
-    // ⭐️ [복구] renderAreaList 함수 ⭐️
     const renderAreaList = (areas) => (
         <div className="space-y-3">
             {areas.map((area) => {
@@ -1144,8 +1263,16 @@ export default function App() {
                         ))}
                     </div>
 
-                    {/* ⭐️ [복구] ColorPalette 컴포넌트 호출 - 가장 안정적인 초기 상태로 복원 ⭐️ */}
-                    <ColorPalette selectedColorId={selectedGroutColor} onSelect={setSelectedGroutColor} onTileImageUpload={handleTileImageUpload} tileImageURL={tileImageURL} />
+                    {/* ⭐️ [업데이트] 색상 선택 및 밝기 조절 팔레트 ⭐️ */}
+                    <ColorPalette
+                        selectedGroutColor={selectedGroutColor}
+                        handleColorSelect={handleColorSelect}
+                        finalSelectedColorData={finalSelectedColorData}
+                        onTileImageUpload={handleTileImageUpload}
+                        tileImageURL={tileImageURL}
+                        brightnessLevel={brightnessLevel}
+                        setBrightnessLevel={setBrightnessLevel}
+                    />
 
                     {/* --- 재료 상세 비교 버튼 영역 (유지) --- */}
                     <div className="mt-5 pt-3 border-t border-gray-100 flex justify-center">
