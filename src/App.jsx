@@ -8,28 +8,22 @@ import {
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
 // =================================================================
-// ⭐️ 상수 정의 및 기본 이미지 경로 (최종 업데이트된 GROUT_COLORS)
+// ⭐️ 상수 정의 및 기본 이미지 경로
 // =================================================================
 const MIN_FEE = 200000;
 const KAKAO_CHAT_URL = 'http://pf.kakao.com/_jAxnYn/chat';
 const DEFAULT_TILE_IMAGE_URL = '/default_tile.jpg'; 
 
 const GROUT_COLORS = [
-  { id: 'white', code: '#ffffff', label: '화이트', isDark: false },           // #ffffff
-  { id: 'light_beige', code: '#e2dfda', label: '103번', isDark: false }, // #e2dfda
-  { id: 'light_gray', code: '#ccccca', label: '110번', isDark: false },  // #ccccca
-  { id: 'silver_gray', code: '#afb0aa', label: '111번', isDark: false },  // #afb0aa
-  { id: 'medium_gray', code: '#848685', label: '112번', isDark: true }, // #848685
-  { id: 'dark_gray', code: '#797671', label: '113번', isDark: true },   // #797671
-  { id: 'black', code: '#49494b', label: '114번', isDark: true },        // #49494b
-  { id: 'charcoal', code: '#565556', label: '119번', isDark: true },         // #565556
-  { id: 'shine_silver', code: '#c2c2c2', label: '127번', isDark: false },  // #c2c2c2
-  { id: 'moca_beige', code: '#dbcbbd', label: '131번', isDark: false }, // #dbcbbd
-  { id: 'sand_brown', code: '#887965', label: '133번', isDark: true }, // #887965
-  { id: 'dark_brown', code: '#85786f', label: '134번', isDark: true }, // #85786f
-  { id: 'vintage_brown', code: '#96877e', label: '141번', isDark: true }, // #96877e
-  { id: 'oat_brown', code: '#b0a9a4', label: '180번', isDark: false }, // #b0a9a4
-  { id: 'burnt_brown', code: '#8b8784', label: '187번', isDark: true }, // #8b8784
+  { id: 'white', code: '#ffffff', label: '화이트', isDark: false },
+  { id: 'moca_beige', code: '#dbcbbd', label: '미학 베이지', isDark: false },
+  { id: 'sand_brown', code: '#887965', label: '미학 브라운1', isDark: true },
+  { id: 'vintage_brown', code: '#96877e', label: '미학 브라운2', isDark: true },
+  { id: 'oat_brown', code: '#b0a9a4', label: '미학 브라운3', isDark: false },
+  { id: 'burnt_brown', code: '#8b8784', label: '미학 브라운4', isDark: true },
+  { id: 'silver_gray', code: '#afb0aa', label: '미학 그레이1', isDark: false },
+  { id: 'medium_gray', code: '#848685', label: '미학 그레이2', isDark: true },
+  { id: 'dark_gray', code: '#565556', label: '미학 그레이3', isDark: true },
 ];
 
 
@@ -311,19 +305,21 @@ const Accordion = ({ question, answer }) => {
 
 // ⭐️ [확장된 컴포넌트] 색상 선택 팔레트 및 시뮬레이션 렌더링 ⭐️
 const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageURL }) => {
-    
+    // 🚨 오류 수정: selectedColorData를 찾지 못하면 GROUT_COLORS[0]을 기본값으로 설정
     const selectedColorData = GROUT_COLORS.find(c => c.id === selectedColorId) || GROUT_COLORS[0];
 
     // 타일 본체 색상은 기본적으로 흰색으로 고정 (이미지 없을 경우)
-    // 🚨 [시뮬레이션 개선] 타일 본체 색상을 미묘한 회색으로 설정하여 흰색 줄눈과의 대비를 확보
-    const TILE_COLOR = '#f7f7f7';  
+    const TILE_COLOR = '#ffffff'; 
     
-    const GROUT_LINE_WIDTH = 12; 
+    const GROUT_LINE_WIDTH = 12; // 줄눈 선 너비 (가운데 십자 모양의 굵기)
     const lineHalf = GROUT_LINE_WIDTH / 2;
 
     const groutPattern = selectedColorData.code;
+    const tilePattern = TILE_COLOR;
     
-    // 1. 가로줄 (to bottom)
+    // 💡 [최종 수정] 음영 제거, 순수한 단색 채우기로 변경 (교차점 조화롭게 연결) 💡
+    
+    // 1. 가로줄 (to bottom) - 순수 단색 적용
     const horizontalGradient = `linear-gradient(to bottom, 
                                         transparent 0%, 
                                         transparent calc(50% - ${lineHalf}px), 
@@ -332,7 +328,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                                         transparent calc(50% + ${lineHalf}px), 
                                         transparent 100%)`;
 
-    // 2. 세로줄 (to right)
+    // 2. 세로줄 (to right) - 순수 단색 적용
     const verticalGradient = `linear-gradient(to right, 
                                         transparent 0%, 
                                         transparent calc(50% - ${lineHalf}px), 
@@ -344,7 +340,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
     // 시뮬레이션 배경 스타일
     const simulationBackgroundStyle = tileImageURL 
         ? { backgroundImage: `url(${tileImageURL})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-        : { backgroundColor: TILE_COLOR }; // 🚨 [개선] 기본 타일 색상을 흰색(#ffffff) 대신 미세한 회색으로 설정
+        : { backgroundColor: TILE_COLOR };
 
     return (
         <div className='mt-5 pt-3 border-t border-gray-100 animate-fade-in'>
@@ -352,37 +348,34 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                 <Palette className="h-4 w-4 text-indigo-600" /> 2-1. 줄눈 색상 미리보기 및 선택
             </h3>
             
-            {/* 🚨🚨 줄눈 시뮬레이션 영역 - 타일 베이스 색상 개선 🚨🚨 */}
+            {/* 🚨🚨 줄눈 시뮬레이션 영역 - 테두리 및 패딩 제거 🚨🚨 */}
             <div className={`transition-all duration-300`} style={simulationBackgroundStyle}>
                 
+                {/* ⭐️ 시뮬레이션 컨테이너: 테두리 및 max-h 제거, 부모에 꽉 차게 조정 ⭐️ */}
                 <div 
-                    className="w-full aspect-video mx-auto overflow-hidden relative" 
+                    className="w-full aspect-video mx-auto overflow-hidden relative" // aspect-video로 가로 세로 비율 유지
                 >
                     
-                    {/* 타일 베이스 (이미지 또는 TILE_COLOR) */}
+                    {/* 타일 베이스 */}
                     <div className="absolute inset-0" style={{ backgroundImage: simulationBackgroundStyle.backgroundImage, backgroundSize: simulationBackgroundStyle.backgroundSize, backgroundPosition: simulationBackgroundStyle.backgroundPosition }}></div>
                     
-                    {/* ⭐️ 줄눈 선 시뮬레이션 레이어 ⭐️ */}
+                    {/* ⭐️ 줄눈 선 시뮬레이션 레이어 (가로+세로 1줄씩) ⭐️ */}
                     <div 
                         className="absolute inset-0 opacity-100 transition-colors duration-300"
                         style={{
                             backgroundColor: 'transparent', 
                             backgroundImage: `${horizontalGradient}, ${verticalGradient}`,
                             backgroundSize: '100% 100%',
-                            backgroundPosition: 'center center', 
+                            backgroundPosition: 'center center', // 중앙에 고정
                             backgroundRepeat: 'no-repeat',
                             backgroundBlendMode: 'normal' 
                         }}
                     >
+                        {/* 텍스트 제거 */}
                     </div>
-                    {/* 시뮬레이션 이미지 대체 텍스트 */}
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-gray-400 text-xs text-center w-full px-4">
-                        타일 이미지 ({tileImageURL === DEFAULT_TILE_IMAGE_URL ? '기본 흰색' : '사용자 업로드'})와 줄눈색({selectedColorData.label}) 조합입니다.
-                    </div>
                 </div>
             </div>
             {/* 🚨🚨 줄눈 시뮬레이션 영역 끝 🚨🚨 */}
-            
 
             {/* ⭐️ [수정] 선택 색상 이름 표시 (유지) ⭐️ */}
             <div className={`p-3 rounded-lg shadow-md mb-3 border border-gray-200`} style={{ backgroundColor: groutPattern }}>
@@ -400,18 +393,15 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                 </label>
             </div>
 
-            {/* 2. 색상 선택 버튼 그리드 (레이블 단순화 적용) */}
+            {/* 2. 색상 선택 버튼 그리드 (유지) */}
             <div className='grid grid-cols-5 sm:grid-cols-5 gap-3'>
-                {GROUT_COLORS.map((color) => {
-                    // 레이블을 첫 단어 또는 번호만 남기기
-                    const shortLabel = color.label.split(' ')[0].replace('번', ''); 
-                    return (
+                {GROUT_COLORS.map((color) => (
                     <button
                         key={color.id}
                         onClick={() => onSelect(color.id)}
                         className={`aspect-square rounded-lg transition-all duration-200 shadow-md flex items-center justify-center p-1 relative hover:scale-[1.02] active:scale-[0.98] ${
                             selectedColorId === color.id
-                                ? 'ring-4 ring-offset-2 ring-indigo-500' 
+                                ? 'ring-4 ring-offset-2 ring-indigo-500' // 선택 시 링 효과
                                 : 'hover:shadow-lg'
                         }`}
                         style={{ backgroundColor: color.code }}
@@ -420,10 +410,9 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                         {selectedColorId === color.id && (
                             <CheckCircle2 size={24} className={`absolute ${color.isDark ? 'text-amber-400' : 'text-indigo-700'} drop-shadow-md`} />
                         )}
-                        {/* 🚨 [수정] 레이블을 첫 단어만 표시하여 공간 확보 🚨 */}
-                        <span className={`absolute bottom-0 text-[8px] font-bold py-[1px] px-1 rounded-t-sm ${color.isDark ? 'bg-white/80 text-gray-900' : 'bg-gray-900/80 text-white'}`}>{shortLabel}</span>
+                        <span className={`absolute bottom-0 text-[8px] font-bold py-[1px] px-1 rounded-t-sm ${color.isDark ? 'bg-white/80 text-gray-900' : 'bg-gray-900/80 text-white'}`}>{color.label}</span>
                     </button>
-                )})}
+                ))}
             </div>
             <p className='text-xs text-gray-500 mt-3 text-center'>
                 * 화면 해상도에 따라 실제 색상과 차이가 있을 수 있습니다.
@@ -689,7 +678,7 @@ export default function App() {
           if ((tempEpoxySelections[id] || 0) !== requiredQty) { 
             isMatch = false;
             break;
-        }
+          }
         }
         if (!isMatch) continue;
 
@@ -1035,7 +1024,7 @@ export default function App() {
                 {mat.label.split('(')[0].trim()}
               </button>
             ))}
-              </div>
+          </div>
         </div>
     );
   };
@@ -1119,7 +1108,6 @@ export default function App() {
         <div className="p-4 flex items-center justify-between max-w-md mx-auto">
           <div className="flex items-center"> 
             <h1 className="text-xl font-extrabold text-gray-50 tracking-wide">줄눈의미학</h1>
-            {/* <Calculator className="h-6 w-6 mr-2 text-amber-400" /> */}
           </div>
           <div className='flex gap-2'> 
             <button 
@@ -1251,7 +1239,7 @@ export default function App() {
             ))}
           </div>
           
-          {/* ⭐️ [반영 완료] 색상 선택 팔레트 (줄눈선 명암 대비 개선 적용) ⭐️ */}
+          {/* ⭐️ [반영 완료] 색상 선택 팔레트 (테두리, 패딩 제거) ⭐️ */}
           <ColorPalette selectedColorId={selectedGroutColor} onSelect={setSelectedGroutColor} onTileImageUpload={handleTileImageUpload} tileImageURL={tileImageURL} />
 
           {/* --- 재료 상세 비교 버튼 영역 (유지) --- */}
@@ -1546,13 +1534,8 @@ export default function App() {
                 </div>
 
                 
-                {/* 총 합계 영역 (총 할인액 추가) */}
+                {/* 총 합계 영역 (유지) */}
                 <div className="pt-3 text-center border-t border-gray-200"> 
-                    
-                    <div className="flex justify-between items-end mb-1 text-sm">
-                        <span className='font-semibold text-gray-600'>총 할인 혜택</span>
-                        <span className='font-extrabold text-red-600'><TrendingUp size={16} className='inline mr-1 rotate-180'/> {calculation.discountAmount.toLocaleString()}원</span>
-                    </div>
                     
                     <div className="flex justify-between items-end"> 
                         <span className='text-base font-semibold text-gray-800'>최종 결제 금액</span>
