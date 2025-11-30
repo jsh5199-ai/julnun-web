@@ -59,7 +59,7 @@ const rgbToHex = (r, g, b) => {
 
 
 // =================================================================
-// [스타일] 애니메이션 정의 (유지)
+// [스타일] 애니메이션 정의 (유지 및 Tip용 추가)
 // =================================================================
 const GlobalStyles = () => (
     <style>{`
@@ -510,9 +510,11 @@ const ColorPalette = React.memo(({ selectedGroutColor, handleColorSelect, finalS
             </div>
 
             {/* ⭐️ [최종 업데이트] 줄눈 색상 선택 팁 문구 (강조 및 흐름 개선) ⭐️ */}
-            <p className='text-xs text-indigo-600 mt-4 text-center font-semibold'>
-                팁: 색상은 타일톤보다 한톤 어둡게 시공할 경우<br className="sm:hidden" /> 관리가 쉽고, 청소주기가 길어집니다.
-            </p>
+            <div className='mt-4 p-3 bg-yellow-100 rounded-lg shadow-md border border-yellow-300 animate-attention'>
+                <p className='text-sm text-gray-800 text-center leading-snug font-semibold'>
+                    <Zap size={16} className='inline mr-1 text-yellow-600'/> 팁: 색상은 타일톤보다 한톤 어둡게 시공할 경우<br className="sm:hidden" /> 관리가 쉽고, 청소주기가 길어집니다.
+                </p>
+            </div>
             
             <p className='text-xs text-gray-500 mt-3 text-center'>
                 * 화면 해상도에 따라 실제 색상과 차이가 있을 수 있습니다.
@@ -597,7 +599,7 @@ export default function App() {
 
     const handleAreaMaterialChange = useCallback((id, mat) => {
         if (id === 'entrance') {
-            setAreaMaterials(prev => ({ ...prev, [id]: 'poly' }));
+            setAreaMaterials(prev => ({ ...prev, 'entrance': 'poly' }));
         } else {
             setAreaMaterials(prev => ({ ...prev, [id]: mat }));
         }
