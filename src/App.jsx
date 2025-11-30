@@ -912,7 +912,7 @@ export default function GroutEstimatorApp() {
   const currentEmbedUrl = getEmbedUrl(currentVideo.id);
 
 
-  // ⭐️ [수정] 컴포넌트: 개별 소재 선택 버튼 (테두리 제거 및 배경색 강조)
+  // ⭐️ [수정] 컴포넌트: 개별 소재 선택 버튼 (배경색 강조 유지)
   const MaterialSelectButtons = ({ areaId, currentMat, onChange, isQuantitySelected }) => {
     
     if (areaId === 'entrance') {
@@ -935,11 +935,11 @@ export default function GroutEstimatorApp() {
                   e.stopPropagation();  
                   if (isQuantitySelected) onChange(areaId, mat.id);
                 }}
-                // ⭐️ [수정] 테두리 제거: border, border-indigo-300 제거 ⭐️
+                // ⭐️ [유지] 배경색 강조 ⭐️
                 className={`flex-1 py-1 text-xs font-semibold rounded-md transition-all active:scale-95 shadow-sm 
                   ${isQuantitySelected
                     ? (currentMat === mat.id 
-                      ? 'bg-indigo-700 text-white shadow-lg' // 선택 시 그림자 강조
+                      ? 'bg-indigo-700 text-white shadow-lg' // 선택 시 배경색 강조
                       : 'bg-indigo-100 text-gray-700 hover:bg-indigo-200') // 비선택 시 배경색 및 호버 효과
                     : 'bg-gray-200 text-gray-500 cursor-not-allowed'
                   }`}
@@ -952,7 +952,7 @@ export default function GroutEstimatorApp() {
     );
   };
     
-  // ⭐️ [수정] 시공 범위 리스트 렌더링 함수 (수량 증감 버튼 테두리 제거) ⭐️
+  // ⭐️ [유지] 시공 범위 리스트 렌더링 함수 (수량 증감 버튼 배경 호버 강조) ⭐️
   const renderAreaList = (areas) => (
     <div className="space-y-3">
         {areas.map((area) => {
@@ -981,12 +981,12 @@ export default function GroutEstimatorApp() {
                                 </div>
                             </div>
                         </div>
-                        {/* ⭐️ [수정] 수량 증감 버튼: border border-gray-200 제거 ⭐️ */}
+                        {/* ⭐️ [유지] 수량 증감 버튼: border border-gray-200 제거 ⭐️ */}
                         <div className="flex items-center gap-1 bg-white px-1 py-1 rounded-full shadow-md">
                             <button 
                                 onClick={() => handleQuantityChange(area.id, -1)} 
                                 disabled={isEntranceAutoSelected && area.id === 'entrance'}
-                                // ⭐️ [수정] hover:bg-gray-100 추가하여 클릭 효과 강조 ⭐️
+                                // ⭐️ [유지] hover:bg-gray-100 추가하여 클릭 효과 강조 ⭐️
                                 className={`w-7 h-7 flex items-center justify-center rounded-full transition active:scale-90 text-lg font-bold 
                                     ${(quantities[area.id] > 0 && !(isEntranceAutoSelected && area.id === 'entrance')) ? 'text-indigo-600 hover:bg-gray-100' : 'text-gray-400 cursor-not-allowed'}`}
                             >-</button> 
@@ -1001,7 +1001,7 @@ export default function GroutEstimatorApp() {
                                 }} 
                                 // 현관이 자동 선택 상태인 경우 + 버튼 비활성화 (수동 조작 방지)
                                 disabled={isEntranceAutoSelected && area.id === 'entrance'}
-                                // ⭐️ [수정] hover:bg-gray-100 추가하여 클릭 효과 강조 ⭐️
+                                // ⭐️ [유지] hover:bg-gray-100 추가하여 클릭 효과 강조 ⭐️
                                 className={`w-7 h-7 flex items-center justify-center rounded-full font-bold text-lg transition active:scale-90
                                     ${isEntranceAutoSelected && area.id === 'entrance' ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'text-indigo-600 hover:bg-gray-100'}
                                 `}
@@ -1080,7 +1080,7 @@ export default function GroutEstimatorApp() {
                         className={`flex-1 py-2 text-sm font-extrabold rounded-lg transition-all duration-300 shadow-md active:scale-[0.99] ${
                             activeVideoId === video.id 
                                 ? 'bg-indigo-700 text-white' 
-                                // ⭐️ [수정] 테두리 제거: border-2 border-indigo-700 제거 ⭐️
+                                // ⭐️ [유지] 테두리 제거 ⭐️
                                 : 'bg-white text-indigo-700 hover:bg-indigo-50' 
                         }`}
                     >
@@ -1091,7 +1091,7 @@ export default function GroutEstimatorApp() {
           </div>
         </section>
         
-        {/* --- 1. 현장 유형 섹션 (테두리 제거 및 링 강조) --- */}
+        {/* --- 1. 현장 유형 섹션 (배경색 강조로 변경) --- */}
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-150">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
             <Home className="h-5 w-5 text-indigo-600" /> 1. 현장 유형을 선택하세요
@@ -1101,11 +1101,11 @@ export default function GroutEstimatorApp() {
               <button
                 key={type.id}
                 onClick={() => setHousingType(type.id)}
-                // ⭐️ [수정] 테두리 제거: border-2, border-gray-300, border-indigo-700 제거 ⭐️
+                // 🚨 [수정] 선택 시 배경색을 Indigo-700으로 변경 🚨
                 className={`p-4 rounded-lg text-center transition-all duration-200 selection-box active:scale-[0.99] shadow-md ${
                   housingType === type.id 
-                    ? 'ring-2 ring-offset-2 ring-indigo-500 bg-indigo-50 font-bold text-gray-900' // 링으로 강조 대체
-                    : 'bg-white text-gray-600 hover:bg-gray-100' // 테두리 제거
+                    ? 'bg-indigo-700 text-white font-bold shadow-lg' 
+                    : 'bg-white text-gray-600 hover:bg-indigo-50'
                 }`}
               >
                 <div className="text-base font-semibold">{type.label}</div>
@@ -1114,7 +1114,7 @@ export default function GroutEstimatorApp() {
           </div>
         </section>
 
-        {/* ⭐️ --- 2. 시공 재료 선택 (기본값 역할만 함, 테두리 제거 및 링 강조) --- ⭐️ */}
+        {/* ⭐️ --- 2. 시공 재료 선택 (배경색 강조로 변경) --- ⭐️ */}
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-300">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
             <Hammer className="h-5 w-5 text-indigo-600" /> 2. 줄눈소재 안내
@@ -1122,21 +1122,25 @@ export default function GroutEstimatorApp() {
           <div className="space-y-4">
             {MATERIALS.map((item) => (
               <div key={item.id} className="animate-fade-in">
-                {/* ⭐️ [수정] 테두리 제거: border-2, border-gray-300, border-indigo-700 제거 ⭐️ */}
-                <div onClick={() => setMaterial(item.id)} className={`flex items-center p-4 rounded-lg cursor-pointer transition-all duration-200 selection-box active:scale-[0.99] shadow-md ${item.id === material ? 'ring-2 ring-offset-2 ring-indigo-500 bg-indigo-50 shadow-lg' : 'bg-white hover:bg-gray-100'}`}>
+                {/* 🚨 [수정] 선택 시 배경색을 Indigo-700으로 변경, 기타 텍스트 색상 조정 🚨 */}
+                <div onClick={() => setMaterial(item.id)} className={`flex items-center p-4 rounded-lg cursor-pointer transition-all duration-200 selection-box active:scale-[0.99] shadow-md ${item.id === material ? 'bg-indigo-700 text-white shadow-lg' : 'bg-white hover:bg-indigo-50'}`}>
                   <div className="flex-1">
                     <div className="flex justify-between items-center">
                       <div className='flex items-center gap-3'>
-                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mr-2 transition ${item.id === material ? 'border-indigo-600' : 'border-gray-400'}`}>
-                          {item.id === material && <CheckCircle2 size={12} className="text-indigo-600" />}
+                        {/* 선택 아이콘 border 색상 변경 */}
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mr-2 transition ${item.id === material ? 'border-white' : 'border-gray-400'}`}>
+                          {item.id === material && <CheckCircle2 size={12} className="text-white" />}
                         </div>
-                        <span className="font-bold text-gray-800">{item.label}</span>
+                        {/* 텍스트 색상 변경 */}
+                        <span className={`font-bold ${item.id === material ? 'text-white' : 'text-gray-800'}`}>{item.label}</span>
                       </div>
-                      <span className={`text-xs font-bold px-3 py-1 rounded-full ${item.badgeColor}`}>
+                      {/* 배지 색상 변경 */}
+                      <span className={`text-xs font-bold px-3 py-1 rounded-full ${item.id === material ? 'bg-amber-400 text-indigo-900' : item.badgeColor}`}>
                         {item.badge}
                       </span>
                     </div>
-                    <p className="text-xs text-gray-500 mt-1 pl-7">{item.description}</p>
+                    {/* 설명 텍스트 색상 변경 */}
+                    <p className={`text-xs mt-1 pl-7 ${item.id === material ? 'text-indigo-200' : 'text-gray-500'}`}>{item.description}</p>
                   </div>
                 </div>
                 {/* 나머지 옵션 부분 유지 */}
@@ -1144,9 +1148,9 @@ export default function GroutEstimatorApp() {
                   <div className="mt-2 ml-6 pl-4 border-l-2 border-indigo-300 space-y-2 animate-slide-down bg-gray-50/50 p-3 rounded-md">
                     <div className="text-xs font-bold text-indigo-700 flex items-center gap-1"><Palette size={12} /> 옵션 선택 (펄 유무)</div>
                     <div className="flex gap-2">
-                      {/* ⭐️ [수정] 테두리 제거 ⭐️ */}
-                      <button onClick={() => setPolyOption('pearl')} className={`flex-1 py-2 text-sm rounded-md transition-all shadow-sm ${polyOption === 'pearl' ? 'bg-indigo-700 text-white border-indigo-700 font-bold shadow-md' : 'bg-white text-gray-600 hover:bg-gray-100'}`}>펄</button>
-                      <button onClick={() => setPolyOption('no_pearl')} className={`flex-1 py-2 text-sm rounded-md transition-all shadow-sm ${polyOption === 'no_pearl' ? 'bg-indigo-700 text-white border-indigo-700 font-bold shadow-md' : 'bg-white text-gray-600 hover:bg-gray-100'}`}>무펄</button>
+                      {/* ⭐️ [유지] 테두리 제거 ⭐️ */}
+                      <button onClick={() => setPolyOption('pearl')} className={`flex-1 py-2 text-sm rounded-md transition-all shadow-sm ${polyOption === 'pearl' ? 'bg-indigo-700 text-white font-bold shadow-md' : 'bg-white text-gray-600 hover:bg-gray-100'}`}>펄</button>
+                      <button onClick={() => setPolyOption('no_pearl')} className={`flex-1 py-2 text-sm rounded-md transition-all shadow-sm ${polyOption === 'no_pearl' ? 'bg-indigo-700 text-white font-bold shadow-md' : 'bg-white text-gray-600 hover:bg-gray-100'}`}>무펄</button>
                     </div>
                   </div>
                 )}
@@ -1154,9 +1158,9 @@ export default function GroutEstimatorApp() {
                   <div className="mt-2 ml-6 pl-4 border-l-2 border-indigo-500 space-y-2 animate-slide-down bg-indigo-50/50 p-3 rounded-md"> 
                     <div className="text-xs font-bold text-indigo-700 flex items-center gap-1"><Crown size={12} /> 옵션 선택 (브랜드)</div> 
                     <div className="flex gap-2">
-                      {/* ⭐️ [수정] 테두리 제거 ⭐️ */}
-                      <button onClick={() => setEpoxyOption('kerapoxy')} className={`flex-1 py-2 text-sm rounded-md transition-all shadow-sm ${epoxyOption === 'kerapoxy' ? 'bg-indigo-700 text-white border-indigo-700 font-bold shadow-md' : 'bg-white text-gray-600 hover:bg-gray-100'}`}>케라폭시</button> 
-                      <button onClick={() => setEpoxyOption('starlike')} className={`flex-1 py-2 text-sm rounded-md transition-all shadow-sm ${epoxyOption === 'starlike' ? 'bg-indigo-700 text-white border-indigo-700 font-bold shadow-md' : 'bg-white text-gray-600 hover:bg-gray-100'}`}>스타라이크</button> 
+                      {/* ⭐️ [유지] 테두리 제거 ⭐️ */}
+                      <button onClick={() => setEpoxyOption('kerapoxy')} className={`flex-1 py-2 text-sm rounded-md transition-all shadow-sm ${epoxyOption === 'kerapoxy' ? 'bg-indigo-700 text-white font-bold shadow-md' : 'bg-white text-gray-600 hover:bg-gray-100'}`}>케라폭시</button> 
+                      <button onClick={() => setEpoxyOption('starlike')} className={`flex-1 py-2 text-sm rounded-md transition-all shadow-sm ${epoxyOption === 'starlike' ? 'bg-indigo-700 text-white font-bold shadow-md' : 'bg-white text-gray-600 hover:bg-gray-100'}`}>스타라이크</button> 
                     </div>
                   </div>
                 )}
@@ -1174,7 +1178,7 @@ export default function GroutEstimatorApp() {
           </div>
         </section>
 
-        {/* ⭐️ --- 3. 원하는 시공범위를 선택해주세요 (수정된 renderAreaList 사용) --- ⭐️ */}
+        {/* ⭐️ --- 3. 원하는 시공범위를 선택해주세요 (수량 증감 버튼 배경 호버 강조 유지) --- ⭐️ */}
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-450">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
             <Calculator className="h-5 w-5 text-indigo-600" /> 3. 시공범위 선택
@@ -1196,7 +1200,7 @@ export default function GroutEstimatorApp() {
 
         </section>
 
-        {/* --- 4. 실리콘 교체할 곳 선택 (수량 증감 버튼 테두리 제거) --- */}
+        {/* --- 4. 실리콘 교체할 곳 선택 (수량 증감 버튼 배경 호버 강조 유지) --- */}
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-600">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
             <Eraser className="h-5 w-5 text-indigo-600" /> 4. 실리콘 시공
@@ -1216,11 +1220,11 @@ export default function GroutEstimatorApp() {
                                 <div className="text-xs text-gray-500">{area.desc && <span className="block text-indigo-600">{area.desc}</span>}</div> 
                             </div>
                         </div>
-                        {/* ⭐️ [수정] 수량 증감 버튼: border border-gray-200 제거 ⭐️ */}
+                        {/* ⭐️ [유지] 수량 증감 버튼: border border-gray-200 제거 ⭐️ */}
                         <div className="flex items-center gap-1 bg-white px-1 py-1 rounded-full shadow-md">
                             <button 
                                 onClick={() => handleQuantityChange(area.id, -1)} 
-                                // ⭐️ [수정] hover:bg-gray-100 추가하여 클릭 효과 강조 ⭐️
+                                // ⭐️ [유지] hover:bg-gray-100 추가하여 클릭 효과 강조 ⭐️
                                 className={`w-7 h-7 flex items-center justify-center rounded-full transition active:scale-90 text-lg font-bold ${quantities[area.id] > 0 ? 'text-indigo-600 hover:bg-gray-100' : 'text-gray-400 cursor-not-allowed'}`}
                             >-</button> 
                             <span className={`w-5 text-center text-sm font-bold ${quantities[area.id] > 0 ? 'text-gray-900' : 'text-gray-400'}`}>{quantities[area.id]}</span>
@@ -1228,7 +1232,7 @@ export default function GroutEstimatorApp() {
                                 onClick={() => {
                                     handleQuantityChange(area.id, 1);
                                 }} 
-                                // ⭐️ [수정] hover:bg-gray-100 추가하여 클릭 효과 강조 ⭐️
+                                // ⭐️ [유지] hover:bg-gray-100 추가하여 클릭 효과 강조 ⭐️
                                 className="w-7 h-7 flex items-center justify-center text-indigo-600 hover:bg-gray-100 rounded-full font-bold text-lg transition active:scale-90"
                             >+</button> 
                         </div>
@@ -1494,10 +1498,10 @@ export default function GroutEstimatorApp() {
                             const discountAmount = evt.discount.toLocaleString();
                             const Icon = isApplied ? CheckCircle2 : Sparkles;
 
-                            // ⭐️ [수정] border-2 제거 ⭐️
+                            // ⭐️ [유지] border-2 제거 ⭐️
                             const baseClasses = "w-full py-3 rounded-xl transition font-extrabold text-sm active:scale-[0.98] shadow-lg flex items-center justify-center gap-2 relative overflow-hidden"; 
                             
-                            // ⭐️ [수정] 테두리 클래스 제거 ⭐️
+                            // ⭐️ [유지] 테두리 클래스 제거 ⭐️
                             const activeClasses = "bg-indigo-700 text-white"; 
                             const inactiveClasses = "bg-amber-400 text-indigo-900 hover:bg-amber-300"; 
 
