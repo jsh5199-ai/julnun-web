@@ -310,31 +310,38 @@ const ColorPalette = ({ selectedColorId, onSelect }) => {
     // 타일 본체 색상은 흰색으로 고정
     const TILE_COLOR = '#ffffff'; 
     
-    // 🚨 [수정된 변수] 줄눈 선 너비 증가 및 위치 조정 🚨
+    // 🚨 [수정된 변수] 줄눈 선 너비 및 위치 조정 🚨
     const GROUT_LINE_WIDTH = 12; // 줄눈 선 너비 (가운데 십자 모양의 굵기)
     const TILE_DEMO_SIZE = 400; // 데모 영역 전체 크기 (임의 설정)
-    const centerOffset = TILE_DEMO_SIZE / 2;
     const lineHalf = GROUT_LINE_WIDTH / 2;
 
     const groutPattern = selectedColorData.code;
     const tilePattern = TILE_COLOR;
+    
+    // 💡 에폭시 질감 효과를 위한 미세한 하이라이트/음영 그라데이션 추가 💡
+    // 에폭시 광택을 중앙에 미세하게 적용 (선택 색상을 기준으로 밝게)
+    const highlightColor = `color-mix(in srgb, ${groutPattern}, white 30%)`;
+    const depthColor = `color-mix(in srgb, ${groutPattern}, black 10%)`;
 
     // 중앙 십자 줄눈선 CSS 배경 이미지 생성
-    // 1. 가로줄 (to bottom)
+    
+    // 1. 가로줄 (to bottom) - 광택 효과 추가
     const horizontalGradient = `linear-gradient(to bottom, 
                                     transparent 0%, 
                                     transparent calc(50% - ${lineHalf}px), 
-                                    ${groutPattern} calc(50% - ${lineHalf}px), 
-                                    ${groutPattern} calc(50% + ${lineHalf}px), 
+                                    ${depthColor} calc(50% - ${lineHalf}px), 
+                                    ${highlightColor} 50%, /* 중앙 하이라이트 */
+                                    ${depthColor} calc(50% + ${lineHalf}px), 
                                     transparent calc(50% + ${lineHalf}px), 
                                     transparent 100%)`;
 
-    // 2. 세로줄 (to right)
+    // 2. 세로줄 (to right) - 광택 효과 추가
     const verticalGradient = `linear-gradient(to right, 
                                     transparent 0%, 
                                     transparent calc(50% - ${lineHalf}px), 
-                                    ${groutPattern} calc(50% - ${lineHalf}px), 
-                                    ${groutPattern} calc(50% + ${lineHalf}px), 
+                                    ${depthColor} calc(50% - ${lineHalf}px), 
+                                    ${highlightColor} 50%, /* 중앙 하이라이트 */
+                                    ${depthColor} calc(50% + ${lineHalf}px), 
                                     transparent calc(50% + ${lineHalf}px), 
                                     transparent 100%)`;
 
@@ -361,7 +368,10 @@ const ColorPalette = ({ selectedColorId, onSelect }) => {
                     <div 
                         className="absolute inset-0 opacity-100 transition-colors duration-300"
                         style={{
-                            // 🚨 [수정 완료] 두 그라디언트를 쉼표로 겹쳐서 적용 🚨
+                            // 🚨 [수정 완료] 가로줄과 세로줄이 모두 표시되도록 수정 🚨
+                            // background-color는 타일 색상과 동일하게 유지하여 투명한 부분은 타일색이 나오게 함
+                            backgroundColor: TILE_COLOR,
+                            // 가로 그라디언트(horizontalGradient)와 세로 그라디언트(verticalGradient)를 겹쳐서 십자 모양 생성
                             backgroundImage: `${horizontalGradient}, ${verticalGradient}`,
                             backgroundSize: '100% 100%',
                             backgroundRepeat: 'no-repeat',
