@@ -5,9 +5,6 @@ import {
   CheckCircle2, Info, RefreshCw, Phone, Sparkles, Hammer, Sofa, Palette, Crown, Gift, Eraser, Star, X, ChevronDown, HelpCircle, Zap, TrendingUp, Clock, Image as ImageIcon
 } from 'lucide-react';
 
-// 🚨 [수정] src/default_tile_image.jpg 파일을 import 합니다. 🚨
-import DefaultTileImage from './default_tile_image.jpg'; 
-
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
 // ⭐️ 최소 출장비 상수 정의
@@ -310,7 +307,7 @@ const Accordion = ({ question, answer }) => {
 const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageURL }) => {
     const selectedColorData = GROUT_COLORS.find(c => c.id === selectedColorId);
 
-    // 타일 본체 색상은 기본적으로 흰색으로 고정 (이미지가 없을 경우 대비)
+    // 타일 본체 색상은 기본적으로 흰색으로 고정
     const TILE_COLOR = '#ffffff'; 
     
     const GROUT_LINE_WIDTH = 12; // 줄눈 선 너비 (가운데 십자 모양의 굵기)
@@ -340,12 +337,9 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                                     transparent 100%)`;
 
     // 시뮬레이션 배경 스타일
-    // tileImageURL은 이제 항상 기본 이미지 또는 업로드된 파일 URL을 가집니다.
-    const simulationBackgroundStyle = {
-        backgroundImage: `url(${tileImageURL})`, 
-        backgroundSize: 'cover', 
-        backgroundPosition: 'center'
-    };
+    const simulationBackgroundStyle = tileImageURL 
+        ? { backgroundImage: `url(${tileImageURL})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+        : { backgroundColor: TILE_COLOR };
 
     return (
         <div className='mt-5 pt-3 border-t border-gray-100 animate-fade-in'>
@@ -437,8 +431,8 @@ export default function GroutEstimatorApp() {
   const [epoxyOption, setEpoxyOption] = useState('kerapoxy');
   // 🚨 [신규 상태] 독립적으로 색상 선택 상태 관리
   const [selectedGroutColor, setSelectedGroutColor] = useState(GROUT_COLORS[0].id); // 기본값: 화이트
-  // 🚨 [수정] 타일 배경 이미지 URL 초기값을 불러온 파일로 설정 🚨
-  const [tileImageURL, setTileImageURL] = useState(DefaultTileImage); 
+  // 🚨 [신규 상태] 타일 배경 이미지 URL 관리 🚨
+  const [tileImageURL, setTileImageURL] = useState(null); 
   const [quantities, setQuantities] = useState(
     [...ALL_AREAS].reduce((acc, area) => ({ ...acc, [area.id]: 0 }), {})
   );
@@ -943,7 +937,7 @@ export default function GroutEstimatorApp() {
     setShowToast(false);
   }, []);
 
-  // 🚨 [유지] 타일 이미지 업로드 핸들러 (업로드 파일로 URL 업데이트) 🚨
+  // 🚨 [신규 핸들러] 타일 이미지 업로드 핸들러 🚨
   const handleTileImageUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -1248,7 +1242,7 @@ export default function GroutEstimatorApp() {
           </div>
           
           {/* ⭐️ [신규 추가] 색상 선택 팔레트 (시뮬레이션 포함) ⭐️ */}
-          <ColorPalette selectedGroutColor={selectedGroutColor} onSelect={setSelectedGroutColor} onTileImageUpload={handleTileImageUpload} tileImageURL={tileImageURL} />
+          <ColorPalette selectedColorId={selectedGroutColor} onSelect={setSelectedGroutColor} onTileImageUpload={handleTileImageUpload} tileImageURL={tileImageURL} />
 
           {/* --- 재료 상세 비교 버튼 영역 (유지) --- */}
           <div className="mt-5 pt-3 border-t border-gray-100 flex justify-center">
