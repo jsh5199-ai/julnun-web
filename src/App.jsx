@@ -310,7 +310,7 @@ const ColorPalette = ({ selectedColorId, onSelect }) => {
     // 타일 본체 색상은 흰색으로 고정
     const TILE_COLOR = '#ffffff'; 
     
-    // 🚨 [수정된 변수] 줄눈 선 너비 증가 및 위치 조정 🚨
+    // 🚨 [수정된 변수] 줄눈 선 너비 및 위치 조정 🚨
     const GROUT_LINE_WIDTH = 12; // 줄눈 선 너비 (가운데 십자 모양의 굵기)
     const TILE_DEMO_SIZE = 400; // 데모 영역 전체 크기 (임의 설정)
     const centerOffset = TILE_DEMO_SIZE / 2;
@@ -320,9 +320,26 @@ const ColorPalette = ({ selectedColorId, onSelect }) => {
     const tilePattern = TILE_COLOR;
 
     // 중앙 십자 줄눈선 CSS 배경 이미지 생성
-    // 교차점의 색상 통일을 위해 두 그라디언트 모두 선택 색상을 사용하고 겹치게 함
-    const verticalGradient = `linear-gradient(to right, ${tilePattern} 0%, ${tilePattern} ${centerOffset - lineHalf}px, ${groutPattern} ${centerOffset - lineHalf}px, ${groutPattern} ${centerOffset + lineHalf}px, ${tilePattern} ${centerOffset + lineHalf}px, ${tilePattern} 100%)`;
-    const horizontalGradient = `linear-gradient(to bottom, ${tilePattern} 0%, ${tilePattern} ${centerOffset - lineHalf}px, ${groutPattern} ${centerOffset - lineHalf}px, ${groutPattern} ${centerOffset + lineHalf}px, ${groutPattern} ${centerOffset + lineHalf}px, ${tilePattern} ${centerOffset + lineHalf}px, ${tilePattern} 100%)`;
+    // 교차점의 색상이 통일되도록 linear-gradient의 정의 방식을 수정하고,
+    // 두 그라디언트가 완벽하게 겹쳐지도록 설정했습니다.
+    
+    // 세로 그라디언트 (가로줄)
+    const horizontalGradient = `linear-gradient(to bottom, 
+                                    transparent 0%, 
+                                    transparent calc(50% - ${lineHalf}px), 
+                                    ${groutPattern} calc(50% - ${lineHalf}px), 
+                                    ${groutPattern} calc(50% + ${lineHalf}px), 
+                                    transparent calc(50% + ${lineHalf}px), 
+                                    transparent 100%)`;
+
+    // 가로 그라디언트 (세로줄)
+    const verticalGradient = `linear-gradient(to right, 
+                                    transparent 0%, 
+                                    transparent calc(50% - ${lineHalf}px), 
+                                    ${groutPattern} calc(50% - ${lineHalf}px), 
+                                    ${groutPattern} calc(50% + ${lineHalf}px), 
+                                    transparent calc(50% + ${lineHalf}px), 
+                                    transparent 100%)`;
 
 
     return (
@@ -338,8 +355,6 @@ const ColorPalette = ({ selectedColorId, onSelect }) => {
                 {/* ⭐️ 시뮬레이션 컨테이너: 타일 본체(흰색) 위에 줄눈선(선택 색상)을 덮습니다. ⭐️ */}
                 <div 
                     className="w-full aspect-square max-h-40 mx-auto overflow-hidden relative border-2 border-gray-300 rounded-md"
-                    // 데모 크기 고정을 위한 스타일 (CSS 변수를 직접 전달)
-                    style={{ '--demo-size': '400px' }}
                 >
                     
                     {/* 타일 베이스 (흰색으로 고정) */}
@@ -350,14 +365,14 @@ const ColorPalette = ({ selectedColorId, onSelect }) => {
                         className="absolute inset-0 opacity-100 transition-colors duration-300"
                         style={{
                             // 가로/세로 그라디언트를 겹쳐서 십자 모양 생성
-                            // 쉼표로 구분하여 두 그라디언트를 겹치게 하여 교차점 색상 문제를 해결
-                            backgroundImage: `${verticalGradient}, ${horizontalGradient}`,
+                            // transparent와 선택 색상을 명확히 구분하여 교차점에서 색상 통일 (교차 부분은 두 그라디언트 모두 선택 색상으로 채워짐)
+                            backgroundImage: `${horizontalGradient}, ${verticalGradient}`,
                             backgroundSize: '100% 100%',
                             backgroundRepeat: 'no-repeat',
                             backgroundBlendMode: 'normal' 
                         }}
                     >
-                        {/* 🚨 [제거됨] 중앙 텍스트 레이어는 삭제되었습니다. */}
+                        {/* 🚨 중앙 텍스트 제거 완료 */}
                     </div>
                 </div>
             </div>
@@ -1265,8 +1280,10 @@ export default function GroutEstimatorApp() {
                         <div className="flex items-center gap-1 bg-white px-1 py-1 rounded-full shadow-md">
                             <button 
                                 onClick={() => handleQuantityChange(area.id, -1)} 
+                                disabled={isEntranceAutoSelected && area.id === 'entrance'}
                                 // ⭐️ [유지] hover:bg-gray-100 추가하여 클릭 효과 강조 ⭐️
-                                className={`w-7 h-7 flex items-center justify-center rounded-full transition active:scale-90 text-lg font-bold ${quantities[area.id] > 0 ? 'text-indigo-600 hover:bg-gray-100' : 'text-gray-400 cursor-not-allowed'}`}
+                                className={`w-7 h-7 flex items-center justify-center rounded-full transition active:scale-90 text-lg font-bold 
+                                    ${(quantities[area.id] > 0 && !(isEntranceAutoSelected && area.id === 'entrance')) ? 'text-indigo-600 hover:bg-gray-100' : 'text-gray-400 cursor-not-allowed'}`}
                             >-</button> 
                             <span className={`w-5 text-center text-sm font-bold ${quantities[area.id] > 0 ? 'text-gray-900' : 'text-gray-400'}`}>{quantities[area.id]}</span>
                             <button 
