@@ -343,12 +343,18 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                                         transparent calc(50% + ${lineHalf}px), 
                                         transparent 100%)`;
 
+    // 💡 [수정됨] 타일 배경 URL 결정: 사용자 이미지가 없거나 기본 이미지일 경우, 기본 타일 이미지 URL을 사용하도록 강제
+    const effectiveTileImageURL = (tileImageURL && tileImageURL !== DEFAULT_TILE_IMAGE_URL)
+        ? tileImageURL
+        : DEFAULT_TILE_IMAGE_URL;
+
     // 시뮬레이션 배경 스타일
-    // 💡 수정된 부분 1: tileImageURL이 있을 때만 이미지 배경을 적용합니다. 
-    // 기본적으로 이 컴포넌트의 배경은 부모 div에서 TILE_COLOR로 설정됩니다.
-    const simulationBackgroundStyle = tileImageURL && tileImageURL !== DEFAULT_TILE_IMAGE_URL
-        ? { backgroundImage: `url(${tileImageURL})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-        : { backgroundColor: 'transparent' }; // 배경 이미지가 없으면 투명하게 두어 아래 TILE_COLOR가 보이도록 함
+    const simulationBackgroundStyle = {
+        // 항상 유효한 URL을 배경 이미지로 사용
+        backgroundImage: `url(${effectiveTileImageURL})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center'
+    };
 
     return (
         <div className='mt-5 pt-3 border-t border-gray-100 animate-fade-in'>
@@ -357,18 +363,19 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
             </h3>
             
             {/* 🚨🚨 줄눈 시뮬레이션 영역 - 줄눈선이 사라지지 않도록 구조 단순화 🚨🚨 */}
-            {/* 💡 수정된 부분 2: 바깥쪽 div에 배경색을 TILE_COLOR로 강제하여, 이미지 로드 실패 시에도 흰색 배경이 유지되도록 함 */}
-            <div className={`transition-all duration-300`} style={{ backgroundColor: TILE_COLOR }}> 
+            {/* 💡 수정된 부분 1: 바깥쪽 div에는 스타일을 최소화 (내부 div에서 처리) */}
+            <div className={`transition-all duration-300`}> 
                 
                 {/* ⭐️ 시뮬레이션 컨테이너: 테두리 및 max-h 제거, 부모에 꽉 차게 조정 ⭐️ */}
                 <div 
                     className="w-full aspect-video mx-auto overflow-hidden relative" // aspect-video로 가로 세로 비율 유지
+                    style={{ backgroundColor: TILE_COLOR }} // 기본 배경색은 흰색으로 고정
                 >
                     
-                    {/* 타일 베이스: 이미지 배경만 적용. 이미지 없으면 아래 TILE_COLOR(흰색)이 보임 */}
+                    {/* 2단계: 타일 베이스 (항상 유효한 이미지) */}
                     <div className="absolute inset-0" style={simulationBackgroundStyle}></div>
                     
-                    {/* ⭐️ 워터마크 레이어 ⭐️ */}
+                    {/* ⭐️ 3단계: 워터마크 레이어 ⭐️ */}
                     <div 
                         className="absolute inset-0 flex items-center justify-center opacity-30" 
                         style={{
@@ -380,11 +387,11 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                     >
                     </div>
                     
-                    {/* ⭐️ 줄눈 선 시뮬레이션 레이어 (가로+세로 1줄씩) ⭐️ */}
+                    {/* ⭐️ 4단계: 줄눈 선 시뮬레이션 레이어 (항상 표시됨) ⭐️ */}
                     <div 
                         className="absolute inset-0 opacity-100 transition-colors duration-300"
                         style={{
-                            backgroundColor: 'transparent', 
+                            backgroundColor: 'transparent', // 💡 수정: 투명하게 유지
                             backgroundImage: `${horizontalGradient}, ${verticalGradient}`,
                             backgroundSize: '100% 100%',
                             backgroundPosition: 'center center', // 중앙에 고정
@@ -906,7 +913,6 @@ export default function App() {
     const totalFinalDiscount = totalItemDiscount + discountAmount;
     
     // 최종 가격도 천원 단위로 내림
-    // 🔴 [수정 완료] 구문 오류 해결
     let originalCalculatedPrice = Math.max(0, Math.floor(total / 1000) * 1000); 
     
     let finalPrice = originalCalculatedPrice; 
@@ -1155,7 +1161,7 @@ export default function App() {
           <h2 className="text-lg font-extrabold flex items-center gap-2 p-4 text-gray-800 border-b border-gray-100">
             <Zap className="h-5 w-5 text-red-600" /> 시공 현장 영상
           </h2 >
-          <div className="relative">
+          <div></div> className="relative"
             <div className="aspect-video w-full">
               <iframe
                 key={currentVideo.id} 
@@ -1183,7 +1189,6 @@ export default function App() {
                     </button>
                 ))}
             </div>
-          </div>
         </section>
         
         {/* --- 1. 현장 유형 섹션 (배경색 강조로 변경) --- */}
