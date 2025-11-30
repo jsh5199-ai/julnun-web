@@ -13,6 +13,20 @@ const MIN_FEE = 200000;
 // 🚨 [수정] 카카오톡 채널 URL 정의 🚨
 const KAKAO_CHAT_URL = 'http://pf.kakao.com/_jAxnYn/chat';
 
+// 🚨 [신규 추가] 줄눈 색상 데이터 정의 (독립적인 선택 항목) 🚨
+const GROUT_COLORS = [
+    { id: 'white', code: '#ffffff', label: '화이트', isDark: false },
+    { id: 'moca_beige', code: '#dbcbbd', label: '모카 베이지', isDark: false },
+    { id: 'sand_brown', code: '#887965', label: '샌드 브라운', isDark: true },
+    { id: 'vintage_brown', code: '#96877e', label: '빈티지 브라운', isDark: true },
+    { id: 'oat_brown', code: '#b0a9a4', label: '오트 브라운', isDark: false },
+    { id: 'burnt_brown', code: '#827e7b', label: '번트 브라운', isDark: true },
+    { id: 'silver_gray', code: '#afb0aa', label: '실버 그레이', isDark: false },
+    { id: 'medium_gray', code: '#848685', label: '미디움 그레이', isDark: true },
+    { id: 'dark_gray', code: '#565556', label: '다크 그레이', isDark: true },
+];
+
+
 // =================================================================
 // [스타일] 애니메이션 정의 (유지)
 // =================================================================
@@ -361,12 +375,60 @@ const Accordion = ({ question, answer }) => {
     );
 };
 
+// ⭐️ [신규 컴포넌트] 색상 선택 팔레트 렌더링 ⭐️
+const ColorPalette = ({ selectedColorId, onSelect }) => {
+    const selectedColorData = GROUT_COLORS.find(c => c.id === selectedColorId);
+
+    return (
+        <div className='mt-5 pt-3 border-t border-gray-100 animate-fade-in'>
+            <h3 className="text-base font-extrabold flex items-center gap-2 mb-3 text-gray-800">
+                <Palette className="h-4 w-4 text-indigo-600" /> 2-1. 줄눈 색상 미리보기 및 선택
+            </h3>
+            
+            {/* 1. 선택된 색상 표시 */}
+            <div className={`p-3 rounded-lg shadow-md mb-3`} style={{ backgroundColor: selectedColorData.code }}>
+                <p className={`text-sm font-bold ${selectedColorData.isDark ? 'text-white' : 'text-gray-900'} flex items-center justify-between`}>
+                    <span className='truncate'>{selectedColorData.label} ({selectedColorData.code})</span>
+                    <CheckCircle2 size={16} className={`ml-2 flex-shrink-0 ${selectedColorData.isDark ? 'text-amber-400' : 'text-indigo-700'}`}/>
+                </p>
+            </div>
+
+            {/* 2. 색상 선택 버튼 그리드 */}
+            <div className='grid grid-cols-5 sm:grid-cols-5 gap-3'>
+                {GROUT_COLORS.map((color) => (
+                    <button
+                        key={color.id}
+                        onClick={() => onSelect(color.id)}
+                        className={`aspect-square rounded-lg transition-all duration-200 shadow-md flex items-center justify-center p-1 relative hover:scale-[1.02] active:scale-[0.98] ${
+                            selectedColorId === color.id
+                                ? 'ring-4 ring-offset-2 ring-indigo-500' // 선택 시 링 효과
+                                : 'hover:shadow-lg'
+                        }`}
+                        style={{ backgroundColor: color.code }}
+                        title={color.label}
+                    >
+                        {selectedColorId === color.id && (
+                            <CheckCircle2 size={24} className={`absolute ${color.isDark ? 'text-amber-400' : 'text-indigo-700'} drop-shadow-md`} />
+                        )}
+                        <span className={`absolute bottom-0 text-[8px] font-bold py-[1px] px-1 rounded-t-sm ${color.isDark ? 'bg-white/80 text-gray-900' : 'bg-gray-900/80 text-white'}`}>{color.label}</span>
+                    </button>
+                ))}
+            </div>
+            <p className='text-xs text-gray-500 mt-3 text-center'>
+                * 화면 해상도에 따라 실제 색상과 차이가 있을 수 있습니다.
+            </p>
+        </div>
+    );
+};
+
 
 export default function GroutEstimatorApp() {
   const [housingType, setHousingType] = useState('new');
   const [material, setMaterial] = useState('poly');
   const [polyOption, setPolyOption] = useState('pearl');
   const [epoxyOption, setEpoxyOption] = useState('kerapoxy');
+  // 🚨 [신규 상태] 독립적으로 색상 선택 상태 관리
+  const [selectedGroutColor, setSelectedGroutColor] = useState(GROUT_COLORS[0].id); // 기본값: 화이트
   const [quantities, setQuantities] = useState(
     [...ALL_AREAS].reduce((acc, area) => ({ ...acc, [area.id]: 0 }), {})
   );
@@ -394,7 +456,7 @@ export default function GroutEstimatorApp() {
   }, [quantities, areaMaterials]);
 
 
-  // ⭐️ [수정] 수량 변경 핸들러 (현관 자동 선택 로직 추가)
+  // ⭐️ [유지] 수량 변경 핸들러 (현관 자동 선택 로직 포함)
   const handleQuantityChange = useCallback((id, delta) => {
     setQuantities(prev => {
       const currentQty = prev[id] || 0;
@@ -633,7 +695,7 @@ export default function GroutEstimatorApp() {
   }, [quantities, areaMaterials]);
 
 
-  // 🚀 [최종] calculation 로직: 특수 영역 가격을 명시적으로 계산하도록 수정 
+  // 🚀 [최종] calculation 로직: 견적 계산 (색상 선택은 가격에 영향 없음) 
   const calculation = useMemo(() => {
     const selectedHousing = HOUSING_TYPES.find(h => h.id === housingType);
     let itemizedPrices = []; 
@@ -912,7 +974,7 @@ export default function GroutEstimatorApp() {
   const currentEmbedUrl = getEmbedUrl(currentVideo.id);
 
 
-  // ⭐️ [수정] 컴포넌트: 개별 소재 선택 버튼 (배경색 강조 유지)
+  // ⭐️ [유지] 컴포넌트: 개별 소재 선택 버튼 (배경색 강조 유지)
   const MaterialSelectButtons = ({ areaId, currentMat, onChange, isQuantitySelected }) => {
     
     if (areaId === 'entrance') {
@@ -952,7 +1014,7 @@ export default function GroutEstimatorApp() {
     );
   };
     
-  // ⭐️ [유지] 시공 범위 리스트 렌더링 함수 (수량 증감 버튼 배경 호버 강조) ⭐️
+  // ⭐️ [유지] 시공 범위 리스트 렌더링 함수 (수량 증감 버튼 배경 호버 강조 유지) ⭐️
   const renderAreaList = (areas) => (
     <div className="space-y-3">
         {areas.map((area) => {
@@ -1114,7 +1176,7 @@ export default function GroutEstimatorApp() {
           </div>
         </section>
 
-        {/* ⭐️ --- 2. 시공 재료 선택 (배경색 강조로 변경) --- ⭐️ */}
+        {/* ⭐️ --- 2. 줄눈소재 안내 (소재/옵션 선택 및 색상 팔레트 포함) --- ⭐️ */}
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-300">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
             <Hammer className="h-5 w-5 text-indigo-600" /> 2. 줄눈소재 안내
@@ -1122,7 +1184,7 @@ export default function GroutEstimatorApp() {
           <div className="space-y-4">
             {MATERIALS.map((item) => (
               <div key={item.id} className="animate-fade-in">
-                {/* 🚨 [수정] 선택 시 배경색을 Indigo-700으로 변경, 기타 텍스트 색상 조정 🚨 */}
+                {/* 🚨 [수정] 배경색 강조로 변경 🚨 */}
                 <div onClick={() => setMaterial(item.id)} className={`flex items-center p-4 rounded-lg cursor-pointer transition-all duration-200 selection-box active:scale-[0.99] shadow-md ${item.id === material ? 'bg-indigo-700 text-white shadow-lg' : 'bg-white hover:bg-indigo-50'}`}>
                   <div className="flex-1">
                     <div className="flex justify-between items-center">
@@ -1148,7 +1210,6 @@ export default function GroutEstimatorApp() {
                   <div className="mt-2 ml-6 pl-4 border-l-2 border-indigo-300 space-y-2 animate-slide-down bg-gray-50/50 p-3 rounded-md">
                     <div className="text-xs font-bold text-indigo-700 flex items-center gap-1"><Palette size={12} /> 옵션 선택 (펄 유무)</div>
                     <div className="flex gap-2">
-                      {/* ⭐️ [유지] 테두리 제거 ⭐️ */}
                       <button onClick={() => setPolyOption('pearl')} className={`flex-1 py-2 text-sm rounded-md transition-all shadow-sm ${polyOption === 'pearl' ? 'bg-indigo-700 text-white font-bold shadow-md' : 'bg-white text-gray-600 hover:bg-gray-100'}`}>펄</button>
                       <button onClick={() => setPolyOption('no_pearl')} className={`flex-1 py-2 text-sm rounded-md transition-all shadow-sm ${polyOption === 'no_pearl' ? 'bg-indigo-700 text-white font-bold shadow-md' : 'bg-white text-gray-600 hover:bg-gray-100'}`}>무펄</button>
                     </div>
@@ -1158,7 +1219,6 @@ export default function GroutEstimatorApp() {
                   <div className="mt-2 ml-6 pl-4 border-l-2 border-indigo-500 space-y-2 animate-slide-down bg-indigo-50/50 p-3 rounded-md"> 
                     <div className="text-xs font-bold text-indigo-700 flex items-center gap-1"><Crown size={12} /> 옵션 선택 (브랜드)</div> 
                     <div className="flex gap-2">
-                      {/* ⭐️ [유지] 테두리 제거 ⭐️ */}
                       <button onClick={() => setEpoxyOption('kerapoxy')} className={`flex-1 py-2 text-sm rounded-md transition-all shadow-sm ${epoxyOption === 'kerapoxy' ? 'bg-indigo-700 text-white font-bold shadow-md' : 'bg-white text-gray-600 hover:bg-gray-100'}`}>케라폭시</button> 
                       <button onClick={() => setEpoxyOption('starlike')} className={`flex-1 py-2 text-sm rounded-md transition-all shadow-sm ${epoxyOption === 'starlike' ? 'bg-indigo-700 text-white font-bold shadow-md' : 'bg-white text-gray-600 hover:bg-gray-100'}`}>스타라이크</button> 
                     </div>
@@ -1167,6 +1227,10 @@ export default function GroutEstimatorApp() {
               </div>
             ))}
           </div>
+          
+          {/* ⭐️ [신규 추가] 색상 선택 팔레트 (독립 섹션) ⭐️ */}
+          <ColorPalette selectedColorId={selectedGroutColor} onSelect={setSelectedGroutColor} />
+
           {/* --- 재료 상세 비교 버튼 영역 (유지) --- */}
           <div className="mt-5 pt-3 border-t border-gray-100 flex justify-center">
               <button 
@@ -1178,7 +1242,7 @@ export default function GroutEstimatorApp() {
           </div>
         </section>
 
-        {/* ⭐️ --- 3. 원하는 시공범위를 선택해주세요 (수량 증감 버튼 배경 호버 강조 유지) --- ⭐️ */}
+        {/* --- 3. 시공범위 선택 (유지) --- */}
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-450">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
             <Calculator className="h-5 w-5 text-indigo-600" /> 3. 시공범위 선택
@@ -1200,7 +1264,7 @@ export default function GroutEstimatorApp() {
 
         </section>
 
-        {/* --- 4. 실리콘 교체할 곳 선택 (수량 증감 버튼 배경 호버 강조 유지) --- */}
+        {/* --- 4. 실리콘 시공 (유지) --- */}
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-600">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
             <Eraser className="h-5 w-5 text-indigo-600" /> 4. 실리콘 시공
@@ -1291,7 +1355,7 @@ export default function GroutEstimatorApp() {
                             </div>
                         </div>
                         
-                        {/* 🚨 [수정] 우측: 패키지/최소비용 라벨 (새로운 우측 빈 공간) 🚨 */}
+                        {/* 🚨 [유지] 우측: 패키지/최소비용 라벨 🚨 */}
                         <div className='flex flex-col items-end justify-end h-full pt-1'> 
                             
                             {/* A. 최소 출장비 적용 안내 (Clock 아이콘) */}
@@ -1372,7 +1436,7 @@ export default function GroutEstimatorApp() {
 
                 {/* 기본 정보 테이블 (현장 유형 제거됨) */}
                 
-                {/* ⭐️ [수정] 시공 및 할인 내역 - 테이블 구조로 변경 ⭐️ */}
+                {/* ⭐️ [유지] 시공 및 할인 내역 - 테이블 구조로 변경 ⭐️ */}
                 <div className="space-y-2 text-sm border-b border-gray-200 pb-3">
                     {/* 현장 유형 제거됨. 이 부분은 이제 패키지/최소비용 정보 아래에만 표시됩니다. */}
                     
@@ -1401,14 +1465,14 @@ export default function GroutEstimatorApp() {
 
                     {/* ⭐️ 항목별 테이블 시작 ⭐️ */}
                     <div className="mt-3">
-                        {/* 🚨 [수정] '금액' 컬럼 제거 🚨 */}
+                        {/* 🚨 [유지] '금액' 컬럼 제거 🚨 */}
                         <div className="grid grid-cols-10 font-extrabold text-xs text-gray-500 border-b border-gray-300 pb-1">
                             <span className="col-span-5 pl-1">시공 내역</span>
                             <span className="col-span-3 text-center">소재</span>
                             <span className="col-span-2 text-right pr-1">수량</span>
                         </div>
 
-                        {/* 🚨 [재수정] 항목별 가격 정보 완전 제거 🚨 */}
+                        {/* 🚨 [유지] 항목별 가격 정보 완전 제거 🚨 */}
                         {calculation.itemizedPrices
                             .filter(item => !item.isDiscount) // 할인 항목(리뷰)만 제외
                             .map(item => {
