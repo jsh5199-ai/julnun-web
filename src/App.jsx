@@ -310,20 +310,19 @@ const ColorPalette = ({ selectedColorId, onSelect }) => {
     // 타일 본체 색상은 흰색으로 고정
     const TILE_COLOR = '#ffffff'; 
     
-    // 🚨 [수정된 변수] 줄눈 선 너비 및 위치 조정 🚨
+    // 🚨 [수정된 변수] 줄눈 선 너비 증가 및 위치 조정 🚨
     const GROUT_LINE_WIDTH = 12; // 줄눈 선 너비 (가운데 십자 모양의 굵기)
     const TILE_DEMO_SIZE = 400; // 데모 영역 전체 크기 (임의 설정)
+    const centerOffset = TILE_DEMO_SIZE / 2;
+    const lineHalf = GROUT_LINE_WIDTH / 2;
 
-    // 가로/세로 중앙 줄눈 선을 위한 선형 그라디언트 정의
     const groutPattern = selectedColorData.code;
     const tilePattern = TILE_COLOR;
 
     // 중앙 십자 줄눈선 CSS 배경 이미지 생성
-    const centerOffset = TILE_DEMO_SIZE / 2;
-    const lineHalf = GROUT_LINE_WIDTH / 2;
-
+    // 교차점의 색상 통일을 위해 두 그라디언트 모두 선택 색상을 사용하고 겹치게 함
     const verticalGradient = `linear-gradient(to right, ${tilePattern} 0%, ${tilePattern} ${centerOffset - lineHalf}px, ${groutPattern} ${centerOffset - lineHalf}px, ${groutPattern} ${centerOffset + lineHalf}px, ${tilePattern} ${centerOffset + lineHalf}px, ${tilePattern} 100%)`;
-    const horizontalGradient = `linear-gradient(to bottom, ${tilePattern} 0%, ${tilePattern} ${centerOffset - lineHalf}px, ${groutPattern} ${centerOffset - lineHalf}px, ${groutPattern} ${centerOffset + lineHalf}px, ${tilePattern} ${centerOffset + lineHalf}px, ${tilePattern} 100%)`;
+    const horizontalGradient = `linear-gradient(to bottom, ${tilePattern} 0%, ${tilePattern} ${centerOffset - lineHalf}px, ${groutPattern} ${centerOffset - lineHalf}px, ${groutPattern} ${centerOffset + lineHalf}px, ${groutPattern} ${centerOffset + lineHalf}px, ${tilePattern} ${centerOffset + lineHalf}px, ${tilePattern} 100%)`;
 
 
     return (
@@ -351,19 +350,14 @@ const ColorPalette = ({ selectedColorId, onSelect }) => {
                         className="absolute inset-0 opacity-100 transition-colors duration-300"
                         style={{
                             // 가로/세로 그라디언트를 겹쳐서 십자 모양 생성
+                            // 쉼표로 구분하여 두 그라디언트를 겹치게 하여 교차점 색상 문제를 해결
                             backgroundImage: `${verticalGradient}, ${horizontalGradient}`,
                             backgroundSize: '100% 100%',
                             backgroundRepeat: 'no-repeat',
-                            // 겹치는 부분의 색상이 통일되도록 multiply 대신 normal 사용
-                            backgroundBlendMode: 'normal'
+                            backgroundBlendMode: 'normal' 
                         }}
                     >
-                        {/* 텍스트는 줄눈 영역 위에 띄워서 대비 확인용 */}
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
-                             <span className={`text-xs font-bold px-2 py-1 rounded-full shadow-sm ${selectedColorData.isDark ? 'bg-white/90 text-gray-900' : 'bg-gray-900/90 text-white'}`}>
-                                {selectedColorData.label} 적용
-                            </span>
-                        </div>
+                        {/* 🚨 [제거됨] 중앙 텍스트 레이어는 삭제되었습니다. */}
                     </div>
                 </div>
             </div>
