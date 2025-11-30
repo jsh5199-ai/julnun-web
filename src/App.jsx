@@ -232,6 +232,225 @@ const getPackageAreaIds = (pkg) => [
 ];
 
 // =================================================================
+// ⭐️ [유지] HEX/RGB 변환 헬퍼 함수 - 파일당 단 한 번만 선언 ⭐️
+// =================================================================
+
+// HEX 코드를 RGB 객체로 변환
+const hexToRgb = (hex) => {
+    if (!hex || hex.length !== 7) return { r: 0, g: 0, b: 0 };
+    const bigint = parseInt(hex.slice(1), 16);
+    const r = (bigint >> 16) & 255;
+    const g = (bigint >> 8) & 255;
+    const b = bigint & 255;
+    return { r, g, b };
+};
+
+// RGB 객체를 HEX 코드로 변환
+const rgbToHex = (r, g, b) => {
+    r = Math.round(Math.max(0, Math.min(255, r))).toString(16);
+    g = Math.round(Math.max(0, Math.min(255, g))).toString(16);
+    b = Math.round(Math.max(0, Math.min(255, b))).toString(16);
+    return `#${r.length === 1 ? '0' + r : r}${g.length === 1 ? '0' + g : g}${b.length === 1 ? '0' + b : b}`;
+};
+
+
+// =================================================================
+// [스타일] 애니메이션 정의 (유지 및 Tip용 추가)
+// =================================================================
+const GlobalStyles = () => (
+    <style>{`
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUpFadeOut { 0% { opacity: 1; transform: translateY(0); } 80% { opacity: 1; transform: translateY(-10px); } 100% { opacity: 0; transform: translateY(-20px); } }
+        
+        /* Tip 강조용 애니메이션 추가 */
+        @keyframes attentionPulse {
+            0%, 100% { box-shadow: 0 0 10px rgba(253, 230, 138, 0.8); }
+            50% { box-shadow: 0 0 15px rgba(253, 230, 138, 0.4); }
+        }
+        .animate-attention { animation: attentionPulse 2s infinite ease-in-out; }
+        
+        @keyframes professionalPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(100, 116, 139, 0.4); }
+            50% { box-shadow: 0 0 0 8px rgba(100, 116, 139, 0); }
+        }
+        /* 리뷰 버튼 애니메이션 복구 */
+        @keyframes shine {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .shine-effect {
+            background: #facc15;
+            background-image: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.7) 50%, rgba(255,255,255,0) 100%);
+            background-size: 200% 100%;
+            animation: shine 3s infinite;
+            color: #1e3a8a;
+        }
+
+        .animate-fade-in { animation: fadeIn 0.5s ease-out; }
+        .animate-slide-down { animation: slideDown 0.3s ease-out; }
+        .animate-toast { animation: slideUpFadeOut 3s forwards; }
+
+        .selection-box { transition: all 0.2s ease-in-out; }
+        .selection-selected {
+            border: 3px solid transparent;
+            background-color: #f3f4f6;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        }
+        .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom); }
+    `}</style>
+);
+
+// =================================================================
+// [데이터] (기존 데이터 유지)
+// =================================================================
+const HOUSING_TYPES = [
+    { id: 'new', label: '신축 아파트', multiplier: 1.0 },
+    { id: 'old', label: '구축/거주 중', multiplier: 1.0 },
+];
+
+const MATERIALS = [
+    {
+        id: 'poly', label: '폴리아스파틱', priceMod: 1.0,
+        description: '탄성과 광택이 우수하며 가성비가 좋습니다.',
+        badge: '일반', badgeColor: 'bg-gray-200 text-gray-700'
+    },
+    {
+        id: 'kerapoxy', label: '에폭시(무광/무펄)', priceMod: 1.8,
+        description: '내구성이 뛰어나고 매트한 질감.',
+        badge: '프리미엄', badgeColor: 'bg-indigo-500/10 text-indigo-700 border border-indigo-500/30'
+    },
+];
+
+const BATHROOM_AREAS = [
+    { id: 'bathroom_floor', label: '욕실 바닥', basePrice: 150000, icon: Bath, unit: '개소' },
+    { id: 'shower_booth', label: '샤워부스 벽 3면', basePrice: 150000, icon: Bath, unit: '구역' },
+    { id: 'bathtub_wall', label: '욕조 벽 3면', basePrice: 150000, icon: Bath, unit: '구역' },
+    { id: 'master_bath_wall', label: '안방욕실 벽 전체', basePrice: 300000, icon: Bath, unit: '구역' },
+    { id: 'common_bath_wall', label: '공용욕실 벽 전체', basePrice: 300000, icon: Bath, unit: '구역' },
+];
+
+const OTHER_AREAS = [
+    { id: 'entrance', label: '현관', basePrice: 50000, icon: DoorOpen, unit: '개소', desc: '' },
+    { id: 'balcony_laundry', label: '베란다/세탁실', basePrice: 100000, icon: LayoutGrid, unit: '개소', desc: '' },
+    { id: 'kitchen_wall', label: '주방 벽면', basePrice: 150000, icon: Utensils, unit: '구역', desc: '' },
+    { id: 'living_room', label: '거실 바닥', basePrice: 550000, icon: Sofa, unit: '구역', desc: '' },
+];
+
+const SERVICE_AREAS = [...BATHROOM_AREAS, ...OTHER_AREAS];
+
+const SILICON_AREAS = [
+    { id: 'silicon_bathtub', label: '욕조 테두리 교체', basePrice: 80000, icon: Eraser, unit: '개소', desc: '' },
+    {
+        id: 'silicon_sink',
+        label: '세면대+젠다이 교체',
+        basePrice: 30000,
+        icon: Eraser,
+        unit: '개소',
+        desc: ''
+    },
+    { id: 'silicon_living_baseboard', label: '거실 걸레받이 실리콘', basePrice: 400000, icon: Sofa, unit: '구역', desc: '' },
+];
+
+const ALL_AREAS = [...SERVICE_AREAS, ...SILICON_AREAS];
+
+const REVIEW_EVENTS = [
+    { id: 'soomgo_review', label: '숨고 리뷰이벤트', discount: 20000, icon: Star, desc: '시공 후기 작성 약속' },
+];
+
+const FAQ_ITEMS = [
+    { question: "Q1. 시공 시간은 얼마나 걸리나요?", answer: "시공범위에 따라 다르지만, 평균적으로 4~6시간 정도 소요되고 있으며 범위/소재에 따라 최대 2일 시공이 걸리는 경우도 있습니다." },
+    { question: "Q2. 줄눈 시공 후 바로 사용 가능한가요?", answer: "줄눈시공 후 폴리아스파틱은 6시간, 케라폭시는 2~3일, 스타라이크는 24시간 정도 양생기간이 필요합니다. 그 시간 동안은 물 사용을 자제해주시는 것이 가장 좋습니다." },
+    { question: "Q3. 왜 줄눈 시공을 해야 하나요?", answer: "줄눈은 곰팡이와 물때가 끼는 것을 방지하고, 타일 틈새 오염을 막아 청소가 쉬워지며, 인테리어 효과까지 얻을 수 있는 필수 시공입니다." },
+    { question: "Q4. A/S 기간 및 조건은 어떻게 되나요?", answer: "시공 후 폴리아스파틱은 2년, 에폭시는 5년의 A/S를 제공합니다. 단, 고객 부주의나 타일 문제로 인한 하자는 소액의 출장비가 발생할 수 있습니다." },
+    { question: "Q5. 구축 아파트도 시공이 가능한가요?", answer: "네, 가능합니다. 기존 줄눈을 제거하는 그라인딩 작업이 추가로 필요하며, 현재 견적은 신축/구축 동일하게 적용됩니다." },
+];
+
+const YOUTUBE_VIDEOS = [
+    { id: 'XekG8hevWpA', title: '에폭시 시공영상 (벽면/바닥)', label: '에폭시 시공영상' },
+    { id: 'M6Aq_VVaG0s', title: '밑작업 영상 (라인 그라인딩)', label: '밑작업 영상' },
+];
+
+const getEmbedUrl = (videoId) => `https://www.youtube.com/embed/${videoId}?autoplay=0&mute=1&rel=0`;
+
+const OTHER_AREA_IDS_FOR_PACKAGE_EXCLUSION = ['entrance', 'balcony_laundry', 'kitchen_wall', 'living_room', 'silicon_bathtub', 'silicon_sink', 'silicon_living_baseboard'];
+
+const ORIGINAL_MIXED_PACKAGES = [
+    { id: 'P_MIX_01', price: 750000, label: '혼합패키지 01', E_areas: [['bathroom_floor', 2]], P_areas: [['shower_booth', 1]] },
+    { id: 'P_MIX_02', price: 750000, label: '혼합패키지 02', E_areas: [['bathroom_floor', 2]], P_areas: [['bathtub_wall', 1]] },
+    { id: 'P_MIX_03_OLD', price: 800000, label: '혼합패키지 03 (구형)', E_areas: [['bathroom_floor', 2]], P_areas: [['master_bath_wall', 1]] },
+    { id: 'P_MIX_04_OLD', price: 800000, label: '혼합패키지 04 (구형)', E_areas: [['bathroom_floor', 2]], P_areas: [['common_bath_wall', 1]] },
+    { id: 'P_MIX_05_OLD', price: 1050000, label: '혼합패키지 05 (구형)', E_areas: [['bathroom_floor', 2]], P_areas: [['master_bath_wall', 1], ['common_bath_wall', 1]] },
+    { id: 'P_MIX_06', price: 830000, label: '혼합패키지 06', E_areas: [['bathroom_floor', 2]], P_areas: [['shower_booth', 1]] },
+    { id: 'P_MIX_07', price: 830000, label: '혼합패키지 07', E_areas: [['bathroom_floor', 2]], P_areas: [['bathtub_wall', 1]] },
+    { id: 'P_MIX_08', price: 950000, label: '혼합패키지 08', E_areas: [['bathroom_floor', 2]], P_areas: [['bathtub_wall', 1], ['shower_booth', 1]] },
+    { id: 'P_MIX_09', price: 1200000, label: '혼합패키지 09', E_areas: [['bathroom_floor', 2]], P_areas: [['master_bath_wall', 1], ['common_bath_wall', 1]] },
+    { id: 'P_MIX_10', price: 900000, label: '혼합패키지 10', E_areas: [['bathroom_floor', 2], ['shower_booth', 1]], P_areas: [] },
+    { id: 'P_MIX_11', price: 900000, label: '혼합패키지 11', E_areas: [['bathroom_floor', 2], ['bathtub_wall', 1]], P_areas: [] },
+    { id: 'P_MIX_13', price: 1100000, label: '혼합패키지 13', E_areas: [['bathroom_floor', 2], ['shower_booth', 1]], P_areas: [] },
+    { id: 'P_MIX_14', price: 1100000, label: '혼합패키지 14', E_areas: [['bathroom_floor', 2], ['bathtub_wall', 1]], P_areas: [] },
+];
+
+const CUSTOM_MIXED_PACKAGES = [
+    { id: 'P_MIX_NEW_A', price: 1150000, label: '혼합벽면A (바닥/안방벽E, 공용벽P) 115만', E_areas: [['bathroom_floor', 2], ['master_bath_wall', 1]], P_areas: [['common_bath_wall', 1]] },
+    { id: 'P_MIX_NEW_B', price: 1150000, label: '혼합벽면B (바닥/공용벽E, 안방벽P) 115만', E_areas: [['bathroom_floor', 2], ['common_bath_wall', 1]], P_areas: [['master_bath_wall', 1]] },
+];
+
+const NEW_USER_PACKAGES = [
+    { id: 'USER_E_700K_MASTER', price: 700000, label: '에폭시 벽면 패키지 (70만)', E_areas: [['bathroom_floor', 1], ['master_bath_wall', 1]], P_areas: [], isFlexible: true, flexibleGroup: ['master_bath_wall', 'common_bath_wall'] },
+    { id: 'USER_E_700K_COMMON', price: 700000, label: '에폭시 벽면 패키지 (70만)', E_areas: [['bathroom_floor', 1], ['common_bath_wall', 1]], P_areas: [], isFlexible: true, flexibleGroup: ['master_bath_wall', 'common_bath_wall'] },
+    { id: 'USER_P_500K_MASTER', price: 500000, label: '폴리 벽면 패키지 (50만)', E_areas: [], P_areas: [['bathroom_floor', 1], ['master_bath_wall', 1]], isFlexible: true, flexibleGroup: ['master_bath_wall', 'common_bath_wall'] },
+    { id: 'USER_P_500K_COMMON', price: 500000, label: '폴리 벽면 패키지 (50만)', E_areas: [], P_areas: [['bathroom_floor', 1], ['common_bath_wall', 1]], isFlexible: true, flexibleGroup: ['master_bath_wall', 'common_bath_wall'] },
+    { id: 'USER_E_550K_FLOOR_2', price: 550000, label: '에폭시 바닥 2곳 (55만)', E_areas: [['bathroom_floor', 2]], P_areas: [], isFlexible: false, },
+    { id: 'USER_E_800K_FLOOR2_SHOWER1', price: 800000, label: '에폭시 바닥 2곳 + 샤워벽 1곳 (80만)', E_areas: [['bathroom_floor', 2], ['shower_booth', 1]], P_areas: [], isFlexible: false, },
+    { id: 'USER_E_550K_FLOOR1_SHOWER1', price: 550000, label: '에폭시 바닥 1곳 + 샤워벽 1곳 (55만)', E_areas: [['bathroom_floor', 1], ['shower_booth', 1]], P_areas: [], isFlexible: false, },
+    { id: 'USER_E_350K_BATH', price: 350000, label: '에폭시 바닥 1곳 (35만)', E_areas: [['bathroom_floor', 1]], P_areas: [], isFlexible: false, },
+];
+
+const HARDCODED_PACKAGES = [
+    { id: 'POLY_550K', price: 550000, label: '폴리 5종 패키지 (55만)', P_areas: [['bathroom_floor', 2], ['shower_booth', 1], ['bathtub_wall', 1]], E_areas: [] },
+    { id: 'POLY_700K_WALLS', price: 700000, label: '폴리 벽 전체 5종 패키지 (70만)', P_areas: [['bathroom_floor', 2], ['master_bath_wall', 1], ['common_bath_wall', 1]], E_areas: [] },
+    { id: 'EPOXY_1300K_WALLS', price: 1300000, label: '에폭시 벽 전체 5종 패키지 (130만)', P_areas: [], E_areas: [['bathroom_floor', 2], ['master_bath_wall', 1], ['common_bath_wall', 1]] },
+];
+
+
+const MIXED_PACKAGES = [
+    ...NEW_USER_PACKAGES,
+    ...CUSTOM_MIXED_PACKAGES,
+    ...ORIGINAL_MIXED_PACKAGES,
+    ...HARDCODED_PACKAGES,
+];
+
+
+const getPackageAreaIds = (pkg) => [
+    ...pkg.P_areas.map(([id]) => id),
+    ...pkg.E_areas.map(([id]) => id),
+];
+
+// =================================================================
+// ⭐️ [유지] HEX/RGB 변환 헬퍼 함수 - 파일당 단 한 번만 선언 ⭐️
+// =================================================================
+
+// HEX 코드를 RGB 객체로 변환
+const hexToRgb = (hex) => {
+    if (!hex || hex.length !== 7) return { r: 0, g: 0, b: 0 };
+    const bigint = parseInt(hex.slice(1), 16);
+    const r = (bigint >> 16) & 255;
+    const g = (bigint >> 8) & 255;
+    const b = bigint & 255;
+    return { r, g, b };
+};
+
+// RGB 객체를 HEX 코드로 변환
+const rgbToHex = (r, g, b) => {
+    r = Math.round(Math.max(0, Math.min(255, r))).toString(16);
+    g = Math.round(Math.max(0, Math.min(255, g))).toString(16);
+    b = Math.round(Math.max(0, Math.min(255, b))).toString(16);
+    return `#${r.length === 1 ? '0' + r : r}${g.length === 1 ? '0' + g : g}${b.length === 1 ? '0' + b : b}`;
+};
+
+
+// =================================================================
 // [컴포넌트] (패키지 토스트, 모달, 아코디언 등 유지)
 // =================================================================
 
@@ -353,7 +572,7 @@ const ColorPalette = React.memo(({ selectedGroutColor, handleColorSelect, finalS
     return (
         <div className='mt-5 pt-3 border-t border-gray-100 animate-fade-in'>
             <h3 className="text-base font-extrabold flex items-center gap-2 mb-3 text-gray-800">
-                <Palette className="h-4 w-4 text-indigo-600" /> 2-1. 줄눈 색상 미리보기
+                <Palette className="h-4 w-4 text-indigo-600" /> 2-1. 줄눈 색상 선택 및 밝기 조절
             </h3>
 
             {/* 시뮬레이션 컨테이너 */}
@@ -479,7 +698,7 @@ const ColorPalette = React.memo(({ selectedGroutColor, handleColorSelect, finalS
             `}</style>
             <div className='mt-5 pt-3 border-t border-gray-100'>
                 <h4 className="text-sm font-extrabold flex items-center gap-2 mb-3 text-gray-700">
-                    <TrendingUp className="h-4 w-4 text-indigo-600" /> 밝기 조색
+                    <TrendingUp className="h-4 w-4 text-indigo-600" /> 밝기 조절 (톤 변경)
                 </h4>
                 <div className='flex items-center justify-between gap-3'>
                     <span className='text-sm font-bold text-gray-600 w-12 text-left'>어둡게</span>
@@ -512,12 +731,12 @@ const ColorPalette = React.memo(({ selectedGroutColor, handleColorSelect, finalS
             {/* ⭐️ [최종 업데이트] 줄눈 색상 선택 팁 문구 (강조 및 흐름 개선) ⭐️ */}
             <div className='mt-4 p-3 bg-yellow-100 rounded-lg shadow-md border border-yellow-300 animate-attention'>
                 <p className='text-sm text-gray-800 text-center leading-snug font-semibold'>
-                    <Zap size={16} className='inline mr-1 text-yellow-600'/> 팁: 타일톤보다 한톤 어둡게 시공하면 관리에 용이합니다.
+                    <Zap size={16} className='inline mr-1 text-yellow-600'/> 팁: 색상은 타일톤보다 한톤 어둡게 시공할 경우<br className="sm:hidden" /> 관리가 쉽고, 청소주기가 길어집니다.
                 </p>
             </div>
             
             <p className='text-xs text-gray-500 mt-3 text-center'>
-                * 타일의 간격/음영 조명에 따라 색상차이가 있을 수 있습니다.
+                * 화면 해상도에 따라 실제 색상과 차이가 있을 수 있습니다.
             </p>
         </div>
     );
