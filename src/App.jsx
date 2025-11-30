@@ -16,14 +16,14 @@ const DEFAULT_TILE_IMAGE_URL = '/default_tile.jpg'; 
 
 const GROUT_COLORS = [
   { id: 'white', code: '#ffffff', label: '화이트', isDark: false },
-  { id: 'moca_beige', code: '#dbcbbd', label: '모카 베이지', isDark: false },
-  { id: 'sand_brown', code: '#887965', label: '샌드 브라운', isDark: true },
-  { id: 'vintage_brown', code: '#96877e', label: '빈티지 브라운', isDark: true },
-  { id: 'oat_brown', code: '#b0a9a4', label: '오트 브라운', isDark: false },
-  { id: 'burnt_brown', code: '#827e7b', label: '번트 브라운', isDark: true },
-  { id: 'silver_gray', code: '#afb0aa', label: '실버 그레이', isDark: false },
-  { id: 'medium_gray', code: '#848685', label: '미디움 그레이', isDark: true },
-  { id: 'dark_gray', code: '#565556', label: '다크 그레이', isDark: true },
+  { id: 'moca_beige', code: '#dbcbbd', label: '131번', isDark: false },
+  { id: 'sand_brown', code: '#887965', label: '133번', isDark: true },
+  { id: 'vintage_brown', code: '#96877e', label: '141번', isDark: true },
+  { id: 'oat_brown', code: '#b0a9a4', label: '180번', isDark: false },
+  { id: 'burnt_brown', code: '#827e7b', label: '187번', isDark: true },
+  { id: 'silver_gray', code: '#afb0aa', label: '111번', isDark: false },
+  { id: 'medium_gray', code: '#848685', label: '112번', isDark: true },
+  { id: 'dark_gray', code: '#565556', label: '119번', isDark: true },
 ];
 
 
@@ -69,7 +69,7 @@ const GlobalStyles = () => (
 );
 
 // =================================================================
-// [데이터] (유지)
+// [데이터] 
 // =================================================================
 const HOUSING_TYPES = [
   { id: 'new', label: '신축 아파트', multiplier: 1.0 },
@@ -102,22 +102,20 @@ const BATHROOM_AREAS = [
 const OTHER_AREAS = [
   // 현관: Poly 5만
   { id: 'entrance', label: '현관', basePrice: 50000, icon: DoorOpen, unit: '개소' }, 
-  // 베란다/세탁실: Poly 10만, Epoxy 25만 -> **설명 문구 삭제**
-  { id: 'balcony_laundry', label: '베란다/세탁실', basePrice: 100000, icon: LayoutGrid, unit: '개소', desc: '' }, 
-  // 주방 벽면: Poly 15만, Epoxy 25만 -> **설명 문구 삭제**
-  { id: 'kitchen_wall', label: '주방 벽면', basePrice: 150000, icon: Utensils, unit: '구역', desc: '' },
-  // 거실: Poly 55만, Epoxy 110만 -> **설명 문구 삭제**
-  { id: 'living_room', label: '거실 바닥', basePrice: 550000, icon: Sofa, unit: '구역', desc: '' },
+  // 베란다/세탁실: Poly 10만, Epoxy 25만
+  { id: 'balcony_laundry', label: '베란다/세탁실', basePrice: 100000, icon: LayoutGrid, unit: '개소', desc: 'Poly 10만 / Epoxy 25만' }, 
+  // 주방 벽면: Poly 15만, Epoxy 25만
+  { id: 'kitchen_wall', label: '주방 벽면', basePrice: 150000, icon: Utensils, unit: '구역', desc: 'Poly 15만 / Epoxy 25만' },
+  // 거실: Poly 55만, Epoxy 110万
+  { id: 'living_room', label: '거실 바닥', basePrice: 550000, icon: Sofa, unit: '구역', desc: 'Poly 55만 / Epoxy 110만 (복도,주방 포함)' },
 ];
 
 const SERVICE_AREAS = [...BATHROOM_AREAS, ...OTHER_AREAS]; // 현관 포함됨
 
 const SILICON_AREAS = [
-  // 욕조 테두리 교체: 단독 8만 / 패키지시 5만 -> **설명 문구 삭제**
-  { id: 'silicon_bathtub', label: '욕조 테두리 교체', basePrice: 80000, icon: Eraser, unit: '개소', desc: '' },
+  { id: 'silicon_bathtub', label: '욕조 테두리 교체', basePrice: 80000, icon: Eraser, unit: '개소', desc: '단독 8만 / 패키지시 5만' },
   { id: 'silicon_sink', label: '세면대+젠다이 교체', basePrice: 30000, icon: Eraser, unit: '개소', desc: '오염된 실리콘 제거 후 재시공' },
-  // 거실 걸레받이 실리콘: 단독 40만 / 패키지시 35만 -> **설명 문구 삭제**
-  { id: 'silicon_living_baseboard', label: '거실 걸레받이 실리콘', basePrice: 400000, icon: Sofa, unit: '구역', desc: '' },
+  { id: 'silicon_living_baseboard', label: '거실 걸레받이 실리콘', basePrice: 400000, icon: Sofa, unit: '구역', desc: '단독 40만 / 패키지시 35만' },
 ];
 
 const ALL_AREAS = [...SERVICE_AREAS, ...SILICON_AREAS];
@@ -145,7 +143,7 @@ const getEmbedUrl = (videoId) => `https://www.youtube.com/embed/${videoId}?autop
 const OTHER_AREA_IDS_FOR_PACKAGE_EXCLUSION = ['entrance', 'balcony_laundry', 'kitchen_wall', 'living_room', 'silicon_bathtub', 'silicon_sink', 'silicon_living_baseboard'];
 
 
-// ⭐️ 패키지 정의 시, 기타 범위를 포함하지 않도록 변경 (유지)
+// ⭐️ 패키지 정의 시, 기타 범위를 포함하지 않도록 변경
 const ORIGINAL_MIXED_PACKAGES = [
     { id: 'P_MIX_01', price: 750000, label: '혼합패키지 01', E_areas: [['bathroom_floor', 2]], P_areas: [['shower_booth', 1]] },
     { id: 'P_MIX_02', price: 750000, label: '혼합패키지 02', E_areas: [['bathroom_floor', 2]], P_areas: [['bathtub_wall', 1]] },
@@ -205,7 +203,7 @@ const getPackageAreaIds = (pkg) => [
 ];
 
 // =================================================================
-// ⭐️ [컴포넌트 수정] ColorPalette: 줄눈 선 렌더링 로직 통합 ⭐️
+// [컴포넌트] (수정)
 // =================================================================
 
 const PackageToast = ({ isVisible, onClose, label }) => {
@@ -305,17 +303,23 @@ const Accordion = ({ question, answer }) => {
     );
 };
 
-// ⭐️ [수정 완료] ColorPalette: 줄눈 선 렌더링 로직 통합 ⭐️
+// ⭐️ [확장된 컴포넌트] 색상 선택 팔레트 및 시뮬레이션 렌더링 ⭐️
 const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageURL }) => {
+    // 🚨 오류 수정: selectedColorData를 찾지 못하면 GROUT_COLORS[0]을 기본값으로 설정
     const selectedColorData = GROUT_COLORS.find(c => c.id === selectedColorId) || GROUT_COLORS[0];
 
+    // 타일 본체 색상은 기본적으로 흰색으로 고정 (이미지 없을 경우)
     const TILE_COLOR = '#ffffff'; 
-    const GROUT_LINE_WIDTH = 12; 
+    
+    const GROUT_LINE_WIDTH = 12; // 줄눈 선 너비 (가운데 십자 모양의 굵기)
     const lineHalf = GROUT_LINE_WIDTH / 2;
 
     const groutPattern = selectedColorData.code;
+    const tilePattern = TILE_COLOR;
     
-    // 1. 가로줄 (to bottom)
+    // 💡 [최종 수정] 음영 제거, 순수한 단색 채우기로 변경 (교차점 조화롭게 연결) 💡
+    
+    // 1. 가로줄 (to bottom) - 순수 단색 적용
     const horizontalGradient = `linear-gradient(to bottom, 
                                         transparent 0%, 
                                         transparent calc(50% - ${lineHalf}px), 
@@ -324,7 +328,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                                         transparent calc(50% + ${lineHalf}px), 
                                         transparent 100%)`;
 
-    // 2. 세로줄 (to right)
+    // 2. 세로줄 (to right) - 순수 단색 적용
     const verticalGradient = `linear-gradient(to right, 
                                         transparent 0%, 
                                         transparent calc(50% - ${lineHalf}px), 
@@ -332,19 +336,11 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                                         ${groutPattern} calc(50% + ${lineHalf}px), 
                                         transparent calc(50% + ${lineHalf}px), 
                                         transparent 100%)`;
-    
-    // 3. 타일 배경 (이미지 또는 단색)
-    const tileBackground = tileImageURL ? `url(${tileImageURL})` : TILE_COLOR;
 
-    // ⭐️ 핵심 수정: 줄눈 그라데이션과 타일 배경을 하나의 스타일 객체로 통합 ⭐️
-    const combinedBackgroundStyle = {
-        // 줄눈 선 2개를 가장 앞에, 타일 이미지를 가장 뒤에 배치
-        backgroundImage: `${verticalGradient}, ${horizontalGradient}, ${tileBackground}`,
-        backgroundRepeat: 'no-repeat, no-repeat, no-repeat',
-        backgroundSize: '100% 100%, 100% 100%, cover', // 줄눈선은 전체 영역, 타일 이미지는 커버
-        backgroundPosition: 'center center', // 모두 중앙에 위치
-        backgroundColor: TILE_COLOR, 
-    };
+    // 시뮬레이션 배경 스타일
+    const simulationBackgroundStyle = tileImageURL 
+        ? { backgroundImage: `url(${tileImageURL})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+        : { backgroundColor: TILE_COLOR };
 
     return (
         <div className='mt-5 pt-3 border-t border-gray-100 animate-fade-in'>
@@ -352,9 +348,32 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                 <Palette className="h-4 w-4 text-indigo-600" /> 2-1. 줄눈 색상 미리보기 및 선택
             </h3>
             
-            {/* 🚨🚨 줄눈 시뮬레이션 영역 - 상위 div에 모든 스타일 통합 🚨🚨 */}
-            <div className={`w-full aspect-video mx-auto overflow-hidden relative transition-all duration-300`} style={combinedBackgroundStyle}>
-               {/* 줄눈 선을 그리는 내부 div는 제거됨 */}
+            {/* 🚨🚨 줄눈 시뮬레이션 영역 - 테두리 및 패딩 제거 🚨🚨 */}
+            <div className={`transition-all duration-300`} style={simulationBackgroundStyle}>
+                
+                {/* ⭐️ 시뮬레이션 컨테이너: 테두리 및 max-h 제거, 부모에 꽉 차게 조정 ⭐️ */}
+                <div 
+                    className="w-full aspect-video mx-auto overflow-hidden relative" // aspect-video로 가로 세로 비율 유지
+                >
+                    
+                    {/* 타일 베이스 */}
+                    <div className="absolute inset-0" style={{ backgroundImage: simulationBackgroundStyle.backgroundImage, backgroundSize: simulationBackgroundStyle.backgroundSize, backgroundPosition: simulationBackgroundStyle.backgroundPosition }}></div>
+                    
+                    {/* ⭐️ 줄눈 선 시뮬레이션 레이어 (가로+세로 1줄씩) ⭐️ */}
+                    <div 
+                        className="absolute inset-0 opacity-100 transition-colors duration-300"
+                        style={{
+                            backgroundColor: 'transparent', 
+                            backgroundImage: `${horizontalGradient}, ${verticalGradient}`,
+                            backgroundSize: '100% 100%',
+                            backgroundPosition: 'center center', // 중앙에 고정
+                            backgroundRepeat: 'no-repeat',
+                            backgroundBlendMode: 'normal' 
+                        }}
+                    >
+                        {/* 텍스트 제거 */}
+                    </div>
+                </div>
             </div>
             {/* 🚨🚨 줄눈 시뮬레이션 영역 끝 🚨🚨 */}
 
@@ -745,7 +764,7 @@ export default function App() {
       
       let finalUnitBasePrice = area.basePrice; // 환경 배율 적용 전의 최종 단가
       
-      // 🚨 [유지] 소재에 따른 최종 단가 설정 🚨
+      // 🚨 [수정] 소재에 따른 최종 단가 설정 🚨
       if (area.id === 'balcony_laundry') {
           finalUnitBasePrice = isEpoxy ? 250000 : 100000; // Poly 10만 / Epoxy 25만
       } else if (area.id === 'kitchen_wall') {
@@ -1005,9 +1024,6 @@ export default function App() {
                 {mat.label.split('(')[0].trim()}
               </button>
             ))}
-            <button onClick={() => setShowMaterialModal(true)} className="w-6 h-6 flex items-center justify-center rounded-full bg-indigo-500 text-white/90 hover:bg-indigo-600 transition active:scale-95 flex-shrink-0">
-              <Info size={12} />
-            </button>
           </div>
         </div>
     );
@@ -1168,7 +1184,7 @@ export default function App() {
                 <div className="text-base font-semibold">{type.label}</div>
               </button>
             ))}
-            </div>
+          </div>
         </section>
 
         {/* ⭐️ --- 2. 줄눈소재 안내 (소재/옵션 선택 및 색상 팔레트 포함) --- ⭐️ */}
@@ -1223,7 +1239,7 @@ export default function App() {
             ))}
           </div>
           
-          {/* ⭐️ [반영 완료] 색상 선택 팔레트 (줄눈선 통합 로직 적용) ⭐️ */}
+          {/* ⭐️ [반영 완료] 색상 선택 팔레트 (테두리, 패딩 제거) ⭐️ */}
           <ColorPalette selectedColorId={selectedGroutColor} onSelect={setSelectedGroutColor} onTileImageUpload={handleTileImageUpload} tileImageURL={tileImageURL} />
 
           {/* --- 재료 상세 비교 버튼 영역 (유지) --- */}
