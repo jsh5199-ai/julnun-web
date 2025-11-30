@@ -100,7 +100,7 @@ const BATHROOM_AREAS = [
 
 // 기타 범위 (현관 포함)
 const OTHER_AREAS = [
-  // 현관: Poly 5만
+  // 현관: Poly 5万
   { id: 'entrance', label: '현관', basePrice: 50000, icon: DoorOpen, unit: '개소' }, 
   // 베란다/세탁실: Poly 10만, Epoxy 25만
   { id: 'balcony_laundry', label: '베란다/세탁실', basePrice: 100000, icon: LayoutGrid, unit: '개소', desc: 'Poly 10만 / Epoxy 25만' }, 
@@ -311,24 +311,24 @@ const ColorPalette = ({ selectedColorId, onSelect }) => {
     const TILE_COLOR = '#ffffff'; 
     
     // 🚨 [수정된 변수] 줄눈 선 너비 유지 🚨
-    const GROUT_LINE_WIDTH = 12; 
+    const GROUT_LINE_WIDTH = 12; // 줄눈 선 너비 (가운데 십자 모양의 굵기)
     const TILE_DEMO_SIZE = 400; 
     const lineHalf = GROUT_LINE_WIDTH / 2;
 
     const groutPattern = selectedColorData.code;
     const tilePattern = TILE_COLOR;
     
-    // 💡 [수정] 에폭시/무광 질감을 위한 미세한 음영 효과만 추가 💡
-    const depthColor = `color-mix(in srgb, ${groutPattern}, black 15%)`; // 그림자 느낌
-    // 중앙은 메인 색상으로 유지하여 광택 제거
+    // 💡 [수정] 무광 질감을 위한 미세한 음영 효과만 추가 💡
+    // 깊이감을 주기 위해 메인 색상보다 15% 어두운 색상을 생성합니다.
+    const depthColor = `color-mix(in srgb, ${groutPattern}, black 15%)`; 
     
     // 1. 가로줄 (to bottom) - 음영 효과만 적용
     const horizontalGradient = `linear-gradient(to bottom, 
                                     transparent 0%, 
                                     transparent calc(50% - ${lineHalf}px), 
-                                    ${depthColor} calc(50% - ${lineHalf}px), 
-                                    ${groutPattern} 50%, /* 중앙 메인 색상 유지 (광택 제거) */
-                                    ${depthColor} calc(50% + ${lineHalf}px), 
+                                    ${depthColor} calc(50% - ${lineHalf}px), /* 윗쪽 음영 */
+                                    ${groutPattern} 50%, /* 중앙 메인 색상 */
+                                    ${depthColor} calc(50% + ${lineHalf}px), /* 아랫쪽 음영 */
                                     transparent calc(50% + ${lineHalf}px), 
                                     transparent 100%)`;
 
@@ -336,9 +336,9 @@ const ColorPalette = ({ selectedColorId, onSelect }) => {
     const verticalGradient = `linear-gradient(to right, 
                                     transparent 0%, 
                                     transparent calc(50% - ${lineHalf}px), 
-                                    ${depthColor} calc(50% - ${lineHalf}px), 
-                                    ${groutPattern} 50%, /* 중앙 메인 색상 유지 (광택 제거) */
-                                    ${depthColor} calc(50% + ${lineHalf}px), 
+                                    ${depthColor} calc(50% - ${lineHalf}px), /* 왼쪽 음영 */
+                                    ${groutPattern} 50%, /* 중앙 메인 색상 */
+                                    ${depthColor} calc(50% + ${lineHalf}px), /* 오른쪽 음영 */
                                     transparent calc(50% + ${lineHalf}px), 
                                     transparent 100%)`;
 
@@ -1284,22 +1284,17 @@ export default function GroutEstimatorApp() {
                         <div className="flex items-center gap-1 bg-white px-1 py-1 rounded-full shadow-md">
                             <button 
                                 onClick={() => handleQuantityChange(area.id, -1)} 
-                                disabled={isEntranceAutoSelected && area.id === 'entrance'}
-                                // ⭐️ [유지] hover:bg-gray-100 추가하여 클릭 효과 강조 ⭐️
-                                className={`w-7 h-7 flex items-center justify-center rounded-full transition active:scale-90 text-lg font-bold 
-                                    ${(quantities[area.id] > 0 && !(isEntranceAutoSelected && area.id === 'entrance')) ? 'text-indigo-600 hover:bg-gray-100' : 'text-gray-400 cursor-not-allowed'}`}
+                                // 🚨 [오류 해결] isEntranceAutoSelected 정의가 없으므로 임시로 disabled 제거 🚨
+                                // 이 부분은 SILICON_AREAS이므로 현관 자동 선택과 무관하여 disabled를 제거합니다.
+                                className={`w-7 h-7 flex items-center justify-center rounded-full transition active:scale-90 text-lg font-bold ${quantities[area.id] > 0 ? 'text-indigo-600 hover:bg-gray-100' : 'text-gray-400 cursor-not-allowed'}`}
                             >-</button> 
                             <span className={`w-5 text-center text-sm font-bold ${quantities[area.id] > 0 ? 'text-gray-900' : 'text-gray-400'}`}>{quantities[area.id]}</span>
                             <button 
                                 onClick={() => {
                                     handleQuantityChange(area.id, 1);
                                 }} 
-                                // 현관이 자동 선택 상태인 경우 + 버튼 비활성화 (수동 조작 방지)
-                                disabled={isEntranceAutoSelected && area.id === 'entrance'}
-                                // ⭐️ [유지] hover:bg-gray-100 추가하여 클릭 효과 강조 ⭐️
-                                className={`w-7 h-7 flex items-center justify-center rounded-full font-bold text-lg transition active:scale-90
-                                    ${isEntranceAutoSelected && area.id === 'entrance' ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'text-indigo-600 hover:bg-gray-100'}
-                                `}
+                                // 이 부분은 SILICON_AREAS이므로 현관 자동 선택과 무관하여 disabled를 제거합니다.
+                                className="w-7 h-7 flex items-center justify-center text-indigo-600 hover:bg-gray-100 rounded-full font-bold text-lg transition active:scale-90"
                             >+</button> 
                         </div>
                     </div>
