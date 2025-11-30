@@ -164,13 +164,19 @@ const CUSTOM_MIXED_PACKAGES = [
 ];
 
 const NEW_USER_PACKAGES = [
+    // 에폭시 혼합 패키지 (70만) - 현관 제외 (기존 유지)
     { id: 'USER_E_700K_MASTER', price: 700000, label: '에폭시 벽면 패키지 (70만)', E_areas: [['bathroom_floor', 1], ['master_bath_wall', 1]], P_areas: [], isFlexible: true, flexibleGroup: ['master_bath_wall', 'common_bath_wall'] },
     { id: 'USER_E_700K_COMMON', price: 700000, label: '에폭시 벽면 패키지 (70만)', E_areas: [['bathroom_floor', 1], ['common_bath_wall', 1]], P_areas: [], isFlexible: true, flexibleGroup: ['master_bath_wall', 'common_bath_wall'] },
+    // 폴리 혼합 패키지 (50만) - 현관 제외 (기존 유지)
     { id: 'USER_P_500K_MASTER', price: 500000, label: '폴리 벽면 패키지 (50만)', E_areas: [], P_areas: [['bathroom_floor', 1], ['master_bath_wall', 1]], isFlexible: true, flexibleGroup: ['master_bath_wall', 'common_bath_wall'] },
     { id: 'USER_P_500K_COMMON', price: 500000, label: '폴리 벽면 패키지 (50만)', E_areas: [], P_areas: [['bathroom_floor', 1], ['common_bath_wall', 1]], isFlexible: true, flexibleGroup: ['master_bath_wall', 'common_bath_wall'] },
+    // 🚨 [신규 추가 1] 욕실 바닥 2곳 에폭시 55만 고정
     { id: 'USER_E_550K_FLOOR_2', price: 550000, label: '에폭시 바닥 2곳 (55만)', E_areas: [['bathroom_floor', 2]], P_areas: [], isFlexible: false, },
+    // 🚨 [신규 추가 2] 욕실 바닥 2곳 + 샤워부스 벽 3면 에폭시 80만 고정
     { id: 'USER_E_800K_FLOOR2_SHOWER1', price: 800000, label: '에폭시 바닥 2곳 + 샤워벽 1곳 (80만)', E_areas: [['bathroom_floor', 2], ['shower_booth', 1]], P_areas: [], isFlexible: false, },
+    // 🚨 [신규 추가 3] 욕실 바닥 1곳 + 샤워부스 벽 3면 에폭시 55만 고정
     { id: 'USER_E_550K_FLOOR1_SHOWER1', price: 550000, label: '에폭시 바닥 1곳 + 샤워벽 1곳 (55만)', E_areas: [['bathroom_floor', 1], ['shower_booth', 1]], P_areas: [], isFlexible: false, },
+    // 🚨 [기존 유지] 욕실 바닥 1곳 에폭시 35만 고정 패키지 
     { id: 'USER_E_350K_BATH', price: 350000, label: '에폭시 바닥 1곳 (35만)', E_areas: [['bathroom_floor', 1]], P_areas: [], isFlexible: false, },
 ];
 
@@ -180,12 +186,14 @@ const HARDCODED_PACKAGES = [
     { id: 'EPOXY_1300K_WALLS', price: 1300000, label: '에폭시 벽 전체 5종 패키지 (130만)', P_areas: [], E_areas: [['bathroom_floor', 2], ['master_bath_wall', 1], ['common_bath_wall', 1]] },
 ];
 
+
 const MIXED_PACKAGES = [
     ...NEW_USER_PACKAGES, 
     ...CUSTOM_MIXED_PACKAGES,
     ...ORIGINAL_MIXED_PACKAGES, 
     ...HARDCODED_PACKAGES,
 ];
+
 
 const getPackageAreaIds = (pkg) => [
     ...pkg.P_areas.map(([id]) => id),
@@ -197,6 +205,8 @@ const getPackageAreaIds = (pkg) => [
 // =================================================================
 
 const PackageToast = ({ isVisible, onClose, label }) => {
+    const toastLabel = label || '패키지 할인';
+    
     useEffect(() => {
         if (isVisible) {
             const timer = setTimeout(() => {
@@ -338,7 +348,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
 
                     {/* ⭐️ 3. 줄눈 십자가 (HTML Div로 직접 그림) - z-index 10 (최상단) ⭐️ */}
                     
-                    {/* 세로 줄 */}
+                    {/* 세로 줄 (그림자 제거됨) */}
                     <div 
                         className="absolute top-0 bottom-0 left-1/2"
                         style={{
@@ -346,11 +356,11 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                             backgroundColor: selectedColorData.code,
                             transform: 'translateX(-50%)',
                             zIndex: 10,
-                            boxShadow: '0 0 2px rgba(0,0,0,0.1)' // 살짝 그림자 추가해서 입체감
+                            // 💡 boxShadow 제거
                         }}
                     ></div>
 
-                    {/* 가로 줄 */}
+                    {/* 가로 줄 (그림자 제거됨) */}
                     <div 
                         className="absolute left-0 right-0 top-1/2"
                         style={{
@@ -358,7 +368,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                             backgroundColor: selectedColorData.code,
                             transform: 'translateY(-50%)',
                             zIndex: 10,
-                            boxShadow: '0 0 2px rgba(0,0,0,0.1)'
+                            // 💡 boxShadow 제거
                         }}
                     ></div>
                 </div>
@@ -1033,22 +1043,28 @@ export default function App() {
           <div className="space-y-4">
             {MATERIALS.map((item) => (
               <div key={item.id} className="animate-fade-in">
+                {/* 🚨 [수정] 배경색 강조로 변경 🚨 */}
                 <div onClick={() => setMaterial(item.id)} className={`flex items-center p-4 rounded-lg cursor-pointer transition-all duration-200 selection-box active:scale-[0.99] shadow-md ${item.id === material ? 'bg-indigo-700 text-white shadow-lg' : 'bg-white hover:bg-indigo-50'}`}>
                   <div className="flex-1">
                     <div className="flex justify-between items-center">
                       <div className='flex items-center gap-3'>
+                        {/* 선택 아이콘 border 색상 변경 */}
                         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mr-2 transition ${item.id === material ? 'border-white' : 'border-gray-400'}`}>
                           {item.id === material && <CheckCircle2 size={12} className="text-white" />}
                         </div>
+                        {/* 텍스트 색상 변경 */}
                         <span className={`font-bold ${item.id === material ? 'text-white' : 'text-gray-800'}`}>{item.label}</span>
                       </div>
+                      {/* 배지 색상 변경 */}
                       <span className={`text-xs font-bold px-3 py-1 rounded-full ${item.id === material ? 'bg-amber-400 text-indigo-900' : item.badgeColor}`}>
                         {item.badge}
                       </span>
                     </div>
+                    {/* 설명 텍스트 색상 변경 */}
                     <p className={`text-xs mt-1 pl-7 ${item.id === material ? 'text-indigo-200' : 'text-gray-500'}`}>{item.description}</p>
                   </div>
                 </div>
+                {/* 나머지 옵션 부분 유지 */}
                 {item.id === 'poly' && item.id === material && (
                   <div className="mt-2 ml-6 pl-4 border-l-2 border-indigo-300 space-y-2 animate-slide-down bg-gray-50/50 p-3 rounded-md">
                     <div className="text-xs font-bold text-indigo-700 flex items-center gap-1"><Palette size={12} /> 옵션 선택 (펄 유무)</div>
@@ -1131,6 +1147,7 @@ export default function App() {
                         <div className="flex items-center gap-1 bg-white px-1 py-1 rounded-full shadow-md">
                             <button 
                                 onClick={() => handleQuantityChange(area.id, -1)} 
+                                // 이 부분은 SILICON_AREAS이므로 현관 자동 선택 로직과 무관합니다.
                                 className={`w-7 h-7 flex items-center justify-center rounded-full transition active:scale-90 text-lg font-bold ${quantities[area.id] > 0 ? 'text-indigo-600 hover:bg-gray-100' : 'text-gray-400 cursor-not-allowed'}`}
                             >-</button> 
                             <span className={`w-5 text-center text-sm font-bold ${quantities[area.id] > 0 ? 'text-gray-900' : 'text-gray-400'}`}>{quantities[area.id]}</span>
@@ -1138,6 +1155,7 @@ export default function App() {
                                 onClick={() => {
                                     handleQuantityChange(area.id, 1);
                                 }} 
+                                // 이 부분은 SILICON_AREAS이므로 현관 자동 선택 로직과 무관합니다.
                                 className="w-7 h-7 flex items-center justify-center text-indigo-600 hover:bg-gray-100 rounded-full font-bold text-lg transition active:scale-90"
                             >+</button> 
                         </div>
@@ -1245,6 +1263,7 @@ export default function App() {
                             className={`w-full py-3 rounded-xl font-extrabold text-sm transition-all 
                                 bg-yellow-400 text-gray-800 hover:bg-yellow-500 active:bg-yellow-600 shadow-md flex items-center justify-center
                             `}
+                            // onClick 핸들러 대신 href를 사용하여 앱 환경에서 안정적으로 카카오톡 앱을 호출하도록 유도
                         >
                             카톡 예약 문의
                         </a>
@@ -1278,6 +1297,7 @@ export default function App() {
                 
                 {/* ⭐️ [유지] 시공 및 할인 내역 - 테이블 구조로 변경 ⭐️ */}
                 <div className="space-y-2 text-sm border-b border-gray-200 pb-3">
+                    {/* 현장 유형 제거됨. 이 부분은 이제 패키지/최소비용 정보 아래에만 표시됩니다. */}
                     
                     {/* ⭐️ 최소 출장비 적용 문구 추가 ⭐️ */}
                     {calculation.minimumFeeApplied && (
@@ -1304,6 +1324,7 @@ export default function App() {
 
                     {/* ⭐️ 항목별 테이블 시작 ⭐️ */}
                     <div className="mt-3">
+                        {/* 🚨 [유지] '금액' 컬럼 제거 🚨 */}
                         <div className="grid grid-cols-10 font-extrabold text-xs text-gray-500 border-b border-gray-300 pb-1">
                             <span className="col-span-5 pl-1">시공 내역</span>
                             <span className="col-span-3 text-center">소재</span>
@@ -1378,6 +1399,7 @@ export default function App() {
                     <div className='w-full py-1.5 px-2 text-center bg-gray-100 text-indigo-600 rounded-md font-bold text-[11px] shadow-sm flex items-center justify-center'>
                         바닥 30x30cm, 벽면 30x60cm 크기 기준
                     </div>
+                    {/* ▼▼▼ 요청하신 문구 디자인 통일 ▼▼▼ */}
                     <div className='w-full py-1.5 px-2 text-center bg-gray-100 text-indigo-600 rounded-md font-bold text-[11px] shadow-sm flex items-center justify-center'>
                         재시공(셀프포함)은 별도문의
                     </div>
@@ -1390,7 +1412,7 @@ export default function App() {
             
             {/* ⭐️ [견적서 모달 하단 컨트롤 영역] ⭐️ */}
             <div className="p-4 bg-gray-50 border-t border-gray-200">
-                {/* 1. 숨고 리뷰 이벤트 버튼 */}
+                {/* 1. 숨고 리뷰 이벤트 버튼 (디자인 강화 및 테두리 제거) */}
                 {soomgoReviewEvent && (
                     <div className='mb-3'>
                         {(() => {
@@ -1399,14 +1421,16 @@ export default function App() {
                             const discountAmount = evt.discount.toLocaleString();
                             const Icon = isApplied ? CheckCircle2 : Sparkles;
 
+                            // ⭐️ [유지] border-2 제거 ⭐️
                             const baseClasses = "w-full py-3 rounded-xl transition font-extrabold text-sm active:scale-[0.98] shadow-lg flex items-center justify-center gap-2 relative overflow-hidden"; 
                             
+                            // ⭐️ [유지] 테두리 클래스 제거 ⭐️
                             const activeClasses = "bg-indigo-700 text-white"; 
                             const inactiveClasses = "bg-amber-400 text-indigo-900 hover:bg-amber-300"; 
 
                             const finalClasses = isApplied
                                 ? activeClasses
-                                : `${inactiveClasses} shine-effect`; 
+                                : `${inactiveClasses} shine-effect`; // 빛나는 효과 적용
 
                             const iconColorClass = isApplied ? 'text-white' : 'text-indigo-900'; 
 
