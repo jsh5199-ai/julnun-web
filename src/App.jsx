@@ -318,29 +318,23 @@ const ColorPalette = ({ selectedColorId, onSelect }) => {
     const groutPattern = selectedColorData.code;
     const tilePattern = TILE_COLOR;
     
-    // 💡 [최종 수정] 무광 질감을 위한 미세한 음영 효과만 추가 (광택 제거) 💡
-    // 깊이감을 주기 위해 메인 색상보다 15% 어두운 색상을 생성합니다.
-    const depthColor = `color-mix(in srgb, ${groutPattern}, black 20%)`; 
+    // 💡 [최종 수정] 음영 제거, 순수한 단색 채우기로 변경 💡
     
-    // 1. 가로줄 (to bottom) - 음영 효과만 적용
+    // 1. 가로줄 (to bottom) - 순수 단색 적용 (음영 제거)
     const horizontalGradient = `linear-gradient(to bottom, 
                                     transparent 0%, 
                                     transparent calc(50% - ${lineHalf}px), 
-                                    ${depthColor} calc(50% - ${lineHalf}px), /* 윗쪽 미세 음영 시작 */
-                                    ${groutPattern} calc(50% - ${lineHalf}px + 1px), /* 메인 색상 시작 (1px 안쪽) */
-                                    ${groutPattern} calc(50% + ${lineHalf}px - 1px), /* 메인 색상 끝 (1px 안쪽) */
-                                    ${depthColor} calc(50% + ${lineHalf}px), /* 아랫쪽 미세 음영 끝 */
+                                    ${groutPattern} calc(50% - ${lineHalf}px), 
+                                    ${groutPattern} calc(50% + ${lineHalf}px), 
                                     transparent calc(50% + ${lineHalf}px), 
                                     transparent 100%)`;
 
-    // 2. 세로줄 (to right) - 음영 효과만 적용
+    // 2. 세로줄 (to right) - 순수 단색 적용 (음영 제거)
     const verticalGradient = `linear-gradient(to right, 
                                     transparent 0%, 
                                     transparent calc(50% - ${lineHalf}px), 
-                                    ${depthColor} calc(50% - ${lineHalf}px), /* 왼쪽 미세 음영 시작 */
-                                    ${groutPattern} calc(50% - ${lineHalf}px + 1px), /* 메인 색상 시작 (1px 안쪽) */
-                                    ${groutPattern} calc(50% + ${lineHalf}px - 1px), /* 메인 색상 끝 (1px 안쪽) */
-                                    ${depthColor} calc(50% + ${lineHalf}px), /* 오른쪽 미세 음영 끝 */
+                                    ${groutPattern} calc(50% - ${lineHalf}px), 
+                                    ${groutPattern} calc(50% + ${lineHalf}px), 
                                     transparent calc(50% + ${lineHalf}px), 
                                     transparent 100%)`;
 
@@ -368,7 +362,7 @@ const ColorPalette = ({ selectedColorId, onSelect }) => {
                         className="absolute inset-0 opacity-100 transition-colors duration-300"
                         style={{
                             backgroundColor: TILE_COLOR,
-                            // 가로 그라디언트와 세로 그라디언트를 겹쳐서 십자 모양 생성
+                            // 🚨 [수정 완료] 음영 제거로 교차점 조화롭게 연결 🚨
                             backgroundImage: `${horizontalGradient}, ${verticalGradient}`,
                             backgroundSize: '100% 100%',
                             backgroundPosition: 'center center', // 중앙에 고정
@@ -1016,7 +1010,7 @@ export default function GroutEstimatorApp() {
         {areas.map((area) => {
             const Icon = area.icon;
             const isSelected = quantities[area.id] > 0;
-            // ⭐️ 현관은 강제 poly이므로 소재는 항상 'poly'로 표시 ⭐️
+            // ⭐️ 현관은 강제로 poly이므로 소재는 항상 'poly'로 표시 ⭐️
             const currentMat = area.id === 'entrance' ? 'poly' : areaMaterials[area.id];
 
             // 🚨 [오류 해결] isEntranceAutoSelected를 여기서 정의 🚨
@@ -1033,13 +1027,7 @@ export default function GroutEstimatorApp() {
                             <div className={`p-2 rounded-full shadow-sm ${isSelected ? 'bg-indigo-700 text-white' : 'bg-gray-200 text-indigo-600'}`}><Icon size={18} /></div> 
                             <div>
                                 <div className="font-semibold text-gray-800">{area.label}</div>
-                                <div className="text-xs text-gray-500">
-                                    {/* 기본 가격과 상세 설명 모두 제거됨 */}
-                                    {area.id === 'entrance' && (
-                                        <span className="block text-green-600 font-bold mt-0.5">폴리아스파틱 소재 고정</span>
-                                    )}
-                                    {extraEntranceInfo}
-                                </div>
+                                <div className="text-xs text-gray-500">{area.desc && <span className="block text-indigo-600">{area.desc}</span>}</div> 
                             </div>
                         </div>
                         {/* ⭐️ [유지] 수량 증감 버튼: border border-gray-200 제거 ⭐️ */}
