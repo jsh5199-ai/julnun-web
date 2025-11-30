@@ -55,8 +55,8 @@ const GlobalStyles = () => (
         background: #facc15; /* Amber-400 고정 */
         background-image: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.7) 50%, rgba(255,255,255,0) 100%);
         background-size: 200% 100%;
-        color: #1e3a8a; /* Indigo-900 */
         animation: shine 3s infinite;
+        color: #1e3a8a; /* Indigo-900 */
     }
     
     .animate-fade-in { animation: fadeIn 0.5s ease-out; }
@@ -108,7 +108,7 @@ const BATHROOM_AREAS = [
 const OTHER_AREAS = [
   // 현관: Poly 5만
   { id: 'entrance', label: '현관', basePrice: 50000, icon: DoorOpen, unit: '개소' }, 
-  // 베란다/세탁실: Poly 10만, Epoxy 25만
+  // 베란다/세탁실: Poly 10만, Epoxy 25万
   { id: 'balcony_laundry', label: '베란다/세탁실', basePrice: 100000, icon: LayoutGrid, unit: '개소', desc: 'Poly 10만 / Epoxy 25만' }, 
   // 주방 벽면: Poly 15만, Epoxy 25만
   { id: 'kitchen_wall', label: '주방 벽면', basePrice: 150000, icon: Utensils, unit: '구역', desc: 'Poly 15만 / Epoxy 25만' },
@@ -362,44 +362,44 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                 <Palette className="h-4 w-4 text-indigo-600" /> 2-1. 줄눈 색상 미리보기 및 선택
             </h3>
             
-            {/* 🚨🚨 줄눈 시뮬레이션 영역 - 줄눈선이 사라지지 않도록 구조 단순화 🚨🚨 */}
-            {/* 💡 수정된 부분 1: 바깥쪽 div에는 스타일을 최소화 (내부 div에서 처리) */}
+            {/* 🚨🚨 줄눈 시뮬레이션 영역 - 레이어 z-index 및 혼합 모드 강제 적용 🚨🚨 */}
             <div className={`transition-all duration-300`}> 
                 
-                {/* ⭐️ 시뮬레이션 컨테이너: 테두리 및 max-h 제거, 부모에 꽉 차게 조정 ⭐️ */}
+                {/* ⭐️ 시뮬레이션 컨테이너: 기본 흰색 배경 설정 ⭐️ */}
                 <div 
-                    className="w-full aspect-video mx-auto overflow-hidden relative" // aspect-video로 가로 세로 비율 유지
-                    style={{ backgroundColor: TILE_COLOR }} // 기본 배경색은 흰색으로 고정
+                    className="w-full aspect-video mx-auto overflow-hidden relative bg-white" // 배경색 흰색 고정
                 >
                     
-                    {/* 2단계: 타일 베이스 (항상 유효한 이미지) */}
-                    <div className="absolute inset-0" style={simulationBackgroundStyle}></div>
+                    {/* 1단계: 타일 베이스 (z-index 1) */}
+                    <div className="absolute inset-0" style={{ ...simulationBackgroundStyle, zIndex: 1 }}></div>
                     
-                    {/* ⭐️ 3단계: 워터마크 레이어 ⭐️ */}
+                    {/* 2단계: 줄눈 선 시뮬레이션 레이어 (z-index 10) - 가장 위에 확실히 표시 */}
+                    <div 
+                        className="absolute inset-0 transition-colors duration-300"
+                        style={{
+                            zIndex: 10, // 💡 수정: z-index를 높여 최상단 배치
+                            opacity: 1, // 💡 수정: 불투명도 100%
+                            backgroundColor: 'transparent', 
+                            backgroundImage: `${horizontalGradient}, ${verticalGradient}`,
+                            backgroundSize: '100% 100%',
+                            backgroundPosition: 'center center',
+                            backgroundRepeat: 'no-repeat',
+                            backgroundBlendMode: 'normal' // 💡 수정: 이미지와 섞이지 않도록 normal로 고정
+                        }}
+                    >
+                    </div>
+                    
+                    {/* 3단계: 워터마크 레이어 (z-index 20) - 줄눈선보다 더 위에 표시 */}
                     <div 
                         className="absolute inset-0 flex items-center justify-center opacity-30" 
                         style={{
+                            zIndex: 20, // 💡 수정: 줄눈선 위에 표시되도록 z-index 설정
                             backgroundImage: 'url(/logo.png)', // public 폴더의 로고 사용
                             backgroundSize: '30%', // 로고 크기 조정
                             backgroundRepeat: 'no-repeat',
                             backgroundPosition: 'center',
                         }}
                     >
-                    </div>
-                    
-                    {/* ⭐️ 4단계: 줄눈 선 시뮬레이션 레이어 (항상 표시됨) ⭐️ */}
-                    <div 
-                        className="absolute inset-0 opacity-100 transition-colors duration-300"
-                        style={{
-                            backgroundColor: 'transparent', // 💡 수정: 투명하게 유지
-                            backgroundImage: `${horizontalGradient}, ${verticalGradient}`,
-                            backgroundSize: '100% 100%',
-                            backgroundPosition: 'center center', // 중앙에 고정
-                            backgroundRepeat: 'no-repeat',
-                            backgroundBlendMode: 'normal' 
-                        }}
-                    >
-                        {/* 텍스트 제거 */}
                     </div>
                 </div>
             </div>
@@ -443,7 +443,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                 ))}
             </div>
             <p className='text-xs text-gray-500 mt-3 text-center'>
-                * 시공 시 타일의 간격/음영, 조명에 따라 차이가 있을 수 있습니다.
+                * 화면 해상도에 따라 실제 색상과 차이가 있을 수 있습니다.
             </p>
         </div>
     );
@@ -706,7 +706,7 @@ export default function App() {
           if ((tempEpoxySelections[id] || 0) !== requiredQty) { 
             isMatch = false;
             break;
-        }
+          }
         }
         if (!isMatch) continue;
 
@@ -924,7 +924,7 @@ export default function App() {
     }
 
     // 🚨 [새로 계산] 패키지 적용 전 총 정가 (최소출장비, 리뷰할인 미적용 순수 합계)
-    const priceBeforeAllDiscount = itemizedPrices.reduce((sum, item) => sum + (item.isDiscount ? 0 : item.originalPrice), 0);
+    const priceBeforeAllDiscount = itemizedPrices.reduce((sum, item) => sum + (item.isDiscount ? 0 : item.originalPrice), 0) + discountAmount;
     
     // 현관 서비스가 적용되었을 경우, labelText 업데이트
     if (isFreeEntrance && !matchedPackage) {
@@ -1230,7 +1230,7 @@ export default function App() {
                         {/* 선택 아이콘 border 색상 변경 */}
                         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mr-2 transition ${item.id === material ? 'border-white' : 'border-gray-400'}`}>
                           {item.id === material && <CheckCircle2 size={12} className="text-white" />}
-                      </div>
+                        </div>
                         {/* 텍스트 색상 변경 */}
                         <span className={`font-bold ${item.id === material ? 'text-white' : 'text-gray-800'}`}>{item.label}</span>
                       </div>
@@ -1266,7 +1266,7 @@ export default function App() {
             ))}
           </div>
           
-          {/* ⭐️ [반영 완료] 색상 선택 팔레트 (줄눈선 유지, 워터마크 추가) ⭐️ */}
+          {/* ⭐️ [반영 완료] 색상 선택 팔레트 (줄눈선 복구 및 워터마크 추가) ⭐️ */}
           <ColorPalette selectedColorId={selectedGroutColor} onSelect={setSelectedGroutColor} onTileImageUpload={handleTileImageUpload} tileImageURL={tileImageURL} />
 
           {/* --- 재료 상세 비교 버튼 영역 (유지) --- */}
@@ -1452,206 +1452,6 @@ export default function App() {
         )}
       </>
 
-      {/* 견적서 모달 */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white w-full max-w-sm rounded-xl shadow-2xl overflow-hidden animate-slide-down border border-gray-200">
-            <div className="bg-indigo-700 p-4 text-white flex justify-between items-center">
-              <h3 className="font-extrabold text-lg flex items-center gap-2"><CheckCircle2 className="h-5 w-5 text-white" /> 줄눈의미학</h3> 
-              <button onClick={() => setShowModal(false)} className="text-white/80 hover:text-white transition active:scale-95">
-                <X size={20} />
-              </button>
-            </div>
-            
-            {/* ★★★ 캡처 전용 견적서 양식 ★★★ */}
-            <div className="p-5 text-gray-800 bg-white overflow-y-auto max-h-[70vh]"> 
-              <div ref={quoteRef} id="quote-content" className="rounded-lg p-5 space-y-3 mx-auto" style={{ width: '320px' }}>
-                
-                {/* 헤더 및 로고 영역 (영어 문구 제거) */}
-                <div className="flex flex-col items-center border-b border-gray-300 pb-3 mb-3">
-                    <h1 className='text-xl font-extrabold text-indigo-800 text-center'>줄눈의미학 예상 견적서</h1>
-                </div>
-
-                {/* 기본 정보 테이블 (현장 유형 제거됨) */}
-                
-                {/* ⭐️ [유지] 시공 및 할인 내역 - 테이블 구조로 변경 ⭐️ */}
-                <div className="space-y-2 text-sm border-b border-gray-200 pb-3">
-                    {/* 현장 유형 제거됨. 이 부분은 이제 패키지/최소비용 정보 아래에만 표시됩니다. */}
-                    
-                    {/* ⭐️ 최소 출장비 적용 문구 추가 ⭐️ */}
-                    {calculation.minimumFeeApplied && (
-                        <div className="bg-red-50/70 p-2 rounded-md border-l-4 border-red-500 text-xs font-semibold text-gray-700">
-                            <p className='flex items-center gap-1 text-red-800 font-extrabold'>
-                                <Zap size={12} className='text-red-400'/> 최소 출장비 {MIN_FEE.toLocaleString()}원 적용
-                            </p>
-                            <p className='text-[11px] ml-1'>선택하신 항목의 합계가 {MIN_FEE.toLocaleString()}원 미만이므로 최소 출장비가 적용되었습니다.</p>
-                        </div>
-                    )}
-                    
-                    {/* 패키지 포함 서비스 내역 */}
-                    {calculation.isPackageActive && (
-                        <div className="bg-indigo-50/70 p-2 rounded-md border-l-4 border-indigo-500 text-xs font-semibold text-gray-700">
-                            <p className='flex items-center gap-1 text-indigo-800 font-extrabold mb-1'>
-                                <Crown size={12} className='text-indigo-400'/> {calculation.label} 
-                            </p>
-                            <ul className='list-disc list-inside text-[11px] ml-1 space-y-0.5 text-left'>
-                                <li>패키지 포함 영역이 할인 적용되었습니다.</li>
-                                {calculation.isFreeEntrance && <li>현관 바닥 서비스 (폴리아스파틱)</li>}
-                            </ul>
-                        </div>
-                    )}
-
-                    {/* ⭐️ 항목별 테이블 시작 ⭐️ */}
-                    <div className="mt-3">
-                        {/* 🚨 [유지] '금액' 컬럼 제거 🚨 */}
-                        <div className="grid grid-cols-10 font-extrabold text-xs text-gray-500 border-b border-gray-300 pb-1">
-                            <span className="col-span-5 pl-1">시공 내역</span>
-                            <span className="col-span-3 text-center">소재</span>
-                            <span className="col-span-2 text-right pr-1">수량</span>
-                        </div>
-
-                        {/* 🚨 [유지] 항목별 가격 정보 완전 제거 🚨 */}
-                        {calculation.itemizedPrices
-                            .filter(item => !item.isDiscount) // 할인 항목(리뷰)만 제외
-                            .map(item => {
-                            return (
-                                <div key={item.id} className="grid grid-cols-10 items-center text-gray-800 py-1 border-b border-gray-100 last:border-b-0">
-                                    
-                                    {/* 1. 시공 내역 (항목명 + 할인 정보) */}
-                                    <div className="col-span-5 flex flex-col pl-1 break-words">
-                                        <span className="font-semibold text-gray-700 text-sm">{item.label}</span>
-                                        {/* 개별 항목 할인액 (실리콘 패키지 할인)만 표시 */}
-                                        {(item.discount > 0 && item.calculatedPrice > 0) && (
-                                            <span className='text-xs text-indigo-500 font-bold'>
-                                                (-{(item.originalPrice - item.calculatedPrice).toLocaleString()}원 할인)
-                                            </span>
-                                        )}
-                                    </div>
-                                    
-                                    {/* 2. 소재 */}
-                                    <span className="col-span-3 text-center font-bold text-[10px] text-indigo-500">
-                                        {item.materialLabel}
-                                    </span>
-
-                                    {/* 3. 수량 */}
-                                    <span className="col-span-2 text-right text-sm font-semibold text-gray-600 pr-1">
-                                        {item.quantity}{item.unit}
-                                    </span>
-                                </div>
-                            );
-                        })}
-                    </div>
-                    {/* ⭐️ 항목별 테이블 끝 ⭐️ */}
-
-                    {/* 할인 항목 루프 (리뷰 할인 등) */}
-                    <div className='pt-2'>
-                        {calculation.itemizedPrices
-                            .filter(item => item.isDiscount) 
-                            .map(item => (
-                                <div key={item.id} className="flex justify-between items-center text-indigo-600 font-semibold pl-2 pr-1 py-1 border-b border-gray-100 last:border-b-0 text-sm">
-                                    <span className={`flex items-center`}>
-                                        <Gift size={12} className='inline mr-1'/> {item.label}
-                                    </span>
-                                    <span className={`text-right`}>
-                                        -{item.originalPrice.toLocaleString()}원
-                                    </span>
-                                </div>
-                            ))}
-                    </div>
-                </div>
-
-                
-                {/* 총 합계 영역 (유지) */}
-                <div className="pt-3 text-center border-t border-gray-200"> 
-                    
-                    <div className="flex justify-between items-end"> 
-                        <span className='text-base font-semibold text-gray-800'>최종 결제 금액</span>
-                        <div className="text-right">
-                            <span className="text-3xl font-extrabold text-indigo-700">{calculation.price.toLocaleString()}원</span>
-                        </div>
-                    </div>
-                    <p className="text-xs text-gray-400 text-right mt-1">VAT 별도 / 현장상황별 상이</p>
-                </div>
-
-                {/* 안내 사항 영역 (문구 디자인 통일) */}
-                <div className="mt-3 pt-3 border-t border-gray-200 space-y-2">
-                    <div className='w-full py-1.5 px-2 text-center bg-gray-100 text-indigo-600 rounded-md font-bold text-[11px] shadow-sm flex items-center justify-center'>
-                        바닥 30x30cm, 벽면 30x60cm 크기 기준
-                    </div>
-                    {/* ▼▼▼ 요청하신 문구 디자인 통일 ▼▼▼ */}
-                    <div className='w-full py-1.5 px-2 text-center bg-gray-100 text-indigo-600 rounded-md font-bold text-[11px] shadow-sm flex items-center justify-center'>
-                        재시공(셀프포함)은 별도문의
-                    </div>
-                    <div className='w-full py-1.5 px-2 text-center bg-gray-100 text-indigo-600 rounded-md font-bold text-[11px] shadow-sm flex items-center justify-center'>
-                        조각타일 및 대리석은 시공불가
-                    </div>
-                </div>
-              </div>
-            </div>
-            
-            {/* ⭐️ [견적서 모달 하단 컨트롤 영역] ⭐️ */}
-            <div className="p-4 bg-gray-50 border-t border-gray-200">
-                {/* 1. 숨고 리뷰 이벤트 버튼 (디자인 강화 및 테두리 제거) */}
-                {soomgoReviewEvent && (
-                    <div className='mb-3'>
-                        {(() => {
-                            const evt = soomgoReviewEvent;
-                            const isApplied = isSoomgoReviewApplied;
-                            const discountAmount = evt.discount.toLocaleString();
-                            const Icon = isApplied ? CheckCircle2 : Sparkles;
-
-                            // ⭐️ [유지] border-2 제거 ⭐️
-                            const baseClasses = "w-full py-3 rounded-xl transition font-extrabold text-sm active:scale-[0.98] shadow-lg flex items-center justify-center gap-2 relative overflow-hidden"; 
-                            
-                            // ⭐️ [유지] 테두리 클래스 제거 ⭐️
-                            const activeClasses = "bg-indigo-700 text-white"; 
-                            const inactiveClasses = "bg-amber-400 text-indigo-900 hover:bg-amber-300"; 
-
-                            const finalClasses = isApplied
-                                ? activeClasses
-                                : `${inactiveClasses} shine-effect`; // 빛나는 효과 적용
-
-                            const iconColorClass = isApplied ? 'text-white' : 'text-indigo-900'; 
-
-                            const labelText = isApplied 
-                                ? `할인 적용 취소하기 (총액 +${discountAmount}원)` 
-                                : `숨고 리뷰 약속하고 ${discountAmount}원 할인받기!`;
-
-                            return (
-                                <button
-                                    onClick={() => toggleReview(evt.id)}
-                                    className={`${baseClasses} ${finalClasses}`}
-                                >
-                                    <Icon size={18} fill="currentColor" className={iconColorClass}/>
-                                    <span>{labelText}</span>
-                                </button>
-                            );
-                        })()}
-                    </div>
-                )}
-                
-                <div className='grid grid-cols-3 gap-3'> 
-                    
-                    <button onClick={handleImageSave} className="flex items-center justify-center gap-1 bg-indigo-600 text-white py-3 rounded-lg font-bold hover:bg-indigo-700 transition text-sm active:scale-95 shadow-md"> 
-                        <ImageIcon size={16} /> <span>견적서 저장</span>
-                    </button>
-                    
-                    <button onClick={() => window.open(KAKAO_CHAT_URL, '_blank')} className="flex items-center justify-center gap-1 bg-yellow-400 text-gray-800 py-3 rounded-lg font-bold hover:bg-yellow-500 transition shadow-md text-sm active:scale-95"> 
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-chat-fill" viewBox="0 0 16 16">
-                            <path d="M8 15c4.418 0 8-3.134 8-7s-3.582-7-8-7-8 3.134-8 7 3.582 7 8 7zm4.25-5.5a1 1 0 0 0-1-1h-6.5a1 1 0 0 0 0 2h6.5a1 1 0 0 0 1-1z"/>
-                        </svg> 
-                        <span>카톡 문의</span>
-                    </button>
-                    
-                    <button onClick={() => window.location.href = `tel:${PHONE_NUMBER}`} className="flex items-center justify-center gap-1 bg-indigo-700 text-white py-3 rounded-lg font-bold hover:bg-indigo-800 transition shadow-md text-sm active:scale-95"> 
-                        <Phone size={16} /> <span>전화 상담</span>
-                    </button>
-                </div>
-            </div>
-          </div>
-        </div>
-      )}
-      
       {/* 재료 상세 비교 모달 표시 */}
       {showMaterialModal && <MaterialDetailModal onClose={() => setShowMaterialModal(false)} />}
     </div>
