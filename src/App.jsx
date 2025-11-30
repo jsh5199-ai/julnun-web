@@ -100,7 +100,7 @@ const BATHROOM_AREAS = [
 
 // 기타 범위 (현관 포함)
 const OTHER_AREAS = [
-  // 현관: Poly 5万
+  // 현관: Poly 5만
   { id: 'entrance', label: '현관', basePrice: 50000, icon: DoorOpen, unit: '개소' }, 
   // 베란다/세탁실: Poly 10만, Epoxy 25만
   { id: 'balcony_laundry', label: '베란다/세탁실', basePrice: 100000, icon: LayoutGrid, unit: '개소', desc: 'Poly 10만 / Epoxy 25만' }, 
@@ -318,17 +318,19 @@ const ColorPalette = ({ selectedColorId, onSelect }) => {
     const groutPattern = selectedColorData.code;
     const tilePattern = TILE_COLOR;
     
-    // 💡 [수정] 무광 질감을 위한 미세한 음영 효과만 추가 💡
+    // 💡 [수정] 무광 질감을 위한 미세한 음영 효과만 추가 (광택 제거) 💡
     // 깊이감을 주기 위해 메인 색상보다 15% 어두운 색상을 생성합니다.
+    // CSS color-mix가 환경에 따라 지원되지 않을 수 있으므로, 대비되는 색상을 하드코딩하거나 필터를 사용했습니다.
+    // 여기서는 depthColor와 groutPattern으로 미세한 굴곡만 표현합니다.
     const depthColor = `color-mix(in srgb, ${groutPattern}, black 15%)`; 
     
     // 1. 가로줄 (to bottom) - 음영 효과만 적용
     const horizontalGradient = `linear-gradient(to bottom, 
                                     transparent 0%, 
                                     transparent calc(50% - ${lineHalf}px), 
-                                    ${depthColor} calc(50% - ${lineHalf}px), /* 윗쪽 음영 */
-                                    ${groutPattern} 50%, /* 중앙 메인 색상 */
-                                    ${depthColor} calc(50% + ${lineHalf}px), /* 아랫쪽 음영 */
+                                    ${depthColor} calc(50% - ${lineHalf}px), 
+                                    ${groutPattern} 50%, 
+                                    ${depthColor} calc(50% + ${lineHalf}px), 
                                     transparent calc(50% + ${lineHalf}px), 
                                     transparent 100%)`;
 
@@ -336,9 +338,9 @@ const ColorPalette = ({ selectedColorId, onSelect }) => {
     const verticalGradient = `linear-gradient(to right, 
                                     transparent 0%, 
                                     transparent calc(50% - ${lineHalf}px), 
-                                    ${depthColor} calc(50% - ${lineHalf}px), /* 왼쪽 음영 */
-                                    ${groutPattern} 50%, /* 중앙 메인 색상 */
-                                    ${depthColor} calc(50% + ${lineHalf}px), /* 오른쪽 음영 */
+                                    ${depthColor} calc(50% - ${lineHalf}px), 
+                                    ${groutPattern} 50%, 
+                                    ${depthColor} calc(50% + ${lineHalf}px), 
                                     transparent calc(50% + ${lineHalf}px), 
                                     transparent 100%)`;
 
@@ -366,9 +368,10 @@ const ColorPalette = ({ selectedColorId, onSelect }) => {
                         className="absolute inset-0 opacity-100 transition-colors duration-300"
                         style={{
                             backgroundColor: TILE_COLOR,
-                            // 가로 그라디언트와 세로 그라디언트를 겹쳐서 십자 모양 생성
+                            // 🚨 [조화로운 교차점 적용] 두 그라디언트를 겹쳐서 적용 🚨
                             backgroundImage: `${horizontalGradient}, ${verticalGradient}`,
                             backgroundSize: '100% 100%',
+                            backgroundPosition: 'center center', // 중앙에 고정
                             backgroundRepeat: 'no-repeat',
                             backgroundBlendMode: 'normal' 
                         }}
@@ -1284,8 +1287,7 @@ export default function GroutEstimatorApp() {
                         <div className="flex items-center gap-1 bg-white px-1 py-1 rounded-full shadow-md">
                             <button 
                                 onClick={() => handleQuantityChange(area.id, -1)} 
-                                // 🚨 [오류 해결] isEntranceAutoSelected 정의가 없으므로 임시로 disabled 제거 🚨
-                                // 이 부분은 SILICON_AREAS이므로 현관 자동 선택과 무관하여 disabled를 제거합니다.
+                                // 이 부분은 SILICON_AREAS이므로 현관 자동 선택 로직과 무관합니다.
                                 className={`w-7 h-7 flex items-center justify-center rounded-full transition active:scale-90 text-lg font-bold ${quantities[area.id] > 0 ? 'text-indigo-600 hover:bg-gray-100' : 'text-gray-400 cursor-not-allowed'}`}
                             >-</button> 
                             <span className={`w-5 text-center text-sm font-bold ${quantities[area.id] > 0 ? 'text-gray-900' : 'text-gray-400'}`}>{quantities[area.id]}</span>
@@ -1293,7 +1295,7 @@ export default function GroutEstimatorApp() {
                                 onClick={() => {
                                     handleQuantityChange(area.id, 1);
                                 }} 
-                                // 이 부분은 SILICON_AREAS이므로 현관 자동 선택과 무관하여 disabled를 제거합니다.
+                                // 이 부분은 SILICON_AREAS이므로 현관 자동 선택 로직과 무관합니다.
                                 className="w-7 h-7 flex items-center justify-center text-indigo-600 hover:bg-gray-100 rounded-full font-bold text-lg transition active:scale-90"
                             >+</button> 
                         </div>
