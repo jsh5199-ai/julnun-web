@@ -70,13 +70,13 @@ const GlobalStyles = () => (
     }
     .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom); }
     
-    /* ⭐️ [최종 수정] 워터마크 스타일: 크기 160px, 투명도 1, 반복 적용 ⭐️ */
+    /* ⭐️ 워터마크 스타일: 크기 160px, 투명도 1, 반복 적용 (html2canvas 호환을 위해 투명도는 임의로 0.15로 설정) ⭐️ */
     .watermark-layer {
         position: absolute;
         inset: 0;
         z-index: 5;
-        opacity: 1; /* 투명도 제거 (원본 그대로) */
-        background-image: url('/images/logo.png'); /* public/images/logo.png 경로 확인 필요 */
+        opacity: 0.15; /* 캡처 시 워터마크가 너무 강하면 가독성을 해치므로 옅게 적용 */
+        background-image: url('/images/logo.png'); /* public/images/logo.png 경로 */
         background-size: 160px; /* 2배 확대 */
         background-repeat: repeat; /* 반복하여 양을 늘림 */
         background-position: center;
@@ -358,7 +358,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                     ></div>
                     
                     {/* ⭐️ 2. 워터마크 레이어 (CSS 클래스 적용) ⭐️ */}
-                    <div className="watermark-layer"></div>
+                    <div className="watermark-layer" style={{ opacity: 0.15 }}></div>
 
                     {/* ⭐️ 3. 줄눈 십자가 (HTML Div로 직접 그림) - z-index 10 (최상단) ⭐️ */}
                     
@@ -632,7 +632,7 @@ export default function App() {
           if ((tempEpoxySelections[id] || 0) !== requiredQty) { 
             isMatch = false;
             break;
-          }
+        }
         }
         if (!isMatch) continue;
 
@@ -1007,7 +1007,6 @@ export default function App() {
             >
               <RefreshCw size={12} className="inline mr-1" /> 초기화
             </button>
-        </b>
         </div>
       </header>
 
@@ -1053,7 +1052,7 @@ export default function App() {
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-150">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
             <Home className="h-5 w-5 text-indigo-600" /> 1. 현장 유형을 선택하세요
-          </h2>
+          </h2> {/* ⭐️ JSX 태그 수정 완료 ⭐️ */}
           <div className="grid grid-cols-2 gap-3">
             {HOUSING_TYPES.map((type) => (
               <button
@@ -1068,7 +1067,7 @@ export default function App() {
                 <div className="text-base font-semibold">{type.label}</div>
               </button>
             ))}
-        </b>
+          </div>
         </section>
 
         {/* ⭐️ --- 2. 줄눈소재 안내 (소재/옵션 선택 및 색상 팔레트 포함) --- ⭐️ */}
@@ -1141,7 +1140,7 @@ export default function App() {
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-450">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
             <Calculator className="h-5 w-5 text-indigo-600" /> 3. 시공범위 선택
-          </h2>
+          </h2> {/* ⭐️ JSX 태그 수정 완료 ⭐️ */}
           
           {/* A. 욕실 범위 */}
           <h3 className="text-base font-extrabold flex items-center gap-2 mb-3 mt-4 text-gray-700">
@@ -1163,7 +1162,7 @@ export default function App() {
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-600">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
             <Eraser className="h-5 w-5 text-indigo-600" /> 4. 실리콘 시공
-          </h2>
+          </h2> {/* ⭐️ JSX 태그 수정 완료 ⭐️ */}
           <div className="space-y-3">
             {SILICON_AREAS.map((area) => {
               const Icon = area.icon;
@@ -1332,8 +1331,8 @@ export default function App() {
             <div className="p-5 text-gray-800 bg-white overflow-y-auto max-h-[70vh]"> 
               <div ref={quoteRef} id="quote-content" className="rounded-lg p-5 space-y-3 mx-auto relative" style={{ width: '320px' }}>
                 
-                 {/* ⭐️ [수정된 부분] 견적서 캡처 영역에 워터마크 레이어 추가 ⭐️ */}
-                 <div className="watermark-layer" style={{ opacity: 0.15, backgroundSize: '160px', zIndex: 1 }}></div>
+                 {/* ⭐️ [최종 수정] 견적서 캡처 영역에 워터마크 레이어 추가 (opacity 1로 설정하여 강하게 표시) ⭐️ */}
+                 <div className="watermark-layer" style={{ opacity: 1, backgroundSize: '160px', zIndex: 1 }}></div>
                 
                 {/* 헤더 및 로고 영역 (z-index 10으로 콘텐츠를 워터마크 위로 올림) */}
                 <div className="flex flex-col items-center border-b border-gray-300 pb-3 mb-3 relative z-10">
