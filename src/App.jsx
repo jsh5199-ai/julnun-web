@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
-import html2canvas from 'html2canvas'; 
+import html2canvas from 'html2canvas';
 import {
   Calculator, Home, Bath, DoorOpen, Utensils, LayoutGrid,
   CheckCircle2, Info, RefreshCw, Phone, Sparkles, Hammer, Sofa, Palette, Crown, Gift, Eraser, Star, X, ChevronDown, HelpCircle, Zap, TrendingUp, Clock, Image as ImageIcon
@@ -69,18 +69,6 @@ const GlobalStyles = () => (
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
     }
     .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom); }
-    
-    /* ⭐️ 워터마크 스타일: 크기 160px, 투명도 1, 반복 적용 (html2canvas 호환을 위해 투명도는 임의로 0.15로 설정) ⭐️ */
-    .watermark-layer {
-        position: absolute;
-        inset: 0;
-        z-index: 5;
-        opacity: 0.15; /* 캡처 시 워터마크가 너무 강하면 가독성을 해치므로 옅게 적용 */
-        background-image: url('/images/logo.png'); /* public/images/logo.png 경로 */
-        background-size: 160px; /* 2배 확대 */
-        background-repeat: repeat; /* 반복하여 양을 늘림 */
-        background-position: center;
-    }
   `}</style>
 );
 
@@ -357,8 +345,18 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                         }}
                     ></div>
                     
-                    {/* ⭐️ 2. 워터마크 레이어 (CSS 클래스 적용) ⭐️ */}
-                    <div className="watermark-layer" style={{ opacity: 0.15 }}></div>
+                    {/* 2. 워터마크 레이어 (z-index 5) */}
+                    <div 
+                        className="absolute inset-0 flex items-center justify-center opacity-30" 
+                        style={{
+                            zIndex: 5, 
+                            backgroundImage: 'url(/logo.png)', 
+                            backgroundSize: '30%', 
+                            backgroundRepeat: 'no-repeat',
+                            backgroundPosition: 'center',
+                        }}
+                    >
+                    </div>
 
                     {/* ⭐️ 3. 줄눈 십자가 (HTML Div로 직접 그림) - z-index 10 (최상단) ⭐️ */}
                     
@@ -398,7 +396,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
             
             {/* 타일 이미지 업로드 버튼 */}
             <div className='mb-4'>
-                <input type="file" id="tileFileInput" accept="image/*" onChange={handleTileImageUpload} style={{ display: 'none' }} />
+                <input type="file" id="tileFileInput" accept="image/*" onChange={onTileImageUpload} style={{ display: 'none' }} />
                 <label htmlFor="tileFileInput" className="w-full py-2.5 px-4 bg-indigo-600 text-white rounded-lg font-bold text-sm hover:bg-indigo-700 transition shadow-md cursor-pointer flex items-center justify-center gap-2">
                     <ImageIcon size={16} /> 내 타일 사진 첨부하여 미리보기
                 </label>
@@ -632,7 +630,7 @@ export default function App() {
           if ((tempEpoxySelections[id] || 0) !== requiredQty) { 
             isMatch = false;
             break;
-        }
+          }
         }
         if (!isMatch) continue;
 
@@ -1007,6 +1005,7 @@ export default function App() {
             >
               <RefreshCw size={12} className="inline mr-1" /> 초기화
             </button>
+          </div>
         </div>
       </header>
 
@@ -1052,7 +1051,7 @@ export default function App() {
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-150">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
             <Home className="h-5 w-5 text-indigo-600" /> 1. 현장 유형을 선택하세요
-          </h2> {/* ⭐️ JSX 태그 수정 완료 ⭐️ */}
+          </h2>
           <div className="grid grid-cols-2 gap-3">
             {HOUSING_TYPES.map((type) => (
               <button
@@ -1140,7 +1139,7 @@ export default function App() {
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-450">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
             <Calculator className="h-5 w-5 text-indigo-600" /> 3. 시공범위 선택
-          </h2> {/* ⭐️ JSX 태그 수정 완료 ⭐️ */}
+          </h2>
           
           {/* A. 욕실 범위 */}
           <h3 className="text-base font-extrabold flex items-center gap-2 mb-3 mt-4 text-gray-700">
@@ -1162,7 +1161,7 @@ export default function App() {
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-600">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
             <Eraser className="h-5 w-5 text-indigo-600" /> 4. 실리콘 시공
-          </h2> {/* ⭐️ JSX 태그 수정 완료 ⭐️ */}
+          </h2>
           <div className="space-y-3">
             {SILICON_AREAS.map((area) => {
               const Icon = area.icon;
@@ -1329,20 +1328,17 @@ export default function App() {
             
             {/* ★★★ 캡처 전용 견적서 양식 ★★★ */}
             <div className="p-5 text-gray-800 bg-white overflow-y-auto max-h-[70vh]"> 
-              <div ref={quoteRef} id="quote-content" className="rounded-lg p-5 space-y-3 mx-auto relative" style={{ width: '320px' }}>
-                
-                 {/* ⭐️ [최종 수정] 견적서 캡처 영역에 워터마크 레이어 추가 (opacity 1로 설정하여 강하게 표시) ⭐️ */}
-                 <div className="watermark-layer" style={{ opacity: 1, backgroundSize: '160px', zIndex: 1 }}></div>
-                
-                {/* 헤더 및 로고 영역 (z-index 10으로 콘텐츠를 워터마크 위로 올림) */}
-                <div className="flex flex-col items-center border-b border-gray-300 pb-3 mb-3 relative z-10">
+              <div ref={quoteRef} id="quote-content" className="rounded-lg p-5 space-y-3 mx-auto" style={{ width: '320px' }}>
+                
+                {/* 헤더 및 로고 영역 (영어 문구 제거) */}
+                <div className="flex flex-col items-center border-b border-gray-300 pb-3 mb-3">
                     <h1 className='text-xl font-extrabold text-indigo-800 text-center'>줄눈의미학 예상 견적서</h1>
                 </div>
 
-                {/* 기본 정보 테이블 (z-index 10으로 콘텐츠를 워터마크 위로 올림) */}
+                {/* 기본 정보 테이블 (현장 유형 제거됨) */}
                 
-                {/* ⭐️ [유지] 시공 및 할인 내역 - 테이블 구조로 변경 (z-index 10) ⭐️ */}
-                <div className="space-y-2 text-sm border-b border-gray-200 pb-3 relative z-10">
+                {/* ⭐️ [유지] 시공 및 할인 내역 - 테이블 구조로 변경 ⭐️ */}
+                <div className="space-y-2 text-sm border-b border-gray-200 pb-3">
                     {/* 현장 유형 제거됨. 이 부분은 이제 패키지/최소비용 정보 아래에만 표시됩니다. */}
                     
                     {/* ⭐️ 최소 출장비 적용 문구 추가 ⭐️ */}
@@ -1429,7 +1425,7 @@ export default function App() {
 
                 
                 {/* 총 합계 영역 (유지) */}
-                <div className="pt-3 text-center border-t border-gray-200 relative z-10"> 
+                <div className="pt-3 text-center border-t border-gray-200"> 
                     
                     <div className="flex justify-between items-end"> 
                         <span className='text-base font-semibold text-gray-800'>최종 결제 금액</span>
@@ -1441,7 +1437,7 @@ export default function App() {
                 </div>
 
                 {/* 안내 사항 영역 (문구 디자인 통일) */}
-                <div className="mt-3 pt-3 border-t border-gray-200 space-y-2 relative z-10">
+                <div className="mt-3 pt-3 border-t border-gray-200 space-y-2">
                     <div className='w-full py-1.5 px-2 text-center bg-gray-100 text-indigo-600 rounded-md font-bold text-[11px] shadow-sm flex items-center justify-center'>
                         바닥 30x30cm, 벽면 30x60cm 크기 기준
                     </div>
