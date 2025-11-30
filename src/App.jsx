@@ -317,13 +317,14 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
     // 타일 본체 색상은 기본적으로 흰색으로 고정 (이미지 없을 경우)
     const TILE_COLOR = '#ffffff'; 
     
-    const GROUT_LINE_WIDTH = 12; // 줄눈 선 너비 (가운데 십자 모양의 굵기)
+    // 💡 수정: 줄눈선 너비를 40으로 크게 늘려 확실하게 보이도록 강제
+    const GROUT_LINE_WIDTH = 40; 
     const lineHalf = GROUT_LINE_WIDTH / 2;
 
     const groutPattern = selectedColorData.code;
     const tilePattern = TILE_COLOR;
     
-    // 💡 [최종 수정] 음영 제거, 순수한 단색 채우기로 변경 (교차점 조화롭게 연결) 💡
+    // 💡 [최종 수정] 그라데이션 정의 유지
     
     // 1. 가로줄 (to bottom) - 순수 단색 적용
     const horizontalGradient = `linear-gradient(to bottom, 
@@ -343,7 +344,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                                         transparent calc(50% + ${lineHalf}px), 
                                         transparent 100%)`;
 
-    // 💡 [수정됨] 타일 배경 URL 결정: 사용자 이미지가 없거나 기본 이미지일 경우, 기본 타일 이미지 URL을 사용하도록 강제
+    // 💡 [수정됨] 타일 배경 URL 결정: 사용자 이미지가 없으면 기본 타일 이미지 URL을 사용하도록 강제
     const effectiveTileImageURL = (tileImageURL && tileImageURL !== DEFAULT_TILE_IMAGE_URL)
         ? tileImageURL
         : DEFAULT_TILE_IMAGE_URL;
@@ -373,27 +374,27 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                     {/* 1단계: 타일 베이스 (z-index 1) */}
                     <div className="absolute inset-0" style={{ ...simulationBackgroundStyle, zIndex: 1 }}></div>
                     
-                    {/* 2단계: 줄눈 선 시뮬레이션 레이어 (z-index 10) - 가장 위에 확실히 표시 */}
+                    {/* 2단계: 줄눈 선 시뮬레이션 레이어 (z-index 30) - 최상단에 확실히 표시 */}
                     <div 
                         className="absolute inset-0 transition-colors duration-300"
                         style={{
-                            zIndex: 10, // 💡 수정: z-index를 높여 최상단 배치
-                            opacity: 1, // 💡 수정: 불투명도 100%
+                            zIndex: 30, // 💡 수정: z-index를 30으로 높여 최상단 배치
+                            opacity: 1, 
                             backgroundColor: 'transparent', 
                             backgroundImage: `${horizontalGradient}, ${verticalGradient}`,
                             backgroundSize: '100% 100%',
                             backgroundPosition: 'center center',
                             backgroundRepeat: 'no-repeat',
-                            backgroundBlendMode: 'normal' // 💡 수정: 이미지와 섞이지 않도록 normal로 고정
+                            backgroundBlendMode: 'normal'
                         }}
                     >
                     </div>
                     
-                    {/* 3단계: 워터마크 레이어 (z-index 20) - 줄눈선보다 더 위에 표시 */}
+                    {/* 3단계: 워터마크 레이어 (z-index 40) - 줄눈선 위에 표시 */}
                     <div 
                         className="absolute inset-0 flex items-center justify-center opacity-30" 
                         style={{
-                            zIndex: 20, // 💡 수정: 줄눈선 위에 표시되도록 z-index 설정
+                            zIndex: 40, // 💡 수정: 워터마크를 줄눈선보다 더 위에 배치
                             backgroundImage: 'url(/logo.png)', // public 폴더의 로고 사용
                             backgroundSize: '30%', // 로고 크기 조정
                             backgroundRepeat: 'no-repeat',
