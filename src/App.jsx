@@ -161,97 +161,25 @@ const ORIGINAL_MIXED_PACKAGES = [
 ];
 
 const CUSTOM_MIXED_PACKAGES = [
-    { 
-      id: 'P_MIX_NEW_A', 
-      price: 1150000, 
-      label: '혼합벽면A (바닥/안방벽E, 공용벽P) 115만', 
-      E_areas: [['bathroom_floor', 2], ['master_bath_wall', 1]], 
-      P_areas: [['common_bath_wall', 1]] 
-    },
-    { 
-      id: 'P_MIX_NEW_B', 
-      price: 1150000, 
-      label: '혼합벽면B (바닥/공용벽E, 안방벽P) 115만', 
-      E_areas: [['bathroom_floor', 2], ['common_bath_wall', 1]], 
-      P_areas: [['master_bath_wall', 1]] 
-    },
+    { id: 'P_MIX_NEW_A', price: 1150000, label: '혼합벽면A (바닥/안방벽E, 공용벽P) 115만', E_areas: [['bathroom_floor', 2], ['master_bath_wall', 1]], P_areas: [['common_bath_wall', 1]] },
+    { id: 'P_MIX_NEW_B', price: 1150000, label: '혼합벽면B (바닥/공용벽E, 안방벽P) 115만', E_areas: [['bathroom_floor', 2], ['common_bath_wall', 1]], P_areas: [['master_bath_wall', 1]] },
 ];
 
 const NEW_USER_PACKAGES = [
     // 에폭시 혼합 패키지 (70만) - 현관 제외 (기존 유지)
-    { 
-      id: 'USER_E_700K_MASTER', 
-      price: 700000, 
-      label: '에폭시 벽면 패키지 (70만)', 
-      E_areas: [['bathroom_floor', 1], ['master_bath_wall', 1]], 
-      P_areas: [],
-      isFlexible: true, 
-      flexibleGroup: ['master_bath_wall', 'common_bath_wall']
-    },
-    { 
-      id: 'USER_E_700K_COMMON', 
-      price: 700000, 
-      label: '에폭시 벽면 패키지 (70만)', 
-      E_areas: [['bathroom_floor', 1], ['common_bath_wall', 1]], 
-      P_areas: [],
-      isFlexible: true,
-      flexibleGroup: ['master_bath_wall', 'common_bath_wall']
-    },
+    { id: 'USER_E_700K_MASTER', price: 700000, label: '에폭시 벽면 패키지 (70만)', E_areas: [['bathroom_floor', 1], ['master_bath_wall', 1]], P_areas: [], isFlexible: true, flexibleGroup: ['master_bath_wall', 'common_bath_wall'] },
+    { id: 'USER_E_700K_COMMON', price: 700000, label: '에폭시 벽면 패키지 (70만)', E_areas: [['bathroom_floor', 1], ['common_bath_wall', 1]], P_areas: [], isFlexible: true, flexibleGroup: ['master_bath_wall', 'common_bath_wall'] },
     // 폴리 혼합 패키지 (50만) - 현관 제외 (기존 유지)
-    { 
-      id: 'USER_P_500K_MASTER', 
-      price: 500000, 
-      label: '폴리 벽면 패키지 (50만)', 
-      E_areas: [], 
-      P_areas: [['bathroom_floor', 1], ['master_bath_wall', 1]],
-      isFlexible: true,
-      flexibleGroup: ['master_bath_wall', 'common_bath_wall']
-    },
-    { 
-      id: 'USER_P_500K_COMMON', 
-      price: 500000, 
-      label: '폴리 벽면 패키지 (50만)', 
-      E_areas: [], 
-      P_areas: [['bathroom_floor', 1], ['common_bath_wall', 1]],
-      isFlexible: true,
-      flexibleGroup: ['master_bath_wall', 'common_bath_wall']
-    },
+    { id: 'USER_P_500K_MASTER', price: 500000, label: '폴리 벽면 패키지 (50만)', E_areas: [], P_areas: [['bathroom_floor', 1], ['master_bath_wall', 1]], isFlexible: true, flexibleGroup: ['master_bath_wall', 'common_bath_wall'] },
+    { id: 'USER_P_500K_COMMON', price: 500000, label: '폴리 벽면 패키지 (50만)', E_areas: [], P_areas: [['bathroom_floor', 1], ['common_bath_wall', 1]], isFlexible: true, flexibleGroup: ['master_bath_wall', 'common_bath_wall'] },
     // 🚨 [신규 추가 1] 욕실 바닥 2곳 에폭시 55만 고정
-    { 
-      id: 'USER_E_550K_FLOOR_2', 
-      price: 550000, 
-      label: '에폭시 바닥 2곳 (55만)', 
-      E_areas: [['bathroom_floor', 2]], 
-      P_areas: [],
-      isFlexible: false,
-    },
+    { id: 'USER_E_550K_FLOOR_2', price: 550000, label: '에폭시 바닥 2곳 (55만)', E_areas: [['bathroom_floor', 2]], P_areas: [], isFlexible: false, },
     // 🚨 [신규 추가 2] 욕실 바닥 2곳 + 샤워부스 벽 3면 에폭시 80만 고정
-    { 
-      id: 'USER_E_800K_FLOOR2_SHOWER1', 
-      price: 800000, 
-      label: '에폭시 바닥 2곳 + 샤워벽 1곳 (80만)', 
-      E_areas: [['bathroom_floor', 2], ['shower_booth', 1]], 
-      P_areas: [],
-      isFlexible: false,
-    },
+    { id: 'USER_E_800K_FLOOR2_SHOWER1', price: 800000, label: '에폭시 바닥 2곳 + 샤워벽 1곳 (80만)', E_areas: [['bathroom_floor', 2], ['shower_booth', 1]], P_areas: [], isFlexible: false, },
     // 🚨 [신규 추가 3] 욕실 바닥 1곳 + 샤워부스 벽 3면 에폭시 55만 고정
-    { 
-      id: 'USER_E_550K_FLOOR1_SHOWER1', 
-      price: 550000, 
-      label: '에폭시 바닥 1곳 + 샤워벽 1곳 (55만)', 
-      E_areas: [['bathroom_floor', 1], ['shower_booth', 1]], 
-      P_areas: [],
-      isFlexible: false,
-    },
+    { id: 'USER_E_550K_FLOOR1_SHOWER1', price: 550000, label: '에폭시 바닥 1곳 + 샤워벽 1곳 (55만)', E_areas: [['bathroom_floor', 1], ['shower_booth', 1]], P_areas: [], isFlexible: false, },
     // 🚨 [기존 유지] 욕실 바닥 1곳 에폭시 35만 고정 패키지 
-    { 
-      id: 'USER_E_350K_BATH', 
-      price: 350000, 
-      label: '에폭시 바닥 1곳 (35만)', 
-      E_areas: [['bathroom_floor', 1]], 
-      P_areas: [],
-      isFlexible: false,
-    },
+    { id: 'USER_E_350K_BATH', price: 350000, label: '에폭시 바닥 1곳 (35만)', E_areas: [['bathroom_floor', 1]], P_areas: [], isFlexible: false, },
 ];
 
 const HARDCODED_PACKAGES = [
@@ -381,9 +309,22 @@ const ColorPalette = ({ selectedColorId, onSelect }) => {
 
     // 타일 본체 색상은 흰색으로 고정
     const TILE_COLOR = '#ffffff'; 
-    // 🚨 [수정] 줄눈 선 너비 증가 및 타일 크기 조정 🚨
-    const GROUT_WIDTH = 4; // 줄눈 선 너비 (4px)
-    const TILE_SIZE = 54; // 타일 + 줄눈 총 크기 (50px 타일 + 4px 줄눈)
+    
+    // 🚨 [수정된 변수] 줄눈 선 너비 및 위치 조정 🚨
+    const GROUT_LINE_WIDTH = 12; // 줄눈 선 너비 (가운데 십자 모양의 굵기)
+    const TILE_DEMO_SIZE = 400; // 데모 영역 전체 크기 (임의 설정)
+
+    // 가로/세로 중앙 줄눈 선을 위한 선형 그라디언트 정의
+    const groutPattern = selectedColorData.code;
+    const tilePattern = TILE_COLOR;
+
+    // 중앙 십자 줄눈선 CSS 배경 이미지 생성
+    const centerOffset = TILE_DEMO_SIZE / 2;
+    const lineHalf = GROUT_LINE_WIDTH / 2;
+
+    const verticalGradient = `linear-gradient(to right, ${tilePattern} 0%, ${tilePattern} ${centerOffset - lineHalf}px, ${groutPattern} ${centerOffset - lineHalf}px, ${groutPattern} ${centerOffset + lineHalf}px, ${tilePattern} ${centerOffset + lineHalf}px, ${tilePattern} 100%)`;
+    const horizontalGradient = `linear-gradient(to bottom, ${tilePattern} 0%, ${tilePattern} ${centerOffset - lineHalf}px, ${groutPattern} ${centerOffset - lineHalf}px, ${groutPattern} ${centerOffset + lineHalf}px, ${tilePattern} ${centerOffset + lineHalf}px, ${tilePattern} 100%)`;
+
 
     return (
         <div className='mt-5 pt-3 border-t border-gray-100 animate-fade-in'>
@@ -391,30 +332,30 @@ const ColorPalette = ({ selectedColorId, onSelect }) => {
                 <Palette className="h-4 w-4 text-indigo-600" /> 2-1. 줄눈 색상 미리보기 및 선택
             </h3>
             
-            {/* 🚨🚨 줄눈 시뮬레이션 영역 (CSS 패턴으로 줄눈 선만 색상 변경) 🚨🚨 */}
+            {/* 🚨🚨 줄눈 시뮬레이션 영역 (십자 줄눈선) 🚨🚨 */}
             <div className={`p-4 rounded-lg shadow-lg mb-4 border border-gray-300 transition-all duration-300`} style={{ backgroundColor: TILE_COLOR }}>
                 <h4 className="text-sm font-semibold text-gray-700 mb-2">선택 색상 시공 미리보기 (흰색 타일 기준)</h4>
                 
                 {/* ⭐️ 시뮬레이션 컨테이너: 타일 본체(흰색) 위에 줄눈선(선택 색상)을 덮습니다. ⭐️ */}
-                <div className="w-full aspect-square max-h-40 mx-auto overflow-hidden relative border-2 border-gray-300 rounded-md">
+                <div 
+                    className="w-full aspect-square max-h-40 mx-auto overflow-hidden relative border-2 border-gray-300 rounded-md"
+                    // 데모 크기 고정을 위한 스타일 (CSS 변수를 직접 전달)
+                    style={{ '--demo-size': '400px' }}
+                >
                     
                     {/* 타일 베이스 (흰색으로 고정) */}
                     <div className="absolute inset-0 bg-white"></div>
                     
-                    {/* ⭐️ 줄눈 선 시뮬레이션 레이어 ⭐️ */}
+                    {/* ⭐️ 줄눈 선 시뮬레이션 레이어 (가로+세로 1줄씩) ⭐️ */}
                     <div 
                         className="absolute inset-0 opacity-100 transition-colors duration-300"
                         style={{
-                            // 배경색은 타일 본체색 (이후 그라디언트 패턴을 위해 설정)
-                            backgroundColor: TILE_COLOR, 
-                            backgroundImage: `
-                                /* 가로 줄눈 선 패턴 */
-                                repeating-linear-gradient(to right, ${selectedColorData.code} 0px, ${selectedColorData.code} ${GROUT_WIDTH}px, ${TILE_COLOR} ${GROUT_WIDTH}px, ${TILE_COLOR} ${TILE_SIZE}px),
-                                /* 세로 줄눈 선 패턴 */
-                                repeating-linear-gradient(to bottom, ${selectedColorData.code} 0px, ${selectedColorData.code} ${GROUT_WIDTH}px, ${TILE_COLOR} ${GROUT_WIDTH}px, ${TILE_COLOR} ${TILE_SIZE}px)
-                            `,
-                            backgroundSize: `${TILE_SIZE}px ${TILE_SIZE}px`,
-                            backgroundBlendMode: 'multiply' // 줄눈이 겹치는 부분의 색상을 부드럽게 처리
+                            // 가로/세로 그라디언트를 겹쳐서 십자 모양 생성
+                            backgroundImage: `${verticalGradient}, ${horizontalGradient}`,
+                            backgroundSize: '100% 100%',
+                            backgroundRepeat: 'no-repeat',
+                            // 겹치는 부분의 색상이 통일되도록 multiply 대신 normal 사용
+                            backgroundBlendMode: 'normal'
                         }}
                     >
                         {/* 텍스트는 줄눈 영역 위에 띄워서 대비 확인용 */}
