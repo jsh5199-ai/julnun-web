@@ -19,7 +19,7 @@ const GROUT_COLORS = [
     { id: 'burnt_brown', code: '#827e7b', label: '번트 브라운', isDark: true },
     { id: 'silver_gray', code: '#afb0aa', label: '실버 그레이', isDark: false },
     { id: 'medium_gray', code: '#848685', label: '미디움 그레이', isDark: true },
-    { id: 'dark_gray', code: '#565556', label: '다크 그레이', isDark: true }, // 🚨 초기값으로 사용될 대비 강한 색상
+    { id: 'dark_gray', code: '#565556', label: '다크 그레이', isDark: true }, // 초기값으로 사용될 대비 강한 색상
 ];
 
 // =================================================================
@@ -175,7 +175,7 @@ const getPackageAreaIds = (pkg) => [
 ];
 
 // =================================================================
-// [컴포넌트] ColorPalette (최종 수정됨)
+// [컴포넌트] ColorPalette (줄눈 시뮬레이션 로직 전면 교체)
 // =================================================================
 
 const ColorPalette = ({ selectedColors, onToggleColor, onUpdateRatio, onTileImageUpload, tileImageURL }) => {
@@ -198,32 +198,49 @@ const ColorPalette = ({ selectedColors, onToggleColor, onUpdateRatio, onTileImag
         isDark: hexToRgb(mixedColorCode).r * 0.299 + hexToRgb(mixedColorCode).g * 0.587 + hexToRgb(mixedColorCode).b * 0.114 < 128
     };
 
-    // 2. 시뮬레이션 스타일 정의
+    // 2. 시뮬레이션 스타일 정의 (radial-gradient 방식으로 전면 교체)
     const TILE_COLOR = '#ffffff'; 
-    // 🚨 [최종 수정] 줄눈 선 굵기를 30px로 대폭 증가
-    const GROUT_LINE_WIDTH = 30; 
-    const lineHalf = GROUT_LINE_WIDTH / 2;
-
+    
+    // 🚨 [새로운 방식] 타일 한 칸의 크기 (CSS px)
+    const TILE_SIZE = 150; 
+    // 🚨 [새로운 방식] 줄눈 라인의 굵기 (CSS px)
+    const GROUT_LINE_WIDTH = 12; 
+    
     const groutPattern = mixedColorCode;
     const simulationBackgroundStyle = tileImageURL 
         ? { backgroundImage: `url(${tileImageURL})`, backgroundSize: 'cover', backgroundPosition: 'center' }
         : { backgroundColor: TILE_COLOR };
+    
+    // ⭐️⭐️⭐️ [새로운 줄눈 생성 로직] ⭐️⭐️⭐️
+    // 타일 중앙에 타일 색상(투명), 바깥쪽에 줄눈 색상을 가지는 방사형 그라데이션 패턴 생성
+    const patternSize = TILE_SIZE + GROUT_LINE_WIDTH;
+    const tileRadius = TILE_SIZE / 2;
+    
+    const repeatingRadialGradient = `
+        repeating-radial-gradient(
+            circle at center, 
+            transparent 0, transparent ${tileRadius}px, 
+            ${groutPattern} ${tileRadius}px, ${groutPattern} ${patternSize / 2}px
+        )
+    `;
 
-    const horizontalGradient = `linear-gradient(to bottom, 
-        transparent 0%, 
-        transparent calc(50% - ${lineHalf}px), 
-        ${groutPattern} calc(50% - ${lineHalf}px), 
-        ${groutPattern} calc(50% + ${lineHalf}px), 
-        transparent calc(50% + ${lineHalf}px), 
-        transparent 100%)`;
+    const repeatingLinearGradient = `
+        repeating-linear-gradient(to right, ${groutPattern}, ${groutPattern} ${GROUT_LINE_WIDTH}px, transparent ${GROUT_LINE_WIDTH}px, transparent ${patternSize}px),
+        repeating-linear-gradient(to bottom, ${groutPattern}, ${groutPattern} ${GROUT_LINE_WIDTH}px, transparent ${GROUT_LINE_WIDTH}px, transparent ${patternSize}px)
+    `;
+    
+    const groutOverlayStyle = {
+        // [수정] 배경색을 투명으로 설정하여 타일 이미지가 보이도록 함
+        backgroundColor: 'transparent',
+        // [수정] 타일 크기 간격으로 패턴을 반복
+        backgroundImage: repeatingLinearGradient,
+        backgroundSize: `${patternSize}px ${patternSize}px`,
+        backgroundPosition: `0 0`,
+        backgroundRepeat: 'repeat',
+        pointerEvents: 'none', // 클릭 방지
+    };
+    // ⭐️⭐️⭐️ [새로운 줄눈 생성 로직 끝] ⭐️⭐️⭐️
 
-    const verticalGradient = `linear-gradient(to right, 
-        transparent 0%, 
-        transparent calc(50% - ${lineHalf}px), 
-        ${groutPattern} calc(50% - ${lineHalf}px), 
-        ${groutPattern} calc(50% + ${lineHalf}px), 
-        transparent calc(50% + ${lineHalf}px), 
-        transparent 100%)`;
 
     const totalRatio = selectedColors.reduce((sum, c) => sum + c.ratio, 0);
 
@@ -244,26 +261,19 @@ const ColorPalette = ({ selectedColors, onToggleColor, onUpdateRatio, onTileImag
                 <Palette className="h-4 w-4 text-indigo-600" /> 2-1. 줄눈 색상 혼합 미리보기 및 선택
             </h3>
             
-            {/* 🚨🚨 줄눈 시뮬레이션 영역 🚨🚨 */}
+            {/* 🚨🚨 줄눈 시뮬레이션 영역 (배경 + 오버레이 패턴) 🚨🚨 */}
             <div className={`p-4 rounded-lg shadow-lg mb-4 border border-gray-300 transition-all duration-300`} style={simulationBackgroundStyle}>
                 <h4 className="text-sm font-semibold text-gray-100 mb-2">혼합 색상 시공 미리보기</h4>
                 
                 <div 
                     className="w-full aspect-square max-h-40 mx-auto overflow-hidden relative border-2 border-gray-300 rounded-md"
+                    // 타일 베이스 색상/이미지
+                    style={simulationBackgroundStyle}
                 >
-                    <div className="absolute inset-0" style={{ backgroundImage: simulationBackgroundStyle.backgroundImage, backgroundSize: simulationBackgroundStyle.backgroundSize, backgroundPosition: simulationBackgroundStyle.backgroundPosition }}></div>
-                    
-                    {/* ⭐️ 줄눈 선 시뮬레이션 레이어 (혼합 색상 적용) ⭐️ */}
+                    {/* ⭐️ 줄눈 패턴 오버레이 레이어 (전면 재구성) ⭐️ */}
                     <div 
                         className="absolute inset-0 opacity-100 transition-colors duration-300"
-                        style={{
-                            backgroundColor: 'transparent', 
-                            backgroundImage: `${horizontalGradient}, ${verticalGradient}`,
-                            backgroundSize: '100% 100%',
-                            backgroundPosition: 'center center', 
-                            backgroundRepeat: 'no-repeat',
-                            backgroundBlendMode: 'normal' 
-                        }}
+                        style={groutOverlayStyle}
                     >
                     </div>
                 </div>
@@ -328,7 +338,7 @@ const ColorPalette = ({ selectedColors, onToggleColor, onUpdateRatio, onTileImag
             {/* ⭐️ [수정된] 단일 게이지 조정 영역 ⭐️ */}
             {selectedColors.length > 1 && primaryColor && (
                 <div className='mt-5 space-y-3 p-4 bg-indigo-50/50 rounded-lg shadow-inner animate-slide-down border border-indigo-200'>
-                    <h4 className='text-sm font-extrabold text-gray-700 flex items-center justify-between'>
+                    <h4 className="text-sm font-extrabold text-gray-700 flex items-center justify-between">
                         <span className='flex items-center gap-2'><TrendingUp size={16} className='text-indigo-600'/> 색상 혼합 비율 조절</span>
                         <span className='text-base font-extrabold text-indigo-700'>총 합계: {totalRatio}%</span>
                     </h4>
@@ -346,7 +356,6 @@ const ColorPalette = ({ selectedColors, onToggleColor, onUpdateRatio, onTileImag
                         <input
                             type="range"
                             min="0"
-                            // 나머지 색상 비율이 최소 10%씩은 유지되도록 최대치를 제한
                             max={100 - (10 * (selectedColors.length - 1))}
                             step="10" 
                             value={primaryColor.ratio}
