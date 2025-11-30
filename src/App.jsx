@@ -7,23 +7,24 @@ import {
 
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
-// ⭐️ 최소 출장비 상수 정의
+// =================================================================
+// ⭐️ [수정된 부분] 상수 정의 및 기본 이미지 경로 (public/default_tile.jpg에 맞춤)
+// =================================================================
 const MIN_FEE = 200000;
-
-// 🚨 [수정] 카카오톡 채널 URL 정의 🚨
 const KAKAO_CHAT_URL = 'http://pf.kakao.com/_jAxnYn/chat';
+// 🚨 현재 파일 구조(public/default_tile.jpg)에 맞춘 기본 이미지 경로 🚨
+const DEFAULT_TILE_IMAGE_URL = '/default_tile.jpg'; 
 
-// 🚨 [신규 추가] 줄눈 색상 데이터 정의 (독립적인 선택 항목) 🚨
 const GROUT_COLORS = [
-    { id: 'white', code: '#ffffff', label: '화이트', isDark: false },
-    { id: 'moca_beige', code: '#dbcbbd', label: '모카 베이지', isDark: false },
-    { id: 'sand_brown', code: '#887965', label: '샌드 브라운', isDark: true },
-    { id: 'vintage_brown', code: '#96877e', label: '빈티지 브라운', isDark: true },
-    { id: 'oat_brown', code: '#b0a9a4', label: '오트 브라운', isDark: false },
-    { id: 'burnt_brown', code: '#827e7b', label: '번트 브라운', isDark: true },
-    { id: 'silver_gray', code: '#afb0aa', label: '실버 그레이', isDark: false },
-    { id: 'medium_gray', code: '#848685', label: '미디움 그레이', isDark: true },
-    { id: 'dark_gray', code: '#565556', label: '다크 그레이', isDark: true },
+  { id: 'white', code: '#ffffff', label: '화이트', isDark: false },
+  { id: 'moca_beige', code: '#dbcbbd', label: '모카 베이지', isDark: false },
+  { id: 'sand_brown', code: '#887965', label: '샌드 브라운', isDark: true },
+  { id: 'vintage_brown', code: '#96877e', label: '빈티지 브라운', isDark: true },
+  { id: 'oat_brown', code: '#b0a9a4', label: '오트 브라운', isDark: false },
+  { id: 'burnt_brown', code: '#827e7b', label: '번트 브라운', isDark: true },
+  { id: 'silver_gray', code: '#afb0aa', label: '실버 그레이', isDark: false },
+  { id: 'medium_gray', code: '#848685', label: '미디움 그레이', isDark: true },
+  { id: 'dark_gray', code: '#565556', label: '다크 그레이', isDark: true },
 ];
 
 
@@ -307,7 +308,7 @@ const Accordion = ({ question, answer }) => {
 const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageURL }) => {
     const selectedColorData = GROUT_COLORS.find(c => c.id === selectedColorId);
 
-    // 타일 본체 색상은 기본적으로 흰색으로 고정
+    // 타일 본체 색상은 기본적으로 흰색으로 고정 (이미지 없을 경우)
     const TILE_COLOR = '#ffffff'; 
     
     const GROUT_LINE_WIDTH = 12; // 줄눈 선 너비 (가운데 십자 모양의 굵기)
@@ -320,21 +321,21 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
     
     // 1. 가로줄 (to bottom) - 순수 단색 적용
     const horizontalGradient = `linear-gradient(to bottom, 
-                                    transparent 0%, 
-                                    transparent calc(50% - ${lineHalf}px), 
-                                    ${groutPattern} calc(50% - ${lineHalf}px), 
-                                    ${groutPattern} calc(50% + ${lineHalf}px), 
-                                    transparent calc(50% + ${lineHalf}px), 
-                                    transparent 100%)`;
+                                        transparent 0%, 
+                                        transparent calc(50% - ${lineHalf}px), 
+                                        ${groutPattern} calc(50% - ${lineHalf}px), 
+                                        ${groutPattern} calc(50% + ${lineHalf}px), 
+                                        transparent calc(50% + ${lineHalf}px), 
+                                        transparent 100%)`;
 
     // 2. 세로줄 (to right) - 순수 단색 적용
     const verticalGradient = `linear-gradient(to right, 
-                                    transparent 0%, 
-                                    transparent calc(50% - ${lineHalf}px), 
-                                    ${groutPattern} calc(50% - ${lineHalf}px), 
-                                    ${groutPattern} calc(50% + ${lineHalf}px), 
-                                    transparent calc(50% + ${lineHalf}px), 
-                                    transparent 100%)`;
+                                        transparent 0%, 
+                                        transparent calc(50% - ${lineHalf}px), 
+                                        ${groutPattern} calc(50% - ${lineHalf}px), 
+                                        ${groutPattern} calc(50% + ${lineHalf}px), 
+                                        transparent calc(50% + ${lineHalf}px), 
+                                        transparent 100%)`;
 
     // 시뮬레이션 배경 스타일
     const simulationBackgroundStyle = tileImageURL 
@@ -424,15 +425,16 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
 };
 
 
-export default function GroutEstimatorApp() {
+// ⭐️ [수정] GroutEstimatorApp -> App 으로 함수 이름 변경 ⭐️
+export default function App() {
   const [housingType, setHousingType] = useState('new');
   const [material, setMaterial] = useState('poly');
   const [polyOption, setPolyOption] = useState('pearl');
   const [epoxyOption, setEpoxyOption] = useState('kerapoxy');
-  // 🚨 [신규 상태] 독립적으로 색상 선택 상태 관리
+  // 🚨 [수정] 초기값을 public 폴더에 있는 이미지로 설정 🚨
   const [selectedGroutColor, setSelectedGroutColor] = useState(GROUT_COLORS[0].id); // 기본값: 화이트
-  // 🚨 [신규 상태] 타일 배경 이미지 URL 관리 🚨
-  const [tileImageURL, setTileImageURL] = useState(null); 
+  const [tileImageURL, setTileImageURL] = useState(DEFAULT_TILE_IMAGE_URL); 
+  
   const [quantities, setQuantities] = useState(
     [...ALL_AREAS].reduce((acc, area) => ({ ...acc, [area.id]: 0 }), {})
   );
@@ -592,74 +594,74 @@ export default function GroutEstimatorApp() {
         
         // 1.1. OR 조건 (isFlexible) 처리 (USER_P_500K, USER_E_700K)
         if (pkg.isFlexible) {
-             const requiredPolyAreas = pkg.P_areas.map(([id]) => id).filter(id => id !== 'entrance');
-             const requiredEpoxyAreas = pkg.E_areas.map(([id]) => id);
-             
-             let baseMatch = true;
-             
-             // Poly 항목 체크 (FlexibleGroup 제외)
-             for (const id of requiredPolyAreas.filter(id => !pkg.flexibleGroup.includes(id))) {
-                 const requiredQty = pkg.P_areas.find(([pkId]) => pkId === id)[1];
-                 if ((tempPolySelections[id] || 0) !== requiredQty) {
-                     baseMatch = false;
-                     break;
-                 }
-             }
-             if (!baseMatch) continue;
+              const requiredPolyAreas = pkg.P_areas.map(([id]) => id).filter(id => id !== 'entrance');
+              const requiredEpoxyAreas = pkg.E_areas.map(([id]) => id);
+              
+              let baseMatch = true;
+              
+              // Poly 항목 체크 (FlexibleGroup 제외)
+              for (const id of requiredPolyAreas.filter(id => !pkg.flexibleGroup.includes(id))) {
+                  const requiredQty = pkg.P_areas.find(([pkId]) => pkId === id)[1];
+                  if ((tempPolySelections[id] || 0) !== requiredQty) {
+                      baseMatch = false;
+                      break;
+                  }
+              }
+              if (!baseMatch) continue;
 
-             // Epoxy 항목 체크 (FlexibleGroup 제외)
-             for (const id of requiredEpoxyAreas.filter(id => !pkg.flexibleGroup.includes(id))) {
-                 const requiredQty = pkg.E_areas.find(([pkId]) => pkId === id)[1];
-                 if ((tempEpoxySelections[id] || 0) !== requiredQty) {
-                     baseMatch = false;
-                     break;
-                 }
-             }
-             if (!baseMatch) continue;
+              // Epoxy 항목 체크 (FlexibleGroup 제외)
+              for (const id of requiredEpoxyAreas.filter(id => !pkg.flexibleGroup.includes(id))) {
+                  const requiredQty = pkg.E_areas.find(([pkId]) => pkId === id)[1];
+                  if ((tempEpoxySelections[id] || 0) !== requiredQty) {
+                      baseMatch = false;
+                      break;
+                  }
+              }
+              if (!baseMatch) continue;
 
 
-             // ⭐️ OR 조건 항목 매칭 및 소재 일치/충돌 방지 ⭐️
-             const flexibleSelectedPolyCount = pkg.flexibleGroup.filter(id => tempPolySelections[id] > 0).length;
-             const flexibleSelectedEpoxyCount = pkg.flexibleGroup.filter(id => tempEpoxySelections[id] > 0).length;
-             
-             const isPolyFlexiblePackage = pkg.id.startsWith('USER_P_');
-             const isEpoxyFlexiblePackage = pkg.id.startsWith('USER_E_');
+              // ⭐️ OR 조건 항목 매칭 및 소재 일치/충돌 방지 ⭐️
+              const flexibleSelectedPolyCount = pkg.flexibleGroup.filter(id => tempPolySelections[id] > 0).length;
+              const flexibleSelectedEpoxyCount = pkg.flexibleGroup.filter(id => tempEpoxySelections[id] > 0).length;
+              
+              const isPolyFlexiblePackage = pkg.id.startsWith('USER_P_');
+              const isEpoxyFlexiblePackage = pkg.id.startsWith('USER_E_');
 
-             let flexibleMatch = false;
+              let flexibleMatch = false;
 
-             if (isPolyFlexiblePackage) {
-                 flexibleMatch = flexibleSelectedPolyCount === 1 && flexibleSelectedEpoxyCount === 0;
+              if (isPolyFlexiblePackage) {
+                  flexibleMatch = flexibleSelectedPolyCount === 1 && flexibleSelectedEpoxyCount === 0;
 
-                 if (flexibleMatch) {
-                     const matchedFlexibleItem = pkg.flexibleGroup.find(id => tempPolySelections[id] > 0);
-                     if (pkg.id.includes('MASTER') && matchedFlexibleItem !== 'master_bath_wall') flexibleMatch = false;
-                     if (pkg.id.includes('COMMON') && matchedFlexibleItem !== 'common_bath_wall') flexibleMatch = false;
-                 }
+                  if (flexibleMatch) {
+                      const matchedFlexibleItem = pkg.flexibleGroup.find(id => tempPolySelections[id] > 0);
+                      if (pkg.id.includes('MASTER') && matchedFlexibleItem !== 'master_bath_wall') flexibleMatch = false;
+                      if (pkg.id.includes('COMMON') && matchedFlexibleItem !== 'common_bath_wall') flexibleMatch = false;
+                  }
 
-             } else if (isEpoxyFlexiblePackage) {
-                 flexibleMatch = flexibleSelectedEpoxyCount === 1 && flexibleSelectedPolyCount === 0;
+              } else if (isEpoxyFlexiblePackage) {
+                  flexibleMatch = flexibleSelectedEpoxyCount === 1 && flexibleSelectedPolyCount === 0;
 
-                 if (flexibleMatch) {
-                     const matchedFlexibleItem = pkg.flexibleGroup.find(id => tempEpoxySelections[id] > 0);
-                     if (pkg.id.includes('MASTER') && matchedFlexibleItem !== 'master_bath_wall') flexibleMatch = false;
-                     if (pkg.id.includes('COMMON') && matchedFlexibleItem !== 'common_bath_wall') flexibleMatch = false;
-                 }
+                  if (flexibleMatch) {
+                      const matchedFlexibleItem = pkg.flexibleGroup.find(id => tempEpoxySelections[id] > 0);
+                      if (pkg.id.includes('MASTER') && matchedFlexibleItem !== 'master_bath_wall') flexibleMatch = false;
+                      if (pkg.id.includes('COMMON') && matchedFlexibleItem !== 'common_bath_wall') flexibleMatch = false;
+                  }
 
-             }
-             
-             if (baseMatch && flexibleMatch) {
-                 // 2. 항목 ID 목록의 '완벽한 일치' 확인 (추가 선택 방지)
-                 const packageAreaIds = new Set(getPackageAreaIds(pkg));
-                 const finalSelectedAreaIds = new Set([...Object.keys(tempPolySelections).filter(id => tempPolySelections[id] > 0), ...Object.keys(tempEpoxySelections).filter(id => tempEpoxySelections[id] > 0)]);
+              }
+              
+              if (baseMatch && flexibleMatch) {
+                  // 2. 항목 ID 목록의 '완벽한 일치' 확인 (추가 선택 방지)
+                  const packageAreaIds = new Set(getPackageAreaIds(pkg));
+                  const finalSelectedAreaIds = new Set([...Object.keys(tempPolySelections).filter(id => tempPolySelections[id] > 0), ...Object.keys(tempEpoxySelections).filter(id => tempEpoxySelections[id] > 0)]);
 
-                 const isIdSetMatch = finalSelectedAreaIds.size === packageAreaIds.size && 
-                                      [...finalSelectedAreaIds].every(id => packageAreaIds.has(id));
+                  const isIdSetMatch = finalSelectedAreaIds.size === packageAreaIds.size && 
+                                           [...finalSelectedAreaIds].every(id => packageAreaIds.has(id));
 
-                 if (isIdSetMatch) {
-                     return { ...pkg, autoEntrance: appliedAutoEntrance }; 
-                 }
-             }
-             continue; 
+                  if (isIdSetMatch) {
+                      return { ...pkg, autoEntrance: appliedAutoEntrance }; 
+                  }
+              }
+              continue; 
         }
         
         // 1.2. 일반 패키지 Quantities Match (욕실 항목만 비교)
@@ -937,7 +939,7 @@ export default function GroutEstimatorApp() {
     setShowToast(false);
   }, []);
 
-  // 🚨 [신규 핸들러] 타일 이미지 업로드 핸들러 🚨
+  // 🚨 [유지] 타일 이미지 업로드 핸들러 🚨
   const handleTileImageUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -1155,7 +1157,6 @@ export default function GroutEstimatorApp() {
                         className={`flex-1 py-2 text-sm font-extrabold rounded-lg transition-all duration-300 shadow-md active:scale-[0.99] ${
                             activeVideoId === video.id 
                                 ? 'bg-indigo-700 text-white' 
-                                // ⭐️ [유지] 테두리 제거 ⭐️
                                 : 'bg-white text-indigo-700 hover:bg-indigo-50' 
                         }`}
                     >
@@ -1176,7 +1177,7 @@ export default function GroutEstimatorApp() {
               <button
                 key={type.id}
                 onClick={() => setHousingType(type.id)}
-                // 🚨 [수정] 선택 시 배경색을 Indigo-700으로 변경 🚨
+                // 🚨🚨🚨 이 부분이 수정되었습니다 (1184번 줄 오류 해결) 🚨🚨🚨
                 className={`p-4 rounded-lg text-center transition-all duration-200 selection-box active:scale-[0.99] shadow-md ${
                   housingType === type.id 
                     ? 'bg-indigo-700 text-white font-bold shadow-lg' 
@@ -1497,9 +1498,9 @@ export default function GroutEstimatorApp() {
                                         <span className="font-semibold text-gray-700 text-sm">{item.label}</span>
                                         {/* 개별 항목 할인액 (실리콘 패키지 할인)만 표시 */}
                                         {(item.discount > 0 && item.calculatedPrice > 0) && (
-                                             <span className='text-xs text-indigo-500 font-bold'>
-                                                 (-{(item.originalPrice - item.calculatedPrice).toLocaleString()}원 할인)
-                                             </span>
+                                            <span className='text-xs text-indigo-500 font-bold'>
+                                                (-{(item.originalPrice - item.calculatedPrice).toLocaleString()}원 할인)
+                                            </span>
                                         )}
                                     </div>
                                     
