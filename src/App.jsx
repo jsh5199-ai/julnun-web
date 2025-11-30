@@ -345,16 +345,16 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                         }}
                     ></div>
                     
-                    {/* 2. 워터마크 레이어 (z-index 5) */}
+                    {/* 2. 워터마크 레이어 (z-index 5, 반복 적용) */}
                     <div 
                         className="absolute inset-0 flex items-center justify-center" 
                         style={{
                             zIndex: 5, 
                             backgroundImage: 'url(/logo.png)', 
-                            backgroundSize: '15%', // 🚨 여러 개 반복을 위해 크기 축소
-                            backgroundRepeat: 'repeat', // 🚨 반복 적용
+                            backgroundSize: '15%', // 여러 개 반복을 위해 크기 축소
+                            backgroundRepeat: 'repeat', // 반복 적용
                             backgroundPosition: 'center',
-                            opacity: '0.1' // 🚨 투명도 조정
+                            opacity: '0.1' // 투명도 조정
                         }}
                     >
                     </div>
@@ -631,7 +631,7 @@ export default function App() {
           if ((tempEpoxySelections[id] || 0) !== requiredQty) { 
             isMatch = false;
             break;
-          }
+        }
         }
         if (!isMatch) continue;
 
@@ -661,7 +661,9 @@ export default function App() {
     let labelText = null;
     let isPackageActive = false; 
     let isFreeEntrance = false;
-    let totalAreaCount = Object.values(quantities).some(v => v > 0) ? Object.keys(quantities).filter(k => quantities[k] > 0).length : 0;
+    
+    // 🐞 FIX 1: totalAreaCount를 항목 개수가 아닌 수량의 총합으로 계산하여 할인 조건에 맞게 수정
+    const totalAreaCount = Object.values(quantities).reduce((sum, qty) => sum + qty, 0);
     
     let packageAreas = []; 
     
@@ -692,7 +694,7 @@ export default function App() {
       const isEpoxy = areaMatId === 'kerapoxy';
       let finalUnitBasePrice = area.basePrice;
       
-      // 🚨 [유지] 가격 계산 로직은 변경 없음
+      // 🚨 [유지] 가격 계산 로직은 변경 없음 (단, 실리콘 sink는 3만원 고정)
       if (area.id === 'balcony_laundry') {
           finalUnitBasePrice = isEpoxy ? 250000 : 100000;
       } else if (area.id === 'kitchen_wall') {
@@ -745,8 +747,6 @@ export default function App() {
               }
               if (initialCount === count) itemOriginalTotal = 400000 * initialCount;
           } else if (area.id === 'silicon_sink') { // 세면대+젠다이 교체는 단가 30,000원으로 고정
-              remainingCalculatedPrice = 30000 * count;
-          } else if (area.id === 'silicon_sink') {
               remainingCalculatedPrice = 30000 * count;
           }
           finalCalculatedPrice = remainingCalculatedPrice; 
@@ -876,48 +876,48 @@ export default function App() {
   const currentVideo = YOUTUBE_VIDEOS.find(v => v.id === activeVideoId);
   const currentEmbedUrl = getEmbedUrl(currentVideo.id);
 
-  // ⭐️ [수정] MaterialSelectButtons 컴포넌트 복구
+  // ⭐️ [수정] MaterialSelectButtons 컴포넌트 복구 및 실리콘 항목 제외
   const MaterialSelectButtons = ({ areaId, currentMat, onChange, isQuantitySelected }) => {
-    if (areaId === 'entrance') {
-        return (
-            <div className='mt-2 pt-2 border-t border-gray-100'>
-                <div className="text-xs font-bold text-green-700 bg-green-100 p-1.5 rounded-md text-center">
-                    현관은 폴리아스파틱 (Poly) 고정입니다.
-                </div>
-            </div>
-        );
-    }
-    if (['silicon_bathtub', 'silicon_sink', 'silicon_living_baseboard'].includes(areaId)) {
-        return (
-            <div className='mt-2 pt-2 border-t border-gray-100'>
-                <div className="text-xs font-bold text-green-700 bg-green-100 p-1.5 rounded-md text-center">
-                    실리콘 시공은 별도 소재입니다.
-                </div>
-            </div>
-        );
-    }
-    return (
-        <div className={`mt-2 ${isQuantitySelected ? 'animate-slide-down' : ''} transition-all duration-300`}>
-            <div className='flex gap-1.5 pt-2 border-t border-gray-100'>
-            {MATERIALS.map(mat => (
-                <button
-                key={mat.id}
-                onClick={(e) => {
-                    e.stopPropagation();  
-                    if (isQuantitySelected) onChange(areaId, mat.id);
-                }}
-                className={`flex-1 py-1 text-xs font-semibold rounded-md transition-all active:scale-95 shadow-sm 
-                    ${currentMat === mat.id 
-                    ? 'bg-indigo-700 text-white shadow-lg' 
-                    : 'bg-indigo-100 text-gray-700 hover:bg-indigo-200' 
-                    }`}
-                >
-                {mat.label.split('(')[0].trim()}
-                </button>
-            ))}
-            </div>
-        </div>
-    );
+      if (areaId === 'entrance') {
+          return (
+              <div className='mt-2 pt-2 border-t border-gray-100'>
+                  <div className="text-xs font-bold text-green-700 bg-green-100 p-1.5 rounded-md text-center">
+                      현관은 폴리아스파틱 (Poly) 고정입니다.
+                  </div>
+              </div>
+          );
+      }
+      if (['silicon_bathtub', 'silicon_sink', 'silicon_living_baseboard'].includes(areaId)) {
+          return (
+              <div className='mt-2 pt-2 border-t border-gray-100'>
+                  <div className="text-xs font-bold text-green-700 bg-green-100 p-1.5 rounded-md text-center">
+                      실리콘 시공은 별도 소재입니다.
+                  </div>
+              </div>
+          );
+      }
+      return (
+          <div className={`mt-2 ${isQuantitySelected ? 'animate-slide-down' : ''} transition-all duration-300`}>
+              <div className='flex gap-1.5 pt-2 border-t border-gray-100'>
+              {MATERIALS.map(mat => (
+                  <button
+                  key={mat.id}
+                  onClick={(e) => {
+                      e.stopPropagation();  
+                      if (isQuantitySelected) onChange(areaId, mat.id);
+                  }}
+                  className={`flex-1 py-1 text-xs font-semibold rounded-md transition-all active:scale-95 shadow-sm 
+                      ${currentMat === mat.id 
+                      ? 'bg-indigo-700 text-white shadow-lg' 
+                      : 'bg-indigo-100 text-gray-700 hover:bg-indigo-200' 
+                      }`}
+                  >
+                  {mat.label.split('(')[0].trim()}
+                  </button>
+              ))}
+              </div>
+          </div>
+      );
   };
 
   // ⭐️ [수정] renderAreaList 함수 복구
@@ -1050,11 +1050,11 @@ export default function App() {
           </div>
         </section>
         
-        {/* --- 1. 현장 유형 섹션 (배경색 강조로 변경) --- */}
+        {/* --- 1. 현장 유형 섹션 --- */}
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-150">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
             <Home className="h-5 w-5 text-indigo-600" /> 1. 현장 유형을 선택하세요
-          </b>
+          </h2>
           <div className="grid grid-cols-2 gap-3">
             {HOUSING_TYPES.map((type) => (
               <button
@@ -1076,7 +1076,7 @@ export default function App() {
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-300">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
             <Hammer className="h-5 w-5 text-indigo-600" /> 2. 줄눈소재 안내
-          </b>
+          </h2>
           <div className="space-y-4">
             {MATERIALS.map((item) => (
               <div key={item.id} className="animate-fade-in">
@@ -1142,7 +1142,7 @@ export default function App() {
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-450">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
             <Calculator className="h-5 w-5 text-indigo-600" /> 3. 시공범위 선택
-          </b>
+          </h2>
           
           {/* A. 욕실 범위 */}
           <h3 className="text-base font-extrabold flex items-center gap-2 mb-3 mt-4 text-gray-700">
@@ -1155,7 +1155,7 @@ export default function App() {
           {/* B. 기타 범위 (현관/주방/베란다) */}
           <h3 className="text-base font-extrabold flex items-center gap-2 mb-3 mt-4 text-gray-700">
             <LayoutGrid size={16} className="text-indigo-500" /> B. 기타 범위
-          </b>
+          </h3>
           {renderAreaList(OTHER_AREAS)}
 
         </section>
@@ -1164,7 +1164,7 @@ export default function App() {
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-600">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
             <Eraser className="h-5 w-5 text-indigo-600" /> 4. 실리콘 시공
-          </b>
+          </h2>
           <div className="space-y-3">
             {SILICON_AREAS.map((area) => {
               const Icon = area.icon;
@@ -1205,6 +1205,15 @@ export default function App() {
                             >+</button> 
                         </div>
                     </div>
+
+                    {isSelected && (
+                        <MaterialSelectButtons 
+                            areaId={area.id}
+                            currentMat={currentMat}
+                            onChange={handleAreaMaterialChange}
+                            isQuantitySelected={isSelected}
+                        />
+                    )}
                 </div>
               );
             })}
@@ -1215,7 +1224,7 @@ export default function App() {
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-750">
             <h2 className="text-lg font-extrabold text-gray-800 mb-2 flex items-center gap-2 border-b pb-2">
                 <HelpCircle className="h-5 w-5 text-indigo-600"/> 자주 묻는 질문
-            </b>
+            </h2>
             <div className="space-y-1">
                 {FAQ_ITEMS.map((item, index) => (
                     <Accordion key={index} question={item.question} answer={item.answer} />
