@@ -354,7 +354,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                             backgroundSize: '15%', // 여러 개 반복을 위해 크기 축소
                             backgroundRepeat: 'repeat', // 반복 적용
                             backgroundPosition: 'center',
-                            opacity: '0.1' // 투명도 조정
+                            opacity: '0.2' // 🐞 FIX 2: 투명도 조정 (0.1 -> 0.2)
                         }}
                     >
                     </div>
@@ -1277,7 +1277,7 @@ export default function App() {
                                     <Clock size={12} className='inline mr-0.5 text-red-300'/> 최소 출장비 적용
                                 </div>
                             )}
-                            
+
                             {/* B. 원래 금액 스트라이크 아웃 */}
                             {calculation.minimumFeeApplied && (
                                 <span className="text-xs text-gray-400 line-through font-normal whitespace-nowrap">
