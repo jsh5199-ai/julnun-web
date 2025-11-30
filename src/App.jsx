@@ -104,19 +104,15 @@ const BATHROOM_AREAS = [
 
 // 기타 범위
 const OTHER_AREAS = [
-  { id: 'entrance', label: '현관', basePrice: 50000, icon: DoorOpen, unit: '개소' }, 
-  // 🚨 [수정] 단가 문구 제거
+  { id: 'entrance', label: '현관', basePrice: 50000, icon: DoorOpen, unit: '개소', desc: '' }, 
   { id: 'balcony_laundry', label: '베란다/세탁실', basePrice: 100000, icon: LayoutGrid, unit: '개소', desc: '' }, 
-  // 🚨 [수정] 단가 문구 제거
   { id: 'kitchen_wall', label: '주방 벽면', basePrice: 150000, icon: Utensils, unit: '구역', desc: '' },
-  // 🚨 [수정] 단가 문구 제거
   { id: 'living_room', label: '거실 바닥', basePrice: 550000, icon: Sofa, unit: '구역', desc: '' },
 ];
 
 const SERVICE_AREAS = [...BATHROOM_AREAS, ...OTHER_AREAS];
 
 const SILICON_AREAS = [
-  // 🚨 [수정] 단가 문구 제거
   { id: 'silicon_bathtub', label: '욕조 테두리 교체', basePrice: 80000, icon: Eraser, unit: '개소', desc: '' },
   { 
     id: 'silicon_sink', 
@@ -124,9 +120,8 @@ const SILICON_AREAS = [
     basePrice: 30000, 
     icon: Eraser, 
     unit: '개소', 
-    desc: '' // 요청에 따라 문구 삭제
+    desc: ''
   },
-  // 🚨 [수정] 단가 문구 제거
   { id: 'silicon_living_baseboard', label: '거실 걸레받이 실리콘', basePrice: 400000, icon: Sofa, unit: '구역', desc: '' },
 ];
 
@@ -176,19 +171,13 @@ const CUSTOM_MIXED_PACKAGES = [
 ];
 
 const NEW_USER_PACKAGES = [
-    // 에폭시 혼합 패키지 (70만) - 현관 제외 (기존 유지)
     { id: 'USER_E_700K_MASTER', price: 700000, label: '에폭시 벽면 패키지 (70만)', E_areas: [['bathroom_floor', 1], ['master_bath_wall', 1]], P_areas: [], isFlexible: true, flexibleGroup: ['master_bath_wall', 'common_bath_wall'] },
     { id: 'USER_E_700K_COMMON', price: 700000, label: '에폭시 벽면 패키지 (70만)', E_areas: [['bathroom_floor', 1], ['common_bath_wall', 1]], P_areas: [], isFlexible: true, flexibleGroup: ['master_bath_wall', 'common_bath_wall'] },
-    // 폴리 혼합 패키지 (50만) - 현관 제외 (기존 유지)
     { id: 'USER_P_500K_MASTER', price: 500000, label: '폴리 벽면 패키지 (50만)', E_areas: [], P_areas: [['bathroom_floor', 1], ['master_bath_wall', 1]], isFlexible: true, flexibleGroup: ['master_bath_wall', 'common_bath_wall'] },
     { id: 'USER_P_500K_COMMON', price: 500000, label: '폴리 벽면 패키지 (50만)', E_areas: [], P_areas: [['bathroom_floor', 1], ['common_bath_wall', 1]], isFlexible: true, flexibleGroup: ['master_bath_wall', 'common_bath_wall'] },
-    // 🚨 [신규 추가 1] 욕실 바닥 2곳 에폭시 55만 고정
     { id: 'USER_E_550K_FLOOR_2', price: 550000, label: '에폭시 바닥 2곳 (55만)', E_areas: [['bathroom_floor', 2]], P_areas: [], isFlexible: false, },
-    // 🚨 [신규 추가 2] 욕실 바닥 2곳 + 샤워부스 벽 3면 에폭시 80만 고정
     { id: 'USER_E_800K_FLOOR2_SHOWER1', price: 800000, label: '에폭시 바닥 2곳 + 샤워벽 1곳 (80만)', E_areas: [['bathroom_floor', 2], ['shower_booth', 1]], P_areas: [], isFlexible: false, },
-    // 🚨 [신규 추가 3] 욕실 바닥 1곳 + 샤워부스 벽 3면 에폭시 55만 고정
     { id: 'USER_E_550K_FLOOR1_SHOWER1', price: 550000, label: '에폭시 바닥 1곳 + 샤워벽 1곳 (55만)', E_areas: [['bathroom_floor', 1], ['shower_booth', 1]], P_areas: [], isFlexible: false, },
-    // 🚨 [기존 유지] 욕실 바닥 1곳 에폭시 35만 고정 패키지 
     { id: 'USER_E_350K_BATH', price: 350000, label: '에폭시 바닥 1곳 (35만)', E_areas: [['bathroom_floor', 1]], P_areas: [], isFlexible: false, },
 ];
 
@@ -211,6 +200,65 @@ const getPackageAreaIds = (pkg) => [
     ...pkg.P_areas.map(([id]) => id),
     ...pkg.E_areas.map(([id]) => id),
 ];
+
+// =================================================================
+// [유틸리티] 색상 혼합 로직 (Hex to RGB 및 혼합)
+// =================================================================
+/**
+ * HEX 코드를 RGB 객체로 변환합니다.
+ * @param {string} hex - #RRGGBB 형태의 16진수 색상 코드
+ * @returns {{r: number, g: number, b: number}}
+ */
+const hexToRgb = (hex) => {
+    const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+    hex = hex.replace(shorthandRegex, (m, r, g, b) => r + r + g + g + b + b);
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : { r: 0, g: 0, b: 0 };
+};
+
+/**
+ * RGB 객체를 HEX 코드로 변환합니다.
+ * @param {number} c - 0-255 범위의 값
+ * @returns {string}
+ */
+const componentToHex = (c) => {
+    const hex = Math.round(c).toString(16);
+    return hex.length === 1 ? "0" + hex : hex;
+};
+
+/**
+ * 여러 색상을 지정된 비율로 혼합합니다.
+ * @param {Array<{color: string, ratio: number}>} mixes - {색상 HEX 코드, 비율(0-100)} 배열
+ * @returns {string} - 혼합된 색상의 HEX 코드
+ */
+const mixColors = (mixes) => {
+    let totalRatio = 0;
+    let r = 0, g = 0, b = 0;
+
+    mixes.forEach(m => {
+        const ratio = m.ratio / 100; // 비율을 0-1로 변환
+        const { r: r1, g: g1, b: b1 } = hexToRgb(m.color);
+        
+        r += r1 * ratio;
+        g += g1 * ratio;
+        b += b1 * ratio;
+        totalRatio += ratio;
+    });
+
+    if (totalRatio === 0) return '#ffffff'; // 비율이 0이면 흰색 반환
+
+    // 합산된 비율로 나누어 최종 색상 계산 (정규화)
+    const finalR = r / totalRatio;
+    const finalG = g / totalRatio;
+    const finalB = b / totalRatio;
+
+    return "#" + componentToHex(finalR) + componentToHex(finalG) + componentToHex(finalB);
+};
+
 
 // =================================================================
 // [컴포넌트]
@@ -313,12 +361,39 @@ const Accordion = ({ question, answer }) => {
     );
 };
 
-// ⭐️ [ColorPalette] 줄눈선을 HTML div로 직접 그림 (확실한 해결) ⭐️
-const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageURL }) => {
-    const selectedColorData = GROUT_COLORS.find(c => c.id === selectedColorId) || GROUT_COLORS[0];
-    const GROUT_LINE_WIDTH = 12; 
+// ⭐️ [ColorPalette] 줄눈선 혼합 시뮬레이션 기능 추가 ⭐️
+const ColorPalette = ({ 
+    groutColors, // {id, ratio} 배열
+    onSelectColor, // (colorId, index) => void
+    onRatioChange, // (ratio, index) => void
+    onRandomize, // () => void
+    tileImageURL, 
+    onTileImageUpload 
+}) => {
+    
+    // 1. 최종 혼합 색상 계산
+    const finalMix = useMemo(() => {
+        const activeMixes = groutColors.map(mix => ({
+            color: GROUT_COLORS.find(c => c.id === mix.id)?.code || '#ffffff',
+            ratio: mix.ratio
+        }));
 
-    // 타일 배경 URL 결정 (이미지가 없으면 기본 이미지)
+        const finalHex = mixColors(activeMixes);
+        
+        // 최종 색상의 밝기 확인 (텍스트 색상 결정용)
+        const rgb = hexToRgb(finalHex);
+        const isDark = (rgb.r * 0.299 + rgb.g * 0.587 + rgb.b * 0.114) < 186; // 밝기 임계값 조정
+
+        const labelText = groutColors.map(mix => `${mix.ratio}%`).join(' : ');
+        
+        return { 
+            code: finalHex, 
+            label: labelText, 
+            isDark 
+        };
+    }, [groutColors]);
+
+    const GROUT_LINE_WIDTH = 12; 
     const effectiveTileImageURL = (tileImageURL && tileImageURL !== DEFAULT_TILE_IMAGE_URL)
         ? tileImageURL
         : DEFAULT_TILE_IMAGE_URL;
@@ -326,7 +401,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
     return (
         <div className='mt-5 pt-3 border-t border-gray-100 animate-fade-in'>
             <h3 className="text-base font-extrabold flex items-center gap-2 mb-3 text-gray-800">
-                <Palette className="h-4 w-4 text-indigo-600" /> 2-1. 줄눈 색상 미리보기 및 선택
+                <Palette className="h-4 w-4 text-indigo-600" /> 2-1. 줄눈 색상 혼합 미리보기 및 선택
             </h3>
             
             {/* 시뮬레이션 컨테이너 */}
@@ -334,7 +409,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                 <div 
                     className="w-full aspect-video mx-auto overflow-hidden relative bg-white" 
                 >
-                    {/* 1. 타일 배경 (이미지) */}
+                    {/* 1. 타일 배경 */}
                     <div 
                         className="absolute inset-0" 
                         style={{ 
@@ -344,8 +419,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                             zIndex: 1 
                         }}
                     ></div>
-                    
-                    {/* 2. 워터마크 레이어 (z-index 5) */}
+                    {/* 2. 워터마크 레이어 */}
                     <div 
                         className="absolute inset-0 flex items-center justify-center opacity-30" 
                         style={{
@@ -357,74 +431,138 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                         }}
                     >
                     </div>
-
-                    {/* ⭐️ 3. 줄눈 십자가 (HTML Div로 직접 그림) - z-index 10 (최상단) ⭐️ */}
-                    
-                    {/* 세로 줄 (그림자 제거됨) */}
+                    {/* 3. 줄눈 십자가 (혼합 색상 적용) */}
                     <div 
                         className="absolute top-0 bottom-0 left-1/2"
                         style={{
                             width: `${GROUT_LINE_WIDTH}px`,
-                            backgroundColor: selectedColorData.code,
+                            backgroundColor: finalMix.code, // ⭐️ 최종 혼합 색상 적용
                             transform: 'translateX(-50%)',
                             zIndex: 10,
-                            // 💡 boxShadow 제거
                         }}
                     ></div>
-
-                    {/* 가로 줄 (그림자 제거됨) */}
                     <div 
                         className="absolute left-0 right-0 top-1/2"
                         style={{
                             height: `${GROUT_LINE_WIDTH}px`,
-                            backgroundColor: selectedColorData.code,
+                            backgroundColor: finalMix.code, // ⭐️ 최종 혼합 색상 적용
                             transform: 'translateY(-50%)',
                             zIndex: 10,
-                            // 💡 boxShadow 제거
                         }}
                     ></div>
                 </div>
             </div>
 
-            {/* 선택 색상 이름 표시 */}
-            <div className={`p-3 rounded-lg shadow-md mb-3 border border-gray-200`} style={{ backgroundColor: selectedColorData.code }}>
-                <p className={`text-sm font-bold ${selectedColorData.isDark ? 'text-white' : 'text-gray-900'} flex items-center justify-between`}>
-                    <span className='truncate'>현재 선택 색상: {selectedColorData.label}</span>
-                    <CheckCircle2 size={16} className={`ml-2 flex-shrink-0 ${selectedColorData.isDark ? 'text-amber-400' : 'text-indigo-700'}`}/>
+            {/* 선택 색상 이름 및 비율 표시 */}
+            <div className={`p-3 rounded-lg shadow-md mb-3 border border-gray-200`} style={{ backgroundColor: finalMix.code }}>
+                <p className={`text-sm font-bold ${finalMix.isDark ? 'text-white' : 'text-gray-900'} flex items-center justify-between`}>
+                    <span className='truncate'>
+                        최종 혼합 색상 (비율): {finalMix.label}
+                    </span>
+                    <CheckCircle2 size={16} className={`ml-2 flex-shrink-0 ${finalMix.isDark ? 'text-amber-400' : 'text-indigo-700'}`}/>
                 </p>
             </div>
             
-            {/* 타일 이미지 업로드 버튼 */}
-            <div className='mb-4'>
-                <input type="file" id="tileFileInput" accept="image/*" onChange={onTileImageUpload} style={{ display: 'none' }} />
-                <label htmlFor="tileFileInput" className="w-full py-2.5 px-4 bg-indigo-600 text-white rounded-lg font-bold text-sm hover:bg-indigo-700 transition shadow-md cursor-pointer flex items-center justify-center gap-2">
-                    <ImageIcon size={16} /> 내 타일 사진 첨부하여 미리보기
-                </label>
-            </div>
+            {/* ⭐️ 색상 선택 및 비율 조정 영역 (3개) ⭐️ */}
+            <div className='mb-4 space-y-3 p-3 bg-indigo-50/50 rounded-lg border border-indigo-200'>
+                {groutColors.map((mix, index) => {
+                    const selectedColorData = GROUT_COLORS.find(c => c.id === mix.id);
+                    const isTotalOneHundred = groutColors.reduce((sum, m) => sum + m.ratio, 0) === 100;
+                    const ratios = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
 
+                    return (
+                        <div key={index} className='bg-white p-3 rounded-lg shadow-sm'>
+                            <div className='flex items-center justify-between mb-2'>
+                                <span className='text-sm font-bold text-gray-700'>Color {index + 1}</span>
+                                <div className='flex items-center gap-2'>
+                                    {/* 현재 선택된 색상 미리보기 */}
+                                    <div 
+                                        className='w-5 h-5 rounded-full border border-gray-300 shadow-inner'
+                                        style={{ backgroundColor: selectedColorData.code }}
+                                    ></div>
+                                    <span className='text-xs font-semibold text-indigo-700'>{selectedColorData.label} ({mix.ratio}%)</span>
+                                </div>
+                            </div>
+                            
+                            {/* 비율 조정 슬라이더 */}
+                            <input
+                                type="range"
+                                min="0"
+                                max="100"
+                                step="10"
+                                value={mix.ratio}
+                                onChange={(e) => onRatioChange(Number(e.target.value), index)}
+                                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer range-lg range-indigo-500"
+                                style={{ accentColor: selectedColorData.code }}
+                            />
+
+                            {/* 비율 값 라벨 */}
+                            <div className='flex justify-between text-xs text-gray-500 mt-1'>
+                                {ratios.map(r => (
+                                    <span key={r} className={`w-[20px] text-center ${mix.ratio === r ? 'text-indigo-700 font-bold' : ''}`}>{r}</span>
+                                ))}
+                            </div>
+                        </div>
+                    );
+                })}
+                {/* 비율 합계 알림 */}
+                <div className='text-center mt-3'>
+                    {groutColors.reduce((sum, m) => sum + m.ratio, 0) !== 100 ? (
+                        <p className='text-sm font-extrabold text-red-600 bg-red-100 p-2 rounded-md'>
+                            <Zap size={14} className='inline mr-1'/> 비율 합계가 **100%**가 아닙니다. (현재 {groutColors.reduce((sum, m) => sum + m.ratio, 0)}%)
+                        </p>
+                    ) : (
+                        <p className='text-sm font-extrabold text-green-700 bg-green-100 p-2 rounded-md'>
+                            <CheckCircle2 size={14} className='inline mr-1'/> 비율 합계 100% 완료
+                        </p>
+                    )}
+                </div>
+            </div>
+
+            {/* ⭐️ 색상 선택 팔레트 (단일 선택 모드) ⭐️ */}
+            <h4 className="text-sm font-bold flex items-center gap-1 mb-2 text-gray-700">
+                <Palette className="h-4 w-4 text-indigo-500" /> 선택할 색상 지정 (클릭 시 Mix 1~3 순서로 선택)
+            </h4>
+            <div className='flex gap-2 mb-4'>
+                <button
+                    onClick={onRandomize}
+                    className="flex-1 py-2 px-4 bg-indigo-500 text-white rounded-lg font-bold text-sm hover:bg-indigo-600 transition shadow-md cursor-pointer flex items-center justify-center gap-2 active:scale-95"
+                >
+                    <RefreshCw size={14} /> 랜덤 3색 조합
+                </button>
+                <input type="file" id="tileFileInput" accept="image/*" onChange={onTileImageUpload} style={{ display: 'none' }} />
+                <label htmlFor="tileFileInput" className="flex-1 py-2.5 px-4 bg-indigo-600 text-white rounded-lg font-bold text-sm hover:bg-indigo-700 transition shadow-md cursor-pointer flex items-center justify-center gap-2">
+                    <ImageIcon size={16} /> 내 타일 사진 첨부
+                </label>
+            </div>
+            
             {/* 색상 선택 버튼 그리드 */}
             <div className='grid grid-cols-5 sm:grid-cols-5 gap-3'>
-                {GROUT_COLORS.map((color) => (
-                    <button
-                        key={color.id}
-                        onClick={() => onSelect(color.id)}
-                        className={`aspect-square rounded-lg transition-all duration-200 shadow-md flex items-center justify-center p-1 relative hover:scale-[1.02] active:scale-[0.98] ${
-                            selectedColorId === color.id
-                                ? 'ring-4 ring-offset-2 ring-indigo-500' // 선택 시 링 효과
-                                : 'hover:shadow-lg'
-                        }`}
-                        style={{ backgroundColor: color.code }}
-                        title={color.label}
-                    >
-                        {selectedColorId === color.id && (
-                            <CheckCircle2 size={24} className={`absolute ${color.isDark ? 'text-amber-400' : 'text-indigo-700'} drop-shadow-md`} />
-                        )}
-                        <span className={`absolute bottom-0 text-[8px] font-bold py-[1px] px-1 rounded-t-sm ${color.isDark ? 'bg-white/80 text-gray-900' : 'bg-gray-900/80 text-white'}`}>{color.label}</span>
-                    </button>
-                ))}
+                {GROUT_COLORS.map((color) => {
+                    const isSelected = groutColors.some(mix => mix.id === color.id);
+                    return (
+                        <button
+                            key={color.id}
+                            onClick={() => onSelectColor(color.id)} // Mix 순서에 따라 선택
+                            className={`aspect-square rounded-lg transition-all duration-200 shadow-md flex items-center justify-center p-1 relative hover:scale-[1.02] active:scale-[0.98] ${
+                                isSelected
+                                    ? 'ring-4 ring-offset-2 ring-indigo-500' // 선택 시 링 효과
+                                    : 'hover:shadow-lg'
+                            }`}
+                            style={{ backgroundColor: color.code }}
+                            title={color.label}
+                        >
+                            {groutColors.map((mix, i) => mix.id === color.id && (
+                                <span key={i} className={`absolute top-0 right-0 text-[10px] font-extrabold px-1.5 py-0.5 rounded-bl-lg ${color.isDark ? 'bg-amber-400 text-gray-900' : 'bg-indigo-700 text-white'}`}>
+                                    Mix {i + 1}
+                                </span>
+                            ))}
+                            <span className={`absolute bottom-0 text-[8px] font-bold py-[1px] px-1 rounded-t-sm ${color.isDark ? 'bg-white/80 text-gray-900' : 'bg-gray-900/80 text-white'}`}>{color.label}</span>
+                        </button>
+                })}
             </div>
             <p className='text-xs text-gray-500 mt-3 text-center'>
-                * 화면 해상도에 따라 실제 색상과 차이가 있을 수 있습니다.
+                * 화면 해상도에 따라 실제 색상과 차이가 있을 수 있으며, 혼합 색상은 시뮬레이션입니다.
             </p>
         </div>
     );
@@ -437,7 +575,12 @@ export default function App() {
   const [material, setMaterial] = useState('poly');
   const [polyOption, setPolyOption] = useState('pearl');
   const [epoxyOption, setEpoxyOption] = useState('kerapoxy');
-  const [selectedGroutColor, setSelectedGroutColor] = useState(GROUT_COLORS[0].id);
+    // ⭐️ 기존 selectedGroutColor -> 3색 혼합 상태로 변경
+  const [groutColors, setGroutColors] = useState([
+    { id: GROUT_COLORS[0].id, ratio: 40 }, 
+    { id: GROUT_COLORS[1].id, ratio: 30 }, 
+    { id: GROUT_COLORS[2].id, ratio: 30 }
+  ]);
   const [tileImageURL, setTileImageURL] = useState(DEFAULT_TILE_IMAGE_URL); 
   
   const [quantities, setQuantities] = useState(
@@ -873,17 +1016,84 @@ export default function App() {
   const currentVideo = YOUTUBE_VIDEOS.find(v => v.id === activeVideoId);
   const currentEmbedUrl = getEmbedUrl(currentVideo.id);
 
+
+    // ⭐️ [신규] 색상 혼합 기능 관련 핸들러 ⭐️
+    const handleSelectGroutColor = useCallback((colorId) => {
+        setGroutColors(prevColors => {
+            const nextIndex = prevColors.findIndex(mix => mix.id === colorId) === -1 
+                ? (prevColors.findIndex(mix => mix.id === prevColors[0].id) + 1) % 3 
+                : (prevColors.findIndex(mix => mix.id === prevColors[1].id) + 1) % 3;
+
+            const newColors = [...prevColors];
+            newColors[nextIndex] = { ...newColors[nextIndex], id: colorId };
+            return newColors;
+        });
+    }, []);
+
+    const handleGroutRatioChange = useCallback((ratio, index) => {
+        setGroutColors(prevColors => {
+            const newColors = [...prevColors];
+            newColors[index] = { ...newColors[index], ratio };
+
+            // 비율 합계가 100을 넘지 않도록 조정
+            const total = newColors.reduce((sum, m) => sum + m.ratio, 0);
+            if (total > 100) {
+                // 다른 비율을 줄여서 맞추기 (단순화)
+                const diff = total - 100;
+                const otherIndices = [0, 1, 2].filter(i => i !== index);
+                
+                // 첫 번째 남은 비율에서 차이만큼 빼기
+                if (newColors[otherIndices[0]].ratio >= diff) {
+                    newColors[otherIndices[0]].ratio -= diff;
+                } else if (newColors[otherIndices[0]].ratio > 0) {
+                    const diff1 = newColors[otherIndices[0]].ratio;
+                    newColors[otherIndices[0]].ratio = 0;
+                    // 두 번째 남은 비율에서 나머지 차이만큼 빼기
+                    newColors[otherIndices[1]].ratio -= (diff - diff1);
+                    if (newColors[otherIndices[1]].ratio < 0) newColors[otherIndices[1]].ratio = 0;
+                } else {
+                    // 비율이 음수가 되는 것을 방지
+                    newColors[otherIndices[1]].ratio -= diff;
+                    if (newColors[otherIndices[1]].ratio < 0) newColors[otherIndices[1]].ratio = 0;
+                }
+
+                // 최종적으로 100을 넘지 않도록 다시 보정
+                const finalTotal = newColors.reduce((sum, m) => sum + m.ratio, 0);
+                if (finalTotal > 100) {
+                    newColors[index].ratio -= (finalTotal - 100);
+                    if (newColors[index].ratio < 0) newColors[index].ratio = 0;
+                }
+            }
+            return newColors;
+        });
+    }, []);
+
+    const handleRandomizeColors = useCallback(() => {
+        const availableColors = GROUT_COLORS.map(c => c.id);
+        
+        // 중복 없이 3개 랜덤 선택
+        const selectedIds = [];
+        while (selectedIds.length < 3) {
+            const randomIndex = Math.floor(Math.random() * availableColors.length);
+            const randomId = availableColors[randomIndex];
+            if (!selectedIds.includes(randomId)) {
+                selectedIds.push(randomId);
+            }
+        }
+        
+        // 비율은 임의로 30/40/30으로 설정
+        setGroutColors([
+            { id: selectedIds[0], ratio: 40 }, 
+            { id: selectedIds[1], ratio: 30 }, 
+            { id: selectedIds[2], ratio: 30 }
+        ]);
+        alert('✅ 랜덤 색상 3가지로 조합되었습니다!');
+    }, []);
+    // ⭐️ [신규] 색상 혼합 기능 관련 핸들러 끝 ⭐️
+
+
   // ⭐️ [수정] MaterialSelectButtons 컴포넌트 복구
   const MaterialSelectButtons = ({ areaId, currentMat, onChange, isQuantitySelected }) => {
-    if (areaId === 'entrance') {
-        return (
-            <div className='mt-2 pt-2 border-t border-gray-100'>
-                <div className="text-xs font-bold text-green-700 bg-green-100 p-1.5 rounded-md text-center">
-                    현관은 폴리아스파틱 (Poly) 고정입니다.
-                </div>
-            </div>
-        );
-    }
     if (['silicon_bathtub', 'silicon_sink', 'silicon_living_baseboard'].includes(areaId)) {
         return (
             <div className='mt-2 pt-2 border-t border-gray-100'>
@@ -893,8 +1103,20 @@ export default function App() {
             </div>
         );
     }
+    if (areaId === 'entrance') {
+        return (
+            <div className='mt-2 pt-2 border-t border-gray-100'>
+                <div className="text-xs font-bold text-green-700 bg-green-100 p-1.5 rounded-md text-center">
+                    현관은 폴리아스파틱 (Poly) 고정입니다.
+                </div>
+            </div>
+        );
+    }
+    
+    if (!isQuantitySelected) return null;
+
     return (
-        <div className={`mt-2 ${isQuantitySelected ? 'animate-slide-down' : ''} transition-all duration-300`}>
+        <div className={`mt-2 animate-slide-down transition-all duration-300`}>
             <div className='flex gap-1.5 pt-2 border-t border-gray-100'>
             {MATERIALS.map(mat => (
                 <button
@@ -926,9 +1148,7 @@ export default function App() {
             const currentMat = area.id === 'entrance' ? 'poly' : areaMaterials[area.id];
             const isEntranceAutoSelected = area.id === 'entrance' && quantities['entrance'] >= 1 && quantities['bathroom_floor'] >= 2 && !calculation.isPackageActive;
             
-            // 🚨 [수정] area.desc가 빈 문자열이 되었으므로, 조건부 렌더링 수정
             const description = area.desc || area.basePrice ? (
-                // 가격 정보만 있는 경우, 표시하지 않음 (요청에 따라)
                 (area.desc && area.desc.trim() !== '') ? (
                     <div className="text-xs text-gray-500"><span className="block text-indigo-600">{area.desc}</span></div>
                 ) : null
@@ -941,7 +1161,6 @@ export default function App() {
                             <div className={`p-2 rounded-full shadow-sm ${isSelected ? 'bg-indigo-700 text-white' : 'bg-gray-200 text-indigo-600'}`}><Icon size={18} /></div> 
                             <div>
                                 <div className="font-semibold text-gray-800">{area.label}</div>
-                                {/* 🚨 [수정] desc 내용만 렌더링 (단가 문구 제거) */}
                                 {description}
                             </div>
                         </div>
@@ -1047,11 +1266,11 @@ export default function App() {
           </div>
         </section>
         
-        {/* --- 1. 현장 유형 섹션 (배경색 강조로 변경) --- */}
+        {/* --- 1. 현장 유형 섹션 --- */}
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-150">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
             <Home className="h-5 w-5 text-indigo-600" /> 1. 현장 유형을 선택하세요
-          </h2>
+            </h2>
           <div className="grid grid-cols-2 gap-3">
             {HOUSING_TYPES.map((type) => (
               <button
@@ -1077,28 +1296,22 @@ export default function App() {
           <div className="space-y-4">
             {MATERIALS.map((item) => (
               <div key={item.id} className="animate-fade-in">
-                {/* 🚨 [수정] 배경색 강조로 변경 🚨 */}
                 <div onClick={() => setMaterial(item.id)} className={`flex items-center p-4 rounded-lg cursor-pointer transition-all duration-200 selection-box active:scale-[0.99] shadow-md ${item.id === material ? 'bg-indigo-700 text-white shadow-lg' : 'bg-white hover:bg-indigo-50'}`}>
                   <div className="flex-1">
                     <div className="flex justify-between items-center">
                       <div className='flex items-center gap-3'>
-                        {/* 선택 아이콘 border 색상 변경 */}
                         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mr-2 transition ${item.id === material ? 'border-white' : 'border-gray-400'}`}>
                           {item.id === material && <CheckCircle2 size={12} className="text-white" />}
                         </div>
-                        {/* 텍스트 색상 변경 */}
                         <span className={`font-bold ${item.id === material ? 'text-white' : 'text-gray-800'}`}>{item.label}</span>
                       </div>
-                      {/* 배지 색상 변경 */}
                       <span className={`text-xs font-bold px-3 py-1 rounded-full ${item.id === material ? 'bg-amber-400 text-indigo-900' : item.badgeColor}`}>
                         {item.badge}
                       </span>
                     </div>
-                    {/* 설명 텍스트 색상 변경 */}
                     <p className={`text-xs mt-1 pl-7 ${item.id === material ? 'text-indigo-200' : 'text-gray-500'}`}>{item.description}</p>
                   </div>
                 </div>
-                {/* 나머지 옵션 부분 유지 */}
                 {item.id === 'poly' && item.id === material && (
                   <div className="mt-2 ml-6 pl-4 border-l-2 border-indigo-300 space-y-2 animate-slide-down bg-gray-50/50 p-3 rounded-md">
                     <div className="text-xs font-bold text-indigo-700 flex items-center gap-1"><Palette size={12} /> 옵션 선택 (펄 유무)</div>
@@ -1121,8 +1334,15 @@ export default function App() {
             ))}
           </div>
           
-          {/* ⭐️ [반영 완료] 색상 선택 팔레트 (줄눈선 복구 및 워터마크 추가) ⭐️ */}
-          <ColorPalette selectedColorId={selectedGroutColor} onSelect={setSelectedGroutColor} onTileImageUpload={handleTileImageUpload} tileImageURL={tileImageURL} />
+          {/* ⭐️ [수정 반영] 색상 선택 팔레트 (혼합 기능 전달) ⭐️ */}
+          <ColorPalette 
+                groutColors={groutColors} 
+                onSelectColor={handleSelectGroutColor} 
+                onRatioChange={handleGroutRatioChange}
+                onRandomize={handleRandomizeColors}
+                tileImageURL={tileImageURL} 
+                onTileImageUpload={handleTileImageUpload} 
+            />
 
           {/* --- 재료 상세 비교 버튼 영역 (유지) --- */}
           <div className="mt-5 pt-3 border-t border-gray-100 flex justify-center">
@@ -1167,7 +1387,6 @@ export default function App() {
               const Icon = area.icon;
               const isSelected = quantities[area.id] > 0;
 
-              // 🚨 [수정] area.desc가 빈 문자열이 되었으므로, 조건부 렌더링 수정
               const description = area.desc || area.basePrice ? (
                     (area.desc && area.desc.trim() !== '') ? (
                         <div className="text-xs text-gray-500"><span className="block text-indigo-600">{area.desc}</span></div>
@@ -1181,7 +1400,6 @@ export default function App() {
                             <div className={`p-2 rounded-full shadow-sm ${isSelected ? 'bg-indigo-500 text-white' : 'bg-gray-200 text-indigo-600'}`}><Icon size={18} /></div> 
                             <div>
                                 <div className="font-semibold text-gray-800">{area.label}</div>
-                                {/* 🚨 [수정] desc 내용만 렌더링 (단가 문구 제거) */}
                                 {description}
                             </div>
                         </div>
@@ -1189,7 +1407,6 @@ export default function App() {
                         <div className="flex items-center gap-1 bg-white px-1 py-1 rounded-full shadow-md">
                             <button 
                                 onClick={() => handleQuantityChange(area.id, -1)} 
-                                // 이 부분은 SILICON_AREAS이므로 현관 자동 선택 로직과 무관합니다.
                                 className={`w-7 h-7 flex items-center justify-center rounded-full transition active:scale-90 text-lg font-bold ${quantities[area.id] > 0 ? 'text-indigo-600 hover:bg-gray-100' : 'text-gray-400 cursor-not-allowed'}`}
                             >-</button> 
                             <span className={`w-5 text-center text-sm font-bold ${quantities[area.id] > 0 ? 'text-gray-900' : 'text-gray-400'}`}>{quantities[area.id]}</span>
@@ -1197,7 +1414,6 @@ export default function App() {
                                 onClick={() => {
                                     handleQuantityChange(area.id, 1);
                                 }} 
-                                // 이 부분은 SILICON_AREAS이므로 현관 자동 선택 로직과 무관합니다.
                                 className="w-7 h-7 flex items-center justify-center text-indigo-600 hover:bg-gray-100 rounded-full font-bold text-lg transition active:scale-90"
                             >+</button> 
                         </div>
@@ -1305,7 +1521,6 @@ export default function App() {
                             className={`w-full py-3 rounded-xl font-extrabold text-sm transition-all 
                                 bg-yellow-400 text-gray-800 hover:bg-yellow-500 active:bg-yellow-600 shadow-md flex items-center justify-center
                             `}
-                            // onClick 핸들러 대신 href를 사용하여 앱 환경에서 안정적으로 카카오톡 앱을 호출하도록 유도
                         >
                             카톡 예약 문의
                         </a>
@@ -1339,7 +1554,6 @@ export default function App() {
                 
                 {/* ⭐️ [유지] 시공 및 할인 내역 - 테이블 구조로 변경 ⭐️ */}
                 <div className="space-y-2 text-sm border-b border-gray-200 pb-3">
-                    {/* 현장 유형 제거됨. 이 부분은 이제 패키지/최소비용 정보 아래에만 표시됩니다. */}
                     
                     {/* ⭐️ 최소 출장비 적용 문구 추가 ⭐️ */}
                     {calculation.minimumFeeApplied && (
@@ -1441,7 +1655,6 @@ export default function App() {
                     <div className='w-full py-1.5 px-2 text-center bg-gray-100 text-indigo-600 rounded-md font-bold text-[11px] shadow-sm flex items-center justify-center'>
                         바닥 30x30cm, 벽면 30x60cm 크기 기준
                     </div>
-                    {/* ▼▼▼ 요청하신 문구 디자인 통일 ▼▼▼ */}
                     <div className='w-full py-1.5 px-2 text-center bg-gray-100 text-indigo-600 rounded-md font-bold text-[11px] shadow-sm flex items-center justify-center'>
                         재시공(셀프포함)은 별도문의
                     </div>
@@ -1454,7 +1667,7 @@ export default function App() {
             
             {/* ⭐️ [견적서 모달 하단 컨트롤 영역] ⭐️ */}
             <div className="p-4 bg-gray-50 border-t border-gray-200">
-                {/* 1. 숨고 리뷰 이벤트 버튼 (디자인 강화 및 테두리 제거) */}
+                {/* 1. 숨고 리뷰 이벤트 버튼 (유지) */}
                 {soomgoReviewEvent && (
                     <div className='mb-3'>
                         {(() => {
@@ -1463,16 +1676,14 @@ export default function App() {
                             const discountAmount = evt.discount.toLocaleString();
                             const Icon = isApplied ? CheckCircle2 : Sparkles;
 
-                            // ⭐️ [유지] border-2 제거 ⭐️
                             const baseClasses = "w-full py-3 rounded-xl transition font-extrabold text-sm active:scale-[0.98] shadow-lg flex items-center justify-center gap-2 relative overflow-hidden"; 
                             
-                            // ⭐️ [유지] 테두리 클래스 제거 ⭐️
                             const activeClasses = "bg-indigo-700 text-white"; 
                             const inactiveClasses = "bg-amber-400 text-indigo-900 hover:bg-amber-300"; 
 
                             const finalClasses = isApplied
                                 ? activeClasses
-                                : `${inactiveClasses} shine-effect`; // 빛나는 효과 적용
+                                : `${inactiveClasses} shine-effect`;
 
                             const iconColorClass = isApplied ? 'text-white' : 'text-indigo-900'; 
 
