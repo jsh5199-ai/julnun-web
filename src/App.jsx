@@ -36,7 +36,7 @@ const BRIGHT_MODIFIER_COLOR = GROUT_COLORS.find(c => c.id === 'white');
 const DARK_MODIFIER_COLOR = GROUT_COLORS.find(c => c.id === 'charcoal');
 
 // =================================================================
-// ⭐️ [유지] HEX/RGB 변환 헬퍼 함수
+// [유지] HEX/RGB 변환 헬퍼 함수
 // =================================================================
 
 // HEX 코드를 RGB 객체로 변환
@@ -58,7 +58,7 @@ const rgbToHex = (r, g, b) => {
 };
 
 // =================================================================
-// [스타일] 애니메이션 정의
+// [스타일] 애니메이션 정의 (유지)
 // =================================================================
 const GlobalStyles = () => (
     <style>{`
@@ -223,7 +223,7 @@ const getPackageAreaIds = (pkg) => [
 ];
 
 // =================================================================
-// [컴포넌트]
+// [컴포넌트] (패키지 토스트, 모달, 아코디언 등 유지)
 // =================================================================
 
 const PackageToast = ({ isVisible, onClose, label }) => {
@@ -324,7 +324,7 @@ const Accordion = ({ question, answer }) => {
 };
 
 
-// ⭐️ [업데이트] ColorPalette 컴포넌트 ⭐️
+// ⭐️ [유지/수정] ColorPalette 컴포넌트 (10% 게이지, 팁 문구 포함) ⭐️
 const ColorPalette = React.memo(({ selectedGroutColor, handleColorSelect, finalSelectedColorData, onTileImageUpload, tileImageURL, brightnessLevel, setBrightnessLevel }) => {
     const GROUT_LINE_WIDTH = 12;
 
@@ -441,15 +441,15 @@ const ColorPalette = React.memo(({ selectedGroutColor, handleColorSelect, finalS
                 </p>
             </div>
 
-            {/* ⭐️ [복원] 단일 색상 선택 버튼 그리드 ⭐️ */}
+            {/* 단일 색상 선택 버튼 그리드 */}
             <div className='grid grid-cols-5 sm:grid-cols-5 gap-3'>
                 {GROUT_COLORS.map((color) => (
                     <button
                         key={color.id}
-                        onClick={() => handleColorSelect(color.id)} // 새로운 핸들러 사용
+                        onClick={() => handleColorSelect(color.id)} 
                         className={`aspect-square rounded-lg transition-all duration-200 shadow-md flex items-center justify-center p-1 relative hover:scale-[1.02] active:scale-[0.98] ${
                             selectedGroutColor === color.id
-                                ? 'ring-4 ring-offset-2 ring-indigo-500' // 선택 시 링 효과
+                                ? 'ring-4 ring-offset-2 ring-indigo-500' 
                                 : 'hover:shadow-lg'
                         }`}
                         style={{ backgroundColor: color.code }}
@@ -464,7 +464,7 @@ const ColorPalette = React.memo(({ selectedGroutColor, handleColorSelect, finalS
             </div>
 
 
-            {/* ⭐️ [업데이트] 밝기 조절 게이지 (슬라이더) - step=10 유지 ⭐️ */}
+            {/* ⭐️ [유지] 밝기 조절 게이지 (슬라이더) - step=10 ⭐️ */}
             <style>{`
                 /* 커스텀 슬라이더 스타일링 */
                 .brightness-slider::-webkit-slider-runnable-track {
@@ -530,7 +530,7 @@ const ColorPalette = React.memo(({ selectedGroutColor, handleColorSelect, finalS
                 </label>
             </div>
 
-            {/* ⭐️ [신규] 줄눈 색상 선택 팁 문구 ⭐️ */}
+            {/* ⭐️ [유지] 줄눈 색상 선택 팁 문구 ⭐️ */}
             <p className='text-xs text-indigo-600 mt-4 text-center font-semibold'>
                 팁: 색상은 타일톤보다 한톤 어둡게 시공할 경우 관리가 쉽고, 청소주기가 길어집니다.
             </p>
@@ -550,12 +550,12 @@ export default function App() {
     const [polyOption, setPolyOption] = useState('pearl');
     const [epoxyOption, setEpoxyOption] = useState('kerapoxy');
     
-    // ⭐️ [복원] 단일 색상 선택 상태
+    // ⭐️ [유지] 색상 관련 상태
     const [selectedGroutColor, setSelectedGroutColor] = useState(GROUT_COLORS[0].id);
-    // ⭐️ [업데이트] 밝기 레벨 상태 (50: 원본, 0: 119번 100%, 100: 화이트 100%)
     const [brightnessLevel, setBrightnessLevel] = useState(50);
     const [tileImageURL, setTileImageURL] = useState(DEFAULT_TILE_IMAGE_URL);
     
+    // 수량 및 재료 상태 (유지)
     const [quantities, setQuantities] = useState(
         [...ALL_AREAS].reduce((acc, area) => ({ ...acc, [area.id]: 0 }), {})
     );
@@ -574,13 +574,14 @@ export default function App() {
     const SOOMGO_REVIEW_URL = 'https://www.soomgo.com/profile/users/10755579?tab=review';
     const PHONE_NUMBER = '010-7734-6709';
 
-    // ⭐️ [신규 핸들러] 색상 선택 시 밝기 레벨을 50 (0% 톤 조절)로 초기화
+    // ⭐️ [유지] 색상 선택 핸들러: 색상 변경 시 밝기 초기화
     const handleColorSelect = useCallback((colorId) => {
         setSelectedGroutColor(colorId);
         setBrightnessLevel(50); 
     }, []);
 
 
+    // 수량 변경 로직 (유지)
     useEffect(() => {
         if (quantities['entrance'] > 0 && areaMaterials['entrance'] !== 'poly') {
             setAreaMaterials(prev => ({ ...prev, 'entrance': 'poly' }));
@@ -814,7 +815,7 @@ export default function App() {
             const isEpoxy = areaMatId === 'kerapoxy';
             let finalUnitBasePrice = area.basePrice;
 
-            // 🚨 [유지] 가격 계산 로직
+            // 🚨 가격 계산 로직 (유지)
             if (area.id === 'balcony_laundry') {
                 finalUnitBasePrice = isEpoxy ? 250000 : 100000;
             } else if (area.id === 'kitchen_wall') {
@@ -951,6 +952,7 @@ export default function App() {
         setShowToast(false);
     }, []);
 
+    // 이미지 업로드 로직 (유지)
     const handleTileImageUpload = (event) => {
         const file = event.target.files[0];
         if (file) {
@@ -963,6 +965,7 @@ export default function App() {
         }
     };
 
+    // 견적서 저장 로직 (유지)
     const handleImageSave = async () => {
         if (quoteRef.current) {
             try {
@@ -996,7 +999,7 @@ export default function App() {
     const currentVideo = YOUTUBE_VIDEOS.find(v => v.id === activeVideoId);
     const currentEmbedUrl = getEmbedUrl(currentVideo.id);
 
-    // ⭐️ [신규] 밝기 조절에 따른 최종 색상 계산 로직 ⭐️
+    // ⭐️ [유지] 밝기 조절에 따른 최종 색상 계산 로직 ⭐️
     const calculateBrightnessAdjustedColor = useCallback((baseColorId, level) => {
         const baseColor = GROUT_COLORS.find(c => c.id === baseColorId) || GROUT_COLORS[0];
         const baseRgb = hexToRgb(baseColor.code);
@@ -1188,29 +1191,6 @@ export default function App() {
                                 ))}
                             </div>
                         </div>
-
-                        {/* 시공 재료 선택 (현재는 미사용) */}
-                        {/* <div>
-                            <div className="flex justify-between items-center mb-2">
-                                <p className="text-sm font-bold text-gray-700">줄눈 시공 재료</p>
-                            </div>
-                            <div className="grid grid-cols-2 gap-3">
-                                {MATERIALS.map(mat => (
-                                    <button
-                                        key={mat.id}
-                                        onClick={() => setMaterial(mat.id)}
-                                        className={`p-3 rounded-lg font-semibold text-sm selection-box relative ${material === mat.id ? 'bg-indigo-600 text-white shadow-lg selection-selected !border-indigo-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
-                                    >
-                                        <span className={`absolute top-1 right-1 text-xs px-2 py-0.5 rounded-full font-bold ${mat.badgeColor}`}>{mat.badge}</span>
-                                        {mat.label.split('(')[0].trim()}
-                                    </button>
-                                ))}
-                            </div>
-                            <p className="text-xs text-gray-500 mt-2">{selectedMaterialData.description}</p>
-                            <button onClick={() => setShowMaterialModal(true)} className="text-xs text-indigo-600 font-semibold mt-1 flex items-center hover:text-indigo-700 transition">
-                                <Info size={14} className="mr-1" /> 재료별 상세 스펙 보기
-                            </button>
-                        </div> */}
                     </div>
                 </section>
 
