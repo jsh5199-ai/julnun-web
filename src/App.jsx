@@ -5,10 +5,11 @@ import {
     CheckCircle2, Info, RefreshCw, Phone, Sparkles, Hammer, Sofa, Palette, Crown, Gift, Eraser, Star, X, ChevronDown, HelpCircle, Zap, TrendingUp, Clock, Image as ImageIcon
 } from 'lucide-react';
 
-// delay, MIN_FEE, KAKAO_CHAT_URL, GROUT_COLORS 상수는 유지합니다.
+// delay, MIN_FEE, KAKAO_CHAT_URL 상수는 유지합니다.
 const delay = ms => new Promise(res => setTimeout(res, ms));
 const MIN_FEE = 200000;
 const KAKAO_CHAT_URL = 'http://pf.kakao.com/_jAxnYn/chat';
+
 const GROUT_COLORS = [
     { id: 'white', code: '#ffffff', label: '화이트', isDark: false },
     { id: 'moca_beige', code: '#dbcbbd', label: '모카 베이지', isDark: false },
@@ -20,7 +21,6 @@ const GROUT_COLORS = [
     { id: 'medium_gray', code: '#848685', label: '미디움 그레이', isDark: true },
     { id: 'dark_gray', code: '#565556', label: '다크 그레이', isDark: true },
 ];
-
 
 // =================================================================
 // [유틸리티 함수] 색상 혼합 계산 로직 (유지)
@@ -56,7 +56,7 @@ function mixColors(colors) {
         }
     }
 
-    if (totalRatio === 0) return '#ffffff';
+    if (totalRatio === 0) return GROUT_COLORS[0].code;
 
     const avgR = Math.round(totalR / totalRatio);
     const avgG = Math.round(totalG / totalRatio);
@@ -97,7 +97,7 @@ const GlobalStyles = () => (
     }
     .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom); }
 
-    /* Custom Range Slider Style: 이 부분이 줄눈 시뮬레이션 오류와 무관하지만, 필요시 CSS 파일로 분리하는 것이 좋습니다. */
+    /* Custom Range Slider Style (유지) */
     input[type=range]::-webkit-slider-thumb {
         -webkit-appearance: none;
         height: 16px;
@@ -105,7 +105,7 @@ const GlobalStyles = () => (
         border-radius: 50%;
         background: #4f46e5;
         cursor: pointer;
-        margin-top: -6px; /* 폼 트랙 높이의 절반을 빼줘야 중앙에 위치 */
+        margin-top: -6px;
         box-shadow: 0 0 2px rgba(0,0,0,.5);
     }
     input[type=range]:focus::-webkit-slider-thumb {
@@ -164,11 +164,9 @@ const REVIEW_EVENTS = [
 
 const OTHER_AREA_IDS_FOR_PACKAGE_EXCLUSION = ['entrance', 'balcony_laundry', 'kitchen_wall', 'living_room', 'silicon_bathtub', 'silicon_sink', 'silicon_living_baseboard'];
 
-// 패키지 정의 생략 (기존 코드 사용)
 const MIXED_PACKAGES = [
     { id: 'USER_E_700K_MASTER', price: 700000, label: '에폭시 벽면 패키지 (70만)', E_areas: [['bathroom_floor', 1], ['master_bath_wall', 1]], P_areas: [], isFlexible: true, flexibleGroup: ['master_bath_wall', 'common_bath_wall'] },
     { id: 'USER_E_550K_FLOOR_2', price: 550000, label: '에폭시 바닥 2곳 (55만)', E_areas: [['bathroom_floor', 2]], P_areas: [], isFlexible: false, },
-    // ... 기타 패키지
 ];
 
 const getPackageAreaIds = (pkg) => [
@@ -177,14 +175,14 @@ const getPackageAreaIds = (pkg) => [
 ];
 
 // =================================================================
-// [컴포넌트] ColorPalette (수정)
+// [컴포넌트] ColorPalette (최종 수정됨)
 // =================================================================
 
 const ColorPalette = ({ selectedColors, onToggleColor, onUpdateRatio, onTileImageUpload, tileImageURL }) => {
     const allColorsMap = useMemo(() => new Map(GROUT_COLORS.map(c => [c.id, c])), []);
     const MAX_COLORS = 3;
 
-    // 1. 최종 혼합 색상 코드 계산 (비율을 반영)
+    // 1. 최종 혼합 색상 코드 계산
     const mixedColorCode = useMemo(() => {
         if (selectedColors.length === 0) return GROUT_COLORS[0].code;
         
@@ -200,7 +198,7 @@ const ColorPalette = ({ selectedColors, onToggleColor, onUpdateRatio, onTileImag
         isDark: hexToRgb(mixedColorCode).r * 0.299 + hexToRgb(mixedColorCode).g * 0.587 + hexToRgb(mixedColorCode).b * 0.114 < 128
     };
 
-    // 2. 시뮬레이션 스타일 정의 (줄눈 라인 오류 수정됨)
+    // 2. 시뮬레이션 스타일 정의
     const TILE_COLOR = '#ffffff'; 
     const GROUT_LINE_WIDTH = 12; 
     const lineHalf = GROUT_LINE_WIDTH / 2;
@@ -210,7 +208,6 @@ const ColorPalette = ({ selectedColors, onToggleColor, onUpdateRatio, onTileImag
         ? { backgroundImage: `url(${tileImageURL})`, backgroundSize: 'cover', backgroundPosition: 'center' }
         : { backgroundColor: TILE_COLOR };
 
-    // 💡 [오류 수정] CSS 변수 사용 대신 ${groutPattern}을 직접 주입하여 줄눈 색상을 명확히 합니다.
     const horizontalGradient = `linear-gradient(to bottom, 
         transparent 0%, 
         transparent calc(50% - ${lineHalf}px), 
@@ -227,13 +224,17 @@ const ColorPalette = ({ selectedColors, onToggleColor, onUpdateRatio, onTileImag
         transparent calc(50% + ${lineHalf}px), 
         transparent 100%)`;
 
-    // 총 비율 합계 (항상 100%)
     const totalRatio = selectedColors.reduce((sum, c) => sum + c.ratio, 0);
 
-    // 슬라이더 조작 시 합계가 100이 되도록 나머지 비율을 재분배하는 핸들러
-    const handleSliderChange = (id, value) => {
-        const newRatio = parseInt(value);
-        onUpdateRatio(id, newRatio);
+    // 단일 게이지 조정 대상 색상 (첫 번째 색상)
+    const primaryColor = selectedColors.length > 0 ? selectedColors[0] : null;
+    const primaryColorData = primaryColor ? allColorsMap.get(primaryColor.id) : null;
+
+    // 단일 게이지 조정 핸들러
+    const handlePrimarySliderChange = (e) => {
+        if (!primaryColor) return;
+        const newRatio = parseInt(e.target.value);
+        onUpdateRatio(primaryColor.id, newRatio);
     };
 
     return (
@@ -323,48 +324,56 @@ const ColorPalette = ({ selectedColors, onToggleColor, onUpdateRatio, onTileImag
                 </p>
             )}
             
-            {/* ⭐️ [수정된] 색상 비율 게이지 영역 ⭐️ */}
-            {selectedColors.length > 0 && (
-                <div className='mt-5 space-y-3 p-4 bg-gray-50 rounded-lg shadow-inner animate-slide-down'>
+            {/* ⭐️ [수정된] 단일 게이지 조정 영역 ⭐️ */}
+            {selectedColors.length > 1 && primaryColor && (
+                <div className='mt-5 space-y-3 p-4 bg-indigo-50/50 rounded-lg shadow-inner animate-slide-down border border-indigo-200'>
                     <h4 className='text-sm font-extrabold text-gray-700 flex items-center justify-between'>
-                        <span className='flex items-center gap-2'><TrendingUp size={16} className='text-indigo-600'/> 색상별 혼합 비율 조절</span>
+                        <span className='flex items-center gap-2'><TrendingUp size={16} className='text-indigo-600'/> 색상 혼합 비율 조절</span>
                         <span className='text-base font-extrabold text-indigo-700'>총 합계: {totalRatio}%</span>
                     </h4>
 
-                    {selectedColors.map(color => {
-                        const colorData = allColorsMap.get(color.id);
-                        const isPrimary = color.id === selectedColors[0].id; // 첫 번째 색상을 우선 순위로 간주
-
-                        return (
-                            <div key={color.id} className='flex flex-col gap-1'>
-                                <div className='flex items-center justify-between text-xs font-semibold'>
+                    {/* 주 게이지 (첫 번째 색상 비율 조정) */}
+                    <div className='flex flex-col gap-1 pb-3 border-b border-indigo-200'>
+                        <div className='flex items-center justify-between text-base font-bold'>
+                            <span className='flex items-center gap-2 text-indigo-800'>
+                                <span className='w-4 h-4 rounded-full border border-gray-300' style={{ backgroundColor: primaryColorData.code }}></span>
+                                **{primaryColorData.label}** 비율 (기준)
+                            </span>
+                            <span className='text-2xl font-extrabold text-indigo-700'>{primaryColor.ratio}%</span>
+                        </div>
+                        
+                        <input
+                            type="range"
+                            min="0"
+                            // 나머지 색상 비율이 최소 10%씩은 유지되도록 최대치를 제한
+                            max={100 - (10 * (selectedColors.length - 1))}
+                            step="10" 
+                            value={primaryColor.ratio}
+                            onChange={handlePrimarySliderChange}
+                            className="w-full h-2 bg-indigo-200 rounded-lg appearance-none cursor-pointer range-sm"
+                        />
+                    </div>
+                    
+                    {/* 종속 색상 비율 목록 */}
+                    <div className='pt-2 space-y-2'>
+                        <h5 className='text-xs font-bold text-gray-600'>자동 재분배 색상 목록:</h5>
+                        {selectedColors.slice(1).map(color => {
+                            const colorData = allColorsMap.get(color.id);
+                            return (
+                                <div key={color.id} className='flex items-center justify-between text-sm font-semibold'>
                                     <span className='flex items-center gap-2'>
                                         <span className='w-3 h-3 rounded-full border border-gray-300' style={{ backgroundColor: colorData.code }}></span>
-                                        {colorData.label} 
-                                        {selectedColors.length > 1 && isPrimary && <span className='text-red-500 font-bold ml-1'>(기준)</span>}
+                                        {colorData.label}
                                     </span>
-                                    <span className='font-extrabold text-indigo-700'>{color.ratio}%</span>
+                                    <span className='font-bold text-gray-700'>{color.ratio}%</span>
                                 </div>
-                                <input
-                                    type="range"
-                                    min="0"
-                                    max="100"
-                                    step="10" // 10% 단위
-                                    value={color.ratio}
-                                    onChange={(e) => handleSliderChange(color.id, e.target.value)}
-                                    // 단일 색상 선택 시 조작 불가
-                                    disabled={selectedColors.length === 1} 
-                                    className="w-full h-2 bg-indigo-200 rounded-lg appearance-none cursor-pointer range-sm"
-                                    // 슬라이더 트랙 색상: 현재 색상 반영 (커스텀 스타일링은 CSS에 의존)
-                                />
-                            </div>
-                        );
-                    })}
-                    {selectedColors.length > 1 && (
-                        <div className='text-xs text-indigo-700 font-bold p-2 bg-indigo-100/50 rounded-md text-center'>
-                            💡 {selectedColors[0].label} 비율을 변경하면, 다른 색상들의 비율이 자동으로 재분배됩니다.
-                        </div>
-                    )}
+                            );
+                        })}
+                    </div>
+
+                    <div className='text-xs text-indigo-700 font-bold p-2 bg-indigo-100/50 rounded-md text-center'>
+                        💡 **{primaryColorData.label}** 비율을 조정하면, 나머지 색상들의 비율이 자동으로 100%에 맞춰집니다.
+                    </div>
                 </div>
             )}
             <p className='text-xs text-gray-500 mt-3 text-center'>
@@ -381,9 +390,10 @@ export default function GroutEstimatorApp() {
     const [polyOption, setPolyOption] = useState('pearl');
     const [epoxyOption, setEpoxyOption] = useState('kerapoxy');
     
-    // 🚨 [수정된 상태] 줄눈 색상 목록 및 비율 관리 (최대 3개) 🚨
+    // 🚨 [초기값 설정] silver_gray 100%로 설정하여 줄눈 시뮬레이션 가시성 확보 🚨
+    const initialGroutColor = GROUT_COLORS.find(c => c.id === 'silver_gray');
     const [selectedGroutColors, setSelectedGroutColors] = useState([
-        { id: GROUT_COLORS[0].id, ratio: 100 } // 기본값: 화이트 100%
+        { id: initialGroutColor ? initialGroutColor.id : GROUT_COLORS[0].id, ratio: 100 }
     ]);
     
     const [tileImageURL, setTileImageURL] = useState(null); 
@@ -405,7 +415,7 @@ export default function GroutEstimatorApp() {
     const PHONE_NUMBER = '010-7734-6709';
 
 
-    // ⭐️ [수정된 핸들러] 색상 토글 로직: 새로운 색상 추가/제거 시 비율 자동 재분배 ⭐️
+    // ⭐️ [최종 수정된 핸들러] 색상 토글 로직: 새로운 색상 추가/제거 시 비율 자동 재분배 ⭐️
     const handleToggleColor = useCallback((colorId) => {
         setSelectedGroutColors(prev => {
             const isSelected = prev.some(c => c.id === colorId);
@@ -413,27 +423,29 @@ export default function GroutEstimatorApp() {
 
             if (isSelected) {
                 // 제거 로직
-                const newColors = prev.filter(c => c.id !== colorId);
+                let newColors = prev.filter(c => c.id !== colorId);
                 if (newColors.length === 0) {
                      return [{ id: GROUT_COLORS[0].id, ratio: 100 }];
                 }
                 
-                // 남은 색상들의 비율을 100%로 재정규화
-                const totalRatio = newColors.reduce((sum, c) => sum + c.ratio, 0);
-                const ratioMultiplier = 100 / (totalRatio === 0 ? 1 : totalRatio);
-
-                let distributedRatio = 0;
+                const count = newColors.length; 
+                // 100을 색상 개수로 나눈 몫을 10 단위로 내림
+                const baseRatio = Math.floor(100 / count / 10) * 10;
+                
+                // 나머지 색상 균등 배분 및 잔차는 첫 번째 색상에 몰아주기
+                let distributed = 0;
                 const finalColors = newColors.map((c, index) => {
-                    if (index === newColors.length - 1) {
-                        // 마지막 색상에 나머지를 몰아줘서 100%를 정확히 맞춤
-                        return { ...c, ratio: 100 - distributedRatio };
+                    let ratio = baseRatio;
+                    if (index === 0) {
+                        // 첫 번째 색상에 잔차(remainder) 몰아주기
+                        const remainder = 100 - (baseRatio * count);
+                        ratio += remainder;
                     }
-                    const newRatio = Math.round(c.ratio * ratioMultiplier / 10) * 10;
-                    distributedRatio += newRatio;
-                    return { ...c, ratio: newRatio };
+                    distributed += ratio;
+                    return { ...c, ratio };
                 });
                 
-                return finalColors;
+                return finalColors.sort((a, b) => a.id.localeCompare(b.id));
 
             } else {
                 // 추가 로직 (최대 3개 제한)
@@ -442,95 +454,61 @@ export default function GroutEstimatorApp() {
                     return prev;
                 }
                 
-                // 새로운 색상 추가 시, 기존 비율을 10% 감소시키고 새 색상에 10%를 할당
                 const newColors = [...prev, { id: colorId, ratio: 0 }];
+                const count = newColors.length; 
+                const baseRatio = Math.floor(100 / count / 10) * 10; 
                 
-                const newRatioBase = Math.floor(100 / newColors.length / 10) * 10; // 10% 단위 기본 배분
-                const remainder = 100 - (newRatioBase * newColors.length);
-
                 let distributed = 0;
-                const finalColors = newColors.map((c, index) => {
-                    let ratio = newRatioBase;
-                    if (index < remainder / 10) { // 나머지 분배
-                        ratio += 10;
-                    }
+                let finalColors = newColors.map((c, index) => {
+                    let ratio = baseRatio;
                     distributed += ratio;
-                    
-                    if (index === newColors.length - 1) {
-                         // 마지막 색상에 나머지를 몰아줘서 100%를 정확히 맞춤
-                        ratio = 100 - (distributed - ratio);
-                    }
                     return { ...c, ratio };
                 });
                 
-                return finalColors;
+                // 잔여 비율을 첫 번째 색상에 몰아주어 총합 100%를 정확히 맞춤
+                const remainder = 100 - distributed;
+                finalColors[0].ratio += remainder;
+                
+                return finalColors.sort((a, b) => a.id.localeCompare(b.id)); 
             }
         });
     }, []);
 
-    // ⭐️ [수정된 핸들러] 색상 비율 업데이트 로직: 한 색상 변경 시 나머지 비율 자동 재분배 ⭐️
+    // ⭐️ [최종 수정된 핸들러] 색상 비율 업데이트 로직: 단일 게이지 기준으로 나머지 색상 비율 자동 재분배 ⭐️
     const handleUpdateRatio = useCallback((colorId, newRatio) => {
         setSelectedGroutColors(prev => {
-            if (prev.length === 1) {
-                // 단일 색상일 경우 비율 조절 불가 (항상 100)
-                return prev;
-            }
+            if (prev.length <= 1) return prev;
             
+            // newRatio를 10% 단위로 정규화
+            const targetRatio = Math.round(newRatio / 10) * 10;
+            
+            // 변경 가능한 색상 (주요 색상)
             const targetColor = prev.find(c => c.id === colorId);
+            // 종속 색상들
             const otherColors = prev.filter(c => c.id !== colorId);
             
-            // 변경 가능한 잔여 비율 (100% - 새로운 색상 비율)
-            const remainingTotalRatio = 100 - newRatio;
-            const currentOtherTotalRatio = otherColors.reduce((sum, c) => sum + c.ratio, 0);
+            // 변경된 색상을 제외한 나머지 색상들의 비율 합
+            const remainingTotalRatio = 100 - targetRatio;
+            const count = otherColors.length;
 
-            let finalColors = [];
+            // 나머지 색상에게 균등하게 기본 비율 배분 (10% 단위로 내림)
+            const baseRatio = Math.floor(remainingTotalRatio / count / 10) * 10;
             
-            if (currentOtherTotalRatio === 0) {
-                // 나머지 색상 합이 0일 경우, 나머지 비율을 균등하게 분배
-                const count = otherColors.length;
-                const baseRatio = Math.floor(remainingTotalRatio / count / 10) * 10;
-                const remainder = remainingTotalRatio - (baseRatio * count);
-                let distributed = 0;
-
-                finalColors = [
-                    { ...targetColor, ratio: newRatio },
-                    ...otherColors.map((c, index) => {
-                        let ratio = baseRatio;
-                        if (index === otherColors.length - 1) {
-                             ratio = remainingTotalRatio - distributed;
-                        } else {
-                            // 나머지 10% 단위 배분 로직이 복잡하므로, 일단 가장 첫 색상에 몰아줌
-                            if (index === 0) ratio += remainder;
-                        }
-                        distributed += ratio;
-                        return { ...c, ratio: ratio };
-                    })
-                ];
-            } else {
-                // 기존 비율에 비례하여 나머지 색상 비율 재분배
-                const ratioMultiplier = remainingTotalRatio / currentOtherTotalRatio;
-                let distributedRatio = 0;
-
-                // 나머지 색상 비율 재계산 (10% 단위로 반올림)
-                const redistributedOthers = otherColors.map((c, index) => {
-                    if (index === otherColors.length - 1) {
-                        return { ...c, ratio: remainingTotalRatio - distributedRatio };
+            const finalColors = [
+                { ...targetColor, ratio: targetRatio },
+                ...otherColors.map((c, index) => {
+                    let ratio = baseRatio;
+                    if (index === 0) {
+                        // 첫 번째 종속 색상에게 잔차(remainder)를 몰아줌
+                        const remainder = remainingTotalRatio - (baseRatio * count);
+                        ratio += remainder;
                     }
-                    const ratio = Math.round((c.ratio * ratioMultiplier) / 10) * 10;
-                    distributedRatio += ratio;
                     return { ...c, ratio };
-                });
+                })
+            ];
 
-                finalColors = [
-                    { ...targetColor, ratio: newRatio },
-                    ...redistributedOthers
-                ];
-            }
-
-            // ID 순서대로 재정렬
-            const sortedFinalColors = finalColors.sort((a, b) => a.id.localeCompare(b.id));
-
-            return sortedFinalColors;
+            // ID 순서대로 재정렬하여 상태 일관성 유지
+            return finalColors.sort((a, b) => a.id.localeCompare(b.id));
         });
     }, []);
 
@@ -545,15 +523,12 @@ export default function GroutEstimatorApp() {
     }, [quantities, areaMaterials]);
 
 
-    // ⭐️ [유지] 수량 변경 핸들러 (현관 자동 선택 로직 포함)
-    const handleQuantityChange = useCallback((id, delta) => { /* ... 로직 유지 ... */
+    const handleQuantityChange = useCallback((id, delta) => { /* ... 유지 ... */
         setQuantities(prev => {
             const currentQty = prev[id] || 0;
             let newQty = Math.max(0, currentQty + delta);
             
             const newQuantities = { ...prev, [id]: newQty };
-
-            // === 1. 더 넓은 영역 선택 시 작은 영역 제외 로직 (유지) ===
             if (newQty > 0) {
                 if (id === 'master_bath_wall' && (newQuantities['shower_booth'] || 0) > 0) {
                     newQuantities['shower_booth'] = 0;
@@ -568,8 +543,6 @@ export default function GroutEstimatorApp() {
                     newQuantities['common_bath_wall'] = 0;
                 }
             }
-
-            // 🚨 2. 욕실 바닥 2곳 선택 시 현관 자동 선택 로직 추가 🚨 (로직 유지)
             const isBathroomFloorUpdated = id === 'bathroom_floor';
             let bathroomFloorCount = isBathroomFloorUpdated ? newQuantities['bathroom_floor'] : prev['bathroom_floor'];
             
@@ -581,12 +554,10 @@ export default function GroutEstimatorApp() {
                     newQuantities['entrance'] = 0;
                 }
             }
-            
             return newQuantities;
         });
     }, []);
 
-    // ... (handleAreaMaterialChange, toggleReview, getSelectionSummary, findMatchingPackage 로직 유지) ...
     const handleAreaMaterialChange = useCallback((id, mat) => {
         if (id === 'entrance') {
             setAreaMaterials(prev => ({ ...prev, [id]: 'poly' }));
@@ -606,8 +577,8 @@ export default function GroutEstimatorApp() {
             return newSet;
         });
     }, []);
-
-    const getSelectionSummary = useCallback((q, areaMats) => {
+    
+    const getSelectionSummary = useCallback((q, areaMats) => { /* ... 유지 ... */
         const summary = {};
         for (const id in q) {
             const qty = q[id];
@@ -630,7 +601,7 @@ export default function GroutEstimatorApp() {
         return summary;
     }, [areaMaterials]);
 
-    const findMatchingPackage = useCallback((selectionSummary, quantities) => {
+    const findMatchingPackage = useCallback((selectionSummary, quantities) => { /* ... 유지 ... */
         const filterSelections = (selections) => {
             const filtered = {};
             for (const id in selections) {
@@ -682,8 +653,7 @@ export default function GroutEstimatorApp() {
     }, [quantities, areaMaterials]);
 
 
-    // 🚀 [최종] calculation 로직: 견적 계산
-    const calculation = useMemo(() => {
+    const calculation = useMemo(() => { /* ... 유지 ... */
         const selectedHousing = HOUSING_TYPES.find(h => h.id === housingType);
         let itemizedPrices = []; 
         
@@ -848,7 +818,6 @@ export default function GroutEstimatorApp() {
     }, [quantities, selectedReviews, housingType, areaMaterials, getSelectionSummary, findMatchingPackage]);
 
 
-    // ... (packageActiveRef, handleCloseToast, handleTileImageUpload, handleImageSave 로직 유지) ...
     const packageActiveRef = useRef(calculation.isPackageActive);
     useEffect(() => {
         if (calculation.isPackageActive && !packageActiveRef.current) {
@@ -901,11 +870,9 @@ export default function GroutEstimatorApp() {
         }
     };
     
-    // ... (renderAreaList 및 JSX 마크업 유지) ...
     const hasSelections = Object.values(quantities).some(v => v > 0);
     const isSoomgoReviewApplied = selectedReviews.has('soomgo_review');
 
-    // ⭐️ [유지] 컴포넌트: 개별 소재 선택 버튼
     const MaterialSelectButtons = ({ areaId, currentMat, onChange, isQuantitySelected }) => {
         if (areaId === 'entrance') {
             return (<div className='mt-2 pt-2 border-t border-gray-100'><div className="text-xs font-bold text-green-700 bg-green-100 p-1.5 rounded-md text-center">현관은 폴리아스파틱 (Poly) 고정입니다.</div></div>);
@@ -913,7 +880,6 @@ export default function GroutEstimatorApp() {
         return (<div className={`mt-2 ${isQuantitySelected ? 'animate-slide-down' : ''} transition-all duration-300`}><div className='flex gap-1.5 pt-2 border-t border-gray-100'>{MATERIALS.map(mat => (<button key={mat.id} onClick={(e) => { e.stopPropagation(); if (isQuantitySelected) onChange(areaId, mat.id); }} className={`flex-1 py-1 text-xs font-semibold rounded-md transition-all active:scale-95 shadow-sm ${currentMat === mat.id ? 'bg-indigo-700 text-white shadow-lg' : 'bg-indigo-100 text-gray-700 hover:bg-indigo-200'}`}>{mat.label.split('(')[0].trim()}</button>))}</div></div>);
     };
         
-    // ⭐️ [유지] 시공 범위 리스트 렌더링 함수
     const renderAreaList = (areas) => (
         <div className="space-y-3">
             {areas.map((area) => {
@@ -958,7 +924,6 @@ export default function GroutEstimatorApp() {
     return (
         <div className={`min-h-screen bg-gray-50 d-gray-800 font-sans pb-40`}>
             <GlobalStyles />
-            {/* ... JSX Header, Main (Video, Housing Type) ... */}
             <header className="bg-indigo-900 text-white sticky top-0 z-20 shadow-xl">
                 <div className="p-4 flex items-center justify-between max-w-md mx-auto">
                     <div className="flex items-center"> 
@@ -972,11 +937,9 @@ export default function GroutEstimatorApp() {
             </header>
 
             <main className="max-w-md mx-auto p-4 space-y-6">
-                 {/* ⭐️ [유지] 동영상 섹션 ⭐️ */}
                 <section className="bg-white rounded-xl shadow-lg border border-gray-100 animate-fade-in">
                 {/* ... (Video JSX) ... */}
                 </section>
-                {/* --- 1. 현장 유형 섹션 --- */}
                 <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-150">
                     <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
                         <Home className="h-5 w-5 text-indigo-600" /> 1. 현장 유형을 선택하세요
@@ -997,7 +960,7 @@ export default function GroutEstimatorApp() {
                         ))}
                     </div>
                 </section>
-                {/* ⭐️ --- 2. 줄눈소재 안내 (수정된 ColorPalette 포함) --- ⭐️ */}
+                
                 <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-300">
                     <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
                         <Hammer className="h-5 w-5 text-indigo-600" /> 2. 줄눈소재 안내
@@ -1039,8 +1002,7 @@ export default function GroutEstimatorApp() {
                         <button onClick={() => setShowMaterialModal(true)} className="w-full py-3 bg-indigo-50 text-indigo-700 rounded-lg font-extrabold text-sm hover:bg-indigo-100 transition shadow-md flex items-center justify-center gap-2 active:scale-[0.99]"><Info size={16} className='text-indigo-500' fill='currentColor'/> 소재 양생기간 확인하기</button>
                     </div>
                 </section>
-
-                {/* --- 3. 시공범위 선택 --- */}
+                
                 <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-450">
                     <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2"><Calculator className="h-5 w-5 text-indigo-600" /> 3. 시공범위 선택</h2 >
                     <h3 className="text-base font-extrabold flex items-center gap-2 mb-3 mt-4 text-gray-700"><Bath size={16} className="text-indigo-500" /> A. 욕실 범위</h3>
@@ -1049,32 +1011,27 @@ export default function GroutEstimatorApp() {
                     <h3 className="text-base font-extrabold flex items-center gap-2 mb-3 mt-4 text-gray-700"><LayoutGrid size={16} className="text-indigo-500" /> B. 기타 범위</h3>
                     {renderAreaList(OTHER_AREAS)}
                 </section>
-
-                {/* --- 4. 실리콘 시공 --- */}
+                
                 <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-600">
                     <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2"><Eraser className="h-5 w-5 text-indigo-600" /> 4. 실리콘 시공</h2 >
                     <div className="space-y-3">{renderAreaList(SILICON_AREAS)}</div>
                 </section>
-
-                {/* ... (FAQ, 숨고 버튼) ... */}
+                
             </main>
 
-            {/* 하단 고정바 */}
             {hasSelections && (
                 <div className="fixed bottom-0 left-0 right-0 bg-indigo-900 shadow-2xl safe-area-bottom z-20 animate-slide-down">
-                {/* ... (견적 금액 및 버튼) ... */}
+                {/* ... (하단 고정바 JSX) ... */}
                 </div>
             )}
             
 
-            {/* 견적서 모달 */}
             {showModal && (
                 <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-fade-in">
-                {/* ... (견적서 내용 및 버튼) ... */}
+                {/* ... (견적서 모달 JSX) ... */}
                 </div>
             )}
             
-            {/* 재료 상세 비교 모달 표시 */}
             {showMaterialModal && <MaterialDetailModal onClose={() => setShowMaterialModal(false)} />}
         </div>
     );
