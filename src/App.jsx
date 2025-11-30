@@ -19,7 +19,7 @@ const GROUT_COLORS = [
     { id: 'burnt_brown', code: '#827e7b', label: '번트 브라운', isDark: true },
     { id: 'silver_gray', code: '#afb0aa', label: '실버 그레이', isDark: false },
     { id: 'medium_gray', code: '#848685', label: '미디움 그레이', isDark: true },
-    { id: 'dark_gray', code: '#565556', label: '다크 그레이', isDark: true },
+    { id: 'dark_gray', code: '#565556', label: '다크 그레이', isDark: true }, // 🚨 초기값으로 사용될 대비 강한 색상
 ];
 
 // =================================================================
@@ -200,8 +200,8 @@ const ColorPalette = ({ selectedColors, onToggleColor, onUpdateRatio, onTileImag
 
     // 2. 시뮬레이션 스타일 정의
     const TILE_COLOR = '#ffffff'; 
-    // 🚨 [수정] 줄눈 선 굵기를 16px로 증가시켜 가시성 확보
-    const GROUT_LINE_WIDTH = 16; 
+    // 🚨 [최종 수정] 줄눈 선 굵기를 30px로 대폭 증가
+    const GROUT_LINE_WIDTH = 30; 
     const lineHalf = GROUT_LINE_WIDTH / 2;
 
     const groutPattern = mixedColorCode;
@@ -391,8 +391,8 @@ export default function GroutEstimatorApp() {
     const [polyOption, setPolyOption] = useState('pearl');
     const [epoxyOption, setEpoxyOption] = useState('kerapoxy');
     
-    // 🚨 [초기값 설정] silver_gray 100%로 설정하여 줄눈 시뮬레이션 가시성 확보 🚨
-    const initialGroutColor = GROUT_COLORS.find(c => c.id === 'silver_gray');
+    // 🚨 [초기값 설정] dark_gray 100%로 설정하여 줄눈 시뮬레이션 가시성 확보 🚨
+    const initialGroutColor = GROUT_COLORS.find(c => c.id === 'dark_gray');
     const [selectedGroutColors, setSelectedGroutColors] = useState([
         { id: initialGroutColor ? initialGroutColor.id : GROUT_COLORS[0].id, ratio: 100 }
     ]);
