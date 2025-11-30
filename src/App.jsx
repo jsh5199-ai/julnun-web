@@ -15,15 +15,21 @@ const KAKAO_CHAT_URL = 'http://pf.kakao.com/_jAxnYn/chat';
 const DEFAULT_TILE_IMAGE_URL = '/default_tile.jpg'; 
 
 const GROUT_COLORS = [
-  { id: 'white', code: '#ffffff', label: '화이트', isDark: false },
-  { id: 'moca_beige', code: '#dbcbbd', label: '131번', isDark: false },
-  { id: 'sand_brown', code: '#887965', label: '133번', isDark: true },
-  { id: 'vintage_brown', code: '#96877e', label: '141번', isDark: true },
-  { id: 'oat_brown', code: '#b0a9a4', label: '180번', isDark: false },
-  { id: 'burnt_brown', code: '#827e7b', label: '187번', isDark: true },
-  { id: 'silver_gray', code: '#afb0aa', label: '111번', isDark: false },
-  { id: 'medium_gray', code: '#848685', label: '112번', isDark: true },
-  { id: 'dark_gray', code: '#565556', label: '119번', isDark: true },
+  { id: 'white', code: '#ffffff', label: '화이트', isDark: false },
+  { id: 'light_beige', code: '#e2dfda', label: '103번', isDark: false },
+  { id: 'light_gray', code: '#ccccca', label: '110번', isDark: false },
+  { id: 'silver_gray', code: '#afb0aa', label: '111번', isDark: false },
+  { id: 'medium_gray', code: '#848685', label: '112번', isDark: true },
+  { id: 'dark_gray', code: '#797671', label: '113번', isDark: true },
+  { id: 'black', code: '#49494b', label: '114번', isDark: true },
+  { id: 'charcoal', code: '#565556', label: '119번', isDark: true },
+  { id: 'shine_silver', code: '#c2c2c2', label: '127번', isDark: false }, 
+  { id: 'moca_beige', code: '#dbcbbd', label: '131번', isDark: false },
+  { id: 'sand_brown', code: '#887965', label: '133번', isDark: true },
+  { id: 'dark_brown', code: '#85786f', label: '134번', isDark: true },
+  { id: 'vintage_brown', code: '#96877e', label: '141번', isDark: true },
+  { id: 'oat_brown', code: '#b0a9a4', label: '180번', isDark: false }, 
+  { id: 'burnt_brown', code: '#8b8784', label: '187번', isDark: true },
 ];
 
 
