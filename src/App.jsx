@@ -304,23 +304,21 @@ const Accordion = ({ question, answer }) => {
 };
 
 // ⭐️ [확장된 컴포넌트] 색상 선택 팔레트 및 시뮬레이션 렌더링 ⭐️
-const ColorPalette = ({ selectedColorId, onSelect }) => {
+const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageURL }) => {
     const selectedColorData = GROUT_COLORS.find(c => c.id === selectedColorId);
 
-    // 타일 본체 색상은 흰색으로 고정
+    // 타일 본체 색상은 기본적으로 흰색으로 고정
     const TILE_COLOR = '#ffffff'; 
     
-    // 🚨 [수정된 변수] 줄눈 선 너비 유지 🚨
     const GROUT_LINE_WIDTH = 12; // 줄눈 선 너비 (가운데 십자 모양의 굵기)
-    const TILE_DEMO_SIZE = 400; 
     const lineHalf = GROUT_LINE_WIDTH / 2;
 
     const groutPattern = selectedColorData.code;
     const tilePattern = TILE_COLOR;
     
-    // 💡 [최종 수정] 음영 제거, 순수한 단색 채우기로 변경 💡
+    // 💡 [최종 수정] 음영 제거, 순수한 단색 채우기로 변경 (교차점 조화롭게 연결) 💡
     
-    // 1. 가로줄 (to bottom) - 순수 단색 적용 (음영 제거)
+    // 1. 가로줄 (to bottom) - 순수 단색 적용
     const horizontalGradient = `linear-gradient(to bottom, 
                                     transparent 0%, 
                                     transparent calc(50% - ${lineHalf}px), 
@@ -329,7 +327,7 @@ const ColorPalette = ({ selectedColorId, onSelect }) => {
                                     transparent calc(50% + ${lineHalf}px), 
                                     transparent 100%)`;
 
-    // 2. 세로줄 (to right) - 순수 단색 적용 (음영 제거)
+    // 2. 세로줄 (to right) - 순수 단색 적용
     const verticalGradient = `linear-gradient(to right, 
                                     transparent 0%, 
                                     transparent calc(50% - ${lineHalf}px), 
@@ -338,6 +336,10 @@ const ColorPalette = ({ selectedColorId, onSelect }) => {
                                     transparent calc(50% + ${lineHalf}px), 
                                     transparent 100%)`;
 
+    // 시뮬레이션 배경 스타일
+    const simulationBackgroundStyle = tileImageURL 
+        ? { backgroundImage: `url(${tileImageURL})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+        : { backgroundColor: TILE_COLOR };
 
     return (
         <div className='mt-5 pt-3 border-t border-gray-100 animate-fade-in'>
@@ -346,23 +348,24 @@ const ColorPalette = ({ selectedColorId, onSelect }) => {
             </h3>
             
             {/* 🚨🚨 줄눈 시뮬레이션 영역 (십자 줄눈선) 🚨🚨 */}
-            <div className={`p-4 rounded-lg shadow-lg mb-4 border border-gray-300 transition-all duration-300`} style={{ backgroundColor: TILE_COLOR }}>
-                <h4 className="text-sm font-semibold text-gray-700 mb-2">선택 색상 시공 미리보기 (흰색 타일 기준)</h4>
+            <div className={`p-4 rounded-lg shadow-lg mb-4 border border-gray-300 transition-all duration-300`} style={simulationBackgroundStyle}>
+                <h4 className="text-sm font-semibold text-gray-100 mb-2">선택 색상 시공 미리보기</h4>
                 
-                {/* ⭐️ 시뮬레이션 컨테이너: 타일 본체(흰색) 위에 줄눈선(선택 색상)을 덮습니다. ⭐️ */}
+                {/* ⭐️ 시뮬레이션 컨테이너: 타일 본체(흰색 또는 업로드 이미지) 위에 줄눈선(선택 색상)을 덮습니다. ⭐️ */}
                 <div 
                     className="w-full aspect-square max-h-40 mx-auto overflow-hidden relative border-2 border-gray-300 rounded-md"
                 >
                     
-                    {/* 타일 베이스 (흰색으로 고정) */}
-                    <div className="absolute inset-0 bg-white"></div>
+                    {/* 타일 베이스 (업로드 이미지 위에 줄눈 선을 겹칠 준비) */}
+                    <div className="absolute inset-0" style={{ backgroundImage: simulationBackgroundStyle.backgroundImage, backgroundSize: simulationBackgroundStyle.backgroundSize, backgroundPosition: simulationBackgroundStyle.backgroundPosition }}></div>
                     
                     {/* ⭐️ 줄눈 선 시뮬레이션 레이어 (가로+세로 1줄씩) ⭐️ */}
                     <div 
                         className="absolute inset-0 opacity-100 transition-colors duration-300"
                         style={{
-                            backgroundColor: TILE_COLOR,
-                            // 🚨 [수정 완료] 음영 제거로 교차점 조화롭게 연결 🚨
+                            // 배경색을 TILE_COLOR로 설정하여 투명한 부분은 타일 본체 색상 또는 이미지의 일부가 비치도록 합니다.
+                            // 타일 이미지 위에 이 그라디언트가 겹쳐져 줄눈 선만 보이게 됩니다.
+                            backgroundColor: 'transparent', 
                             backgroundImage: `${horizontalGradient}, ${verticalGradient}`,
                             backgroundSize: '100% 100%',
                             backgroundPosition: 'center center', // 중앙에 고정
@@ -376,13 +379,20 @@ const ColorPalette = ({ selectedColorId, onSelect }) => {
             </div>
             {/* 🚨🚨 줄눈 시뮬레이션 영역 끝 🚨🚨 */}
 
-
-            {/* 1. 선택된 색상 이름 표시 */}
-            <div className={`p-3 rounded-lg shadow-md mb-3 border border-gray-200`} style={{ backgroundColor: selectedColorData.code }}>
+            {/* ⭐️ [수정] 색상 코드 제거된 선택 색상 이름 표시 ⭐️ */}
+            <div className={`p-3 rounded-lg shadow-md mb-3 border border-gray-200`} style={{ backgroundColor: groutPattern }}>
                 <p className={`text-sm font-bold ${selectedColorData.isDark ? 'text-white' : 'text-gray-900'} flex items-center justify-between`}>
-                    <span className='truncate'>현재 선택 색상: {selectedColorData.label} ({selectedColorData.code})</span>
+                    <span className='truncate'>현재 선택 색상: {selectedColorData.label}</span>
                     <CheckCircle2 size={16} className={`ml-2 flex-shrink-0 ${selectedColorData.isDark ? 'text-amber-400' : 'text-indigo-700'}`}/>
                 </p>
+            </div>
+            
+            {/* ⭐️ [신규 추가] 타일 이미지 업로드 버튼 ⭐️ */}
+            <div className='mb-4'>
+                <input type="file" id="tileFileInput" accept="image/*" onChange={onTileImageUpload} style={{ display: 'none' }} />
+                <label htmlFor="tileFileInput" className="w-full py-2.5 px-4 bg-indigo-600 text-white rounded-lg font-bold text-sm hover:bg-indigo-700 transition shadow-md cursor-pointer flex items-center justify-center gap-2">
+                    <ImageIcon size={16} /> 내 타일 사진 첨부하여 미리보기
+                </label>
             </div>
 
             {/* 2. 색상 선택 버튼 그리드 */}
@@ -421,6 +431,8 @@ export default function GroutEstimatorApp() {
   const [epoxyOption, setEpoxyOption] = useState('kerapoxy');
   // 🚨 [신규 상태] 독립적으로 색상 선택 상태 관리
   const [selectedGroutColor, setSelectedGroutColor] = useState(GROUT_COLORS[0].id); // 기본값: 화이트
+  // 🚨 [신규 상태] 타일 배경 이미지 URL 관리 🚨
+  const [tileImageURL, setTileImageURL] = useState(null); 
   const [quantities, setQuantities] = useState(
     [...ALL_AREAS].reduce((acc, area) => ({ ...acc, [area.id]: 0 }), {})
   );
@@ -925,6 +937,20 @@ export default function GroutEstimatorApp() {
     setShowToast(false);
   }, []);
 
+  // 🚨 [신규 핸들러] 타일 이미지 업로드 핸들러 🚨
+  const handleTileImageUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      // FileReader를 사용하여 파일 URL 생성
+      const reader = new FileReader();
+      reader.onload = () => {
+        setTileImageURL(reader.result);
+        alert('✅ 타일 이미지가 성공적으로 업로드되었습니다!');
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   // --- 기타 핸들러 (수정된 로직 적용) ---
   const handleImageSave = async () => {
       if (quoteRef.current) {
@@ -1216,7 +1242,7 @@ export default function GroutEstimatorApp() {
           </div>
           
           {/* ⭐️ [신규 추가] 색상 선택 팔레트 (시뮬레이션 포함) ⭐️ */}
-          <ColorPalette selectedColorId={selectedGroutColor} onSelect={setSelectedGroutColor} />
+          <ColorPalette selectedColorId={selectedGroutColor} onSelect={setSelectedGroutColor} onTileImageUpload={handleTileImageUpload} tileImageURL={tileImageURL} />
 
           {/* --- 재료 상세 비교 버튼 영역 (유지) --- */}
           <div className="mt-5 pt-3 border-t border-gray-100 flex justify-center">
