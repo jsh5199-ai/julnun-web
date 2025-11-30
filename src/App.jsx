@@ -55,8 +55,8 @@ const GlobalStyles = () => (
         background: #facc15; /* Amber-400 고정 */
         background-image: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.7) 50%, rgba(255,255,255,0) 100%);
         background-size: 200% 100%;
-        animation: shine 3s infinite;
         color: #1e3a8a; /* Indigo-900 */
+        animation: shine 3s infinite;
     }
     
     .animate-fade-in { animation: fadeIn 0.5s ease-out; }
@@ -252,7 +252,7 @@ const MaterialDetailModal = ({ onClose }) => (
         <div className="bg-indigo-900 p-4 text-white flex justify-between items-center">
           <h3 className="font-extrabold text-lg flex items-center gap-2"><Info className="h-5 w-5 text-white" /> 재료별 상세 스펙</h3>
           <button onClick={onClose} className="text-white/80 hover:text-white transition active:scale-95"><X size={20} /></button>
-          </div>
+        </div>
         <div className="p-5 max-h-[70vh] overflow-y-auto">
           <table className="min-w-full divide-y divide-gray-200 text-sm">
             <thead className="bg-gray-50">
@@ -344,9 +344,11 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                                         transparent 100%)`;
 
     // 시뮬레이션 배경 스타일
-    const simulationBackgroundStyle = tileImageURL 
+    // 💡 수정된 부분 1: tileImageURL이 있을 때만 이미지 배경을 적용합니다. 
+    // 기본적으로 이 컴포넌트의 배경은 부모 div에서 TILE_COLOR로 설정됩니다.
+    const simulationBackgroundStyle = tileImageURL && tileImageURL !== DEFAULT_TILE_IMAGE_URL
         ? { backgroundImage: `url(${tileImageURL})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-        : { backgroundColor: TILE_COLOR };
+        : { backgroundColor: 'transparent' }; // 배경 이미지가 없으면 투명하게 두어 아래 TILE_COLOR가 보이도록 함
 
     return (
         <div className='mt-5 pt-3 border-t border-gray-100 animate-fade-in'>
@@ -354,18 +356,19 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                 <Palette className="h-4 w-4 text-indigo-600" /> 2-1. 줄눈 색상 미리보기 및 선택
             </h3>
             
-            {/* 🚨🚨 줄눈 시뮬레이션 영역 - 테두리 및 패딩 제거 🚨🚨 */}
-            <div className={`transition-all duration-300`} style={simulationBackgroundStyle}>
+            {/* 🚨🚨 줄눈 시뮬레이션 영역 - 줄눈선이 사라지지 않도록 구조 단순화 🚨🚨 */}
+            {/* 💡 수정된 부분 2: 바깥쪽 div에 배경색을 TILE_COLOR로 강제하여, 이미지 로드 실패 시에도 흰색 배경이 유지되도록 함 */}
+            <div className={`transition-all duration-300`} style={{ backgroundColor: TILE_COLOR }}> 
                 
                 {/* ⭐️ 시뮬레이션 컨테이너: 테두리 및 max-h 제거, 부모에 꽉 차게 조정 ⭐️ */}
                 <div 
                     className="w-full aspect-video mx-auto overflow-hidden relative" // aspect-video로 가로 세로 비율 유지
                 >
                     
-                    {/* 타일 베이스 */}
-                    <div className="absolute inset-0" style={{ backgroundImage: simulationBackgroundStyle.backgroundImage, backgroundSize: simulationBackgroundStyle.backgroundSize, backgroundPosition: simulationBackgroundStyle.backgroundPosition }}></div>
+                    {/* 타일 베이스: 이미지 배경만 적용. 이미지 없으면 아래 TILE_COLOR(흰색)이 보임 */}
+                    <div className="absolute inset-0" style={simulationBackgroundStyle}></div>
                     
-                    {/* ⭐️ [추가] 워터마크 레이어 ⭐️ */}
+                    {/* ⭐️ 워터마크 레이어 ⭐️ */}
                     <div 
                         className="absolute inset-0 flex items-center justify-center opacity-30" 
                         style={{
@@ -696,7 +699,7 @@ export default function App() {
           if ((tempEpoxySelections[id] || 0) !== requiredQty) { 
             isMatch = false;
             break;
-          }
+        }
         }
         if (!isMatch) continue;
 
@@ -903,6 +906,7 @@ export default function App() {
     const totalFinalDiscount = totalItemDiscount + discountAmount;
     
     // 최종 가격도 천원 단위로 내림
+    // 🔴 [수정 완료] 구문 오류 해결
     let originalCalculatedPrice = Math.max(0, Math.floor(total / 1000) * 1000); 
     
     let finalPrice = originalCalculatedPrice; 
@@ -914,7 +918,7 @@ export default function App() {
     }
 
     // 🚨 [새로 계산] 패키지 적용 전 총 정가 (최소출장비, 리뷰할인 미적용 순수 합계)
-    const priceBeforeAllDiscount = itemizedPrices.reduce((sum, item) => sum + (item.isDiscount ? 0 : item.originalPrice), 0) + discountAmount;
+    const priceBeforeAllDiscount = itemizedPrices.reduce((sum, item) => sum + (item.isDiscount ? 0 : item.originalPrice), 0);
     
     // 현관 서비스가 적용되었을 경우, labelText 업데이트
     if (isFreeEntrance && !matchedPackage) {
@@ -1221,7 +1225,7 @@ export default function App() {
                         {/* 선택 아이콘 border 색상 변경 */}
                         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mr-2 transition ${item.id === material ? 'border-white' : 'border-gray-400'}`}>
                           {item.id === material && <CheckCircle2 size={12} className="text-white" />}
-                        </div>
+                      </div>
                         {/* 텍스트 색상 변경 */}
                         <span className={`font-bold ${item.id === material ? 'text-white' : 'text-gray-800'}`}>{item.label}</span>
                       </div>
@@ -1257,7 +1261,7 @@ export default function App() {
             ))}
           </div>
           
-          {/* ⭐️ [반영 완료] 색상 선택 팔레트 (테두리, 패딩 제거) ⭐️ */}
+          {/* ⭐️ [반영 완료] 색상 선택 팔레트 (줄눈선 유지, 워터마크 추가) ⭐️ */}
           <ColorPalette selectedColorId={selectedGroutColor} onSelect={setSelectedGroutColor} onTileImageUpload={handleTileImageUpload} tileImageURL={tileImageURL} />
 
           {/* --- 재료 상세 비교 버튼 영역 (유지) --- */}
