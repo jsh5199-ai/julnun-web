@@ -203,7 +203,7 @@ const getPackageAreaIds = (pkg) => [
 ];
 
 // =================================================================
-// [컴포넌트] (유지)
+// [컴포넌트] (수정된 ColorPalette)
 // =================================================================
 
 const PackageToast = ({ isVisible, onClose, label }) => {
@@ -303,8 +303,8 @@ const Accordion = ({ question, answer }) => {
     );
 };
 
-// ⭐️ [확장된 컴포넌트] 색상 선택 팔레트 및 시뮬레이션 렌더링 ⭐️
-const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageURL }) => {
+// ⭐️ [수정된 컴포넌트] ColorPalette: 줄눈선 1개만 보이도록 수정 ⭐️
+const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, onTileImageReset, tileImageURL }) => {
     const selectedColorData = GROUT_COLORS.find(c => c.id === selectedColorId);
 
     // 타일 본체 색상은 기본적으로 흰색으로 고정
@@ -314,9 +314,6 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
     const lineHalf = GROUT_LINE_WIDTH / 2;
 
     const groutPattern = selectedColorData.code;
-    const tilePattern = TILE_COLOR;
-    
-    // 💡 [최종 수정] 음영 제거, 순수한 단색 채우기로 변경 (교차점 조화롭게 연결) 💡
     
     // 1. 가로줄 (to bottom) - 순수 단색 적용
     const horizontalGradient = `linear-gradient(to bottom, 
@@ -359,21 +356,19 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                     {/* 타일 베이스 (업로드 이미지 위에 줄눈 선을 겹칠 준비) */}
                     <div className="absolute inset-0" style={{ backgroundImage: simulationBackgroundStyle.backgroundImage, backgroundSize: simulationBackgroundStyle.backgroundSize, backgroundPosition: simulationBackgroundStyle.backgroundPosition }}></div>
                     
-                    {/* ⭐️ 줄눈 선 시뮬레이션 레이어 (가로+세로 1줄씩) ⭐️ */}
+                    {/* ⭐️ [수정됨] 줄눈 선 시뮬레이션 레이어 (가로+세로 1줄씩) ⭐️ */}
                     <div 
                         className="absolute inset-0 opacity-100 transition-colors duration-300"
                         style={{
-                            // 배경색을 TILE_COLOR로 설정하여 투명한 부분은 타일 본체 색상 또는 이미지의 일부가 비치도록 합니다.
-                            // 타일 이미지 위에 이 그라디언트가 겹쳐져 줄눈 선만 보이게 됩니다.
                             backgroundColor: 'transparent', 
                             backgroundImage: `${horizontalGradient}, ${verticalGradient}`,
+                            // 👇 배경 크기를 100% 100%로 유지하고, 반복을 금지하여 중앙에 1개의 십자선만 표시
                             backgroundSize: '100% 100%',
-                            backgroundPosition: 'center center', // 중앙에 고정
-                            backgroundRepeat: 'no-repeat',
+                            backgroundPosition: 'center center',
+                            backgroundRepeat: 'no-repeat', // 👈 이 속성 추가
                             backgroundBlendMode: 'normal' 
                         }}
                     >
-                        {/* 🚨 중앙 텍스트 제거 완료 */}
                     </div>
                 </div>
             </div>
@@ -388,11 +383,19 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
             </div>
             
             {/* ⭐️ [신규 추가] 타일 이미지 업로드 버튼 ⭐️ */}
-            <div className='mb-4'>
+            <div className='mb-4 flex gap-2'>
                 <input type="file" id="tileFileInput" accept="image/*" onChange={onTileImageUpload} style={{ display: 'none' }} />
-                <label htmlFor="tileFileInput" className="w-full py-2.5 px-4 bg-indigo-600 text-white rounded-lg font-bold text-sm hover:bg-indigo-700 transition shadow-md cursor-pointer flex items-center justify-center gap-2">
+                <label htmlFor="tileFileInput" className="flex-1 py-2.5 px-4 bg-indigo-600 text-white rounded-lg font-bold text-sm hover:bg-indigo-700 transition shadow-md cursor-pointer flex items-center justify-center gap-2">
                     <ImageIcon size={16} /> 내 타일 사진 첨부하여 미리보기
                 </label>
+                {tileImageURL && (
+                    <button 
+                        onClick={onTileImageReset}
+                        className="py-2.5 px-3 bg-red-500 text-white rounded-lg font-bold text-sm hover:bg-red-600 transition shadow-md flex items-center justify-center gap-1 flex-shrink-0"
+                    >
+                        <Eraser size={16} /> 초기화
+                    </button>
+                )}
             </div>
 
             {/* 2. 색상 선택 버튼 그리드 */}
@@ -466,7 +469,7 @@ export default function GroutEstimatorApp() {
       const currentQty = prev[id] || 0;
       let newQty = Math.max(0, currentQty + delta);
       
-      const newQuantities = { ...prev, [id]: newQty };
+      let newQuantities = { ...prev, [id]: newQty };
 
       // === 1. 더 넓은 영역 선택 시 작은 영역 제외 로직 (유지) ===
       if (newQty > 0) {
@@ -950,6 +953,11 @@ export default function GroutEstimatorApp() {
       reader.readAsDataURL(file);
     }
   };
+  
+  // 🚨 [신규 핸들러] 타일 이미지 초기화 핸들러 🚨
+  const handleTileImageReset = useCallback(() => {
+    setTileImageURL(null);
+  }, []);
 
   // --- 기타 핸들러 (수정된 로직 적용) ---
   const handleImageSave = async () => {
@@ -1241,8 +1249,14 @@ export default function GroutEstimatorApp() {
             ))}
           </div>
           
-          {/* ⭐️ [신규 추가] 색상 선택 팔레트 (시뮬레이션 포함) ⭐️ */}
-          <ColorPalette selectedColorId={selectedGroutColor} onSelect={setSelectedGroutColor} onTileImageUpload={handleTileImageUpload} tileImageURL={tileImageURL} />
+          {/* ⭐️ [수정] ColorPalette에 초기화 핸들러 전달 ⭐️ */}
+          <ColorPalette 
+              selectedColorId={selectedGroutColor} 
+              onSelect={setSelectedGroutColor} 
+              onTileImageUpload={handleTileImageUpload} 
+              onTileImageReset={handleTileImageReset} 
+              tileImageURL={tileImageURL} 
+          />
 
           {/* --- 재료 상세 비교 버튼 영역 (유지) --- */}
           <div className="mt-5 pt-3 border-t border-gray-100 flex justify-center">
