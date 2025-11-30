@@ -5,8 +5,6 @@ import {
   CheckCircle2, Info, RefreshCw, Phone, Sparkles, Hammer, Sofa, Palette, Crown, Gift, Eraser, Star, X, ChevronDown, HelpCircle, Zap, TrendingUp, Clock, Image as ImageIcon
 } from 'lucide-react';
 
-const delay = ms => new Promise(res => setTimeout(res, ms));
-
 // =================================================================
 // ⭐️ 상수 정의 및 기본 이미지 경로
 // =================================================================
@@ -69,6 +67,10 @@ const GlobalStyles = () => (
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
     }
     .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom); }
+    /* 텍스트 그림자 스타일 추가 (워터마크용) */
+    .text-shadow {
+        text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+    }
   `}</style>
 );
 
@@ -104,29 +106,24 @@ const BATHROOM_AREAS = [
 
 // 기타 범위
 const OTHER_AREAS = [
-  { id: 'entrance', label: '현관', basePrice: 50000, icon: DoorOpen, unit: '개소' }, 
-  // 🚨 [수정] 단가 문구 제거
+  { id: 'entrance', label: '현관', basePrice: 50000, icon: DoorOpen, unit: '개소', desc: '' }, 
   { id: 'balcony_laundry', label: '베란다/세탁실', basePrice: 100000, icon: LayoutGrid, unit: '개소', desc: '' }, 
-  // 🚨 [수정] 단가 문구 제거
   { id: 'kitchen_wall', label: '주방 벽면', basePrice: 150000, icon: Utensils, unit: '구역', desc: '' },
-  // 🚨 [수정] 단가 문구 제거
   { id: 'living_room', label: '거실 바닥', basePrice: 550000, icon: Sofa, unit: '구역', desc: '' },
 ];
 
 const SERVICE_AREAS = [...BATHROOM_AREAS, ...OTHER_AREAS];
 
 const SILICON_AREAS = [
-  // 🚨 [수정] 단가 문구 제거
   { id: 'silicon_bathtub', label: '욕조 테두리 교체', basePrice: 80000, icon: Eraser, unit: '개소', desc: '' },
-  { 
-    id: 'silicon_sink', 
-    label: '세면대+젠다이 교체', 
-    basePrice: 30000, 
-    icon: Eraser, 
-    unit: '개소', 
-    desc: '' // 요청에 따라 문구 삭제
+  { 
+    id: 'silicon_sink', 
+    label: '세면대+젠다이 교체', 
+    basePrice: 30000, 
+    icon: Eraser, 
+    unit: '개소', 
+    desc: ''
   },
-  // 🚨 [수정] 단가 문구 제거
   { id: 'silicon_living_baseboard', label: '거실 걸레받이 실리콘', basePrice: 400000, icon: Sofa, unit: '구역', desc: '' },
 ];
 
@@ -151,7 +148,6 @@ const YOUTUBE_VIDEOS = [
 
 const getEmbedUrl = (videoId) => `https://www.youtube.com/embed/${videoId}?autoplay=0&mute=1&rel=0`;
 
-// ⭐️ 혼합 패키지 데이터 ⭐️
 const OTHER_AREA_IDS_FOR_PACKAGE_EXCLUSION = ['entrance', 'balcony_laundry', 'kitchen_wall', 'living_room', 'silicon_bathtub', 'silicon_sink', 'silicon_living_baseboard'];
 
 const ORIGINAL_MIXED_PACKAGES = [
@@ -176,19 +172,13 @@ const CUSTOM_MIXED_PACKAGES = [
 ];
 
 const NEW_USER_PACKAGES = [
-    // 에폭시 혼합 패키지 (70만) - 현관 제외 (기존 유지)
     { id: 'USER_E_700K_MASTER', price: 700000, label: '에폭시 벽면 패키지 (70만)', E_areas: [['bathroom_floor', 1], ['master_bath_wall', 1]], P_areas: [], isFlexible: true, flexibleGroup: ['master_bath_wall', 'common_bath_wall'] },
     { id: 'USER_E_700K_COMMON', price: 700000, label: '에폭시 벽면 패키지 (70만)', E_areas: [['bathroom_floor', 1], ['common_bath_wall', 1]], P_areas: [], isFlexible: true, flexibleGroup: ['master_bath_wall', 'common_bath_wall'] },
-    // 폴리 혼합 패키지 (50만) - 현관 제외 (기존 유지)
     { id: 'USER_P_500K_MASTER', price: 500000, label: '폴리 벽면 패키지 (50만)', E_areas: [], P_areas: [['bathroom_floor', 1], ['master_bath_wall', 1]], isFlexible: true, flexibleGroup: ['master_bath_wall', 'common_bath_wall'] },
     { id: 'USER_P_500K_COMMON', price: 500000, label: '폴리 벽면 패키지 (50만)', E_areas: [], P_areas: [['bathroom_floor', 1], ['common_bath_wall', 1]], isFlexible: true, flexibleGroup: ['master_bath_wall', 'common_bath_wall'] },
-    // 🚨 [신규 추가 1] 욕실 바닥 2곳 에폭시 55만 고정
     { id: 'USER_E_550K_FLOOR_2', price: 550000, label: '에폭시 바닥 2곳 (55만)', E_areas: [['bathroom_floor', 2]], P_areas: [], isFlexible: false, },
-    // 🚨 [신규 추가 2] 욕실 바닥 2곳 + 샤워부스 벽 3면 에폭시 80만 고정
     { id: 'USER_E_800K_FLOOR2_SHOWER1', price: 800000, label: '에폭시 바닥 2곳 + 샤워벽 1곳 (80만)', E_areas: [['bathroom_floor', 2], ['shower_booth', 1]], P_areas: [], isFlexible: false, },
-    // 🚨 [신규 추가 3] 욕실 바닥 1곳 + 샤워부스 벽 3면 에폭시 55만 고정
     { id: 'USER_E_550K_FLOOR1_SHOWER1', price: 550000, label: '에폭시 바닥 1곳 + 샤워벽 1곳 (55만)', E_areas: [['bathroom_floor', 1], ['shower_booth', 1]], P_areas: [], isFlexible: false, },
-    // 🚨 [기존 유지] 욕실 바닥 1곳 에폭시 35만 고정 패키지 
     { id: 'USER_E_350K_BATH', price: 350000, label: '에폭시 바닥 1곳 (35만)', E_areas: [['bathroom_floor', 1]], P_areas: [], isFlexible: false, },
 ];
 
@@ -313,7 +303,7 @@ const Accordion = ({ question, answer }) => {
     );
 };
 
-// ⭐️ [ColorPalette] 줄눈선을 HTML div로 직접 그림 (확실한 해결) ⭐️
+// ⭐️ [ColorPalette] 줄눈선 및 요청하신 워터마크 텍스트를 포함한 컴포넌트 ⭐️
 const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageURL }) => {
     const selectedColorData = GROUT_COLORS.find(c => c.id === selectedColorId) || GROUT_COLORS[0];
     const GROUT_LINE_WIDTH = 12; 
@@ -345,7 +335,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                         }}
                     ></div>
                     
-                    {/* 2. 워터마크 레이어 (z-index 5) */}
+                    {/* 2. 로고 워터마크 레이어 (z-index 5) */}
                     <div 
                         className="absolute inset-0 flex items-center justify-center opacity-30" 
                         style={{
@@ -358,9 +348,38 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                     >
                     </div>
 
+                    {/* ⭐️ 2.5. [추가] 텍스트 워터마크 레이어 - z-index 8 ⭐️ */}
+                    <div 
+                        className="absolute inset-0 font-extrabold"
+                        style={{ zIndex: 8, pointerEvents: 'none' }}
+                    >
+                        {/* JOINT MIHAK (왼쪽 상단 4분할 지점) */}
+                        <div 
+                            className="absolute top-1/4 left-1/4 transform -translate-x-1/2 -translate-y-1/2 text-shadow opacity-60"
+                            style={{ 
+                                color: '#1e3a8a',
+                                letterSpacing: '2px',
+                                fontSize: 'min(5vw, 24px)',
+                            }}
+                        >
+                            JOINT MIHAK
+                        </div>
+                        {/* 줄눈의미학 (오른쪽 하단 4분할 지점) */}
+                        <div 
+                            className="absolute bottom-1/4 right-1/4 transform translate-x-1/2 translate-y-1/2 text-shadow opacity-60"
+                            style={{ 
+                                color: '#1e3a8a',
+                                fontSize: 'min(4vw, 20px)',
+                            }}
+                        >
+                            줄눈의미학
+                        </div>
+                    </div>
+                    {/* ⭐️ [추가된 부분] 끝 ⭐️ */}
+
                     {/* ⭐️ 3. 줄눈 십자가 (HTML Div로 직접 그림) - z-index 10 (최상단) ⭐️ */}
                     
-                    {/* 세로 줄 (그림자 제거됨) */}
+                    {/* 세로 줄 */}
                     <div 
                         className="absolute top-0 bottom-0 left-1/2"
                         style={{
@@ -368,11 +387,10 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                             backgroundColor: selectedColorData.code,
                             transform: 'translateX(-50%)',
                             zIndex: 10,
-                            // 💡 boxShadow 제거
                         }}
                     ></div>
 
-                    {/* 가로 줄 (그림자 제거됨) */}
+                    {/* 가로 줄 */}
                     <div 
                         className="absolute left-0 right-0 top-1/2"
                         style={{
@@ -380,7 +398,6 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                             backgroundColor: selectedColorData.code,
                             transform: 'translateY(-50%)',
                             zIndex: 10,
-                            // 💡 boxShadow 제거
                         }}
                     ></div>
                 </div>
@@ -873,7 +890,7 @@ export default function App() {
   const currentVideo = YOUTUBE_VIDEOS.find(v => v.id === activeVideoId);
   const currentEmbedUrl = getEmbedUrl(currentVideo.id);
 
-  // ⭐️ [수정] MaterialSelectButtons 컴포넌트 복구
+  // ⭐️ [유지] MaterialSelectButtons 컴포넌트 ⭐️
   const MaterialSelectButtons = ({ areaId, currentMat, onChange, isQuantitySelected }) => {
     if (areaId === 'entrance') {
         return (
@@ -917,7 +934,7 @@ export default function App() {
     );
   };
 
-  // ⭐️ [수정] renderAreaList 함수 복구
+  // ⭐️ [유지] renderAreaList 함수 ⭐️
   const renderAreaList = (areas) => (
     <div className="space-y-3">
         {areas.map((area) => {
@@ -926,9 +943,7 @@ export default function App() {
             const currentMat = area.id === 'entrance' ? 'poly' : areaMaterials[area.id];
             const isEntranceAutoSelected = area.id === 'entrance' && quantities['entrance'] >= 1 && quantities['bathroom_floor'] >= 2 && !calculation.isPackageActive;
             
-            // 🚨 [수정] area.desc가 빈 문자열이 되었으므로, 조건부 렌더링 수정
             const description = area.desc || area.basePrice ? (
-                // 가격 정보만 있는 경우, 표시하지 않음 (요청에 따라)
                 (area.desc && area.desc.trim() !== '') ? (
                     <div className="text-xs text-gray-500"><span className="block text-indigo-600">{area.desc}</span></div>
                 ) : null
@@ -941,7 +956,6 @@ export default function App() {
                             <div className={`p-2 rounded-full shadow-sm ${isSelected ? 'bg-indigo-700 text-white' : 'bg-gray-200 text-indigo-600'}`}><Icon size={18} /></div> 
                             <div>
                                 <div className="font-semibold text-gray-800">{area.label}</div>
-                                {/* 🚨 [수정] desc 내용만 렌더링 (단가 문구 제거) */}
                                 {description}
                             </div>
                         </div>
@@ -1047,7 +1061,7 @@ export default function App() {
           </div>
         </section>
         
-        {/* --- 1. 현장 유형 섹션 (배경색 강조로 변경) --- */}
+        {/* --- 1. 현장 유형 섹션 (유지) --- */}
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-150">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
             <Home className="h-5 w-5 text-indigo-600" /> 1. 현장 유형을 선택하세요
@@ -1077,7 +1091,7 @@ export default function App() {
           <div className="space-y-4">
             {MATERIALS.map((item) => (
               <div key={item.id} className="animate-fade-in">
-                {/* 🚨 [수정] 배경색 강조로 변경 🚨 */}
+                {/* 🚨 [유지] 배경색 강조로 변경 🚨 */}
                 <div onClick={() => setMaterial(item.id)} className={`flex items-center p-4 rounded-lg cursor-pointer transition-all duration-200 selection-box active:scale-[0.99] shadow-md ${item.id === material ? 'bg-indigo-700 text-white shadow-lg' : 'bg-white hover:bg-indigo-50'}`}>
                   <div className="flex-1">
                     <div className="flex justify-between items-center">
@@ -1121,7 +1135,7 @@ export default function App() {
             ))}
           </div>
           
-          {/* ⭐️ [반영 완료] 색상 선택 팔레트 (줄눈선 복구 및 워터마크 추가) ⭐️ */}
+          {/* ⭐️ [적용 완료] 색상 선택 팔레트 (요청 사항 반영) ⭐️ */}
           <ColorPalette selectedColorId={selectedGroutColor} onSelect={setSelectedGroutColor} onTileImageUpload={handleTileImageUpload} tileImageURL={tileImageURL} />
 
           {/* --- 재료 상세 비교 버튼 영역 (유지) --- */}
@@ -1139,7 +1153,7 @@ export default function App() {
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-450">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
             <Calculator className="h-5 w-5 text-indigo-600" /> 3. 시공범위 선택
-          </h2>
+          </b>
           
           {/* A. 욕실 범위 */}
           <h3 className="text-base font-extrabold flex items-center gap-2 mb-3 mt-4 text-gray-700">
@@ -1167,7 +1181,6 @@ export default function App() {
               const Icon = area.icon;
               const isSelected = quantities[area.id] > 0;
 
-              // 🚨 [수정] area.desc가 빈 문자열이 되었으므로, 조건부 렌더링 수정
               const description = area.desc || area.basePrice ? (
                     (area.desc && area.desc.trim() !== '') ? (
                         <div className="text-xs text-gray-500"><span className="block text-indigo-600">{area.desc}</span></div>
@@ -1181,7 +1194,6 @@ export default function App() {
                             <div className={`p-2 rounded-full shadow-sm ${isSelected ? 'bg-indigo-500 text-white' : 'bg-gray-200 text-indigo-600'}`}><Icon size={18} /></div> 
                             <div>
                                 <div className="font-semibold text-gray-800">{area.label}</div>
-                                {/* 🚨 [수정] desc 내용만 렌더링 (단가 문구 제거) */}
                                 {description}
                             </div>
                         </div>
@@ -1189,7 +1201,6 @@ export default function App() {
                         <div className="flex items-center gap-1 bg-white px-1 py-1 rounded-full shadow-md">
                             <button 
                                 onClick={() => handleQuantityChange(area.id, -1)} 
-                                // 이 부분은 SILICON_AREAS이므로 현관 자동 선택 로직과 무관합니다.
                                 className={`w-7 h-7 flex items-center justify-center rounded-full transition active:scale-90 text-lg font-bold ${quantities[area.id] > 0 ? 'text-indigo-600 hover:bg-gray-100' : 'text-gray-400 cursor-not-allowed'}`}
                             >-</button> 
                             <span className={`w-5 text-center text-sm font-bold ${quantities[area.id] > 0 ? 'text-gray-900' : 'text-gray-400'}`}>{quantities[area.id]}</span>
@@ -1197,7 +1208,6 @@ export default function App() {
                                 onClick={() => {
                                     handleQuantityChange(area.id, 1);
                                 }} 
-                                // 이 부분은 SILICON_AREAS이므로 현관 자동 선택 로직과 무관합니다.
                                 className="w-7 h-7 flex items-center justify-center text-indigo-600 hover:bg-gray-100 rounded-full font-bold text-lg transition active:scale-90"
                             >+</button> 
                         </div>
@@ -1212,7 +1222,7 @@ export default function App() {
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-750">
             <h2 className="text-lg font-extrabold text-gray-800 mb-2 flex items-center gap-2 border-b pb-2">
                 <HelpCircle className="h-5 w-5 text-indigo-600"/> 자주 묻는 질문
-            </h2>
+            </b>
             <div className="space-y-1">
                 {FAQ_ITEMS.map((item, index) => (
                     <Accordion key={index} question={item.question} answer={item.answer} />
@@ -1235,7 +1245,6 @@ export default function App() {
 
       {/* 하단 고정바 */}
       <>
-        {/* PackageToast 위치 수정 완료 */}
         <PackageToast isVisible={showToast} onClose={handleCloseToast} label={calculation.label} />
 
         {/* ⭐️ [유지] hasSelections가 true일 때만 하단 견적 바 렌더링 ⭐️ */}
@@ -1305,7 +1314,6 @@ export default function App() {
                             className={`w-full py-3 rounded-xl font-extrabold text-sm transition-all 
                                 bg-yellow-400 text-gray-800 hover:bg-yellow-500 active:bg-yellow-600 shadow-md flex items-center justify-center
                             `}
-                            // onClick 핸들러 대신 href를 사용하여 앱 환경에서 안정적으로 카카오톡 앱을 호출하도록 유도
                         >
                             카톡 예약 문의
                         </a>
@@ -1330,16 +1338,13 @@ export default function App() {
             <div className="p-5 text-gray-800 bg-white overflow-y-auto max-h-[70vh]"> 
               <div ref={quoteRef} id="quote-content" className="rounded-lg p-5 space-y-3 mx-auto" style={{ width: '320px' }}>
                 
-                {/* 헤더 및 로고 영역 (영어 문구 제거) */}
+                {/* 헤더 및 로고 영역 (유지) */}
                 <div className="flex flex-col items-center border-b border-gray-300 pb-3 mb-3">
                     <h1 className='text-xl font-extrabold text-indigo-800 text-center'>줄눈의미학 예상 견적서</h1>
                 </div>
 
-                {/* 기본 정보 테이블 (현장 유형 제거됨) */}
-                
                 {/* ⭐️ [유지] 시공 및 할인 내역 - 테이블 구조로 변경 ⭐️ */}
                 <div className="space-y-2 text-sm border-b border-gray-200 pb-3">
-                    {/* 현장 유형 제거됨. 이 부분은 이제 패키지/최소비용 정보 아래에만 표시됩니다. */}
                     
                     {/* ⭐️ 최소 출장비 적용 문구 추가 ⭐️ */}
                     {calculation.minimumFeeApplied && (
@@ -1441,7 +1446,6 @@ export default function App() {
                     <div className='w-full py-1.5 px-2 text-center bg-gray-100 text-indigo-600 rounded-md font-bold text-[11px] shadow-sm flex items-center justify-center'>
                         바닥 30x30cm, 벽면 30x60cm 크기 기준
                     </div>
-                    {/* ▼▼▼ 요청하신 문구 디자인 통일 ▼▼▼ */}
                     <div className='w-full py-1.5 px-2 text-center bg-gray-100 text-indigo-600 rounded-md font-bold text-[11px] shadow-sm flex items-center justify-center'>
                         재시공(셀프포함)은 별도문의
                     </div>
@@ -1454,7 +1458,7 @@ export default function App() {
             
             {/* ⭐️ [견적서 모달 하단 컨트롤 영역] ⭐️ */}
             <div className="p-4 bg-gray-50 border-t border-gray-200">
-                {/* 1. 숨고 리뷰 이벤트 버튼 (디자인 강화 및 테두리 제거) */}
+                {/* 1. 숨고 리뷰 이벤트 버튼 (유지) */}
                 {soomgoReviewEvent && (
                     <div className='mb-3'>
                         {(() => {
@@ -1463,16 +1467,13 @@ export default function App() {
                             const discountAmount = evt.discount.toLocaleString();
                             const Icon = isApplied ? CheckCircle2 : Sparkles;
 
-                            // ⭐️ [유지] border-2 제거 ⭐️
                             const baseClasses = "w-full py-3 rounded-xl transition font-extrabold text-sm active:scale-[0.98] shadow-lg flex items-center justify-center gap-2 relative overflow-hidden"; 
-                            
-                            // ⭐️ [유지] 테두리 클래스 제거 ⭐️
                             const activeClasses = "bg-indigo-700 text-white"; 
                             const inactiveClasses = "bg-amber-400 text-indigo-900 hover:bg-amber-300"; 
 
                             const finalClasses = isApplied
                                 ? activeClasses
-                                : `${inactiveClasses} shine-effect`; // 빛나는 효과 적용
+                                : `${inactiveClasses} shine-effect`; 
 
                             const iconColorClass = isApplied ? 'text-white' : 'text-indigo-900'; 
 
