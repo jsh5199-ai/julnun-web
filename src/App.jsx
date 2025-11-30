@@ -124,7 +124,7 @@ const SILICON_AREAS = [
     basePrice: 30000, 
     icon: Eraser, 
     unit: '개소', 
-    desc: '' // 요청에 따라 문구 삭제
+    desc: '' // 요청에 따라 문구 삭제됨
   },
   // 🚨 [수정] 단가 문구 제거
   { id: 'silicon_living_baseboard', label: '거실 걸레받이 실리콘', basePrice: 400000, icon: Sofa, unit: '구역', desc: '' },
@@ -347,13 +347,14 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                     
                     {/* 2. 워터마크 레이어 (z-index 5) */}
                     <div 
-                        className="absolute inset-0 flex items-center justify-center opacity-30" 
+                        className="absolute inset-0 flex items-center justify-center" 
                         style={{
                             zIndex: 5, 
                             backgroundImage: 'url(/logo.png)', 
-                            backgroundSize: '30%', 
-                            backgroundRepeat: 'no-repeat',
+                            backgroundSize: '15%', // 🚨 여러 개 반복을 위해 크기 축소
+                            backgroundRepeat: 'repeat', // 🚨 반복 적용
                             backgroundPosition: 'center',
+                            opacity: '0.1' // 🚨 투명도 조정
                         }}
                     >
                     </div>
@@ -745,6 +746,8 @@ export default function App() {
               if (initialCount === count) itemOriginalTotal = 400000 * initialCount;
           } else if (area.id === 'silicon_sink') { // 세면대+젠다이 교체는 단가 30,000원으로 고정
               remainingCalculatedPrice = 30000 * count;
+          } else if (area.id === 'silicon_sink') {
+              remainingCalculatedPrice = 30000 * count;
           }
           finalCalculatedPrice = remainingCalculatedPrice; 
           finalDiscount = remainingDiscount; 
@@ -1051,7 +1054,7 @@ export default function App() {
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-150">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
             <Home className="h-5 w-5 text-indigo-600" /> 1. 현장 유형을 선택하세요
-          </h2>
+          </b>
           <div className="grid grid-cols-2 gap-3">
             {HOUSING_TYPES.map((type) => (
               <button
@@ -1073,7 +1076,7 @@ export default function App() {
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-300">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
             <Hammer className="h-5 w-5 text-indigo-600" /> 2. 줄눈소재 안내
-          </h2>
+          </b>
           <div className="space-y-4">
             {MATERIALS.map((item) => (
               <div key={item.id} className="animate-fade-in">
@@ -1139,7 +1142,7 @@ export default function App() {
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-450">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
             <Calculator className="h-5 w-5 text-indigo-600" /> 3. 시공범위 선택
-          </h2>
+          </b>
           
           {/* A. 욕실 범위 */}
           <h3 className="text-base font-extrabold flex items-center gap-2 mb-3 mt-4 text-gray-700">
@@ -1152,7 +1155,7 @@ export default function App() {
           {/* B. 기타 범위 (현관/주방/베란다) */}
           <h3 className="text-base font-extrabold flex items-center gap-2 mb-3 mt-4 text-gray-700">
             <LayoutGrid size={16} className="text-indigo-500" /> B. 기타 범위
-          </h3>
+          </b>
           {renderAreaList(OTHER_AREAS)}
 
         </section>
@@ -1161,7 +1164,7 @@ export default function App() {
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-600">
           <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
             <Eraser className="h-5 w-5 text-indigo-600" /> 4. 실리콘 시공
-          </h2>
+          </b>
           <div className="space-y-3">
             {SILICON_AREAS.map((area) => {
               const Icon = area.icon;
@@ -1212,7 +1215,7 @@ export default function App() {
         <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-750">
             <h2 className="text-lg font-extrabold text-gray-800 mb-2 flex items-center gap-2 border-b pb-2">
                 <HelpCircle className="h-5 w-5 text-indigo-600"/> 자주 묻는 질문
-            </h2>
+            </b>
             <div className="space-y-1">
                 {FAQ_ITEMS.map((item, index) => (
                     <Accordion key={index} question={item.question} answer={item.answer} />
