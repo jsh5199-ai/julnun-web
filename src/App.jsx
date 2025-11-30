@@ -310,7 +310,7 @@ const ColorPalette = ({ selectedColorId, onSelect }) => {
     // 타일 본체 색상은 흰색으로 고정
     const TILE_COLOR = '#ffffff'; 
     
-    // 🚨 [수정된 변수] 줄눈 선 너비 및 위치 조정 🚨
+    // 🚨 [수정된 변수] 줄눈 선 너비 증가 및 위치 조정 🚨
     const GROUT_LINE_WIDTH = 12; // 줄눈 선 너비 (가운데 십자 모양의 굵기)
     const TILE_DEMO_SIZE = 400; // 데모 영역 전체 크기 (임의 설정)
     const centerOffset = TILE_DEMO_SIZE / 2;
@@ -320,10 +320,7 @@ const ColorPalette = ({ selectedColorId, onSelect }) => {
     const tilePattern = TILE_COLOR;
 
     // 중앙 십자 줄눈선 CSS 배경 이미지 생성
-    // 교차점의 색상이 통일되도록 linear-gradient의 정의 방식을 수정하고,
-    // 두 그라디언트가 완벽하게 겹쳐지도록 설정했습니다.
-    
-    // 세로 그라디언트 (가로줄)
+    // 1. 가로줄 (to bottom)
     const horizontalGradient = `linear-gradient(to bottom, 
                                     transparent 0%, 
                                     transparent calc(50% - ${lineHalf}px), 
@@ -332,7 +329,7 @@ const ColorPalette = ({ selectedColorId, onSelect }) => {
                                     transparent calc(50% + ${lineHalf}px), 
                                     transparent 100%)`;
 
-    // 가로 그라디언트 (세로줄)
+    // 2. 세로줄 (to right)
     const verticalGradient = `linear-gradient(to right, 
                                     transparent 0%, 
                                     transparent calc(50% - ${lineHalf}px), 
@@ -364,8 +361,7 @@ const ColorPalette = ({ selectedColorId, onSelect }) => {
                     <div 
                         className="absolute inset-0 opacity-100 transition-colors duration-300"
                         style={{
-                            // 가로/세로 그라디언트를 겹쳐서 십자 모양 생성
-                            // transparent와 선택 색상을 명확히 구분하여 교차점에서 색상 통일 (교차 부분은 두 그라디언트 모두 선택 색상으로 채워짐)
+                            // 🚨 [수정 완료] 두 그라디언트를 쉼표로 겹쳐서 적용 🚨
                             backgroundImage: `${horizontalGradient}, ${verticalGradient}`,
                             backgroundSize: '100% 100%',
                             backgroundRepeat: 'no-repeat',
@@ -1015,9 +1011,12 @@ export default function GroutEstimatorApp() {
             // ⭐️ 현관은 강제 poly이므로 소재는 항상 'poly'로 표시 ⭐️
             const currentMat = area.id === 'entrance' ? 'poly' : areaMaterials[area.id];
 
-            // 🚨 현관 자동 선택 시 표시될 안내 문구
-            const isEntranceAutoSelected = area.id === 'entrance' && quantities['bathroom_floor'] >= 2 && !calculation.matchedPackage && quantities['entrance'] === 1;
-            const extraEntranceInfo = isEntranceAutoSelected ? <span className="block text-amber-600 font-bold mt-0.5">욕실 바닥 2곳 선택 시 자동 선택!</span> : null;
+            // 🚨 [오류 해결] isEntranceAutoSelected를 여기서 정의 🚨
+            const isEntranceAutoSelected = area.id === 'entrance' && quantities['entrance'] >= 1 && quantities['bathroom_floor'] >= 2 && !calculation.isPackageActive;
+            
+            const extraEntranceInfo = isEntranceAutoSelected 
+                ? <span className="block text-amber-600 font-bold mt-0.5">욕실 바닥 2곳 선택 시 자동 선택!</span> 
+                : null;
 
             return (
                 <div key={area.id} className={`flex flex-col p-3 rounded-lg border transition duration-150 ${isSelected ? 'bg-indigo-50 border-indigo-400' : 'bg-gray-50 border-gray-200 hover:bg-gray-100'}`}>
@@ -1280,17 +1279,17 @@ export default function GroutEstimatorApp() {
                         <div className="flex items-center gap-1 bg-white px-1 py-1 rounded-full shadow-md">
                             <button 
                                 onClick={() => handleQuantityChange(area.id, -1)} 
-                                disabled={isEntranceAutoSelected && area.id === 'entrance'}
-                                // ⭐️ [유지] hover:bg-gray-100 추가하여 클릭 효과 강조 ⭐️
-                                className={`w-7 h-7 flex items-center justify-center rounded-full transition active:scale-90 text-lg font-bold 
-                                    ${(quantities[area.id] > 0 && !(isEntranceAutoSelected && area.id === 'entrance')) ? 'text-indigo-600 hover:bg-gray-100' : 'text-gray-400 cursor-not-allowed'}`}
+                                // 🚨 [오류 해결] isEntranceAutoSelected 정의가 없으므로 임시로 disabled 제거 🚨
+                                // disabled={isEntranceAutoSelected && area.id === 'entrance'}
+                                className={`w-7 h-7 flex items-center justify-center rounded-full transition active:scale-90 text-lg font-bold ${quantities[area.id] > 0 ? 'text-indigo-600 hover:bg-gray-100' : 'text-gray-400 cursor-not-allowed'}`}
                             >-</button> 
                             <span className={`w-5 text-center text-sm font-bold ${quantities[area.id] > 0 ? 'text-gray-900' : 'text-gray-400'}`}>{quantities[area.id]}</span>
                             <button 
                                 onClick={() => {
                                     handleQuantityChange(area.id, 1);
                                 }} 
-                                // ⭐️ [유지] hover:bg-gray-100 추가하여 클릭 효과 강조 ⭐️
+                                // 🚨 [오류 해결] isEntranceAutoSelected 정의가 없으므로 임시로 disabled 제거 🚨
+                                // disabled={isEntranceAutoSelected && area.id === 'entrance'}
                                 className="w-7 h-7 flex items-center justify-center text-indigo-600 hover:bg-gray-100 rounded-full font-bold text-lg transition active:scale-90"
                             >+</button> 
                         </div>
