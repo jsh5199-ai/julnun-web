@@ -8,7 +8,7 @@ import {
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
 // =================================================================
-// ⭐️ [수정된 부분] 상수 정의 및 기본 이미지 경로 (public/default_tile.jpg에 맞춤)
+// ⭐️ [반영 완료] 상수 정의 및 기본 이미지 경로 (public/default_tile.jpg에 맞춤)
 // =================================================================
 const MIN_FEE = 200000;
 const KAKAO_CHAT_URL = 'http://pf.kakao.com/_jAxnYn/chat';
@@ -103,7 +103,7 @@ const BATHROOM_AREAS = [
 const OTHER_AREAS = [
   // 현관: Poly 5만
   { id: 'entrance', label: '현관', basePrice: 50000, icon: DoorOpen, unit: '개소' }, 
-  // 베란다/세탁실: Poly 10만, Epoxy 25만
+  // 베란다/세탁실: Poly 10만, Epoxy 25万
   { id: 'balcony_laundry', label: '베란다/세탁실', basePrice: 100000, icon: LayoutGrid, unit: '개소', desc: 'Poly 10만 / Epoxy 25만' }, 
   // 주방 벽면: Poly 15만, Epoxy 25만
   { id: 'kitchen_wall', label: '주방 벽면', basePrice: 150000, icon: Utensils, unit: '구역', desc: 'Poly 15만 / Epoxy 25만' },
@@ -348,24 +348,21 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                 <Palette className="h-4 w-4 text-indigo-600" /> 2-1. 줄눈 색상 미리보기 및 선택
             </h3>
             
-            {/* 🚨🚨 줄눈 시뮬레이션 영역 (십자 줄눈선) 🚨🚨 */}
-            <div className={`p-4 rounded-lg shadow-lg mb-4 border border-gray-300 transition-all duration-300`} style={simulationBackgroundStyle}>
-                <h4 className="text-sm font-semibold text-gray-100 mb-2">선택 색상 시공 미리보기</h4>
+            {/* 🚨🚨 줄눈 시뮬레이션 영역 - 테두리 및 패딩 제거 🚨🚨 */}
+            <div className={`transition-all duration-300`} style={simulationBackgroundStyle}>
                 
-                {/* ⭐️ 시뮬레이션 컨테이너: 타일 본체(흰색 또는 업로드 이미지) 위에 줄눈선(선택 색상)을 덮습니다. ⭐️ */}
+                {/* ⭐️ 시뮬레이션 컨테이너: 테두리 및 max-h 제거, 부모에 꽉 차게 조정 ⭐️ */}
                 <div 
-                    className="w-full aspect-square max-h-40 mx-auto overflow-hidden relative border-2 border-gray-300 rounded-md"
+                    className="w-full aspect-video mx-auto overflow-hidden relative" // aspect-video로 가로 세로 비율 유지
                 >
                     
-                    {/* 타일 베이스 (업로드 이미지 위에 줄눈 선을 겹칠 준비) */}
+                    {/* 타일 베이스 */}
                     <div className="absolute inset-0" style={{ backgroundImage: simulationBackgroundStyle.backgroundImage, backgroundSize: simulationBackgroundStyle.backgroundSize, backgroundPosition: simulationBackgroundStyle.backgroundPosition }}></div>
                     
                     {/* ⭐️ 줄눈 선 시뮬레이션 레이어 (가로+세로 1줄씩) ⭐️ */}
                     <div 
                         className="absolute inset-0 opacity-100 transition-colors duration-300"
                         style={{
-                            // 배경색을 TILE_COLOR로 설정하여 투명한 부분은 타일 본체 색상 또는 이미지의 일부가 비치도록 합니다.
-                            // 타일 이미지 위에 이 그라디언트가 겹쳐져 줄눈 선만 보이게 됩니다.
                             backgroundColor: 'transparent', 
                             backgroundImage: `${horizontalGradient}, ${verticalGradient}`,
                             backgroundSize: '100% 100%',
@@ -374,13 +371,13 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                             backgroundBlendMode: 'normal' 
                         }}
                     >
-                        {/* 🚨 중앙 텍스트 제거 완료 */}
+                        {/* 텍스트 제거 */}
                     </div>
                 </div>
             </div>
             {/* 🚨🚨 줄눈 시뮬레이션 영역 끝 🚨🚨 */}
 
-            {/* ⭐️ [수정] 색상 코드 제거된 선택 색상 이름 표시 ⭐️ */}
+            {/* ⭐️ [수정] 선택 색상 이름 표시 (유지) ⭐️ */}
             <div className={`p-3 rounded-lg shadow-md mb-3 border border-gray-200`} style={{ backgroundColor: groutPattern }}>
                 <p className={`text-sm font-bold ${selectedColorData.isDark ? 'text-white' : 'text-gray-900'} flex items-center justify-between`}>
                     <span className='truncate'>현재 선택 색상: {selectedColorData.label}</span>
@@ -388,7 +385,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                 </p>
             </div>
             
-            {/* ⭐️ [신규 추가] 타일 이미지 업로드 버튼 ⭐️ */}
+            {/* ⭐️ [신규 추가] 타일 이미지 업로드 버튼 (유지) ⭐️ */}
             <div className='mb-4'>
                 <input type="file" id="tileFileInput" accept="image/*" onChange={onTileImageUpload} style={{ display: 'none' }} />
                 <label htmlFor="tileFileInput" className="w-full py-2.5 px-4 bg-indigo-600 text-white rounded-lg font-bold text-sm hover:bg-indigo-700 transition shadow-md cursor-pointer flex items-center justify-center gap-2">
@@ -396,7 +393,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                 </label>
             </div>
 
-            {/* 2. 색상 선택 버튼 그리드 */}
+            {/* 2. 색상 선택 버튼 그리드 (유지) */}
             <div className='grid grid-cols-5 sm:grid-cols-5 gap-3'>
                 {GROUT_COLORS.map((color) => (
                     <button
@@ -1177,7 +1174,7 @@ export default function App() {
               <button
                 key={type.id}
                 onClick={() => setHousingType(type.id)}
-                // 🚨🚨🚨 이 부분이 수정되었습니다 (1184번 줄 오류 해결) 🚨🚨🚨
+                // 🚨🚨🚨 수정된 부분: 문법 오류 수정 (`?` -> `:`) 🚨🚨🚨
                 className={`p-4 rounded-lg text-center transition-all duration-200 selection-box active:scale-[0.99] shadow-md ${
                   housingType === type.id 
                     ? 'bg-indigo-700 text-white font-bold shadow-lg' 
@@ -1242,8 +1239,8 @@ export default function App() {
             ))}
           </div>
           
-          {/* ⭐️ [신규 추가] 색상 선택 팔레트 (시뮬레이션 포함) ⭐️ */}
-          <ColorPalette selectedColorId={selectedGroutColor} onSelect={setSelectedGroutColor} onTileImageUpload={handleTileImageUpload} tileImageURL={tileImageURL} />
+          {/* ⭐️ [반영 완료] 색상 선택 팔레트 (테두리, 패딩 제거) ⭐️ */}
+          <ColorPalette selectedGroutColor={selectedGroutColor} onSelect={setSelectedGroutColor} onTileImageUpload={handleTileImageUpload} tileImageURL={tileImageURL} />
 
           {/* --- 재료 상세 비교 버튼 영역 (유지) --- */}
           <div className="mt-5 pt-3 border-t border-gray-100 flex justify-center">
