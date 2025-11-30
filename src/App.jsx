@@ -224,68 +224,6 @@ const getPackageAreaIds = (pkg) => [
 ];
 
 // =================================================================
-// ⭐️ [신규/유지] 색상 헬퍼 함수 - 파일당 단 한 번만 선언 ⭐️
-// =================================================================
-
-// HEX 코드를 RGB 객체로 변환
-const hexToRgb = (hex) => {
-    if (!hex || hex.length !== 7) return { r: 0, g: 0, b: 0 };
-    const bigint = parseInt(hex.slice(1), 16);
-    const r = (bigint >> 16) & 255;
-    const g = (bigint >> 8) & 255;
-    const b = bigint & 255;
-    return { r, g, b };
-};
-
-// RGB 객체를 HEX 코드로 변환
-const rgbToHex = (r, g, b) => {
-    r = Math.round(Math.max(0, Math.min(255, r))).toString(16);
-    g = Math.round(Math.max(0, Math.min(255, g))).toString(16);
-    b = Math.round(Math.max(0, Math.min(255, b))).toString(16);
-    return `#${r.length === 1 ? '0' + r : r}${g.length === 1 ? '0' + g : g}${b.length === 1 ? '0' + b : b}`;
-};
-
-
-// =================================================================
-// [스타일] 애니메이션 정의 (유지)
-// =================================================================
-const GlobalStyles = () => (
-    <style>{`
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes slideUpFadeOut { 0% { opacity: 1; transform: translateY(0); } 80% { opacity: 1; transform: translateY(-10px); } 100% { opacity: 0; transform: translateY(-20px); } }
-        @keyframes professionalPulse {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(100, 116, 139, 0.4); }
-            50% { box-shadow: 0 0 0 8px rgba(100, 116, 139, 0); }
-        }
-        /* 리뷰 버튼 애니메이션 복구 */
-        @keyframes shine {
-            0% { background-position: -200% 0; }
-            100% { background-position: 200% 0; }
-        }
-        .shine-effect {
-            background: #facc15;
-            background-image: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.7) 50%, rgba(255,255,255,0) 100%);
-            background-size: 200% 100%;
-            animation: shine 3s infinite;
-            color: #1e3a8a;
-        }
-
-        .animate-fade-in { animation: fadeIn 0.5s ease-out; }
-        .animate-slide-down { animation: slideDown 0.3s ease-out; }
-        .animate-toast { animation: slideUpFadeOut 3s forwards; }
-
-        .selection-box { transition: all 0.2s ease-in-out; }
-        .selection-selected {
-            border: 3px solid transparent;
-            background-color: #f3f4f6;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-        }
-        .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom); }
-    `}</style>
-);
-
-// =================================================================
 // [컴포넌트] (패키지 토스트, 모달, 아코디언 등 유지)
 // =================================================================
 
