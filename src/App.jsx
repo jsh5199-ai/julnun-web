@@ -16,14 +16,14 @@ const DEFAULT_TILE_IMAGE_URL = '/default_tile.jpg';
 
 const GROUT_COLORS = [
   { id: 'white', code: '#ffffff', label: '화이트', isDark: false },
-  { id: 'moca_beige', code: '#dbcbbd', label: '모카 베이지', isDark: false },
-  { id: 'sand_brown', code: '#887965', label: '샌드 브라운', isDark: true },
-  { id: 'vintage_brown', code: '#96877e', label: '빈티지 브라운', isDark: true },
-  { id: 'oat_brown', code: '#b0a9a4', label: '오트 브라운', isDark: false },
-  { id: 'burnt_brown', code: '#827e7b', label: '번트 브라운', isDark: true },
-  { id: 'silver_gray', code: '#afb0aa', label: '실버 그레이', isDark: false },
-  { id: 'medium_gray', code: '#848685', label: '미디움 그레이', isDark: true },
-  { id: 'dark_gray', code: '#565556', label: '다크 그레이', isDark: true },
+  { id: 'moca_beige', code: '#dbcbbd', label: '미학 베이지', isDark: false },
+  { id: 'sand_brown', code: '#887965', label: '미학 브라운1', isDark: true },
+  { id: 'vintage_brown', code: '#96877e', label: '미학 브라운2', isDark: true },
+  { id: 'oat_brown', code: '#b0a9a4', label: '미학 브라운3', isDark: false },
+  { id: 'burnt_brown', code: '#827e7b', label: '미학 브라운4', isDark: true },
+  { id: 'silver_gray', code: '#afb0aa', label: '미학 그레이1', isDark: false },
+  { id: 'medium_gray', code: '#848685', label: '미학 그레이2', isDark: true },
+  { id: 'dark_gray', code: '#565556', label: '미학 그레이3', isDark: true },
 ];
 
 
