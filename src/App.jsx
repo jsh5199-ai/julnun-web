@@ -8,11 +8,10 @@ import {
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
 // =================================================================
-// ⭐️ [반영 완료] 상수 정의 및 기본 이미지 경로 (public/default_tile.jpg에 맞춤)
+// ⭐️ 상수 정의 및 기본 이미지 경로
 // =================================================================
 const MIN_FEE = 200000;
 const KAKAO_CHAT_URL = 'http://pf.kakao.com/_jAxnYn/chat';
-// 🚨 현재 파일 구조(public/default_tile.jpg)에 맞춘 기본 이미지 경로 🚨
 const DEFAULT_TILE_IMAGE_URL = '/default_tile.jpg'; 
 
 const GROUT_COLORS = [
@@ -103,7 +102,7 @@ const BATHROOM_AREAS = [
 const OTHER_AREAS = [
   // 현관: Poly 5만
   { id: 'entrance', label: '현관', basePrice: 50000, icon: DoorOpen, unit: '개소' }, 
-  // 베란다/세탁실: Poly 10만, Epoxy 25万
+  // 베란다/세탁실: Poly 10만, Epoxy 25만
   { id: 'balcony_laundry', label: '베란다/세탁실', basePrice: 100000, icon: LayoutGrid, unit: '개소', desc: 'Poly 10만 / Epoxy 25만' }, 
   // 주방 벽면: Poly 15만, Epoxy 25만
   { id: 'kitchen_wall', label: '주방 벽면', basePrice: 150000, icon: Utensils, unit: '구역', desc: 'Poly 15만 / Epoxy 25만' },
@@ -204,7 +203,7 @@ const getPackageAreaIds = (pkg) => [
 ];
 
 // =================================================================
-// [컴포넌트] (유지)
+// [컴포넌트] (수정)
 // =================================================================
 
 const PackageToast = ({ isVisible, onClose, label }) => {
@@ -306,7 +305,8 @@ const Accordion = ({ question, answer }) => {
 
 // ⭐️ [확장된 컴포넌트] 색상 선택 팔레트 및 시뮬레이션 렌더링 ⭐️
 const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageURL }) => {
-    const selectedColorData = GROUT_COLORS.find(c => c.id === selectedColorId);
+    // 🚨 오류 수정: selectedColorData를 찾지 못하면 GROUT_COLORS[0]을 기본값으로 설정
+    const selectedColorData = GROUT_COLORS.find(c => c.id === selectedColorId) || GROUT_COLORS[0];
 
     // 타일 본체 색상은 기본적으로 흰색으로 고정 (이미지 없을 경우)
     const TILE_COLOR = '#ffffff'; 
@@ -1240,7 +1240,7 @@ export default function App() {
           </div>
           
           {/* ⭐️ [반영 완료] 색상 선택 팔레트 (테두리, 패딩 제거) ⭐️ */}
-          <ColorPalette selectedGroutColor={selectedGroutColor} onSelect={setSelectedGroutColor} onTileImageUpload={handleTileImageUpload} tileImageURL={tileImageURL} />
+          <ColorPalette selectedColorId={selectedGroutColor} onSelect={setSelectedGroutColor} onTileImageUpload={handleTileImageUpload} tileImageURL={tileImageURL} />
 
           {/* --- 재료 상세 비교 버튼 영역 (유지) --- */}
           <div className="mt-5 pt-3 border-t border-gray-100 flex justify-center">
