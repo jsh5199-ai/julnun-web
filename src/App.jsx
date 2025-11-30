@@ -32,15 +32,48 @@ const GROUT_COLORS = [
     { id: 'burnt_brown', code: '#8b8784', label: '187번', isDark: true },
 ];
 
+const BRIGHT_MODIFIER_COLOR = GROUT_COLORS.find(c => c.id === 'white');
+const DARK_MODIFIER_COLOR = GROUT_COLORS.find(c => c.id === 'charcoal');
 
 // =================================================================
-// [스타일] 애니메이션 정의 (초기 상태로 복구)
+// ⭐️ [유지] HEX/RGB 변환 헬퍼 함수 - 파일당 단 한 번만 선언 ⭐️
+// =================================================================
+
+// HEX 코드를 RGB 객체로 변환
+const hexToRgb = (hex) => {
+    if (!hex || hex.length !== 7) return { r: 0, g: 0, b: 0 };
+    const bigint = parseInt(hex.slice(1), 16);
+    const r = (bigint >> 16) & 255;
+    const g = (bigint >> 8) & 255;
+    const b = bigint & 255;
+    return { r, g, b };
+};
+
+// RGB 객체를 HEX 코드로 변환
+const rgbToHex = (r, g, b) => {
+    r = Math.round(Math.max(0, Math.min(255, r))).toString(16);
+    g = Math.round(Math.max(0, Math.min(255, g))).toString(16);
+    b = Math.round(Math.max(0, Math.min(255, b))).toString(16);
+    return `#${r.length === 1 ? '0' + r : r}${g.length === 1 ? '0' + g : g}${b.length === 1 ? '0' + b : b}`;
+};
+
+
+// =================================================================
+// [스타일] 애니메이션 정의 (유지)
 // =================================================================
 const GlobalStyles = () => (
     <style>{`
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes slideUpFadeOut { 0% { opacity: 1; transform: translateY(0); } 80% { opacity: 1; transform: translateY(-10px); } 100% { opacity: 0; transform: translateY(-20px); } }
+        
+        /* Tip 강조용 애니메이션 추가 */
+        @keyframes attentionPulse {
+            0%, 100% { box-shadow: 0 0 10px rgba(253, 230, 138, 0.8); }
+            50% { box-shadow: 0 0 15px rgba(253, 230, 138, 0.4); }
+        }
+        .animate-attention { animation: attentionPulse 2s infinite ease-in-out; }
+        
         @keyframes professionalPulse {
             0%, 100% { box-shadow: 0 0 0 0 rgba(100, 116, 139, 0.4); }
             50% { box-shadow: 0 0 0 8px rgba(100, 116, 139, 0); }
@@ -199,13 +232,114 @@ const getPackageAreaIds = (pkg) => [
 ];
 
 // =================================================================
-// ⭐️ [복원] ColorPalette 컴포넌트 ⭐️
-// (밝기 조절 기능 없이, 초기 단일 색상 선택으로만 복원)
+// [컴포넌트] (패키지 토스트, 모달, 아코디언 등 복구)
 // =================================================================
+
+const PackageToast = ({ isVisible, onClose, label }) => {
+    const toastLabel = label || '패키지 할인';
+
+    useEffect(() => {
+        if (isVisible) {
+            const timer = setTimeout(() => {
+                onClose();
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [isVisible, onClose]);
+
+    if (!isVisible) return null;
+
+    return (
+        <div className="fixed bottom-[120px] left-1/2 -translate-x-1/2 z-50 max-w-sm w-11/12">
+            <div className="bg-indigo-800 text-white p-3 rounded-xl shadow-2xl border border-indigo-700 flex items-center justify-between animate-toast">
+                <div className="flex items-center gap-2">
+                    <Gift size={18} className='text-white flex-shrink-0' />
+                    <div className="text-sm font-bold truncate">
+                        {label || '패키지 할인'} 적용되었습니다!
+                    </div>
+                </div>
+                <button
+                    onClick={onClose}
+                    className="text-xs font-extrabold bg-amber-400 text-indigo-900 px-2 py-1 rounded-full hover:bg-amber-300 transition active:scale-95 flex-shrink-0"
+                >
+                    확인하기
+                </button>
+            </div>
+        </div>
+    );
+};
+
+const MaterialDetailModal = ({ onClose }) => (
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-fade-in">
+        <div className="bg-white w-full max-w-md rounded-xl shadow-2xl overflow-hidden animate-slide-down border border-gray-200">
+            <div className="bg-indigo-900 p-4 text-white flex justify-between items-center">
+                <h3 className="font-extrabold text-lg flex items-center gap-2"><Info className="h-5 w-5 text-white" /> 재료별 상세 스펙</h3>
+                <button onClick={onClose} className="text-white/80 hover:text-white transition active:scale-95"><X size={20} /></button>
+            </div>
+            <div className="p-5 max-h-[70vh] overflow-y-auto">
+                <table className="min-w-full divide-y divide-gray-200 text-sm">
+                    <thead className="bg-gray-50">
+                        <tr>
+                            <th className="px-3 py-3 text-left font-extrabold text-gray-700">구분</th>
+                            <th className="px-3 py-3 text-center font-extrabold text-gray-700">폴리아스파틱</th>
+                            <th className="px-3 py-3 text-center font-extrabold text-indigo-700">에폭시</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                        <tr className="hover:bg-gray-50">
+                            <td className="px-3 py-3 font-semibold text-gray-900">내구성</td>
+                            <td className="px-3 py-3 text-center text-gray-600">우수</td>
+                            <td className="px-3 py-3 text-center font-bold text-indigo-600">최상 (전문가용)</td>
+                        </tr>
+                        <tr className="hover:bg-gray-50">
+                            <td className="px-3 py-3 font-semibold text-gray-900">A/S 기간</td>
+                            <td className="px-3 py-3 text-center font-bold text-indigo-600">2년</td>
+                            <td className="px-3 py-3 text-center font-bold text-indigo-600">5년</td>
+                        </tr>
+                        <tr className="hover:bg-gray-50">
+                            <td className="px-3 py-3 font-semibold text-gray-900">시공 후 양생</td>
+                            <td className="px-3 py-3 text-center text-gray-600">6시간</td>
+                            <td className="px-3 py-3 text-center text-gray-600">24시간 ~ 3일</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div className="p-4 bg-gray-50 border-t border-gray-200">
+                <button onClick={onClose} className="w-full py-3 bg-indigo-700 text-white rounded-lg font-bold hover:bg-indigo-800 transition active:scale-95">확인</button>
+            </div>
+        </div>
+    </div>
+);
+
+// ⭐️ [복구] Accordion 컴포넌트 정의 ⭐️
+const Accordion = ({ question, answer }) => {
+    const [isOpen, setIsOpen] = useState(false);
+
+    return (
+        <div className="border-b border-gray-100">
+            <button
+                className="flex justify-between items-center w-full py-3 text-left font-semibold text-gray-800 hover:text-indigo-600 transition duration-150"
+                onClick={() => setIsOpen(!isOpen)}
+            >
+                <span>{question}</span>
+                <ChevronDown size={18} className={`text-indigo-600 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+            </button>
+            {isOpen && (
+                <div className="pb-3 text-sm text-gray-600 animate-slide-down">
+                    {answer}
+                </div>
+            )}
+        </div>
+    );
+};
+
+
+// ⭐️ [복구] ColorPalette 컴포넌트 (단일 선택으로 복원) ⭐️
 const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageURL }) => {
     const selectedColorData = GROUT_COLORS.find(c => c.id === selectedColorId) || GROUT_COLORS[0];
     const GROUT_LINE_WIDTH = 12;
 
+    // 타일 배경 URL 결정 (이미지가 없으면 기본 이미지)
     const effectiveTileImageURL = (tileImageURL && tileImageURL !== DEFAULT_TILE_IMAGE_URL)
         ? tileImageURL
         : DEFAULT_TILE_IMAGE_URL;
@@ -245,9 +379,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                     >
                     </div>
 
-                    {/* ⭐️ 3. 줄눈 십자가 (HTML Div로 직접 그림) - z-index 10 (최상단) ⭐️ */}
-
-                    {/* 세로 줄 (그림자 제거됨) */}
+                    {/* ⭐️ 3. 줄눈 십자가 ⭐️ */}
                     <div
                         className="absolute top-0 bottom-0 left-1/2"
                         style={{
@@ -255,11 +387,9 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                             backgroundColor: selectedColorData.code,
                             transform: 'translateX(-50%)',
                             zIndex: 10,
-                            // 💡 boxShadow 제거
                         }}
                     ></div>
 
-                    {/* 가로 줄 (그림자 제거됨) */}
                     <div
                         className="absolute left-0 right-0 top-1/2"
                         style={{
@@ -267,7 +397,6 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                             backgroundColor: selectedColorData.code,
                             transform: 'translateY(-50%)',
                             zIndex: 10,
-                            // 💡 boxShadow 제거
                         }}
                     ></div>
                 </div>
@@ -281,7 +410,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                 </p>
             </div>
             
-            {/* ⭐️ [복구] 줄눈 색상 선택 팁 문구 (기본 스타일) ⭐️ */}
+            {/* 팁 문구 (초기 디자인 복구) */}
             <p className='text-xs text-indigo-600 mt-4 text-center font-semibold'>
                 팁: 색상은 타일톤보다 한톤 어둡게 시공할 경우 관리가 쉽고, 청소주기가 길어집니다.
             </p>
@@ -324,7 +453,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
 };
 
 
-// ⭐️ [App Main] - 기존 기능 및 로직 복원됨 ⭐️
+// ⭐️ [App Main] - 최종 복구 버전 ⭐️
 export default function App() {
     const [housingType, setHousingType] = useState('new');
     const [material, setMaterial] = useState('poly');
