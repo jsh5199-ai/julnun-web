@@ -16,14 +16,14 @@ const DEFAULT_TILE_IMAGE_URL = '/default_tile.jpg'; 
 
 const GROUT_COLORS = [
   { id: 'white', code: '#ffffff', label: '화이트', isDark: false },
-  { id: 'moca_beige', code: '#dbcbbd', label: '모카 베이지', isDark: false },
-  { id: 'sand_brown', code: '#887965', label: '샌드 브라운', isDark: true },
-  { id: 'vintage_brown', code: '#96877e', label: '빈티지 브라운', isDark: true },
-  { id: 'oat_brown', code: '#b0a9a4', label: '오트 브라운', isDark: false },
-  { id: 'burnt_brown', code: '#827e7b', label: '번트 브라운', isDark: true },
-  { id: 'silver_gray', code: '#afb0aa', label: '실버 그레이', isDark: false },
-  { id: 'medium_gray', code: '#848685', label: '미디움 그레이', isDark: true },
-  { id: 'dark_gray', code: '#565556', label: '다크 그레이', isDark: true },
+  { id: 'moca_beige', code: '#dbcbbd', label: '131번', isDark: false },
+  { id: 'sand_brown', code: '#887965', label: '133번', isDark: true },
+  { id: 'vintage_brown', code: '#96877e', label: '141번', isDark: true },
+  { id: 'oat_brown', code: '#b0a9a4', label: '180번', isDark: false },
+  { id: 'burnt_brown', code: '#827e7b', label: '187번', isDark: true },
+  { id: 'silver_gray', code: '#afb0aa', label: '111번', isDark: false },
+  { id: 'medium_gray', code: '#848685', label: '112번', isDark: true },
+  { id: 'dark_gray', code: '#565556', label: '119번', isDark: true },
 ];
 
 
@@ -69,7 +69,7 @@ const GlobalStyles = () => (
 );
 
 // =================================================================
-// [데이터] (수정 반영)
+// [데이터] 
 // =================================================================
 const HOUSING_TYPES = [
   { id: 'new', label: '신축 아파트', multiplier: 1.0 },
@@ -102,22 +102,20 @@ const BATHROOM_AREAS = [
 const OTHER_AREAS = [
   // 현관: Poly 5만
   { id: 'entrance', label: '현관', basePrice: 50000, icon: DoorOpen, unit: '개소' }, 
-  // 베란다/세탁실: Poly 10만, Epoxy 25만 -> **설명 문구 삭제**
-  { id: 'balcony_laundry', label: '베란다/세탁실', basePrice: 100000, icon: LayoutGrid, unit: '개소', desc: '' }, 
-  // 주방 벽면: Poly 15만, Epoxy 25만 -> **설명 문구 삭제**
-  { id: 'kitchen_wall', label: '주방 벽면', basePrice: 150000, icon: Utensils, unit: '구역', desc: '' },
-  // 거실: Poly 55만, Epoxy 110万 -> **설명 문구 삭제**
-  { id: 'living_room', label: '거실 바닥', basePrice: 550000, icon: Sofa, unit: '구역', desc: '' },
+  // 베란다/세탁실: Poly 10만, Epoxy 25만
+  { id: 'balcony_laundry', label: '베란다/세탁실', basePrice: 100000, icon: LayoutGrid, unit: '개소', desc: 'Poly 10만 / Epoxy 25만' }, 
+  // 주방 벽면: Poly 15만, Epoxy 25만
+  { id: 'kitchen_wall', label: '주방 벽면', basePrice: 150000, icon: Utensils, unit: '구역', desc: 'Poly 15만 / Epoxy 25만' },
+  // 거실: Poly 55만, Epoxy 110万
+  { id: 'living_room', label: '거실 바닥', basePrice: 550000, icon: Sofa, unit: '구역', desc: 'Poly 55만 / Epoxy 110만 (복도,주방 포함)' },
 ];
 
 const SERVICE_AREAS = [...BATHROOM_AREAS, ...OTHER_AREAS]; // 현관 포함됨
 
 const SILICON_AREAS = [
-  // 욕조 테두리 교체: 단독 8만 / 패키지시 5만 -> **설명 문구 삭제**
-  { id: 'silicon_bathtub', label: '욕조 테두리 교체', basePrice: 80000, icon: Eraser, unit: '개소', desc: '' },
+  { id: 'silicon_bathtub', label: '욕조 테두리 교체', basePrice: 80000, icon: Eraser, unit: '개소', desc: '단독 8만 / 패키지시 5만' },
   { id: 'silicon_sink', label: '세면대+젠다이 교체', basePrice: 30000, icon: Eraser, unit: '개소', desc: '오염된 실리콘 제거 후 재시공' },
-  // 거실 걸레받이 실리콘: 단독 40만 / 패키지시 35만 -> **설명 문구 삭제**
-  { id: 'silicon_living_baseboard', label: '거실 걸레받이 실리콘', basePrice: 400000, icon: Sofa, unit: '구역', desc: '' },
+  { id: 'silicon_living_baseboard', label: '거실 걸레받이 실리콘', basePrice: 400000, icon: Sofa, unit: '구역', desc: '단독 40만 / 패키지시 35만' },
 ];
 
 const ALL_AREAS = [...SERVICE_AREAS, ...SILICON_AREAS];
@@ -205,7 +203,7 @@ const getPackageAreaIds = (pkg) => [
 ];
 
 // =================================================================
-// [컴포넌트] (유지)
+// [컴포넌트] (수정)
 // =================================================================
 
 const PackageToast = ({ isVisible, onClose, label }) => {
@@ -418,6 +416,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
             </div>
             <p className='text-xs text-gray-500 mt-3 text-center'>
                 * 화면 해상도에 따라 실제 색상과 차이가 있을 수 있습니다.
+                * 시공 시 타일 간격, 조명에 따라 차이가 있을 수 있습니다.
             </p>
         </div>
     );
@@ -766,7 +765,7 @@ export default function App() {
       
       let finalUnitBasePrice = area.basePrice; // 환경 배율 적용 전의 최종 단가
       
-      // 🚨 [유지] 소재에 따른 최종 단가 설정 🚨
+      // 🚨 [수정] 소재에 따른 최종 단가 설정 🚨
       if (area.id === 'balcony_laundry') {
           finalUnitBasePrice = isEpoxy ? 250000 : 100000; // Poly 10만 / Epoxy 25만
       } else if (area.id === 'kitchen_wall') {
