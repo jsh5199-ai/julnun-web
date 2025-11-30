@@ -421,7 +421,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                 ))}
             </div>
             <p className='text-xs text-gray-500 mt-3 text-center'>
-                * 시공 시 타일의 간격/음영/조명에 따라 차이가 있을 수 있습니다.
+                * 시공 시 타일의 간격/음영, 조명에 따라 차이가 있을 수 있습니다.
             </p>
         </div>
     );
