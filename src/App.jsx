@@ -318,19 +318,18 @@ const ColorPalette = ({ selectedColorId, onSelect }) => {
     const groutPattern = selectedColorData.code;
     const tilePattern = TILE_COLOR;
     
-    // 💡 [수정] 무광 질감을 위한 미세한 음영 효과만 추가 (광택 제거) 💡
+    // 💡 [최종 수정] 무광 질감을 위한 미세한 음영 효과만 추가 (광택 제거) 💡
     // 깊이감을 주기 위해 메인 색상보다 15% 어두운 색상을 생성합니다.
-    // CSS color-mix가 환경에 따라 지원되지 않을 수 있으므로, 대비되는 색상을 하드코딩하거나 필터를 사용했습니다.
-    // 여기서는 depthColor와 groutPattern으로 미세한 굴곡만 표현합니다.
-    const depthColor = `color-mix(in srgb, ${groutPattern}, black 15%)`; 
+    const depthColor = `color-mix(in srgb, ${groutPattern}, black 20%)`; 
     
     // 1. 가로줄 (to bottom) - 음영 효과만 적용
     const horizontalGradient = `linear-gradient(to bottom, 
                                     transparent 0%, 
                                     transparent calc(50% - ${lineHalf}px), 
-                                    ${depthColor} calc(50% - ${lineHalf}px), 
-                                    ${groutPattern} 50%, 
-                                    ${depthColor} calc(50% + ${lineHalf}px), 
+                                    ${depthColor} calc(50% - ${lineHalf}px), /* 윗쪽 미세 음영 시작 */
+                                    ${groutPattern} calc(50% - ${lineHalf}px + 1px), /* 메인 색상 시작 (1px 안쪽) */
+                                    ${groutPattern} calc(50% + ${lineHalf}px - 1px), /* 메인 색상 끝 (1px 안쪽) */
+                                    ${depthColor} calc(50% + ${lineHalf}px), /* 아랫쪽 미세 음영 끝 */
                                     transparent calc(50% + ${lineHalf}px), 
                                     transparent 100%)`;
 
@@ -338,9 +337,10 @@ const ColorPalette = ({ selectedColorId, onSelect }) => {
     const verticalGradient = `linear-gradient(to right, 
                                     transparent 0%, 
                                     transparent calc(50% - ${lineHalf}px), 
-                                    ${depthColor} calc(50% - ${lineHalf}px), 
-                                    ${groutPattern} 50%, 
-                                    ${depthColor} calc(50% + ${lineHalf}px), 
+                                    ${depthColor} calc(50% - ${lineHalf}px), /* 왼쪽 미세 음영 시작 */
+                                    ${groutPattern} calc(50% - ${lineHalf}px + 1px), /* 메인 색상 시작 (1px 안쪽) */
+                                    ${groutPattern} calc(50% + ${lineHalf}px - 1px), /* 메인 색상 끝 (1px 안쪽) */
+                                    ${depthColor} calc(50% + ${lineHalf}px), /* 오른쪽 미세 음영 끝 */
                                     transparent calc(50% + ${lineHalf}px), 
                                     transparent 100%)`;
 
@@ -368,7 +368,7 @@ const ColorPalette = ({ selectedColorId, onSelect }) => {
                         className="absolute inset-0 opacity-100 transition-colors duration-300"
                         style={{
                             backgroundColor: TILE_COLOR,
-                            // 🚨 [조화로운 교차점 적용] 두 그라디언트를 겹쳐서 적용 🚨
+                            // 가로 그라디언트와 세로 그라디언트를 겹쳐서 십자 모양 생성
                             backgroundImage: `${horizontalGradient}, ${verticalGradient}`,
                             backgroundSize: '100% 100%',
                             backgroundPosition: 'center center', // 중앙에 고정
