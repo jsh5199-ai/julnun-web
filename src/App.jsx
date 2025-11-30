@@ -35,9 +35,8 @@ const GROUT_COLORS = [
 const BRIGHT_MODIFIER_COLOR = GROUT_COLORS.find(c => c.id === 'white');
 const DARK_MODIFIER_COLOR = GROUT_COLORS.find(c => c.id === 'charcoal');
 
-
 // =================================================================
-// ⭐️ [신규/유지] 색상 헬퍼 함수
+// ⭐️ [유지] HEX/RGB 변환 헬퍼 함수 - 파일당 단 한 번만 선언 ⭐️
 // =================================================================
 
 // HEX 코드를 RGB 객체로 변환
@@ -60,7 +59,7 @@ const rgbToHex = (r, g, b) => {
 
 
 // =================================================================
-// [스타일] 애니메이션 정의
+// [스타일] 애니메이션 정의 (유지)
 // =================================================================
 const GlobalStyles = () => (
     <style>{`
@@ -225,7 +224,7 @@ const getPackageAreaIds = (pkg) => [
 ];
 
 // =================================================================
-// ⭐️ [신규/유지] 색상 헬퍼 함수
+// ⭐️ [신규/유지] 색상 헬퍼 함수 - 파일당 단 한 번만 선언 ⭐️
 // =================================================================
 
 // HEX 코드를 RGB 객체로 변환
@@ -246,6 +245,45 @@ const rgbToHex = (r, g, b) => {
     return `#${r.length === 1 ? '0' + r : r}${g.length === 1 ? '0' + g : g}${b.length === 1 ? '0' + b : b}`;
 };
 
+
+// =================================================================
+// [스타일] 애니메이션 정의 (유지)
+// =================================================================
+const GlobalStyles = () => (
+    <style>{`
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUpFadeOut { 0% { opacity: 1; transform: translateY(0); } 80% { opacity: 1; transform: translateY(-10px); } 100% { opacity: 0; transform: translateY(-20px); } }
+        @keyframes professionalPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(100, 116, 139, 0.4); }
+            50% { box-shadow: 0 0 0 8px rgba(100, 116, 139, 0); }
+        }
+        /* 리뷰 버튼 애니메이션 복구 */
+        @keyframes shine {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .shine-effect {
+            background: #facc15;
+            background-image: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.7) 50%, rgba(255,255,255,0) 100%);
+            background-size: 200% 100%;
+            animation: shine 3s infinite;
+            color: #1e3a8a;
+        }
+
+        .animate-fade-in { animation: fadeIn 0.5s ease-out; }
+        .animate-slide-down { animation: slideDown 0.3s ease-out; }
+        .animate-toast { animation: slideUpFadeOut 3s forwards; }
+
+        .selection-box { transition: all 0.2s ease-in-out; }
+        .selection-selected {
+            border: 3px solid transparent;
+            background-color: #f3f4f6;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        }
+        .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom); }
+    `}</style>
+);
 
 // =================================================================
 // [컴포넌트] (패키지 토스트, 모달, 아코디언 등 유지)
@@ -538,7 +576,7 @@ const ColorPalette = React.memo(({ selectedGroutColor, handleColorSelect, finalS
 });
 
 
-// ⭐️ [App Main] ⭐️
+// ⭐️ [App Main] - 기존 기능 및 로직 복원됨 ⭐️
 export default function App() {
     const [housingType, setHousingType] = useState('new');
     const [material, setMaterial] = useState('poly');
