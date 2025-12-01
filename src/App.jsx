@@ -601,7 +601,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
 
                     {/* 2. 워터마크 레이어 (z-index 5) */}
                     <div
-                        className="absolute inset-0 flex items-center justify-center opacity-90"
+                        className="absolute inset-0 flex items-center justify-center opacity-70"
                         style={{
                             zIndex: 5,
                             backgroundImage: 'url(/logo.png)',
