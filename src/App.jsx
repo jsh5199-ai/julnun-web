@@ -2,7 +2,7 @@ import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react'
 import html2canvas from 'html2canvas';
 import {
     Calculator, Home, Bath, DoorOpen, Utensils, LayoutGrid,
-    CheckCircle2, Info, RefreshCw, Phone, Sparkles, Hammer, Sofa, Palette, Crown, Gift, Eraser, Star, X, ChevronDown, HelpCircle, Zap, TrendingUp, Clock, Image as ImageIcon, Download, DollarSign, List, Layers
+    CheckCircle2, Info, RefreshCw, Phone, Sparkles, Hammer, Sofa, Palette, Crown, Gift, Eraser, Star, X, ChevronDown, HelpCircle, Zap, TrendingUp, Clock, Image as ImageIcon, Download, DollarSign, List, Layers, Package, HomeIcon
 } from 'lucide-react';
 
 // =================================================================
@@ -170,7 +170,7 @@ const ORIGINAL_MIXED_PACKAGES = [
     { id: 'P_MIX_05_OLD', price: 1050000, label: '혼합패키지 05 (구형)', E_areas: [['bathroom_floor', 2]], P_areas: [['master_bath_wall', 1], ['common_bath_wall', 1]] },
     { id: 'P_MIX_06', price: 830000, label: '혼합패키지 06', E_areas: [['bathroom_floor', 2]], P_areas: [['shower_booth', 1]] },
     { id: 'P_MIX_07', price: 830000, label: '혼합패키지 07', E_areas: [['bathroom_floor', 2]], P_areas: [['bathtub_wall', 1]] },
-    { id: 'P_MIX_08', price: 850000, label: '혼합패키지 08', E_areas: [['bathroom_floor', 2]], P_areas: [['bathtub_wall', 1], ['shower_booth', 1]] }, // 95만 -> 85만 수정 완료
+    { id: 'P_MIX_08', price: 850000, label: '혼합패키지 08', E_areas: [['bathroom_floor', 2]], P_areas: [['bathtub_wall', 1], ['shower_booth', 1]] }, 
     { id: 'P_MIX_09', price: 1200000, label: '혼합패키지 09', E_areas: [['bathroom_floor', 2]], P_areas: [['master_bath_wall', 1], ['common_bath_wall', 1]] },
     { id: 'P_MIX_10', price: 900000, label: '혼합패키지 10', E_areas: [['bathroom_floor', 2], ['shower_booth', 1]], P_areas: [] },
     { id: 'P_MIX_11', price: 900000, label: '혼합패키지 11', E_areas: [['bathroom_floor', 2], ['bathtub_wall', 1]], P_areas: [] },
@@ -246,7 +246,7 @@ const PackageToast = ({ isVisible, onClose, label }) => {
 };
 
 // -------------------------------------------------------------
-// ⭐️ [견적서 상세 모달] (취소선 및 "서비스" 문구 제거 반영) ⭐️
+// ⭐️ [견적서 상세 모달] (무료 서비스 항목 추가 반영) ⭐️
 // -------------------------------------------------------------
 const QuoteModal = ({ calculation, onClose, onImageSave, quoteRef }) => {
     const { 
@@ -259,9 +259,40 @@ const QuoteModal = ({ calculation, onClose, onImageSave, quoteRef }) => {
 
     const totalDiscountAmount = priceBeforeAllDiscount - price;
 
-    const ItemRow = ({ label, quantity, unit, price, isDiscount, isPackageItem, materialLabel }) => {
+    // 무료 서비스 항목 필터링 (calculatedPrice가 0원이고, 할인 항목이 아닌 경우)
+    const freeServiceItems = useMemo(() => {
+        // 유저가 실제로 선택한 유료 항목들만 필터링합니다. (실리콘 시공 제외)
+        const mainAreaItems = itemizedPrices.filter(item => !item.isDiscount && item.id !== 'silicon_bathtub' && item.id !== 'silicon_sink' && item.id !== 'silicon_living_baseboard');
+        
+        const isEntranceFree = mainAreaItems.some(item => item.id === 'entrance' && item.calculatedPrice === 0);
+        const hasBathFloor = mainAreaItems.some(item => item.id === 'bathroom_floor');
+        
+        const services = [];
+
+        // 1. 욕실 변기테두리, 바닥테두리, 젠다이 실리콘 오염방지코팅 (욕실 바닥 시공 시)
+        if (hasBathFloor) {
+            services.push({ 
+                label: '욕실 실리콘 오염방지 코팅 (변기/바닥테두리/젠다이)',
+                unit: '개소',
+            });
+        }
+        
+        // 2. 현관 서비스 (현관이 0원 처리되었거나, 기본적으로 0원이면 포함)
+        if (isEntranceFree || mainAreaItems.some(item => item.id === 'entrance' && item.calculatedPrice === 0)) {
+            services.push({
+                label: '현관 바닥 줄눈 시공 (서비스 적용)',
+                unit: '개소',
+            });
+        }
+
+        return services;
+
+    }, [itemizedPrices]);
+
+
+    const ItemRow = ({ label, quantity, unit, price, isDiscount, isPackageItem, materialLabel, isFreeServiceRow = false }) => {
         const isFree = price === 0 && !isDiscount;
-        const displayMaterial = materialLabel && materialLabel !== 'Event' ? (
+        const displayMaterial = materialLabel && materialLabel !== 'Event' && !isFreeServiceRow ? (
              <span className={`text-[10px] font-medium ml-1 px-1 py-[1px] rounded ${materialLabel === 'Epoxy' ? 'bg-indigo-100 text-indigo-700' : (materialLabel === 'Poly' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700')}`}>
                 {materialLabel}
              </span>
@@ -274,14 +305,13 @@ const QuoteModal = ({ calculation, onClose, onImageSave, quoteRef }) => {
                         {label}
                     </span>
                     {displayMaterial}
-                    {(isPackageItem || isFree) && <Sparkles size={10} className='ml-1 text-amber-500' />}
+                    {(isPackageItem || isFree) && !isFreeServiceRow && <Sparkles size={10} className='ml-1 text-amber-500' />}
                 </div>
                 <div className='flex justify-end items-center flex-shrink-0 w-32'>
                     <span className='w-10 text-center text-xs text-gray-500'>
                         {quantity}{unit}
                     </span>
                     <span className={`font-bold w-20 text-right ${isDiscount ? 'text-red-600' : (isFree ? 'text-gray-900' : 'text-gray-900')}`}>
-                        {/* ⭐️ [수정 반영] isFree일 때 문구 표시 (서비스 문구 삭제) ⭐️ */}
                         {isFree ? '' : price.toLocaleString()}
                     </span>
                     <span className={`text-xs ml-1 text-gray-900`}>{isFree ? '' : '원'}</span>
@@ -314,9 +344,9 @@ const QuoteModal = ({ calculation, onClose, onImageSave, quoteRef }) => {
                         {/* 시공 항목 리스트 */}
                         <div className='border border-gray-100 rounded-lg p-3'>
                             <div className='font-extrabold text-base text-gray-800 flex items-center mb-2'>
-                                <Layers size={14} className='mr-1 text-indigo-600'/> 시공 범위 ({itemizedPrices.filter(i => !i.isDiscount).length}개 항목)
+                                <Layers size={14} className='mr-1 text-indigo-600'/> 시공 범위 ({itemizedPrices.filter(i => !i.isDiscount).filter(i => i.calculatedPrice > 0 || !i.isFreeService).length}개 항목)
                             </div>
-                            {itemizedPrices.filter(i => !i.isDiscount).map((item) => (
+                            {itemizedPrices.filter(i => !i.isDiscount && (i.calculatedPrice > 0 || !i.isFreeService)).map((item) => (
                                 <ItemRow 
                                     key={item.id} 
                                     label={item.label} 
@@ -330,9 +360,31 @@ const QuoteModal = ({ calculation, onClose, onImageSave, quoteRef }) => {
                             ))}
                         </div>
 
+                        {/* ⭐️ [추가] 무료 서비스 항목 섹션 ⭐️ */}
+                        {freeServiceItems.length > 0 && (
+                            <div className='border border-gray-100 rounded-lg p-3 bg-green-50/50 mt-3'>
+                                <div className='font-extrabold text-base text-green-700 flex items-center mb-2'>
+                                    <Package size={14} className='mr-1 text-green-600'/> 🎁 무료 서비스 항목
+                                </div>
+                                {freeServiceItems.map((item, index) => (
+                                    <ItemRow
+                                        key={item.label + index}
+                                        label={item.label}
+                                        quantity={item.quantity || 1}
+                                        unit={item.unit}
+                                        price={0}
+                                        isDiscount={false}
+                                        isPackageItem={true}
+                                        isFreeServiceRow={true} 
+                                    />
+                                ))}
+                            </div>
+                        )}
+                        {/* ⭐️ [추가] 무료 서비스 항목 섹션 끝 ⭐️ */}
+
                         {/* 할인 항목 리스트 */}
                         {itemizedPrices.filter(i => i.isDiscount).length > 0 && (
-                             <div className='border border-gray-100 rounded-lg p-3 bg-red-50'>
+                             <div className='border border-gray-100 rounded-lg p-3 bg-red-50 mt-3'>
                                 <div className='font-extrabold text-base text-red-700 flex items-center mb-2'>
                                     <Gift size={14} className='mr-1 text-red-600'/> 추가 할인 항목
                                 </div>
@@ -1457,7 +1509,6 @@ export default function App() {
             <>
             <PackageToast isVisible={showToast} onClose={handleCloseToast} label={calculation.label} />
 
-            {/* ⭐️ [유지] hasSelections가 true일 때만 하단 견적 바 렌더링 ⭐️ */}
             {hasSelections && (
                 <div className="fixed bottom-0 left-0 right-0 bg-indigo-900 shadow-2xl safe-area-bottom z-20 animate-slide-down">
                     <div className="max-w-md mx-auto p-4 flex flex-col gap-2"> 
