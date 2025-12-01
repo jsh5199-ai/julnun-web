@@ -621,7 +621,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                         style={{
                             zIndex: 5,
                             backgroundImage: 'url(/logo.png)',
-                            backgroundSize: '50%',
+                            backgroundSize: '70%',
                             backgroundRepeat: 'repeat',
                             backgroundPosition: 'center',
                         }}
