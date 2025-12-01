@@ -246,7 +246,7 @@ const PackageToast = ({ isVisible, onClose, label }) => {
 };
 
 // -------------------------------------------------------------
-// ⭐️ [최종 수정된] 견적서 상세 모달 (디자인 일치, VAT 위치, 할인 문구 반영) ⭐️
+// ⭐️ [수정됨] 견적서 상세 모달 (시공 내역, 디자인 일치, 할인 문구 반영) ⭐️
 // -------------------------------------------------------------
 const QuoteModal = ({ calculation, onClose, quoteRef }) => {
     const { 
@@ -257,13 +257,14 @@ const QuoteModal = ({ calculation, onClose, quoteRef }) => {
         priceBeforeAllDiscount // 할인 전 총 원가
     } = calculation;
 
-    // 1. 총 할인 금액 계산 (오류 수정 반영)
+    // 1. 총 할인 금액 계산
     const totalDiscount = priceBeforeAllDiscount - price;
     const isDiscountApplied = totalDiscount > 0;
     
-    // 패키지/무료 서비스에 포함된 항목만 필터링 (시공 내역 목록에 표시될 항목)
+    // ⭐️ 수정된 필터링 로직: 계산된 가격이 0원(무료 서비스)이거나, 
+    //    패키지 적용 중일 때 가격이 0원이 아닌 모든 항목(패키지 포함 항목)을 포함 ⭐️
     const packageItems = itemizedPrices.filter(i => 
-        (i.isPackageItem && i.calculatedPrice === 0 && !i.isDiscount) || (i.id === 'entrance' && calculation.isFreeEntrance)
+        (i.isPackageItem && !i.isDiscount) // 패키지나 무료 서비스 항목
     ).map(item => ({
         label: item.label,
         materialLabel: item.materialLabel,
@@ -1322,7 +1323,7 @@ export default function App() {
                 <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-300">
                     <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
                         <Hammer className="h-5 w-5 text-indigo-600" /> 2. 줄눈소재 안내
-                    </h2>
+                    </h2 >
                     <div className="space-y-4">
                         {MATERIALS.map((item) => (
                         <div key={item.id} className="animate-fade-in">
