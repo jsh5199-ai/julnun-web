@@ -31,8 +31,8 @@ const GROUT_COLORS = [
 ];
 
 // 밝기 조절의 목표 색상 정의
-const BRIGHT_COLOR_CODE = '#ffffff'; // 화이트 (밝게)
-const DARK_COLOR_CODE = '#565556'; // 119번 (어둡게)
+const BRIGHT_COLOR_CODE = '#ffffff'; // 밝게
+const DARK_COLOR_CODE = '#565556'; // 어둡게
 
 // =================================================================
 // ⭐️ [수정된 함수] 색상 혼합 로직 (버그 수정)
