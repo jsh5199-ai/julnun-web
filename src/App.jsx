@@ -35,7 +35,7 @@ const BRIGHT_COLOR_CODE = '#ffffff'; // 화이트 (밝게)
 const DARK_COLOR_CODE = '#565556'; // 119번 (어둡게)
 
 // =================================================================
-// ⭐️ [유지] 색상 혼합 로직 (버그 수정 완료된 로직)
+// ⭐️ [유지] 색상 혼합 로직
 // =================================================================
 /**
  * HEX 코드를 RGB로 변환하고, 두 색상을 주어진 비율로 혼합합니다.
@@ -300,7 +300,7 @@ const Accordion = ({ question, answer }) => {
     );
 };
 
-// ⭐️ [ColorPalette] 밝기 조절 기능 추가 ⭐️
+// ⭐️ [ColorPalette] 밝기 조절 문구 수정 완료 ⭐️
 const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageURL, brightnessLevel, onBrightnessChange }) => {
     const baseColorData = GROUT_COLORS.find(c => c.id === selectedColorId) || GROUT_COLORS[0];
     const GROUT_LINE_WIDTH = 12; 
@@ -413,7 +413,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                     <TrendingUp size={14} className='text-indigo-500' /> 조색 밝기 조절 
                 </h4>
                 <div className='flex items-center gap-3'>
-                    {/* ⭐️ 문구 수정: (White) 제거 ⭐️ */}
+                    {/* ⭐️ 위치/문구 수정: "밝게"를 왼쪽으로 이동 ⭐️ */}
                     <span className='text-xs font-bold text-gray-500 whitespace-nowrap'>밝게</span> 
                     <input
                         type="range"
@@ -424,10 +424,11 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                         onChange={(e) => onBrightnessChange(Number(e.target.value))}
                         className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer range-lg dark:bg-gray-700"
                         style={{ 
+                            // 밝기(화이트)를 왼쪽, 어둡기(119번)를 오른쪽으로 배치
                             backgroundImage: 'linear-gradient(to right, #ffffff 50%, #565556 50%)'
                         }}
                     />
-                    {/* ⭐️ 문구 수정: (119번) 제거 ⭐️ */}
+                    {/* ⭐️ 위치/문구 수정: "어둡게"를 오른쪽으로 이동 ⭐️ */}
                     <span className='text-xs font-bold text-gray-500 whitespace-nowrap'>어둡게</span> 
                 </div>
                 <div className='text-center mt-1 text-sm font-extrabold text-indigo-600'>
@@ -1307,7 +1308,7 @@ export default function App() {
                                         <Clock size={12} className='inline mr-0.5 text-red-300'/> 최소 출장비 적용
                                     </div>
                                 )}
-                                
+
                                 {/* B. 원래 금액 스트라이크 아웃 */}
                                 {calculation.minimumFeeApplied && (
                                     <span className="text-xs text-gray-400 line-through font-normal whitespace-nowrap">
