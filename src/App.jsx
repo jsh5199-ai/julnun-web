@@ -246,7 +246,7 @@ const PackageToast = ({ isVisible, onClose, label }) => {
 };
 
 // -------------------------------------------------------------
-// ⭐️ [견적서 상세 모달] ⭐️
+// ⭐️ [견적서 상세 모달] (취소선 제거 반영) ⭐️
 // -------------------------------------------------------------
 const QuoteModal = ({ calculation, onClose, onImageSave, quoteRef }) => {
     const { 
@@ -257,7 +257,6 @@ const QuoteModal = ({ calculation, onClose, onImageSave, quoteRef }) => {
         itemizedPrices 
     } = calculation;
 
-    // itemOriginalTotal은 calculation에서 새로운 정가 기준으로 계산됨.
     const totalDiscountAmount = priceBeforeAllDiscount - price;
 
     const ItemRow = ({ label, quantity, unit, price, isDiscount, isPackageItem, materialLabel }) => {
@@ -271,7 +270,7 @@ const QuoteModal = ({ calculation, onClose, onImageSave, quoteRef }) => {
         return (
             <div className={`flex justify-between py-2 text-sm ${isDiscount ? 'text-red-600' : 'text-gray-800'} ${isPackageItem ? 'bg-indigo-50/50' : 'bg-white'}`}>
                 <div className='flex items-center flex-1'>
-                    <span className={`font-semibold ${isFree ? 'text-gray-500 line-through' : ''}`}>
+                    <span className={`font-semibold ${isFree ? 'text-gray-800' : ''}`}>
                         {label}
                     </span>
                     {displayMaterial}
@@ -281,7 +280,7 @@ const QuoteModal = ({ calculation, onClose, onImageSave, quoteRef }) => {
                     <span className='w-10 text-center text-xs text-gray-500'>
                         {quantity}{unit}
                     </span>
-                    <span className={`font-bold w-20 text-right ${isDiscount ? 'text-red-600' : 'text-gray-900'}`}>
+                    <span className={`font-bold w-20 text-right ${isDiscount ? 'text-red-600' : (isFree ? 'text-gray-600' : 'text-gray-900')}`}>
                         {isFree ? '서비스' : price.toLocaleString()}
                     </span>
                     <span className={`text-xs ml-1 ${isFree ? 'text-gray-500' : 'text-gray-900'}`}>{isFree ? '' : '원'}</span>
@@ -886,7 +885,8 @@ export default function App() {
         if (matchedPackage) {
             total = matchedPackage.price;
             isPackageActive = true;
-            labelText = matchedPackage.label || '패키지 할인 적용 중'; // 패키지 이름 사용
+            // ⭐️ [요청 반영] 패키지 라벨 통합: 어떤 패키지든 "패키지 할인 적용 중" 문구 사용 ⭐️
+            labelText = '패키지 할인 적용 중'; 
             packageAreas = getPackageAreaIds(matchedPackage);
             packageAreas.forEach(id => { q[id] = 0; });
             if (quantities['entrance'] >= 1) { 
@@ -912,9 +912,11 @@ export default function App() {
             // ⭐️ [변경 시작] 정가(itemOriginalTotal) 계산을 ORIGINAL_PRICES 기준으로 변경 ⭐️
             const priceKey = areaMatId === 'poly' ? 'poly' : 'epoxy';
             
-            let itemOriginalTotal = (ORIGINAL_PRICES[area.id] && ORIGINAL_PRICES[area.id][priceKey] !== undefined)
-                ? ORIGINAL_PRICES[area.id][priceKey] * initialCount // 신규 정가 기준
-                : Math.floor((area.basePrice * (isEpoxy ? MATERIALS.find(m => m.id === 'kerapoxy').priceMod : 1.0) * selectedHousing.multiplier) / 1000) * 1000 * initialCount; // 기존 로직 대체 (안전장치)
+            let originalPriceFromConst = (ORIGINAL_PRICES[area.id] && ORIGINAL_PRICES[area.id][priceKey] !== undefined)
+                ? ORIGINAL_PRICES[area.id][priceKey] 
+                : (area.basePrice * (isEpoxy ? MATERIALS.find(m => m.id === 'kerapoxy').priceMod : 1.0) * selectedHousing.multiplier);
+
+            let itemOriginalTotal = originalPriceFromConst * initialCount;
 
 
             // 🚨 [유지] 견적 계산 시 사용되는 단가 로직 (할인 적용되는 가격) 🚨
@@ -1024,7 +1026,8 @@ export default function App() {
         if (isFreeEntrance && !matchedPackage) {
                 labelText = '현관 서비스 적용 중';
         } else if (matchedPackage) {
-                labelText = matchedPackage.label || '패키지 할인 적용 중';
+                // ⭐️ [요청 반영] 패키지 라벨 통합: 어떤 패키지든 "패키지 할인 적용 중" 문구 사용 ⭐️
+                labelText = '패키지 할인 적용 중'; 
         }
 
         return { 
