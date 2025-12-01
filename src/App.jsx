@@ -441,15 +441,15 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
                             </div>
                         </div>
 
-                        {/* 6. 안내 버튼 영역 */}
+                        {/* 6. 안내 버튼 영역 -> ⭐️ [수정된 부분] 폰트 크기 text-xs로 변경 ⭐️ */}
                         <div className='space-y-2 pt-3'>
-                            <div className='w-full py-2.5 rounded-lg bg-gray-100 text-gray-700 text-sm font-semibold text-center shadow-sm'>
+                            <div className='w-full py-2.5 rounded-lg bg-gray-100 text-gray-700 text-xs font-semibold text-center shadow-sm'>
                                 바닥 30x30cm, 벽면 30x60cm 크기 기준
                             </div>
-                            <div className='w-full py-2.5 rounded-lg bg-gray-100 text-gray-700 text-sm font-semibold text-center shadow-sm'>
+                            <div className='w-full py-2.5 rounded-lg bg-gray-100 text-gray-700 text-xs font-semibold text-center shadow-sm'>
                                 재시공(셀프포함)은 별도문의
                             </div>
-                            <div className='w-full py-2.5 rounded-lg bg-gray-100 text-gray-700 text-sm font-semibold text-center shadow-sm'>
+                            <div className='w-full py-2.5 rounded-lg bg-gray-100 text-gray-700 text-xs font-semibold text-center shadow-sm'>
                                 조각타일 및 대리석은 시공불가
                             </div>
                         </div>
@@ -621,7 +621,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                         style={{
                             zIndex: 5,
                             backgroundImage: 'url(/logo.png)',
-                            backgroundSize: '70%',
+                            backgroundSize: '50%',
                             backgroundRepeat: 'repeat',
                             backgroundPosition: 'center',
                         }}
@@ -864,7 +864,7 @@ export default function App() {
         const filteredEpoxySelections = filterSelections(selectionSummary['kerapoxy'] || {});
 
         const totalSelectedCount = Object.values(filteredPolySelections).reduce((sum, v) => sum + v, 0) +
-                                         Object.values(filteredEpoxySelections).reduce((sum, v) => sum + v, 0);
+                                             Object.values(filteredEpoxySelections).reduce((sum, v) => sum + v, 0);
 
         if (totalSelectedCount === 0) return null;
         const sortedPackages = MIXED_PACKAGES;
@@ -875,86 +875,86 @@ export default function App() {
                     let appliedAutoEntrance = false;
 
                     if (pkg.isFlexible) {
-                                               const requiredPolyAreas = pkg.P_areas.map(([id]) => id).filter(id => id !== 'entrance');
-                                               const requiredEpoxyAreas = pkg.E_areas.map(([id]) => id);
-                                               let baseMatch = true;
-                                               for (const id of requiredPolyAreas.filter(id => !pkg.flexibleGroup.includes(id))) {
-                                                   const requiredQty = pkg.P_areas.find(([pkId]) => pkId === id)[1];
-                                                   if ((tempPolySelections[id] || 0) !== requiredQty) {
-                                                       baseMatch = false;
-                                                       break;
+                                                   const requiredPolyAreas = pkg.P_areas.map(([id]) => id).filter(id => id !== 'entrance');
+                                                   const requiredEpoxyAreas = pkg.E_areas.map(([id]) => id);
+                                                   let baseMatch = true;
+                                                   for (const id of requiredPolyAreas.filter(id => !pkg.flexibleGroup.includes(id))) {
+                                                       const requiredQty = pkg.P_areas.find(([pkId]) => pkId === id)[1];
+                                                       if ((tempPolySelections[id] || 0) !== requiredQty) {
+                                                           baseMatch = false;
+                                                           break;
+                                                       }
                                                    }
-                                               }
-                                               if (!baseMatch) continue;
+                                                   if (!baseMatch) continue;
 
-                                               for (const id of requiredEpoxyAreas.filter(id => !pkg.flexibleGroup.includes(id))) {
-                                                   const requiredQty = pkg.E_areas.find(([pkId]) => pkId === id)[1];
-                                                   if ((tempEpoxySelections[id] || 0) !== requiredQty) {
-                                                       baseMatch = false;
-                                                       break;
+                                                   for (const id of requiredEpoxyAreas.filter(id => !pkg.flexibleGroup.includes(id))) {
+                                                       const requiredQty = pkg.E_areas.find(([pkId]) => pkId === id)[1];
+                                                       if ((tempEpoxySelections[id] || 0) !== requiredQty) {
+                                                           baseMatch = false;
+                                                           break;
+                                                       }
                                                    }
-                                               }
-                                               if (!baseMatch) continue;
+                                                   if (!baseMatch) continue;
 
-                                               const flexibleSelectedPolyCount = pkg.flexibleGroup.filter(id => tempPolySelections[id] > 0).length;
-                                               const flexibleSelectedEpoxyCount = pkg.flexibleGroup.filter(id => tempEpoxySelections[id] > 0).length;
-                                               const isPolyFlexiblePackage = pkg.id.startsWith('USER_P_');
-                                               const isEpoxyFlexiblePackage = pkg.id.startsWith('USER_E_');
-                                               let flexibleMatch = false;
+                                                   const flexibleSelectedPolyCount = pkg.flexibleGroup.filter(id => tempPolySelections[id] > 0).length;
+                                                   const flexibleSelectedEpoxyCount = pkg.flexibleGroup.filter(id => tempEpoxySelections[id] > 0).length;
+                                                   const isPolyFlexiblePackage = pkg.id.startsWith('USER_P_');
+                                                   const isEpoxyFlexiblePackage = pkg.id.startsWith('USER_E_');
+                                                   let flexibleMatch = false;
 
-                                               if (isPolyFlexiblePackage) {
-                                                   flexibleMatch = flexibleSelectedPolyCount === 1 && flexibleSelectedEpoxyCount === 0;
-                                                   if (flexibleMatch) {
-                                                       const matchedFlexibleItem = pkg.flexibleGroup.find(id => tempPolySelections[id] > 0);
-                                                       if (pkg.id.includes('MASTER') && matchedFlexibleItem !== 'master_bath_wall') flexibleMatch = false;
-                                                       if (pkg.id.includes('COMMON') && matchedFlexibleItem !== 'common_bath_wall') flexibleMatch = false;
+                                                   if (isPolyFlexiblePackage) {
+                                                       flexibleMatch = flexibleSelectedPolyCount === 1 && flexibleSelectedEpoxyCount === 0;
+                                                       if (flexibleMatch) {
+                                                           const matchedFlexibleItem = pkg.flexibleGroup.find(id => tempPolySelections[id] > 0);
+                                                           if (pkg.id.includes('MASTER') && matchedFlexibleItem !== 'master_bath_wall') flexibleMatch = false;
+                                                           if (pkg.id.includes('COMMON') && matchedFlexibleItem !== 'common_bath_wall') flexibleMatch = false;
+                                                       }
+                                                   } else if (isEpoxyFlexiblePackage) {
+                                                       flexibleMatch = flexibleSelectedEpoxyCount === 1 && flexibleSelectedPolyCount === 0;
+                                                       if (flexibleMatch) {
+                                                           const matchedFlexibleItem = pkg.flexibleGroup.find(id => tempEpoxySelections[id] > 0);
+                                                           if (pkg.id.includes('MASTER') && matchedFlexibleItem !== 'master_bath_wall') flexibleMatch = false;
+                                                           if (pkg.id.includes('COMMON') && matchedFlexibleItem !== 'common_bath_wall') flexibleMatch = false;
+                                                       }
                                                    }
-                                               } else if (isEpoxyFlexiblePackage) {
-                                                   flexibleMatch = flexibleSelectedEpoxyCount === 1 && flexibleSelectedPolyCount === 0;
-                                                   if (flexibleMatch) {
-                                                       const matchedFlexibleItem = pkg.flexibleGroup.find(id => tempEpoxySelections[id] > 0);
-                                                       if (pkg.id.includes('MASTER') && matchedFlexibleItem !== 'master_bath_wall') flexibleMatch = false;
-                                                       if (pkg.id.includes('COMMON') && matchedFlexibleItem !== 'common_bath_wall') flexibleMatch = false;
-                                                   }
-                                               }
 
-                                               if (baseMatch && flexibleMatch) {
-                                                   const packageAreaIds = new Set(getPackageAreaIds(pkg));
-                                                   const finalSelectedAreaIds = new Set([...Object.keys(tempPolySelections).filter(id => tempPolySelections[id] > 0), ...Object.keys(tempEpoxySelections).filter(id => tempEpoxySelections[id] > 0)]);
-                                                   const isIdSetMatch = finalSelectedAreaIds.size === packageAreaIds.size &&
-                                                                                         [...finalSelectedAreaIds].every(id => packageAreaIds.has(id));
+                                                   if (baseMatch && flexibleMatch) {
+                                                       const packageAreaIds = new Set(getPackageAreaIds(pkg));
+                                                       const finalSelectedAreaIds = new Set([...Object.keys(tempPolySelections).filter(id => tempPolySelections[id] > 0), ...Object.keys(tempEpoxySelections).filter(id => tempEpoxySelections[id] > 0)]);
+                                                       const isIdSetMatch = finalSelectedAreaIds.size === packageAreaIds.size &&
+                                                                                                    [...finalSelectedAreaIds].every(id => packageAreaIds.has(id));
 
-                                                   if (isIdSetMatch) {
-                                                       return { ...pkg, autoEntrance: appliedAutoEntrance };
+                                                       if (isIdSetMatch) {
+                                                           return { ...pkg, autoEntrance: appliedAutoEntrance };
+                                                       }
                                                    }
-                                               }
-                                               continue;
+                                                   continue;
                     }
 
                     let isMatch = true;
                     for (const [id, requiredQty] of pkg.P_areas) {
-                                   if ((tempPolySelections[id] || 0) !== requiredQty) {
-                                       isMatch = false;
-                                       break;
-                                   }
+                                           if ((tempPolySelections[id] || 0) !== requiredQty) {
+                                               isMatch = false;
+                                               break;
+                                           }
                     }
                     if (!isMatch) continue;
 
                     for (const [id, requiredQty] of pkg.E_areas) {
-                                   if ((tempEpoxySelections[id] || 0) !== requiredQty) {
-                                       isMatch = false;
-                                       break;
-                                   }
+                                           if ((tempEpoxySelections[id] || 0) !== requiredQty) {
+                                               isMatch = false;
+                                               break;
+                                           }
                     }
                     if (!isMatch) continue;
 
-                    const selectedAreaIds = new Set([...Object.keys(tempPolySelections).filter(id => tempPolySelections[id] > 0), ...Object.keys(tempEpoxySelections).filter(id => tempEpoxySelections[id] > 0)]);
+                    const selectedAreaIds = new Set([...Object.keys(filteredPolySelections).filter(id => filteredPolySelections[id] > 0), ...Object.keys(filteredEpoxySelections).filter(id => filteredEpoxySelections[id] > 0)]);
                     const packageAreaIds = new Set(getPackageAreaIds(pkg));
                     const isIdSetMatch = selectedAreaIds.size === packageAreaIds.size &&
                                                              [...selectedAreaIds].every(id => packageAreaIds.has(id));
 
                     if (isIdSetMatch) {
-                                   return { ...pkg, autoEntrance: appliedAutoEntrance };
+                                           return { ...pkg, autoEntrance: appliedAutoEntrance };
                     }
         }
         return null;
@@ -1213,13 +1213,13 @@ export default function App() {
         }
         return (
                             <div className={`mt-2 ${isQuantitySelected ? 'animate-slide-down' : ''} transition-all duration-300`}>
-                                        <div className='flex gap-1.5 pt-2 border-t border-gray-100'>
-                                        {MATERIALS.map(mat => (
+                                    <div className='flex gap-1.5 pt-2 border-t border-gray-100'>
+                                    {MATERIALS.map(mat => (
                                                         <button
                                                         key={mat.id}
                                                         onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                onChange(areaId, mat.id);
+                                                            e.stopPropagation();
+                                                            onChange(areaId, mat.id);
                                                         }}
                                                         className={`flex-1 py-1 text-xs font-semibold rounded-md transition-all active:scale-95 shadow-sm
                                                             ${currentMat === mat.id
@@ -1229,8 +1229,8 @@ export default function App() {
                                                         >
                                                         {mat.label.split('(')[0].trim()}
                                                         </button>
-                                        ))}
-                                        </div>
+                                    ))}
+                                    </div>
                             </div>
         );
     };
@@ -1483,10 +1483,10 @@ export default function App() {
                   const isSelected = quantities[area.id] > 0;
 
                   const description = area.desc || area.basePrice ? (
-                                     (area.desc && area.desc.trim() !== '') ? (
-                                         <div className="text-xs text-gray-500"><span className="block text-indigo-600">{area.desc}</span></div>
-                                     ) : null
-                                 ) : null;
+                                             (area.desc && area.desc.trim() !== '') ? (
+                                                 <div className="text-xs text-gray-500"><span className="block text-indigo-600">{area.desc}</span></div>
+                                             ) : null
+                                         ) : null;
 
                   return (
                     <div key={area.id} className={`flex flex-col p-3 rounded-lg border transition duration-150 ${isSelected ? 'bg-indigo-50 border-indigo-400' : 'bg-gray-50 border-gray-200 hover:bg-gray-100'}`}>
@@ -1518,10 +1518,6 @@ export default function App() {
                 </div>
                 </section>
                 
-                {/* ⭐️ [제거] 숨고 리뷰 이벤트 버튼은 모달 안으로 이동했으므로, 여기서는 제거함. ⭐️
-                <div className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in">...</div> 
-                */}
-
                 {/* 자주 묻는 질문 (FAQ) (유지) */}
                 <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-750">
                 <h2 className="text-lg font-extrabold text-gray-800 mb-2 flex items-center gap-2 border-b pb-2">
