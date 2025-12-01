@@ -31,11 +31,11 @@ const GROUT_COLORS = [
 ];
 
 // 밝기 조절의 목표 색상 정의
-const BRIGHT_COLOR_CODE = '#ffffff'; // 밝게
-const DARK_COLOR_CODE = '#565556'; // 어둡게
+const BRIGHT_COLOR_CODE = '#ffffff'; // 화이트 (밝게)
+const DARK_COLOR_CODE = '#565556'; // 119번 (어둡게)
 
 // =================================================================
-// ⭐️ [수정된 함수] 색상 혼합 로직 (버그 수정)
+// ⭐️ [유지] 색상 혼합 로직 (버그 수정 완료된 로직)
 // =================================================================
 /**
  * HEX 코드를 RGB로 변환하고, 두 색상을 주어진 비율로 혼합합니다.
@@ -309,10 +309,10 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
         ? tileImageURL
         : DEFAULT_TILE_IMAGE_URL;
     
-    // ⭐️ [로직 수정] 밝기 레벨에 따라 최종 줄눈 색상 결정 ⭐️
+    // ⭐️ [로직 유지] 밝기 레벨에 따라 최종 줄눈 색상 결정 ⭐️
     const effectiveGroutColor = useMemo(() => {
         const baseHex = baseColorData.code;
-        // 🚨 수정된 로직: brightnessLevel(-50~50)을 -1.0~1.0의 비율로 변환
+        // brightnessLevel(-50~50)을 -1.0~1.0의 비율로 변환 (50이 100% 혼합)
         const level = brightnessLevel / 50; 
 
         if (level === 0) {
@@ -406,13 +406,15 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                 </p>
             </div>
             
-            {/* ⭐️ [신규] 밝기 조절 슬라이더 ⭐️ */}
+            {/* ⭐️ [문구 수정 반영] 밝기 조절 슬라이더 ⭐️ */}
             <div className='mb-4 p-3 bg-gray-50 rounded-lg border border-gray-100'>
                 <h4 className="text-xs font-extrabold flex items-center gap-1 mb-2 text-gray-700">
-                    <TrendingUp size={14} className='text-indigo-500' /> 조색 밝기 조절 (10% 단위)
+                    {/* ⭐️ 문구 수정: (10% 단위) 제거 ⭐️ */}
+                    <TrendingUp size={14} className='text-indigo-500' /> 조색 밝기 조절 
                 </h4>
                 <div className='flex items-center gap-3'>
-                    <span className='text-xs font-bold text-gray-500 whitespace-nowrap'>밝게 (White)</span>
+                    {/* ⭐️ 문구 수정: (White) 제거 ⭐️ */}
+                    <span className='text-xs font-bold text-gray-500 whitespace-nowrap'>밝게</span> 
                     <input
                         type="range"
                         min="-50"
@@ -425,7 +427,8 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                             backgroundImage: 'linear-gradient(to right, #ffffff 50%, #565556 50%)'
                         }}
                     />
-                    <span className='text-xs font-bold text-gray-500 whitespace-nowrap'>어둡게 (119번)</span>
+                    {/* ⭐️ 문구 수정: (119번) 제거 ⭐️ */}
+                    <span className='text-xs font-bold text-gray-500 whitespace-nowrap'>어둡게</span> 
                 </div>
                 <div className='text-center mt-1 text-sm font-extrabold text-indigo-600'>
                     현재 밝기: {brightnessLevel}%
@@ -448,7 +451,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                         key={color.id}
                         onClick={() => {
                             onSelect(color.id);
-                            onBrightnessChange(0); // ⭐️ 색상 선택 시 밝기 0%로 초기화 ⭐️
+                            onBrightnessChange(0); // 색상 선택 시 밝기 0%로 초기화
                         }}
                         className={`aspect-square rounded-lg transition-all duration-200 shadow-md flex items-center justify-center p-1 relative hover:scale-[1.02] active:scale-[0.98] ${
                             selectedColorId === color.id
@@ -480,7 +483,7 @@ export default function App() {
     const [polyOption, setPolyOption] = useState('pearl');
     const [epoxyOption, setEpoxyOption] = useState('kerapoxy');
     const [selectedGroutColor, setSelectedGroutColor] = useState(GROUT_COLORS[0].id);
-    const [brightnessLevel, setBrightnessLevel] = useState(0); // ⭐️ [신규 상태] 밝기 조절 레벨 (-50 ~ 50) ⭐️
+    const [brightnessLevel, setBrightnessLevel] = useState(0); 
     const [tileImageURL, setTileImageURL] = useState(DEFAULT_TILE_IMAGE_URL); 
      
     const [quantities, setQuantities] = useState(
@@ -1162,8 +1165,8 @@ export default function App() {
                         onSelect={setSelectedGroutColor} 
                         onTileImageUpload={handleTileImageUpload} 
                         tileImageURL={tileImageURL} 
-                        brightnessLevel={brightnessLevel} // ⭐️ 상태 전달 ⭐️
-                        onBrightnessChange={setBrightnessLevel} // ⭐️ 핸들러 전달 ⭐️
+                        brightnessLevel={brightnessLevel} 
+                        onBrightnessChange={setBrightnessLevel} 
                     />
 
                     {/* 재료 상세 비교 버튼 영역 (유지) */}
