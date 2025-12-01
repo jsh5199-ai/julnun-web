@@ -329,22 +329,23 @@ const QuoteModal = ({ calculation, onClose, quoteRef }) => {
                         </div>
 
                         {/* 2. 패키지/할인 적용 영역 (배경색: #f0f0ff, 보더: #cccceb) */}
-                        <div className='p-4 rounded-lg space-y-2' style={{ backgroundColor: '#f0f0ff', border: '1px solid #cccceb' }}>
-                            <div className='flex items-center justify-between'> 
-                                {/* 패키지 라벨: 문구 크기 text-base, 아이콘 색상 이미지 참고 */}
-                                <div className='font-bold text-base flex items-center text-gray-800'> 
+                        <div className='p-4 rounded-lg space-y-1' style={{ backgroundColor: '#f0f0ff', border: '1px solid #cccceb' }}>
+                            {/* ⭐️ 디자인 개선: 윗줄 (메인 라벨), 아랫줄 (총 할인 금액) ⭐️ */}
+                            <div className='flex flex-col items-start'> 
+                                {/* 메인 라벨 */}
+                                <div className='font-bold text-base flex items-center text-gray-800'>
                                     <Crown size={18} className='mr-2' style={{ color: '#9987ce' }}/> {displayLabel}
                                 </div>
-                                {/* 총 할인 금액 문구 (첫 번째 이미지 디자인 반영) */}
+                                {/* 총 할인 금액 문구 (두 번째 이미지 디자인 반영) */}
                                 {isDiscountApplied && (
-                                    <p className='text-base font-extrabold text-red-600 whitespace-nowrap'>
+                                    <p className='font-extrabold text-sm text-red-600 ml-6'>
                                         총 {totalDiscount.toLocaleString()}원 할인!
                                     </p>
                                 )}
                             </div>
                             
                             {/* 상세 설명 리스트 */}
-                            <ul className='list-disc list-inside text-sm text-gray-700 ml-1'>
+                            <ul className='list-disc list-inside text-sm text-gray-700 mt-2 ml-1'>
                                 <li>패키지 포함 영역이 할인 적용되었습니다.</li>
                                 {minimumFeeApplied && <li>최소 시공비(20만원)가 적용되었습니다.</li>}
                             </ul>
@@ -400,7 +401,7 @@ const QuoteModal = ({ calculation, onClose, quoteRef }) => {
                             </div>
                             <div className="flex flex-col items-end">
                                 <div className='flex items-end'>
-                                    {/* 최종 금액: 폰트 크기 text-4xl (이미지 참조), 색상 #585885 */}
+                                    {/* 최종 금액: 폰트 크기 text-4xl, 색상 #585885 */}
                                     <span className="text-4xl font-extrabold" style={{ color: '#585885' }}>
                                         {price.toLocaleString()}
                                     </span>
