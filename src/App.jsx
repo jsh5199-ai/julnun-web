@@ -247,7 +247,7 @@ const PackageToast = ({ isVisible, onClose, label }) => {
 };
 
 // -------------------------------------------------------------
-// ⭐️ [수정됨] QuoteModal: 하단 버튼을 상담/연결로 변경 ⭐️
+// ⭐️ [수정됨] QuoteModal: 최종 금액 스타일 및 문구, 버튼 변경, 이미지 저장 버튼 제거 ⭐️
 // -------------------------------------------------------------
 const QuoteModal = ({ calculation, onClose, quoteRef }) => {
     const {
@@ -322,6 +322,7 @@ const QuoteModal = ({ calculation, onClose, quoteRef }) => {
                     <h3 className="font-extrabold text-lg flex items-center gap-2">
                         <List className="h-6 w-6 text-white" /> 최종 견적서
                     </h3>
+                    {/* 모달 닫기 버튼 */}
                     <button onClick={onClose} className="text-white/80 hover:text-white transition active:scale-95"><X size={24} /></button>
                 </div>
 
@@ -400,22 +401,19 @@ const QuoteModal = ({ calculation, onClose, quoteRef }) => {
                             </div>
                         )}
 
-                        {/* 5. 최종 금액 영역 (VAT 문구 위치 변경 반영) */}
-                        <div className='mt-6 pt-4 flex justify-between items-end'>
-                            <div className='flex flex-col items-start'>
-                                {/* 문구 크기 text-base */}
-                                <span className='text-base font-bold text-gray-800'>최종 결제 금액</span>
-                            </div>
+                        {/* 5. 최종 금액 영역 (최종 결제 금액 문구 제거, 금액 네이비 변경) */}
+                        <div className='mt-6 pt-4 flex justify-end items-end'>
+                            {/* ⭐️ "최종 결제 금액" 문구 제거 ⭐️ */}
                             <div className="flex flex-col items-end">
                                 <div className='flex items-end'>
-                                    {/* 최종 금액: 폰트 크기 text-4xl, 색상 #585885 */}
-                                    <span className="text-4xl font-extrabold" style={{ color: '#585885' }}>
+                                    {/* 최종 금액: 폰트 크기 text-4xl, 색상 #1e3a8a (네이비) */}
+                                    <span className="text-4xl font-extrabold" style={{ color: '#1e3a8a' }}>
                                         {price.toLocaleString()}
                                     </span>
-                                    {/* '원' 문구: 폰트 크기 text-lg, 색상 #585885 */}
-                                    <span className="text-lg font-normal ml-1" style={{ color: '#585885' }}>원</span>
+                                    {/* '원' 문구: 폰트 크기 text-lg, 색상 #1e3a8a (네이비) */}
+                                    <span className="text-lg font-normal ml-1" style={{ color: '#1e3a8a' }}>원</span>
                                 </div>
-                                {/* ⭐️ VAT 문구 위치 변경: 금액 바로 밑에 위치 ⭐️ */}
+                                {/* VAT 문구 위치 변경: 금액 바로 밑에 위치 */}
                                 <span className='text-xs text-gray-500 mt-1'>
                                     VAT 별도 / 현장상황별 상이
                                 </span>
@@ -434,12 +432,7 @@ const QuoteModal = ({ calculation, onClose, quoteRef }) => {
                                 조각타일 및 대리석은 시공불가
                             </div>
                         </div>
-
-                        <div className='text-center pt-3'>
-                            <button onClick={handleImageSave} className="py-2.5 px-4 bg-gray-100 text-gray-700 rounded-lg font-bold text-sm hover:bg-gray-200 transition shadow-md flex items-center justify-center gap-2 mx-auto active:scale-95">
-                                <Download size={16} /> 견적서 이미지로 저장 (캡처)
-                            </button>
-                        </div>
+                        {/* ⭐️ [제거됨] 견적서 이미지 저장 버튼 제거 ⭐️ */}
 
                     </div>
                     {/* 견적서 캡처 영역 종료 */}
@@ -462,7 +455,6 @@ const QuoteModal = ({ calculation, onClose, quoteRef }) => {
                        <Phone size={18} /> 상담원 연결
                     </a>
                 </div>
-                {/* ⭐️ [수정된 부분] 끝 ⭐️ */}
             </div>
         </div>
     );
@@ -601,7 +593,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
 
                     {/* 2. 워터마크 레이어 (z-index 5) */}
                     <div
-                        className="absolute inset-0 flex items-center justify-center opacity-70"
+                        className="absolute inset-0 flex items-center justify-center opacity-80"
                         style={{
                             zIndex: 5,
                             backgroundImage: 'url(/logo.png)',
@@ -1501,6 +1493,35 @@ export default function App() {
                 })}
                 </div>
                 </section>
+
+                {/* ⭐️ [추가] 리뷰 이벤트 버튼 ⭐️ */}
+                <div className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in">
+                    <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
+                        <Gift className="h-5 w-5 text-red-500" /> 5. 추가 할인 혜택
+                    </h2>
+                    <div className="space-y-3">
+                        {/* 숨고 리뷰 이벤트 */}
+                        <div className={`p-3 rounded-lg border transition duration-150 ${isSoomgoReviewApplied ? 'bg-red-50 border-red-400' : 'bg-gray-50 border-gray-200 hover:bg-gray-100'}`}>
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className={`p-2 rounded-full shadow-sm ${isSoomgoReviewApplied ? 'bg-red-500 text-white' : 'bg-gray-200 text-red-600'}`}>
+                                        <Star size={18} />
+                                    </div>
+                                    <div>
+                                        <div className="font-semibold text-gray-800">{soomgoReviewEvent.label}</div>
+                                        <div className="text-xs text-gray-500"><span className="block text-red-600">-{soomgoReviewEvent.discount.toLocaleString()}원 할인</span></div>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => toggleReview('soomgo_review')}
+                                    className={`py-1 px-3 rounded-full text-xs font-bold transition active:scale-95 ${isSoomgoReviewApplied ? 'bg-red-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                                >
+                                    {isSoomgoReviewApplied ? '적용됨' : '할인 적용'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 {/* 자주 묻는 질문 (FAQ) (유지) */}
                 <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-750">
