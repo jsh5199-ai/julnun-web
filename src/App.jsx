@@ -109,7 +109,7 @@ const GlobalStyles = () => (
 );
 
 // =================================================================
-// [데이터] (P_MIX_08 가격 85만으로 수정 및 기타 정의 유지)
+// [데이터] (패키지 정보 등 유지)
 // =================================================================
 const HOUSING_TYPES = [
     { id: 'new', label: '신축 아파트', multiplier: 1.0 },
@@ -247,9 +247,9 @@ const PackageToast = ({ isVisible, onClose, label }) => {
 };
 
 // -------------------------------------------------------------
-// ⭐️ [수정됨] QuoteModal: 최종 금액 스타일 및 문구, 버튼 변경, 이미지 저장 버튼 제거 ⭐️
+// ⭐️ [수정됨] QuoteModal: 최종 금액 스타일 및 문구, 버튼 변경, 리뷰 이벤트 추가 ⭐️
 // -------------------------------------------------------------
-const QuoteModal = ({ calculation, onClose, quoteRef }) => {
+const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleReview }) => {
     const {
         price,
         label,
@@ -262,17 +262,14 @@ const QuoteModal = ({ calculation, onClose, quoteRef }) => {
     const totalDiscount = priceBeforeAllDiscount - price;
     const isDiscountApplied = totalDiscount > 0;
 
-    // ⭐️ [로직 유지]: quantity > 0 인 모든 선택 항목 + 할인 항목을 포함
     const packageItems = itemizedPrices.filter(i =>
         i.quantity > 0 && !i.isDiscount
     ).map(item => {
-        // 원래의 선택된 수량과 단위 정보를 사용
         const areaInfo = ALL_AREAS.find(a => a.id === item.id);
 
         return {
             label: item.label,
             materialLabel: item.materialLabel,
-            // 견적서에는 계산의 기반이 된 실제 선택 수량을 표시
             quantity: item.quantity,
             unit: areaInfo ? areaInfo.unit : '개소'
         }
@@ -280,6 +277,8 @@ const QuoteModal = ({ calculation, onClose, quoteRef }) => {
 
     // 리뷰 할인 항목 필터링
     const discountItems = itemizedPrices.filter(i => i.isDiscount);
+    const soomgoReviewEvent = REVIEW_EVENTS.find(evt => evt.id === 'soomgo_review');
+    const isSoomgoReviewApplied = selectedReviews.has('soomgo_review');
 
     // 최소 요금/패키지 적용 시의 라벨
     const displayLabel = minimumFeeApplied
@@ -383,7 +382,7 @@ const QuoteModal = ({ calculation, onClose, quoteRef }) => {
                             </div>
                         )}
 
-                        {/* 4. 이벤트 할인 영역 (숨고 리뷰 이벤트) */}
+                        {/* 4. 이벤트 할인 영역 (견적서 내 할인 상세) */}
                         {discountItems.length > 0 && (
                             <div className='mt-2 pt-2 border-t border-gray-100'>
                                 {discountItems.map((item, index) => (
@@ -400,6 +399,28 @@ const QuoteModal = ({ calculation, onClose, quoteRef }) => {
                                 ))}
                             </div>
                         )}
+
+                        {/* ⭐️ [추가] 숨고 리뷰 이벤트 버튼 (모달 내) ⭐️ */}
+                        <div className='mt-4 p-3 rounded-lg border transition duration-150 bg-gray-50 border-gray-200'>
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className={`p-2 rounded-full shadow-sm ${isSoomgoReviewApplied ? 'bg-red-500 text-white' : 'bg-gray-200 text-red-600'}`}>
+                                        <Star size={18} />
+                                    </div>
+                                    <div>
+                                        <div className="font-semibold text-gray-800">{soomgoReviewEvent.label}</div>
+                                        <div className="text-xs text-gray-500"><span className="block text-red-600">-{soomgoReviewEvent.discount.toLocaleString()}원 할인</span></div>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => toggleReview('soomgo_review')}
+                                    className={`py-1 px-3 rounded-full text-xs font-bold transition active:scale-95 ${isSoomgoReviewApplied ? 'bg-red-600 text-white shadow-md' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                                >
+                                    {isSoomgoReviewApplied ? '적용됨' : '할인 적용'}
+                                </button>
+                            </div>
+                        </div>
+                        {/* ⭐️ [추가] 끝 ⭐️ */}
 
                         {/* 5. 최종 금액 영역 (최종 결제 금액 문구 제거, 금액 네이비 변경) */}
                         <div className='mt-6 pt-4 flex justify-end items-end'>
@@ -432,8 +453,11 @@ const QuoteModal = ({ calculation, onClose, quoteRef }) => {
                                 조각타일 및 대리석은 시공불가
                             </div>
                         </div>
-                        {/* ⭐️ [제거됨] 견적서 이미지 저장 버튼 제거 ⭐️ */}
-
+                        <div className='text-center pt-3'>
+                            <button onClick={handleImageSave} className="py-2.5 px-4 bg-gray-100 text-gray-700 rounded-lg font-bold text-sm hover:bg-gray-200 transition shadow-md flex items-center justify-center gap-2 mx-auto active:scale-95">
+                                <Download size={16} /> 견적서 이미지로 저장 (캡처)
+                            </button>
+                        </div>
                     </div>
                     {/* 견적서 캡처 영역 종료 */}
                 </div>
@@ -597,7 +621,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                         style={{
                             zIndex: 5,
                             backgroundImage: 'url(/logo.png)',
-                            backgroundSize: '50%',
+                            backgroundSize: '70%',
                             backgroundRepeat: 'repeat',
                             backgroundPosition: 'center',
                         }}
@@ -938,7 +962,7 @@ export default function App() {
 
 
     // -------------------------------------------------------------
-    // ⭐️ [로직 유지] calculation 로직 (누락 수정 반영된 버전) ⭐️
+    // ⭐️ [로직 유지] calculation 로직 ⭐️
     // -------------------------------------------------------------
     const calculation = useMemo(() => {
         const selectedHousing = HOUSING_TYPES.find(h => h.id === housingType);
@@ -1493,35 +1517,10 @@ export default function App() {
                 })}
                 </div>
                 </section>
-
-                {/* ⭐️ [추가] 리뷰 이벤트 버튼 ⭐️ */}
-                <div className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in">
-                    <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
-                        <Gift className="h-5 w-5 text-red-500" /> 5. 추가 할인 혜택
-                    </h2>
-                    <div className="space-y-3">
-                        {/* 숨고 리뷰 이벤트 */}
-                        <div className={`p-3 rounded-lg border transition duration-150 ${isSoomgoReviewApplied ? 'bg-red-50 border-red-400' : 'bg-gray-50 border-gray-200 hover:bg-gray-100'}`}>
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <div className={`p-2 rounded-full shadow-sm ${isSoomgoReviewApplied ? 'bg-red-500 text-white' : 'bg-gray-200 text-red-600'}`}>
-                                        <Star size={18} />
-                                    </div>
-                                    <div>
-                                        <div className="font-semibold text-gray-800">{soomgoReviewEvent.label}</div>
-                                        <div className="text-xs text-gray-500"><span className="block text-red-600">-{soomgoReviewEvent.discount.toLocaleString()}원 할인</span></div>
-                                    </div>
-                                </div>
-                                <button
-                                    onClick={() => toggleReview('soomgo_review')}
-                                    className={`py-1 px-3 rounded-full text-xs font-bold transition active:scale-95 ${isSoomgoReviewApplied ? 'bg-red-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-                                >
-                                    {isSoomgoReviewApplied ? '적용됨' : '할인 적용'}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                
+                {/* ⭐️ [제거] 숨고 리뷰 이벤트 버튼은 모달 안으로 이동했으므로, 여기서는 제거함. ⭐️
+                <div className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in">...</div> 
+                */}
 
                 {/* 자주 묻는 질문 (FAQ) (유지) */}
                 <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-750">
@@ -1630,12 +1629,14 @@ export default function App() {
             {/* 재료 상세 비교 모달 표시 (유지) */}
             {showMaterialModal && <MaterialDetailModal onClose={() => setShowMaterialModal(false)} />}
 
-            {/* ⭐️ [추가] 견적서 상세 모달 렌더링 ⭐️ */}
+            {/* ⭐️ [추가] 견적서 상세 모달 렌더링 (리뷰 상태/토글 함수 전달) ⭐️ */}
             {showModal && (
                 <QuoteModal
                     calculation={calculation}
                     onClose={() => setShowModal(false)}
                     quoteRef={quoteRef}
+                    selectedReviews={selectedReviews}
+                    toggleReview={toggleReview} // 토글 함수 전달
                 />
             )}
         </div>
