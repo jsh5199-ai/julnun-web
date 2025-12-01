@@ -246,7 +246,7 @@ const PackageToast = ({ isVisible, onClose, label }) => {
 };
 
 // -------------------------------------------------------------
-// ⭐️ [최종 수정된] 견적서 상세 모달 (디테일 및 할인 금액 반영) ⭐️
+// ⭐️ [최종 수정된] 견적서 상세 모달 (디자인 일치, VAT 위치, 할인 문구 반영) ⭐️
 // -------------------------------------------------------------
 const QuoteModal = ({ calculation, onClose, quoteRef }) => {
     const { 
@@ -257,7 +257,7 @@ const QuoteModal = ({ calculation, onClose, quoteRef }) => {
         priceBeforeAllDiscount // 할인 전 총 원가
     } = calculation;
 
-    // 1. 총 할인 금액 계산
+    // 1. 총 할인 금액 계산 (오류 수정 반영)
     const totalDiscount = priceBeforeAllDiscount - price;
     const isDiscountApplied = totalDiscount > 0;
     
@@ -325,27 +325,26 @@ const QuoteModal = ({ calculation, onClose, quoteRef }) => {
                         
                         {/* 1. 제목 영역 */}
                         <div className='text-center pt-2'>
-                            {/* 폰트 크기: text-xl, 색상: #585885 (진한 남색 계열) */}
                             <h4 className='text-xl font-extrabold' style={{ color: '#585885' }}>줄눈의미학 예상 견적서</h4>
                         </div>
 
                         {/* 2. 패키지/할인 적용 영역 (배경색: #f0f0ff, 보더: #cccceb) */}
-                        <div className='p-4 rounded-lg' style={{ backgroundColor: '#f0f0ff', border: '1px solid #cccceb' }}>
-                            <div className='flex items-center justify-between'>
+                        <div className='p-4 rounded-lg space-y-2' style={{ backgroundColor: '#f0f0ff', border: '1px solid #cccceb' }}>
+                            <div className='flex items-center justify-between'> 
                                 {/* 패키지 라벨: 문구 크기 text-base, 아이콘 색상 이미지 참고 */}
-                                <div className='font-bold text-base flex items-center' style={{ color: '#585885' }}>
+                                <div className='font-bold text-base flex items-center text-gray-800'> 
                                     <Crown size={18} className='mr-2' style={{ color: '#9987ce' }}/> {displayLabel}
                                 </div>
-                                {/* 총 할인 금액 문구 (여기에 표시: 우측 상단 배치) */}
+                                {/* 총 할인 금액 문구 (첫 번째 이미지 디자인 반영) */}
                                 {isDiscountApplied && (
-                                    <p className='text-sm font-bold text-red-600 whitespace-nowrap'>
+                                    <p className='text-base font-extrabold text-red-600 whitespace-nowrap'>
                                         총 {totalDiscount.toLocaleString()}원 할인!
                                     </p>
                                 )}
                             </div>
                             
                             {/* 상세 설명 리스트 */}
-                            <ul className='list-disc list-inside text-sm text-gray-700 mt-2 ml-1'>
+                            <ul className='list-disc list-inside text-sm text-gray-700 ml-1'>
                                 <li>패키지 포함 영역이 할인 적용되었습니다.</li>
                                 {minimumFeeApplied && <li>최소 시공비(20만원)가 적용되었습니다.</li>}
                             </ul>
@@ -393,24 +392,25 @@ const QuoteModal = ({ calculation, onClose, quoteRef }) => {
                             </div>
                         )}
 
-
-                        {/* 5. 최종 금액 영역 */}
-                        <div className='mt-6 pt-4 border-t-2 border-dashed border-gray-300 flex justify-between items-center'>
+                        {/* 5. 최종 금액 영역 (VAT 문구 위치 변경 반영) */}
+                        <div className='mt-6 pt-4 flex justify-between items-end'>
                             <div className='flex flex-col items-start'>
                                 {/* 문구 크기 text-base */}
                                 <span className='text-base font-bold text-gray-800'>최종 결제 금액</span>
-                                {/* 문구 크기 text-xs */}
+                            </div>
+                            <div className="flex flex-col items-end">
+                                <div className='flex items-end'>
+                                    {/* 최종 금액: 폰트 크기 text-4xl (이미지 참조), 색상 #585885 */}
+                                    <span className="text-4xl font-extrabold" style={{ color: '#585885' }}>
+                                        {price.toLocaleString()}
+                                    </span>
+                                    {/* '원' 문구: 폰트 크기 text-lg, 색상 #585885 */}
+                                    <span className="text-lg font-normal ml-1" style={{ color: '#585885' }}>원</span>
+                                </div>
+                                {/* ⭐️ VAT 문구 위치 변경: 금액 바로 밑에 위치 ⭐️ */}
                                 <span className='text-xs text-gray-500 mt-1'>
                                     VAT 별도 / 현장상황별 상이
                                 </span>
-                            </div>
-                            <div className="flex items-end">
-                                {/* 최종 금액: 폰트 크기 text-4xl (이미지 참조), 색상 #585885 */}
-                                <span className="text-4xl font-extrabold" style={{ color: '#585885' }}>
-                                    {price.toLocaleString()}
-                                </span>
-                                {/* '원' 문구: 폰트 크기 text-lg, 색상 #585885 */}
-                                <span className="text-lg font-normal ml-1" style={{ color: '#585885' }}>원</span>
                             </div>
                         </div>
 
@@ -1431,7 +1431,6 @@ export default function App() {
                                     {description}
                                 </div>
                             </div>
-                            {/* ⭐️ [유지] 수량 증감 버튼: border border-gray-200 제거 ⭐️ */}
                             <div className="flex items-center gap-1 bg-white px-1 py-1 rounded-full shadow-md">
                                 <button 
                                     onClick={() => handleQuantityChange(area.id, -1)} 
