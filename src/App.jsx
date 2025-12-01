@@ -35,34 +35,42 @@ const BRIGHT_COLOR_CODE = '#ffffff'; // 화이트 (밝게)
 const DARK_COLOR_CODE = '#565556'; // 119번 (어둡게)
 
 // =================================================================
+// ⭐️ [신규] 견적서 할인 문구에만 사용되는 "정가" 기준 ⭐️
+// =================================================================
+const ORIGINAL_PRICES = {
+    // [항목 ID]: { poly: 정가, epoxy: 정가 }
+    'bathroom_floor': { poly: 230000, epoxy: 400000 },
+    'shower_booth': { poly: 150000, epoxy: 300000 },
+    'bathtub_wall': { poly: 150000, epoxy: 300000 },
+    'master_bath_wall': { poly: 300000, epoxy: 600000 },
+    'common_bath_wall': { poly: 300000, epoxy: 600000 },
+    'entrance': { poly: 50000, epoxy: 100000 },
+    // 기타 항목 (기존 basePrice 기반 계산 유지)
+    'balcony_laundry': { poly: 100000, epoxy: 250000 },
+    'kitchen_wall': { poly: 150000, epoxy: 250000 },
+    'living_room': { poly: 550000, epoxy: 1100000 },
+    // 실리콘 항목 (원가와 단가 동일, 할인 시에만 차액 발생)
+    'silicon_bathtub': { poly: 80000, epoxy: 80000 },
+    'silicon_sink': { poly: 30000, epoxy: 30000 }, // 단가 3만원으로 고정
+    'silicon_living_baseboard': { poly: 400000, epoxy: 400000 },
+};
+
+// =================================================================
 // ⭐️ [유지] 색상 혼합 로직
 // =================================================================
-/**
- * HEX 코드를 RGB로 변환하고, 두 색상을 주어진 비율로 혼합합니다.
- * @param {string} color1 - 기본 색상 HEX 코드 (#RRGGBB)
- * @param {string} color2 - 목표 색상 HEX 코드 (#RRGGBB)
- * @param {number} weight - 혼합 비율 (0.0: color1, 1.0: color2)
- * @returns {string} 혼합된 색상의 HEX 코드
- */
 const mixColors = (color1, color2, weight) => {
-    // # 제거 및 안전을 위해 6자리 코드로 가정
     color1 = color1.replace('#', '');
     color2 = color2.replace('#', '');
-
     const r1 = parseInt(color1.substring(0, 2), 16);
     const g1 = parseInt(color1.substring(2, 4), 16);
     const b1 = parseInt(color1.substring(4, 6), 16);
-
     const r2 = parseInt(color2.substring(0, 2), 16);
     const g2 = parseInt(color2.substring(2, 4), 16);
     const b2 = parseInt(color2.substring(4, 6), 16);
-
     const r = Math.round(r1 * (1 - weight) + r2 * weight);
     const g = Math.round(g1 * (1 - weight) + g2 * weight);
     const b = Math.round(b1 * (1 - weight) + b2 * weight);
-
     const toHex = (c) => ('0' + Math.max(0, Math.min(255, c)).toString(16)).slice(-2);
-
     return '#' + toHex(r) + toHex(g) + toHex(b);
 };
 
@@ -100,7 +108,7 @@ const GlobalStyles = () => (
 );
 
 // =================================================================
-// [데이터] (수정된 패키지 가격 반영)
+// [데이터] (P_MIX_08 가격 85만으로 수정 및 기타 정의 유지)
 // =================================================================
 const HOUSING_TYPES = [
     { id: 'new', label: '신축 아파트', multiplier: 1.0 },
@@ -162,8 +170,7 @@ const ORIGINAL_MIXED_PACKAGES = [
     { id: 'P_MIX_05_OLD', price: 1050000, label: '혼합패키지 05 (구형)', E_areas: [['bathroom_floor', 2]], P_areas: [['master_bath_wall', 1], ['common_bath_wall', 1]] },
     { id: 'P_MIX_06', price: 830000, label: '혼합패키지 06', E_areas: [['bathroom_floor', 2]], P_areas: [['shower_booth', 1]] },
     { id: 'P_MIX_07', price: 830000, label: '혼합패키지 07', E_areas: [['bathroom_floor', 2]], P_areas: [['bathtub_wall', 1]] },
-    // ⭐️ 요청 반영: P_MIX_08 가격 950000 -> 850000원으로 수정 ⭐️
-    { id: 'P_MIX_08', price: 850000, label: '혼합패키지 08', E_areas: [['bathroom_floor', 2]], P_areas: [['bathtub_wall', 1], ['shower_booth', 1]] },
+    { id: 'P_MIX_08', price: 850000, label: '혼합패키지 08', E_areas: [['bathroom_floor', 2]], P_areas: [['bathtub_wall', 1], ['shower_booth', 1]] }, // 95만 -> 85만 수정 완료
     { id: 'P_MIX_09', price: 1200000, label: '혼합패키지 09', E_areas: [['bathroom_floor', 2]], P_areas: [['master_bath_wall', 1], ['common_bath_wall', 1]] },
     { id: 'P_MIX_10', price: 900000, label: '혼합패키지 10', E_areas: [['bathroom_floor', 2], ['shower_booth', 1]], P_areas: [] },
     { id: 'P_MIX_11', price: 900000, label: '혼합패키지 11', E_areas: [['bathroom_floor', 2], ['bathtub_wall', 1]], P_areas: [] },
@@ -201,7 +208,7 @@ const getPackageAreaIds = (pkg) => [
 ];
 
 // =================================================================
-// [컴포넌트] (Modal 포함)
+// [컴포넌트]
 // =================================================================
 
 const PackageToast = ({ isVisible, onClose, label }) => {
@@ -244,15 +251,13 @@ const PackageToast = ({ isVisible, onClose, label }) => {
 const QuoteModal = ({ calculation, onClose, onImageSave, quoteRef }) => {
     const { 
         price, 
-        originalCalculatedPrice, 
         priceBeforeAllDiscount,
         label, 
-        isPackageActive, 
-        discountAmount, 
         minimumFeeApplied, 
         itemizedPrices 
     } = calculation;
 
+    // itemOriginalTotal은 calculation에서 새로운 정가 기준으로 계산됨.
     const totalDiscountAmount = priceBeforeAllDiscount - price;
 
     const ItemRow = ({ label, quantity, unit, price, isDiscount, isPackageItem, materialLabel }) => {
@@ -270,7 +275,7 @@ const QuoteModal = ({ calculation, onClose, onImageSave, quoteRef }) => {
                         {label}
                     </span>
                     {displayMaterial}
-                    {isPackageItem && <Sparkles size={10} className='ml-1 text-amber-500' />}
+                    {(isPackageItem || isFree) && <Sparkles size={10} className='ml-1 text-amber-500' />}
                 </div>
                 <div className='flex justify-end items-center flex-shrink-0 w-32'>
                     <span className='w-10 text-center text-xs text-gray-500'>
@@ -347,7 +352,7 @@ const QuoteModal = ({ calculation, onClose, onImageSave, quoteRef }) => {
                         {/* 최종 합계 */}
                         <div className='pt-3 border-t-2 border-dashed border-gray-300'>
                             <div className='flex justify-between items-end mb-2'>
-                                <span className='text-sm text-gray-500 font-semibold'>시공 총 원가</span>
+                                <span className='text-sm text-gray-500 font-semibold'>시공 총 원가 (정가 기준)</span>
                                 <span className='text-sm text-gray-500 font-semibold line-through'>
                                     {priceBeforeAllDiscount.toLocaleString()} 원
                                 </span>
@@ -665,7 +670,7 @@ export default function App() {
     const SOOMGO_REVIEW_URL = 'https://www.soomgo.com/profile/users/10755579?tab=review';
     const PHONE_NUMBER = '010-7734-6709';
 
-    // 🚨 [수정] areaMaterials 의존성 간소화 (cleaner guardrail)
+    // 🚨 [유지] areaMaterials 의존성 간소화 (cleaner guardrail)
     useEffect(() => {
         if (quantities['entrance'] > 0 && areaMaterials['entrance'] !== 'poly') {
             setAreaMaterials(prev => ({ ...prev, 'entrance': 'poly' }));
@@ -723,7 +728,7 @@ export default function App() {
         });
     }, []);
 
-    // 🚨 [수정] useMemo/useCallback 의존성 최적화: 인자에만 의존하도록 수정
+    // 🚨 [유지] useMemo/useCallback 의존성 최적화
     const getSelectionSummary = useCallback((q, areaMats) => {
         const summary = {};
         for (const id in q) {
@@ -747,7 +752,7 @@ export default function App() {
         return summary;
     }, []); 
         
-    // 🚨 [수정] useMemo/useCallback 의존성 최적화: 인자에만 의존하도록 수정
+    // 🚨 [유지] useMemo/useCallback 의존성 최적화
     const findMatchingPackage = useCallback((selectionSummary, quantities) => {
         const filterSelections = (selections) => {
             const filtered = {};
@@ -903,9 +908,17 @@ export default function App() {
             const count = q[area.id] || 0; 
             const areaMatId = area.id === 'entrance' ? 'poly' : areaMaterials[area.id];
             const isEpoxy = areaMatId === 'kerapoxy';
-            let finalUnitBasePrice = area.basePrice;
             
-            // 🚨 [유지] 가격 계산 로직은 변경 없음
+            // ⭐️ [변경 시작] 정가(itemOriginalTotal) 계산을 ORIGINAL_PRICES 기준으로 변경 ⭐️
+            const priceKey = areaMatId === 'poly' ? 'poly' : 'epoxy';
+            
+            let itemOriginalTotal = (ORIGINAL_PRICES[area.id] && ORIGINAL_PRICES[area.id][priceKey] !== undefined)
+                ? ORIGINAL_PRICES[area.id][priceKey] * initialCount // 신규 정가 기준
+                : Math.floor((area.basePrice * (isEpoxy ? MATERIALS.find(m => m.id === 'kerapoxy').priceMod : 1.0) * selectedHousing.multiplier) / 1000) * 1000 * initialCount; // 기존 로직 대체 (안전장치)
+
+
+            // 🚨 [유지] 견적 계산 시 사용되는 단가 로직 (할인 적용되는 가격) 🚨
+            let finalUnitBasePrice = area.basePrice;
             if (area.id === 'balcony_laundry') {
                         finalUnitBasePrice = isEpoxy ? 250000 : 100000;
             } else if (area.id === 'kitchen_wall') {
@@ -919,28 +932,28 @@ export default function App() {
             } 
             
             const calculatedPricePerUnit = Math.floor(finalUnitBasePrice * selectedHousing.multiplier);
-            let itemOriginalTotal = calculatedPricePerUnit * initialCount;
             let finalCalculatedPrice = 0;
             let finalDiscount = 0;
             let isFreeServiceItem = false;
             let packageCount = initialCount - count; 
-
+            
+            // ⭐️ [계산 로직 유지] 패키지/무료 서비스 적용 시 가격 0원 처리 ⭐️
             if (packageCount > 0 && (matchedPackage || isFreeEntrance) && count === 0) {
                                 finalCalculatedPrice = 0;
-                                finalDiscount = itemOriginalTotal;
+                                finalDiscount = itemOriginalTotal; // 할인액은 정가와 같음
                                 isFreeServiceItem = area.id === 'entrance' || packageAreas.includes(area.id); 
             } 
             else if (area.id === 'entrance' && isFreeEntrance && !matchedPackage && count === 0) {
                                 finalCalculatedPrice = 0;
-                                finalDiscount = itemOriginalTotal;
+                                finalDiscount = itemOriginalTotal; // 할인액은 정가와 같음
                                 isFreeServiceItem = true;
             }
             else {
-                                let remainingOriginalTotal = calculatedPricePerUnit * count;
-                                let remainingCalculatedPrice = remainingOriginalTotal;
+                                // ⭐️ [계산 로직 유지] 패키지 미적용 시의 개별 할인 로직 ⭐️
+                                let remainingOriginalTotalForDiscountCalc = calculatedPricePerUnit * count;
+                                let remainingCalculatedPrice = calculatedPricePerUnit * count;
                                 let remainingDiscount = 0;
                                 
-                                // 실리콘 항목 할인 로직 (총 시공 영역 3개 이상일 때)
                                 if (area.id === 'silicon_bathtub' && totalAreaCount >= 3) {
                                         const nonPackageOriginalPrice = 80000 * count; 
                                         const fixedPriceForRemaining = 50000 * count; 
@@ -957,13 +970,14 @@ export default function App() {
                                                 remainingCalculatedPrice = fixedPriceForRemaining;
                                         }
                                         if (initialCount === count) itemOriginalTotal = 400000 * initialCount;
-                                } else if (area.id === 'silicon_sink') { // 세면대+젠다이 교체는 단가 30,000원으로 고정
+                                } else if (area.id === 'silicon_sink') {
                                         remainingCalculatedPrice = 30000 * count;
                                 }
                                 finalCalculatedPrice = remainingCalculatedPrice; 
                                 finalDiscount = remainingDiscount; 
                                 total += finalCalculatedPrice;
             }
+            // ⭐️ [변경 끝] ⭐️
             
             finalCalculatedPrice = Math.floor(finalCalculatedPrice / 1000) * 1000;
             itemOriginalTotal = Math.floor(itemOriginalTotal / 1000) * 1000;
@@ -974,7 +988,7 @@ export default function App() {
                                 label: area.label, 
                                 quantity: initialCount, 
                                 unit: area.unit, 
-                                originalPrice: itemOriginalTotal, 
+                                originalPrice: itemOriginalTotal, // ⭐️ 새로운 정가 기준 적용 ⭐️
                                 calculatedPrice: finalCalculatedPrice, 
                                 discount: finalDiscount, 
                                 isFreeService: isFreeServiceItem, 
@@ -993,11 +1007,9 @@ export default function App() {
         });
         total -= discountAmount;
             
-        const totalItemDiscount = itemizedPrices
-                .filter(item => !item.isDiscount)
-                .reduce((sum, item) => sum + (item.originalPrice - item.calculatedPrice), 0);
-        const totalFinalDiscount = totalItemDiscount + discountAmount;
-            
+        // 총 원가 (정가 기준)를 다시 계산
+        const priceBeforeAllDiscount = itemizedPrices.reduce((sum, item) => sum + (item.isDiscount ? 0 : item.originalPrice), 0);
+        
         let originalCalculatedPrice = Math.max(0, Math.floor(total / 1000) * 1000); 
         let finalPrice = originalCalculatedPrice; 
         let minimumFeeApplied = false;
@@ -1007,7 +1019,7 @@ export default function App() {
                 minimumFeeApplied = true;
         }
 
-        const priceBeforeAllDiscount = itemizedPrices.reduce((sum, item) => sum + (item.isDiscount ? 0 : item.originalPrice), 0);
+        
             
         if (isFreeEntrance && !matchedPackage) {
                 labelText = '현관 서비스 적용 중';
@@ -1018,11 +1030,11 @@ export default function App() {
         return { 
                 price: finalPrice, 
                 originalCalculatedPrice, 
-                priceBeforeAllDiscount,
+                priceBeforeAllDiscount, // ⭐️ 새로운 정가 기준이 반영된 총 원가 ⭐️
                 label: labelText, 
                 isPackageActive: isPackageActive || isFreeEntrance, 
                 isFreeEntrance: isFreeEntrance,
-                discountAmount: totalFinalDiscount, 
+                discountAmount: priceBeforeAllDiscount - finalPrice, // ⭐️ 새로운 정가 기준의 총 할인액 ⭐️
                 minimumFeeApplied, 
                 itemizedPrices: itemizedPrices.filter(item => item.quantity > 0 || item.isDiscount),
         };
@@ -1114,7 +1126,6 @@ export default function App() {
                                         key={mat.id}
                                         onClick={(e) => {
                                                 e.stopPropagation();  
-                                                // 🚨 [수정] isQuantitySelected 체크 제거. 컴포넌트 자체가 수량 > 0일때만 렌더링되므로 불필요
                                                 onChange(areaId, mat.id);
                                         }}
                                         className={`flex-1 py-1 text-xs font-semibold rounded-md transition-all active:scale-95 shadow-sm 
@@ -1139,7 +1150,6 @@ export default function App() {
                 const currentMat = area.id === 'entrance' ? 'poly' : areaMaterials[area.id];
                 const isEntranceAutoSelected = area.id === 'entrance' && quantities['entrance'] >= 1 && quantities['bathroom_floor'] >= 2 && !calculation.isPackageActive;
                 
-                // 🚨 [수정] area.desc가 빈 문자열이 되었으므로, 조건부 렌더링 수정
                 const description = area.desc || area.basePrice ? (
                     (area.desc && area.desc.trim() !== '') ? (
                         <div className="text-xs text-gray-500"><span className="block text-indigo-600">{area.desc}</span></div>
@@ -1153,7 +1163,6 @@ export default function App() {
                                 <div className={`p-2 rounded-full shadow-sm ${isSelected ? 'bg-indigo-700 text-white' : 'bg-gray-200 text-indigo-600'}`}><Icon size={18} /></div> 
                                 <div>
                                     <div className="font-semibold text-gray-800">{area.label}</div>
-                                    {/* 🚨 [수정] desc 내용만 렌더링 (단가 문구 제거) */}
                                     {description}
                                 </div>
                             </div>
@@ -1379,7 +1388,6 @@ export default function App() {
                   const Icon = area.icon;
                   const isSelected = quantities[area.id] > 0;
 
-                  // 🚨 [수정] area.desc가 빈 문자열이 되었으므로, 조건부 렌더링 수정
                   const description = area.desc || area.basePrice ? (
                             (area.desc && area.desc.trim() !== '') ? (
                                 <div className="text-xs text-gray-500"><span className="block text-indigo-600">{area.desc}</span></div>
@@ -1393,7 +1401,6 @@ export default function App() {
                                 <div className={`p-2 rounded-full shadow-sm ${isSelected ? 'bg-indigo-500 text-white' : 'bg-gray-200 text-indigo-600'}`}><Icon size={18} /></div> 
                                 <div>
                                     <div className="font-semibold text-gray-800">{area.label}</div>
-                                    {/* 🚨 [수정] desc 내용만 렌더링 (단가 문구 제거) */}
                                     {description}
                                 </div>
                             </div>
@@ -1401,7 +1408,6 @@ export default function App() {
                             <div className="flex items-center gap-1 bg-white px-1 py-1 rounded-full shadow-md">
                                 <button 
                                     onClick={() => handleQuantityChange(area.id, -1)} 
-                                    // 이 부분은 SILICON_AREAS이므로 현관 자동 선택 로직과 무관합니다.
                                     className={`w-7 h-7 flex items-center justify-center rounded-full transition active:scale-90 text-lg font-bold ${quantities[area.id] > 0 ? 'text-indigo-600 hover:bg-gray-100' : 'text-gray-400 cursor-not-allowed'}`}
                                 >-</button> 
                                 <span className={`w-5 text-center text-sm font-bold ${quantities[area.id] > 0 ? 'text-gray-900' : 'text-gray-400'}`}>{quantities[area.id]}</span>
@@ -1409,7 +1415,6 @@ export default function App() {
                                     onClick={() => {
                                         handleQuantityChange(area.id, 1);
                                     }} 
-                                    // 이 부분은 SILICON_AREAS이므로 현관 자동 선택 로직과 무관합니다.
                                     className="w-7 h-7 flex items-center justify-center text-indigo-600 hover:bg-gray-100 rounded-full font-bold text-lg transition active:scale-90"
                                 >+</button> 
                             </div>
@@ -1477,7 +1482,7 @@ export default function App() {
                                 )}
 
                                 {/* B. 원래 금액 스트라이크 아웃 */}
-                                {(calculation.minimumFeeApplied || calculation.isPackageActive) && (
+                                {((calculation.minimumFeeApplied || calculation.isPackageActive) && (calculation.priceBeforeAllDiscount > calculation.price)) && (
                                     <span className="text-xs text-gray-400 line-through font-normal whitespace-nowrap">
                                         {calculation.priceBeforeAllDiscount.toLocaleString()}원
                                     </span>
