@@ -246,7 +246,7 @@ const PackageToast = ({ isVisible, onClose, label }) => {
 };
 
 // -------------------------------------------------------------
-// ⭐️ [견적서 상세 모달] (취소선 제거 반영) ⭐️
+// ⭐️ [견적서 상세 모달] (취소선 및 "서비스" 문구 제거 반영) ⭐️
 // -------------------------------------------------------------
 const QuoteModal = ({ calculation, onClose, onImageSave, quoteRef }) => {
     const { 
@@ -270,7 +270,7 @@ const QuoteModal = ({ calculation, onClose, onImageSave, quoteRef }) => {
         return (
             <div className={`flex justify-between py-2 text-sm ${isDiscount ? 'text-red-600' : 'text-gray-800'} ${isPackageItem ? 'bg-indigo-50/50' : 'bg-white'}`}>
                 <div className='flex items-center flex-1'>
-                    <span className={`font-semibold ${isFree ? 'text-gray-800' : ''}`}>
+                    <span className={`font-semibold text-gray-800`}>
                         {label}
                     </span>
                     {displayMaterial}
@@ -280,10 +280,11 @@ const QuoteModal = ({ calculation, onClose, onImageSave, quoteRef }) => {
                     <span className='w-10 text-center text-xs text-gray-500'>
                         {quantity}{unit}
                     </span>
-                    <span className={`font-bold w-20 text-right ${isDiscount ? 'text-red-600' : (isFree ? 'text-gray-600' : 'text-gray-900')}`}>
-                        {isFree ? '서비스' : price.toLocaleString()}
+                    <span className={`font-bold w-20 text-right ${isDiscount ? 'text-red-600' : (isFree ? 'text-gray-900' : 'text-gray-900')}`}>
+                        {/* ⭐️ [수정 반영] isFree일 때 문구 표시 (서비스 문구 삭제) ⭐️ */}
+                        {isFree ? '' : price.toLocaleString()}
                     </span>
-                    <span className={`text-xs ml-1 ${isFree ? 'text-gray-500' : 'text-gray-900'}`}>{isFree ? '' : '원'}</span>
+                    <span className={`text-xs ml-1 text-gray-900`}>{isFree ? '' : '원'}</span>
                 </div>
             </div>
         );
