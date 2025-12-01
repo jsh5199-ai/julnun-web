@@ -36,7 +36,7 @@ const BRIGHT_MODIFIER_COLOR = GROUT_COLORS.find(c => c.id === 'white');
 const DARK_MODIFIER_COLOR = GROUT_COLORS.find(c => c.id === 'charcoal');
 
 // =================================================================
-// ⭐️ [유지] HEX/RGB 변환 헬퍼 함수 - 파일당 단 한 번만 선언 ⭐️
+// ⭐️ [유지] HEX/RGB 변환 헬퍼 함수
 // =================================================================
 
 // HEX 코드를 RGB 객체로 변환
@@ -57,23 +57,14 @@ const rgbToHex = (r, g, b) => {
     return `#${r.length === 1 ? '0' + r : r}${g.length === 1 ? '0' + g : g}${b.length === 1 ? '0' + b : b}`;
 };
 
-
 // =================================================================
-// [스타일] 애니메이션 정의 (유지 및 Tip용 추가)
+// [스타일] 애니메이션 정의
 // =================================================================
 const GlobalStyles = () => (
     <style>{`
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes slideUpFadeOut { 0% { opacity: 1; transform: translateY(0); } 80% { opacity: 1; transform: translateY(-10px); } 100% { opacity: 0; transform: translateY(-20px); } }
-        
-        /* Tip 강조용 애니메이션 추가 */
-        @keyframes attentionPulse {
-            0%, 100% { box-shadow: 0 0 10px rgba(253, 230, 138, 0.8); }
-            50% { box-shadow: 0 0 15px rgba(253, 230, 138, 0.4); }
-        }
-        .animate-attention { animation: attentionPulse 2s infinite ease-in-out; }
-        
         @keyframes professionalPulse {
             0%, 100% { box-shadow: 0 0 0 0 rgba(100, 116, 139, 0.4); }
             50% { box-shadow: 0 0 0 8px rgba(100, 116, 139, 0); }
@@ -232,7 +223,7 @@ const getPackageAreaIds = (pkg) => [
 ];
 
 // =================================================================
-// [컴포넌트] (패키지 토스트, 모달, 아코디언 등 유지)
+// [컴포넌트]
 // =================================================================
 
 const PackageToast = ({ isVisible, onClose, label }) => {
@@ -333,7 +324,7 @@ const Accordion = ({ question, answer }) => {
 };
 
 
-// ⭐️ [신규/수정] ColorPalette 컴포넌트 (밝기 조절 기능 포함) ⭐️
+// ⭐️ [업데이트] ColorPalette 컴포넌트 ⭐️
 const ColorPalette = React.memo(({ selectedGroutColor, handleColorSelect, finalSelectedColorData, onTileImageUpload, tileImageURL, brightnessLevel, setBrightnessLevel }) => {
     const GROUT_LINE_WIDTH = 12;
 
@@ -349,6 +340,36 @@ const ColorPalette = React.memo(({ selectedGroutColor, handleColorSelect, finalS
     const displayTone = brightnessLevel > 50 ? '밝게 톤업' : brightnessLevel < 50 ? '어둡게 톤다운' : '원본 색상';
     const displaySign = brightnessLevel === 50 ? '' : brightnessLevel > 50 ? '+' : '-';
     
+    // 슬라이더 색상 커스텀 스타일 (밝기 레벨에 따라 게이지 색상 변경)
+    const getSliderBackground = () => {
+        // 50%를 기준으로 양쪽으로 그라데이션이 퍼지도록 설정
+        const currentPercentage = brightnessLevel / 100 * 100; // 0~100
+        const fillToCenter = brightnessLevel < 50 ? 50 : currentPercentage;
+        const fillFromCenter = brightnessLevel > 50 ? 50 : 100 - currentPercentage;
+
+        // 중앙(50%)을 0% 기준으로 변환
+        const valueFromCenter = Math.abs(brightnessLevel - 50) * 2;
+        
+        let color1, color2;
+        if (brightnessLevel > 50) { // 밝게
+            color1 = baseColorData.code;
+            color2 = BRIGHT_MODIFIER_COLOR.code;
+        } else if (brightnessLevel < 50) { // 어둡게
+            color1 = DARK_MODIFIER_COLOR.code;
+            color2 = baseColorData.code;
+        } else { // 원본 (중앙)
+            color1 = baseColorData.code;
+            color2 = baseColorData.code;
+        }
+        
+        // 게이지 배경 스타일을 CSS 변수를 사용하여 계산
+        return {
+             '--range-progress': `${valueFromCenter}%`,
+             '--range-base-color': baseColorData.code,
+             '--range-modifier-color': brightnessLevel > 50 ? BRIGHT_MODIFIER_COLOR.code : DARK_MODIFIER_COLOR.code,
+             '--range-level': brightnessLevel
+        };
+    };
 
     return (
         <div className='mt-5 pt-3 border-t border-gray-100 animate-fade-in'>
@@ -420,15 +441,15 @@ const ColorPalette = React.memo(({ selectedGroutColor, handleColorSelect, finalS
                 </p>
             </div>
 
-            {/* 단일 색상 선택 버튼 그리드 */}
+            {/* ⭐️ [복원] 단일 색상 선택 버튼 그리드 ⭐️ */}
             <div className='grid grid-cols-5 sm:grid-cols-5 gap-3'>
                 {GROUT_COLORS.map((color) => (
                     <button
                         key={color.id}
-                        onClick={() => handleColorSelect(color.id)} 
+                        onClick={() => handleColorSelect(color.id)} // 새로운 핸들러 사용
                         className={`aspect-square rounded-lg transition-all duration-200 shadow-md flex items-center justify-center p-1 relative hover:scale-[1.02] active:scale-[0.98] ${
                             selectedGroutColor === color.id
-                                ? 'ring-4 ring-offset-2 ring-indigo-500' 
+                                ? 'ring-4 ring-offset-2 ring-indigo-500' // 선택 시 링 효과
                                 : 'hover:shadow-lg'
                         }`}
                         style={{ backgroundColor: color.code }}
@@ -443,7 +464,7 @@ const ColorPalette = React.memo(({ selectedGroutColor, handleColorSelect, finalS
             </div>
 
 
-            {/* ⭐️ [업데이트] 밝기 조절 게이지 (슬라이더) - step=10 및 문구 유지 ⭐️ */}
+            {/* ⭐️ [업데이트] 밝기 조절 게이지 (슬라이더) ⭐️ */}
             <style>{`
                 /* 커스텀 슬라이더 스타일링 */
                 .brightness-slider::-webkit-slider-runnable-track {
@@ -488,7 +509,7 @@ const ColorPalette = React.memo(({ selectedGroutColor, handleColorSelect, finalS
                         type="range"
                         min="0"
                         max="100"
-                        step="10" 
+                        step="10" // 10% 단위로 조절
                         value={brightnessLevel}
                         onChange={(e) => setBrightnessLevel(parseInt(e.target.value, 10))}
                         className="flex-1 h-2 rounded-lg appearance-none cursor-pointer brightness-slider"
@@ -508,13 +529,6 @@ const ColorPalette = React.memo(({ selectedGroutColor, handleColorSelect, finalS
                     <ImageIcon size={16} /> 내 타일 사진 첨부하여 미리보기
                 </label>
             </div>
-
-            {/* ⭐️ [최종 업데이트] 줄눈 색상 선택 팁 문구 (강조 및 흐름 개선) ⭐️ */}
-            <div className='mt-4 p-3 bg-yellow-100 rounded-lg shadow-md border border-yellow-300 animate-attention'>
-                <p className='text-sm text-gray-800 text-center leading-snug font-semibold'>
-                    <Zap size={16} className='inline mr-1 text-yellow-600'/> 팁: 색상은 타일톤보다 한톤 어둡게 시공할 경우<br className="sm:hidden" /> 관리가 쉽고, 청소주기가 길어집니다.
-                </p>
-            </div>
             
             <p className='text-xs text-gray-500 mt-3 text-center'>
                 * 화면 해상도에 따라 실제 색상과 차이가 있을 수 있습니다.
@@ -524,19 +538,19 @@ const ColorPalette = React.memo(({ selectedGroutColor, handleColorSelect, finalS
 });
 
 
-// ⭐️ [App Main] - 기존 기능 및 로직 복원됨 ⭐️
+// ⭐️ [App Main] ⭐️
 export default function App() {
     const [housingType, setHousingType] = useState('new');
     const [material, setMaterial] = useState('poly');
     const [polyOption, setPolyOption] = useState('pearl');
     const [epoxyOption, setEpoxyOption] = useState('kerapoxy');
     
-    // ⭐️ [유지] 색상 관련 상태
+    // ⭐️ [복원] 단일 색상 선택 상태
     const [selectedGroutColor, setSelectedGroutColor] = useState(GROUT_COLORS[0].id);
+    // ⭐️ [업데이트] 밝기 레벨 상태 (50: 원본, 0: 119번 100%, 100: 화이트 100%)
     const [brightnessLevel, setBrightnessLevel] = useState(50);
     const [tileImageURL, setTileImageURL] = useState(DEFAULT_TILE_IMAGE_URL);
     
-    // 수량 및 재료 상태 (유지)
     const [quantities, setQuantities] = useState(
         [...ALL_AREAS].reduce((acc, area) => ({ ...acc, [area.id]: 0 }), {})
     );
@@ -555,14 +569,13 @@ export default function App() {
     const SOOMGO_REVIEW_URL = 'https://www.soomgo.com/profile/users/10755579?tab=review';
     const PHONE_NUMBER = '010-7734-6709';
 
-    // ⭐️ [유지] 색상 선택 핸들러: 색상 변경 시 밝기 초기화
+    // ⭐️ [신규 핸들러] 색상 선택 시 밝기 레벨을 50 (0% 톤 조절)로 초기화
     const handleColorSelect = useCallback((colorId) => {
         setSelectedGroutColor(colorId);
         setBrightnessLevel(50); 
     }, []);
 
 
-    // 수량 변경 로직 (유지)
     useEffect(() => {
         if (quantities['entrance'] > 0 && areaMaterials['entrance'] !== 'poly') {
             setAreaMaterials(prev => ({ ...prev, 'entrance': 'poly' }));
@@ -599,7 +612,7 @@ export default function App() {
 
     const handleAreaMaterialChange = useCallback((id, mat) => {
         if (id === 'entrance') {
-            setAreaMaterials(prev => ({ ...prev, 'entrance': 'poly' }));
+            setAreaMaterials(prev => ({ ...prev, [id]: 'poly' }));
         } else {
             setAreaMaterials(prev => ({ ...prev, [id]: mat }));
         }
@@ -978,7 +991,7 @@ export default function App() {
     const currentVideo = YOUTUBE_VIDEOS.find(v => v.id === activeVideoId);
     const currentEmbedUrl = getEmbedUrl(currentVideo.id);
 
-    // ⭐️ [유지] 밝기 조절에 따른 최종 색상 계산 로직 ⭐️
+    // ⭐️ [신규] 밝기 조절에 따른 최종 색상 계산 로직 ⭐️
     const calculateBrightnessAdjustedColor = useCallback((baseColorId, level) => {
         const baseColor = GROUT_COLORS.find(c => c.id === baseColorId) || GROUT_COLORS[0];
         const baseRgb = hexToRgb(baseColor.code);
@@ -1217,7 +1230,7 @@ export default function App() {
                     </div>
                 </section>
 
-                {/* ⭐️ --- 2. 줄눈소재 안내 (색상 섹션 통합) --- ⭐️ */}
+                {/* ⭐️ --- 2. 줄눈소재 안내 (색상 선택 및 밝기 조절 적용) --- ⭐️ */}
                 <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-300">
                     <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
                         <Hammer className="h-5 w-5 text-indigo-600" /> 2. 줄눈소재 안내
@@ -1266,7 +1279,7 @@ export default function App() {
                     {/* ⭐️ [업데이트] 색상 선택 및 밝기 조절 팔레트 ⭐️ */}
                     <ColorPalette
                         selectedGroutColor={selectedGroutColor}
-                        handleColorSelect={handleColorSelect}
+                        handleColorSelect={handleColorSelect} // 업데이트된 핸들러 사용
                         finalSelectedColorData={finalSelectedColorData}
                         onTileImageUpload={handleTileImageUpload}
                         tileImageURL={tileImageURL}
@@ -1317,7 +1330,6 @@ export default function App() {
                             const Icon = area.icon;
                             const isSelected = quantities[area.id] > 0;
 
-                            // 🚨 [수정] area.desc가 빈 문자열이 되었으므로, 조건부 렌더링 수정
                             const description = area.desc || area.basePrice ? (
                                     (area.desc && area.desc.trim() !== '') ? (
                                         <div className="text-xs text-gray-500"><span className="block text-indigo-600">{area.desc}</span></div>
@@ -1331,15 +1343,12 @@ export default function App() {
                                             <div className={`p-2 rounded-full shadow-sm ${isSelected ? 'bg-indigo-500 text-white' : 'bg-gray-200 text-indigo-600'}`}><Icon size={18} /></div>
                                             <div>
                                                 <div className="font-semibold text-gray-800">{area.label}</div>
-                                                {/* 🚨 [수정] desc 내용만 렌더링 (단가 문구 제거) */}
                                                 {description}
                                             </div>
                                         </div>
-                                        {/* ⭐️ [유지] 수량 증감 버튼: border border-gray-200 제거 ⭐️ */}
                                         <div className="flex items-center gap-1 bg-white px-1 py-1 rounded-full shadow-md">
                                             <button
                                                 onClick={() => handleQuantityChange(area.id, -1)}
-                                                // 이 부분은 SILICON_AREAS이므로 현관 자동 선택 로직과 무관합니다.
                                                 className={`w-7 h-7 flex items-center justify-center rounded-full transition active:scale-90 text-lg font-bold ${quantities[area.id] > 0 ? 'text-indigo-600 hover:bg-gray-100' : 'text-gray-400 cursor-not-allowed'}`}
                                             >-</button>
                                             <span className={`w-5 text-center text-sm font-bold ${quantities[area.id] > 0 ? 'text-gray-900' : 'text-gray-400'}`}>{quantities[area.id]}</span>
@@ -1347,7 +1356,6 @@ export default function App() {
                                                 onClick={() => {
                                                     handleQuantityChange(area.id, 1);
                                                 }}
-                                                // 이 부분은 SILICON_AREAS이므로 현관 자동 선택 로직과 무관합니다.
                                                 className="w-7 h-7 flex items-center justify-center text-indigo-600 hover:bg-gray-100 rounded-full font-bold text-lg transition active:scale-90"
                                             >+</button>
                                         </div>
