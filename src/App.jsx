@@ -1,8 +1,8 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
-import html2canvas from 'html2canvas';
+import html2canvas from 'html2canvas'; // (사용되지 않지만, import는 일단 유지)
 import {
     Calculator, Home, Bath, DoorOpen, Utensils, LayoutGrid,
-    CheckCircle2, Info, RefreshCw, Phone, Sparkles, Hammer, Sofa, Palette, Crown, Gift, Eraser, Star, X, ChevronDown, HelpCircle, Zap, TrendingUp, Clock, Image as ImageIcon, Download, DollarSign, List, Layers
+    CheckCircle2, Info, RefreshCw, Phone, Sparkles, Hammer, Sofa, Palette, Crown, Gift, Eraser, Star, X, ChevronDown, HelpCircle, Zap, TrendingUp, Clock, ImageIcon, Download, DollarSign, List, Layers
 } from 'lucide-react';
 
 // =================================================================
@@ -108,7 +108,7 @@ const GlobalStyles = () => (
 );
 
 // =================================================================
-// [데이터] (P_MIX_08 가격 85만으로 수정 및 기타 정의 유지)
+// [데이터] (유지)
 // =================================================================
 const HOUSING_TYPES = [
     { id: 'new', label: '신축 아파트', multiplier: 1.0 },
@@ -246,9 +246,9 @@ const PackageToast = ({ isVisible, onClose, label }) => {
 };
 
 // -------------------------------------------------------------
-// ⭐️ [견적서 상세 모달] (취소선 및 "서비스" 문구 제거 반영) ⭐️
+// ⭐️ [최종 수정] 견적서 상세 모달 (아이콘/이미지 저장 제거 및 정렬/상담 버튼 개선) ⭐️
 // -------------------------------------------------------------
-const QuoteModal = ({ calculation, onClose, onImageSave, quoteRef }) => {
+const QuoteModal = ({ calculation, onClose, quoteRef }) => {
     const { 
         price, 
         priceBeforeAllDiscount,
@@ -258,31 +258,39 @@ const QuoteModal = ({ calculation, onClose, onImageSave, quoteRef }) => {
     } = calculation;
 
     const totalDiscountAmount = priceBeforeAllDiscount - price;
+    const PHONE_NUMBER = '010-7734-6709'; // 상수 재정의
+    const KAKAO_CHAT_URL = 'http://pf.kakao.com/_jAxnYn/chat'; // 상수 재정의
 
     const ItemRow = ({ label, quantity, unit, price, isDiscount, isPackageItem, materialLabel }) => {
         const isFree = price === 0 && !isDiscount;
-        const displayMaterial = materialLabel && materialLabel !== 'Event' ? (
-             <span className={`text-[10px] font-medium ml-1 px-1 py-[1px] rounded ${materialLabel === 'Epoxy' ? 'bg-indigo-100 text-indigo-700' : (materialLabel === 'Poly' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700')}`}>
+        
+        // 재료 라벨 스타일 개선: 작은 캡슐 모양으로 변경 (아이콘 제거)
+        const displayMaterial = materialLabel && materialLabel !== 'Event' && !['Silicon'].includes(materialLabel) ? (
+            <span className={`text-[10px] font-medium ml-2 px-1.5 py-[2px] rounded-full flex-shrink-0 ${
+                materialLabel === 'Epoxy' ? 'bg-indigo-600 text-white' : 
+                (materialLabel === 'Poly' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700')
+            }`}>
                 {materialLabel}
-             </span>
+            </span>
         ) : null;
         
         return (
-            <div className={`flex justify-between py-2 text-sm ${isDiscount ? 'text-red-600' : 'text-gray-800'} ${isPackageItem ? 'bg-indigo-50/50' : 'bg-white'}`}>
+            <div className={`flex justify-between py-2.5 text-sm border-b border-gray-100 ${isPackageItem ? 'bg-indigo-50/50' : 'bg-white'} hover:bg-gray-50 transition`}>
                 <div className='flex items-center flex-1'>
                     <span className={`font-semibold text-gray-800`}>
                         {label}
                     </span>
                     {displayMaterial}
-                    {(isPackageItem || isFree) && <Sparkles size={10} className='ml-1 text-amber-500' />}
+                    {/* 패키지 서비스 문구 강화 (아이콘 제거) */}
+                    {(isPackageItem && price === 0) && <span className='ml-2 text-xs font-bold text-amber-600 bg-amber-100 px-2 py-0.5 rounded-full'>서비스 적용</span>}
                 </div>
-                <div className='flex justify-end items-center flex-shrink-0 w-32'>
-                    <span className='w-10 text-center text-xs text-gray-500'>
+                {/* ⭐️ 수량과 금액을 우측으로 명확하게 정렬 ⭐️ */}
+                <div className='flex justify-end items-center flex-shrink-0 w-40'>
+                    <span className='w-14 text-right text-xs text-gray-500'>
                         {quantity}{unit}
                     </span>
-                    <span className={`font-bold w-20 text-right ${isDiscount ? 'text-red-600' : (isFree ? 'text-gray-900' : 'text-gray-900')}`}>
-                        {/* ⭐️ [수정 반영] isFree일 때 문구 표시 (서비스 문구 삭제) ⭐️ */}
-                        {isFree ? '' : price.toLocaleString()}
+                    <span className={`font-bold w-24 text-right ${isDiscount ? 'text-red-600' : 'text-gray-900'}`}>
+                        {isFree ? '0' : price.toLocaleString()}
                     </span>
                     <span className={`text-xs ml-1 text-gray-900`}>{isFree ? '' : '원'}</span>
                 </div>
@@ -290,31 +298,31 @@ const QuoteModal = ({ calculation, onClose, onImageSave, quoteRef }) => {
         );
     };
 
-
     return (
         <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 animate-fade-in overflow-y-auto">
             <div className="bg-white w-full max-w-md rounded-xl shadow-2xl overflow-hidden animate-slide-down border border-gray-200 my-8">
                 
                 <div className="sticky top-0 bg-indigo-900 p-4 text-white flex justify-between items-center z-10">
-                    <h3 className="font-extrabold text-xl flex items-center gap-2">
-                        <List className="h-6 w-6 text-white" /> 최종 견적 상세 내역
-                    </h3>
+                    {/* ⭐️ 타이틀: 아이콘 제거 후 폰트 강조 ⭐️ */}
+                    <h3 className="font-extrabold text-xl"> 최종 견적 상세 내역 </h3>
                     <button onClick={onClose} className="text-white/80 hover:text-white transition active:scale-95"><X size={24} /></button>
                 </div>
 
                 <div className="p-5 max-h-[70vh] overflow-y-auto">
                     
                     {/* 견적서 캡처 영역 시작 */}
-                    <div ref={quoteRef} className="bg-white p-4 space-y-3 border border-gray-200 rounded-lg shadow-inner">
-                        <div className='text-center border-b pb-2 mb-3'>
-                            <h4 className='text-2xl font-extrabold text-indigo-900'>줄눈의미학 견적서</h4>
-                            <p className='text-xs text-gray-500'>발행일: {new Date().toISOString().slice(0, 10)}</p>
+                    <div ref={quoteRef} className="bg-white p-4 space-y-4 border border-gray-200 rounded-lg shadow-inner">
+                        
+                        {/* ⭐️ 타이틀: 아이콘 제거 후 중앙 정렬 강조 ⭐️ */}
+                        <div className='text-center border-b pb-3 mb-4'>
+                            <h4 className='text-3xl font-extrabold text-indigo-900'>줄눈의미학 견적서</h4>
+                            <p className='text-xs text-gray-500 mt-1'>발행일: {new Date().toISOString().slice(0, 10)}</p>
                         </div>
 
                         {/* 시공 항목 리스트 */}
-                        <div className='border border-gray-100 rounded-lg p-3'>
-                            <div className='font-extrabold text-base text-gray-800 flex items-center mb-2'>
-                                <Layers size={14} className='mr-1 text-indigo-600'/> 시공 범위 ({itemizedPrices.filter(i => !i.isDiscount).length}개 항목)
+                        <div className='rounded-lg bg-white'>
+                            <div className='font-extrabold text-base text-gray-800 border-b-2 border-indigo-100 pb-2 mb-1'>
+                                시공 범위 ({itemizedPrices.filter(i => !i.isDiscount).length}개 항목)
                             </div>
                             {itemizedPrices.filter(i => !i.isDiscount).map((item) => (
                                 <ItemRow 
@@ -332,9 +340,9 @@ const QuoteModal = ({ calculation, onClose, onImageSave, quoteRef }) => {
 
                         {/* 할인 항목 리스트 */}
                         {itemizedPrices.filter(i => i.isDiscount).length > 0 && (
-                             <div className='border border-gray-100 rounded-lg p-3 bg-red-50'>
-                                <div className='font-extrabold text-base text-red-700 flex items-center mb-2'>
-                                    <Gift size={14} className='mr-1 text-red-600'/> 추가 할인 항목
+                             <div className='rounded-lg bg-red-50 p-3'>
+                                <div className='font-extrabold text-base text-red-700 border-b-2 border-red-200 pb-2 mb-1'>
+                                     추가 할인 항목
                                 </div>
                                 {itemizedPrices.filter(i => i.isDiscount).map((item) => (
                                     <ItemRow 
@@ -350,36 +358,38 @@ const QuoteModal = ({ calculation, onClose, onImageSave, quoteRef }) => {
                         )}
 
                         {/* 최종 합계 */}
-                        <div className='pt-3 border-t-2 border-dashed border-gray-300'>
-                            <div className='flex justify-between items-end mb-2'>
-                                <span className='text-sm text-gray-500 font-semibold'>시공 총 원가 (정가 기준)</span>
-                                <span className='text-sm text-gray-500 font-semibold line-through'>
+                        <div className='pt-3 border-t-2 border-dashed border-gray-300 space-y-2'>
+                            
+                            {/* 1. 정가 및 총 할인액 */}
+                            <div className='flex justify-between items-end'>
+                                <span className='text-sm text-gray-500 font-medium'>시공 총 원가 (정가 기준)</span>
+                                <span className='text-base text-gray-500 font-semibold line-through'>
                                     {priceBeforeAllDiscount.toLocaleString()} 원
                                 </span>
                             </div>
-                            <div className='flex justify-between items-end mb-2'>
-                                <span className='text-sm text-red-600 font-semibold flex items-center'>
-                                    <DollarSign size={14} className='mr-1'/> 총 할인액
-                                </span>
-                                <span className='text-xl font-extrabold text-red-600'>
-                                    {(totalDiscountAmount > 0 ? totalDiscountAmount : 0).toLocaleString()} 원
+                            
+                            <div className='flex justify-between items-end p-2 rounded-lg bg-red-50 border border-red-300/50'>
+                                <span className='text-lg text-red-700 font-extrabold'>총 할인액</span>
+                                <span className='text-3xl font-extrabold text-red-700'>
+                                    - {(totalDiscountAmount > 0 ? totalDiscountAmount : 0).toLocaleString()} 원
                                 </span>
                             </div>
-                            <div className={`flex justify-between items-center p-3 rounded-lg shadow-lg ${minimumFeeApplied ? 'bg-red-50 border border-red-300' : 'bg-indigo-700'}`}>
-                                <div className='flex flex-col items-start'>
-                                    <span className={`text-sm font-semibold ${minimumFeeApplied ? 'text-red-700' : 'text-indigo-200'}`}>
-                                        최종 예상 견적 {minimumFeeApplied && '(최소 출장비 적용)'}
-                                    </span>
-                                    {label && <span className={`text-xs font-bold mt-0.5 ${minimumFeeApplied ? 'text-red-500' : 'text-amber-300'}`}>{label}</span>}
-                                </div>
-                                <div className="flex items-end">
-                                    <span className={`text-3xl font-extrabold ${minimumFeeApplied ? 'text-red-900' : 'text-white'}`}>
+
+                            {/* 2. 최종 견적 (가장 크게 강조) */}
+                            <div className={`flex flex-col items-center justify-center p-5 rounded-xl shadow-2xl ${minimumFeeApplied ? 'bg-red-900' : 'bg-indigo-700'}`}>
+                                <span className={`text-sm font-semibold ${minimumFeeApplied ? 'text-red-300' : 'text-indigo-200'}`}>
+                                    최종 예상 견적 {minimumFeeApplied && '(최소 출장비 적용)'}
+                                </span>
+                                <div className="flex items-end mt-1">
+                                    <span className={`text-6xl font-extrabold ${minimumFeeApplied ? 'text-white' : 'text-white'}`}>
                                         {price.toLocaleString()}
                                     </span>
-                                    <span className={`text-base font-normal ml-1 ${minimumFeeApplied ? 'text-red-900' : 'text-white'}`}>원</span>
+                                    <span className={`text-2xl font-normal ml-2 ${minimumFeeApplied ? 'text-white' : 'text-white'}`}>원</span>
                                 </div>
+                                {label && <span className={`text-sm font-bold mt-1 ${minimumFeeApplied ? 'text-red-300' : 'text-amber-300'}`}>{label}</span>}
                             </div>
-                            <p className='text-xs text-gray-500 mt-2 text-center'>
+                            
+                            <p className='text-xs text-gray-500 mt-3 text-center'>
                                 * 최종 견적은 현장 상황 및 추가 옵션에 따라 달라질 수 있습니다.
                             </p>
                         </div>
@@ -388,10 +398,36 @@ const QuoteModal = ({ calculation, onClose, onImageSave, quoteRef }) => {
                     {/* 견적서 캡처 영역 종료 */}
                 </div>
 
+                {/* ⭐️ [최종 변경] 하단 버튼: 카톡/상담원 연결만 배치 ⭐️ */}
                 <div className="p-4 bg-gray-50 border-t border-gray-200 grid grid-cols-2 gap-3">
-                    <button onClick={onClose} className="py-3 bg-gray-300 text-gray-700 rounded-lg font-bold hover:bg-gray-400 transition active:scale-95">닫기</button>
-                    <button onClick={onImageSave} className="py-3 bg-indigo-700 text-white rounded-lg font-bold hover:bg-indigo-800 transition active:scale-95 flex items-center justify-center gap-2">
-                        <Download size={18} /> 이미지 저장
+                    
+                    {/* 1. 카카오톡 예약 문의 (왼쪽) */}
+                    <a 
+                        href={KAKAO_CHAT_URL} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className={`py-3 rounded-xl font-extrabold text-sm transition-all 
+                            bg-yellow-400 text-gray-800 hover:bg-yellow-500 active:bg-yellow-600 shadow-md flex items-center justify-center
+                        `}
+                    >
+                        카톡 예약 문의
+                    </a>
+                    
+                    {/* 2. 상담원 연결 (오른쪽) */}
+                    <button 
+                        onClick={() => window.location.href = `tel:${PHONE_NUMBER}`}
+                        className={`py-3 rounded-xl font-extrabold text-sm transition-all 
+                            bg-indigo-700 text-white hover:bg-indigo-800 active:bg-indigo-900 shadow-md flex items-center justify-center
+                        `}
+                    >
+                        상담원 연결
+                    </button>
+                    
+                </div>
+                {/* 닫기 버튼을 별도로 추가하여 필수 기능을 제공합니다. */}
+                <div className='p-4 pt-0 bg-gray-50'>
+                    <button onClick={onClose} className="w-full py-2 bg-white border border-gray-300 text-gray-700 rounded-xl text-sm font-bold hover:bg-gray-100 transition active:scale-95 shadow-sm">
+                        닫기
                     </button>
                 </div>
             </div>
@@ -404,7 +440,7 @@ const MaterialDetailModal = ({ onClose }) => (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-fade-in">
           <div className="bg-white w-full max-w-md rounded-xl shadow-2xl overflow-hidden animate-slide-down border border-gray-200">
             <div className="bg-indigo-900 p-4 text-white flex justify-between items-center">
-              <h3 className="font-extrabold text-lg flex items-center gap-2"><Info className="h-5 w-5 text-white" /> 재료별 상세 스펙</h3>
+              <h3 className="font-extrabold text-lg">재료별 상세 스펙</h3>
               <button onClick={onClose} className="text-white/80 hover:text-white transition active:scale-95"><X size={20} /></button>
             </div>
             <div className="p-5 max-h-[70vh] overflow-y-auto">
@@ -463,7 +499,7 @@ const Accordion = ({ question, answer }) => {
     );
 };
 
-// ⭐️ [ColorPalette] (로직 및 스타일 유지) ⭐️
+// ⭐️ [ColorPalette] (유지) ⭐️
 const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageURL, brightnessLevel, onBrightnessChange }) => {
     const baseColorData = GROUT_COLORS.find(c => c.id === selectedColorId) || GROUT_COLORS[0];
     const GROUT_LINE_WIDTH = 12; 
@@ -768,7 +804,7 @@ export default function App() {
         const filteredEpoxySelections = filterSelections(selectionSummary['kerapoxy'] || {});
             
         const totalSelectedCount = Object.values(filteredPolySelections).reduce((sum, v) => sum + v, 0) + 
-                                            Object.values(filteredEpoxySelections).reduce((sum, v) => sum + v, 0);
+                                         Object.values(filteredEpoxySelections).reduce((sum, v) => sum + v, 0);
             
         if (totalSelectedCount === 0) return null;
         const sortedPackages = MIXED_PACKAGES; 
@@ -779,76 +815,76 @@ export default function App() {
                     let appliedAutoEntrance = false;
                     
                     if (pkg.isFlexible) {
-                                     const requiredPolyAreas = pkg.P_areas.map(([id]) => id).filter(id => id !== 'entrance');
-                                     const requiredEpoxyAreas = pkg.E_areas.map(([id]) => id);
-                                     let baseMatch = true;
-                                     for (const id of requiredPolyAreas.filter(id => !pkg.flexibleGroup.includes(id))) {
-                                            const requiredQty = pkg.P_areas.find(([pkId]) => pkId === id)[1];
-                                            if ((tempPolySelections[id] || 0) !== requiredQty) {
-                                                baseMatch = false;
-                                                break;
-                                            }
-                                     }
-                                     if (!baseMatch) continue;
+                                         const requiredPolyAreas = pkg.P_areas.map(([id]) => id).filter(id => id !== 'entrance');
+                                         const requiredEpoxyAreas = pkg.E_areas.map(([id]) => id);
+                                         let baseMatch = true;
+                                         for (const id of requiredPolyAreas.filter(id => !pkg.flexibleGroup.includes(id))) {
+                                                const requiredQty = pkg.P_areas.find(([pkId]) => pkId === id)[1];
+                                                if ((tempPolySelections[id] || 0) !== requiredQty) {
+                                                    baseMatch = false;
+                                                    break;
+                                                }
+                                         }
+                                         if (!baseMatch) continue;
 
-                                     for (const id of requiredEpoxyAreas.filter(id => !pkg.flexibleGroup.includes(id))) {
-                                            const requiredQty = pkg.E_areas.find(([pkId]) => pkId === id)[1];
-                                            if ((tempEpoxySelections[id] || 0) !== requiredQty) {
-                                                baseMatch = false;
-                                                break;
-                                            }
-                                     }
-                                     if (!baseMatch) continue;
+                                         for (const id of requiredEpoxyAreas.filter(id => !pkg.flexibleGroup.includes(id))) {
+                                                const requiredQty = pkg.E_areas.find(([pkId]) => pkId === id)[1];
+                                                if ((tempEpoxySelections[id] || 0) !== requiredQty) {
+                                                    baseMatch = false;
+                                                    break;
+                                                }
+                                         }
+                                         if (!baseMatch) continue;
 
-                                     const flexibleSelectedPolyCount = pkg.flexibleGroup.filter(id => tempPolySelections[id] > 0).length;
-                                     const flexibleSelectedEpoxyCount = pkg.flexibleGroup.filter(id => tempEpoxySelections[id] > 0).length;
-                                     const isPolyFlexiblePackage = pkg.id.startsWith('USER_P_');
-                                     const isEpoxyFlexiblePackage = pkg.id.startsWith('USER_E_');
-                                     let flexibleMatch = false;
+                                         const flexibleSelectedPolyCount = pkg.flexibleGroup.filter(id => tempPolySelections[id] > 0).length;
+                                         const flexibleSelectedEpoxyCount = pkg.flexibleGroup.filter(id => tempEpoxySelections[id] > 0).length;
+                                         const isPolyFlexiblePackage = pkg.id.startsWith('USER_P_');
+                                         const isEpoxyFlexiblePackage = pkg.id.startsWith('USER_E_');
+                                         let flexibleMatch = false;
 
-                                     if (isPolyFlexiblePackage) {
-                                            flexibleMatch = flexibleSelectedPolyCount === 1 && flexibleSelectedEpoxyCount === 0;
-                                            if (flexibleMatch) {
-                                                const matchedFlexibleItem = pkg.flexibleGroup.find(id => tempPolySelections[id] > 0);
-                                                if (pkg.id.includes('MASTER') && matchedFlexibleItem !== 'master_bath_wall') flexibleMatch = false;
-                                                if (pkg.id.includes('COMMON') && matchedFlexibleItem !== 'common_bath_wall') flexibleMatch = false;
-                                            }
-                                     } else if (isEpoxyFlexiblePackage) {
-                                            flexibleMatch = flexibleSelectedEpoxyCount === 1 && flexibleSelectedPolyCount === 0;
-                                            if (flexibleMatch) {
-                                                const matchedFlexibleItem = pkg.flexibleGroup.find(id => tempEpoxySelections[id] > 0);
-                                                if (pkg.id.includes('MASTER') && matchedFlexibleItem !== 'master_bath_wall') flexibleMatch = false;
-                                                if (pkg.id.includes('COMMON') && matchedFlexibleItem !== 'common_bath_wall') flexibleMatch = false;
-                                            }
-                                     }
-                                     
-                                     if (baseMatch && flexibleMatch) {
-                                            const packageAreaIds = new Set(getPackageAreaIds(pkg));
-                                            const finalSelectedAreaIds = new Set([...Object.keys(tempPolySelections).filter(id => tempPolySelections[id] > 0), ...Object.keys(tempEpoxySelections).filter(id => tempEpoxySelections[id] > 0)]);
-                                            const isIdSetMatch = finalSelectedAreaIds.size === packageAreaIds.size && 
-                                                                         [...finalSelectedAreaIds].every(id => packageAreaIds.has(id));
+                                         if (isPolyFlexiblePackage) {
+                                                flexibleMatch = flexibleSelectedPolyCount === 1 && flexibleSelectedEpoxyCount === 0;
+                                                if (flexibleMatch) {
+                                                    const matchedFlexibleItem = pkg.flexibleGroup.find(id => tempPolySelections[id] > 0);
+                                                    if (pkg.id.includes('MASTER') && matchedFlexibleItem !== 'master_bath_wall') flexibleMatch = false;
+                                                    if (pkg.id.includes('COMMON') && matchedFlexibleItem !== 'common_bath_wall') flexibleMatch = false;
+                                                }
+                                         } else if (isEpoxyFlexiblePackage) {
+                                                flexibleMatch = flexibleSelectedEpoxyCount === 1 && flexibleSelectedPolyCount === 0;
+                                                if (flexibleMatch) {
+                                                    const matchedFlexibleItem = pkg.flexibleGroup.find(id => tempEpoxySelections[id] > 0);
+                                                    if (pkg.id.includes('MASTER') && matchedFlexibleItem !== 'master_bath_wall') flexibleMatch = false;
+                                                    if (pkg.id.includes('COMMON') && matchedFlexibleItem !== 'common_bath_wall') flexibleMatch = false;
+                                                }
+                                         }
+                                         
+                                         if (baseMatch && flexibleMatch) {
+                                             const packageAreaIds = new Set(getPackageAreaIds(pkg));
+                                             const finalSelectedAreaIds = new Set([...Object.keys(tempPolySelections).filter(id => tempPolySelections[id] > 0), ...Object.keys(tempEpoxySelections).filter(id => tempEpoxySelections[id] > 0)]);
+                                             const isIdSetMatch = finalSelectedAreaIds.size === packageAreaIds.size && 
+                                                                 [...finalSelectedAreaIds].every(id => packageAreaIds.has(id));
 
-                                            if (isIdSetMatch) {
-                                                return { ...pkg, autoEntrance: appliedAutoEntrance }; 
-                                            }
-                                     }
-                                     continue; 
+                                             if (isIdSetMatch) {
+                                                 return { ...pkg, autoEntrance: appliedAutoEntrance }; 
+                                             }
+                                         }
+                                         continue; 
                     }
                     
                     let isMatch = true;
                     for (const [id, requiredQty] of pkg.P_areas) {
-                            if ((tempPolySelections[id] || 0) !== requiredQty) { 
-                                isMatch = false;
-                                break;
-                            }
+                                if ((tempPolySelections[id] || 0) !== requiredQty) { 
+                                    isMatch = false;
+                                    break;
+                                }
                     }
                     if (!isMatch) continue;
 
                     for (const [id, requiredQty] of pkg.E_areas) {
-                            if ((tempEpoxySelections[id] || 0) !== requiredQty) { 
-                                isMatch = false;
-                                break;
-                            }
+                                if ((tempEpoxySelections[id] || 0) !== requiredQty) { 
+                                    isMatch = false;
+                                    break;
+                                }
                     }
                     if (!isMatch) continue;
 
@@ -858,7 +894,7 @@ export default function App() {
                                              [...selectedAreaIds].every(id => packageAreaIds.has(id));
 
                     if (isIdSetMatch) {
-                            return { ...pkg, autoEntrance: appliedAutoEntrance }; 
+                                return { ...pkg, autoEntrance: appliedAutoEntrance }; 
                     }
         }
         return null;
@@ -942,43 +978,43 @@ export default function App() {
             
             // ⭐️ [계산 로직 유지] 패키지/무료 서비스 적용 시 가격 0원 처리 ⭐️
             if (packageCount > 0 && (matchedPackage || isFreeEntrance) && count === 0) {
-                                finalCalculatedPrice = 0;
-                                finalDiscount = itemOriginalTotal; // 할인액은 정가와 같음
-                                isFreeServiceItem = area.id === 'entrance' || packageAreas.includes(area.id); 
+                                 finalCalculatedPrice = 0;
+                                 finalDiscount = itemOriginalTotal; // 할인액은 정가와 같음
+                                 isFreeServiceItem = area.id === 'entrance' || packageAreas.includes(area.id); 
             } 
             else if (area.id === 'entrance' && isFreeEntrance && !matchedPackage && count === 0) {
-                                finalCalculatedPrice = 0;
-                                finalDiscount = itemOriginalTotal; // 할인액은 정가와 같음
-                                isFreeServiceItem = true;
+                                 finalCalculatedPrice = 0;
+                                 finalDiscount = itemOriginalTotal; // 할인액은 정가와 같음
+                                 isFreeServiceItem = true;
             }
             else {
-                                // ⭐️ [계산 로직 유지] 패키지 미적용 시의 개별 할인 로직 ⭐️
-                                let remainingOriginalTotalForDiscountCalc = calculatedPricePerUnit * count;
-                                let remainingCalculatedPrice = calculatedPricePerUnit * count;
-                                let remainingDiscount = 0;
-                                
-                                if (area.id === 'silicon_bathtub' && totalAreaCount >= 3) {
-                                        const nonPackageOriginalPrice = 80000 * count; 
-                                        const fixedPriceForRemaining = 50000 * count; 
-                                        if (count > 0) {
-                                                remainingDiscount = nonPackageOriginalPrice - fixedPriceForRemaining;
-                                                remainingCalculatedPrice = fixedPriceForRemaining;
-                                        }
-                                        if (initialCount === count) itemOriginalTotal = 80000 * initialCount;
-                                } else if (area.id === 'silicon_living_baseboard' && totalAreaCount >= 3) {
-                                        const nonPackageOriginalPrice = 400000 * count; 
-                                        const fixedPriceForRemaining = 350000 * count; 
-                                        if (count > 0) {
-                                                remainingDiscount = nonPackageOriginalPrice - fixedPriceForRemaining;
-                                                remainingCalculatedPrice = fixedPriceForRemaining;
-                                        }
-                                        if (initialCount === count) itemOriginalTotal = 400000 * initialCount;
-                                } else if (area.id === 'silicon_sink') {
-                                        remainingCalculatedPrice = 30000 * count;
-                                }
-                                finalCalculatedPrice = remainingCalculatedPrice; 
-                                finalDiscount = remainingDiscount; 
-                                total += finalCalculatedPrice;
+                                 // ⭐️ [계산 로직 유지] 패키지 미적용 시의 개별 할인 로직 ⭐️
+                                 let remainingOriginalTotalForDiscountCalc = calculatedPricePerUnit * count;
+                                 let remainingCalculatedPrice = calculatedPricePerUnit * count;
+                                 let remainingDiscount = 0;
+                                 
+                                 if (area.id === 'silicon_bathtub' && totalAreaCount >= 3) {
+                                         const nonPackageOriginalPrice = 80000 * count; 
+                                         const fixedPriceForRemaining = 50000 * count; 
+                                         if (count > 0) {
+                                                 remainingDiscount = nonPackageOriginalPrice - fixedPriceForRemaining;
+                                                 remainingCalculatedPrice = fixedPriceForRemaining;
+                                         }
+                                         if (initialCount === count) itemOriginalTotal = 80000 * initialCount;
+                                 } else if (area.id === 'silicon_living_baseboard' && totalAreaCount >= 3) {
+                                         const nonPackageOriginalPrice = 400000 * count; 
+                                         const fixedPriceForRemaining = 350000 * count; 
+                                         if (count > 0) {
+                                                 remainingDiscount = nonPackageOriginalPrice - fixedPriceForRemaining;
+                                                 remainingCalculatedPrice = fixedPriceForRemaining;
+                                         }
+                                         if (initialCount === count) itemOriginalTotal = 400000 * initialCount;
+                                 } else if (area.id === 'silicon_sink') {
+                                         remainingCalculatedPrice = 30000 * count;
+                                 }
+                                 finalCalculatedPrice = remainingCalculatedPrice; 
+                                 finalDiscount = remainingDiscount; 
+                                 total += finalCalculatedPrice;
             }
             // ⭐️ [변경 끝] ⭐️
             
@@ -987,17 +1023,17 @@ export default function App() {
             finalDiscount = Math.floor(finalDiscount / 1000) * 1000;
 
             itemizedPrices.push({
-                                id: area.id, 
-                                label: area.label, 
-                                quantity: initialCount, 
-                                unit: area.unit, 
-                                originalPrice: itemOriginalTotal, // ⭐️ 새로운 정가 기준 적용 ⭐️
-                                calculatedPrice: finalCalculatedPrice, 
-                                discount: finalDiscount, 
-                                isFreeService: isFreeServiceItem, 
-                                isPackageItem: packageCount > 0 || (area.id === 'silicon_bathtub' && totalAreaCount >= 3) || (area.id === 'silicon_living_baseboard' && totalAreaCount >= 3), 
-                                isDiscount: false, 
-                                materialLabel: ['silicon_bathtub', 'silicon_sink', 'silicon_living_baseboard'].includes(area.id) ? 'Silicon' : (areaMatId === 'poly' ? 'Poly' : 'Epoxy')
+                                 id: area.id, 
+                                 label: area.label, 
+                                 quantity: initialCount, 
+                                 unit: area.unit, 
+                                 originalPrice: itemOriginalTotal, // ⭐️ 새로운 정가 기준 적용 ⭐️
+                                 calculatedPrice: finalCalculatedPrice, 
+                                 discount: finalDiscount, 
+                                 isFreeService: isFreeServiceItem, 
+                                 isPackageItem: packageCount > 0 || (area.id === 'silicon_bathtub' && totalAreaCount >= 3) || (area.id === 'silicon_living_baseboard' && totalAreaCount >= 3), 
+                                 isDiscount: false, 
+                                 materialLabel: ['silicon_bathtub', 'silicon_sink', 'silicon_living_baseboard'].includes(area.id) ? 'Silicon' : (areaMatId === 'poly' ? 'Poly' : 'Epoxy')
             });
         });
             
@@ -1012,7 +1048,7 @@ export default function App() {
             
         // 총 원가 (정가 기준)를 다시 계산
         const priceBeforeAllDiscount = itemizedPrices.reduce((sum, item) => sum + (item.isDiscount ? 0 : item.originalPrice), 0);
-        
+            
         let originalCalculatedPrice = Math.max(0, Math.floor(total / 1000) * 1000); 
         let finalPrice = originalCalculatedPrice; 
         let minimumFeeApplied = false;
@@ -1022,7 +1058,7 @@ export default function App() {
                 minimumFeeApplied = true;
         }
 
-        
+            
             
         if (isFreeEntrance && !matchedPackage) {
                 labelText = '현관 서비스 적용 중';
@@ -1070,29 +1106,8 @@ export default function App() {
         }
     };
 
-    const handleImageSave = async () => {
-             if (quoteRef.current) {
-                    try {
-                            const canvas = await html2canvas(quoteRef.current, {
-                                    scale: 3, 
-                                    useCORS: true,
-                                    allowTaint: true,
-                                    backgroundColor: '#ffffff'
-                            });
-                            const image = canvas.toDataURL('image/png');
-                            const link = document.createElement('a');
-                            link.href = image;
-                            link.download = `줄눈의미학_견적서_${new Date().toISOString().slice(0, 10)}.png`;
-                            document.body.appendChild(link);
-                            link.click();
-                            document.body.removeChild(link);
-                            alert('✅ 견적서 다운로드가 시작되었습니다!\n\n**파일이 다운로드 폴더에 저장되었는지 확인해주세요.**');
-                    } catch (error) {
-                            console.error('Error saving image:', error);
-                            alert('이미지 저장 중 오류가 발생했습니다. 브라우저 설정을 확인해주세요.');
-                    }
-             }
-    };
+    // ⭐️ 이미지 저장 기능 삭제 (주석 처리) ⭐️
+    // const handleImageSave = async () => { /* ... */ };
 
 
     const selectedMaterialData = MATERIALS.find(m => m.id === material);
@@ -1105,41 +1120,41 @@ export default function App() {
 
     const MaterialSelectButtons = ({ areaId, currentMat, onChange, isQuantitySelected }) => {
         if (areaId === 'entrance') {
-                return (
-                    <div className='mt-2 pt-2 border-t border-gray-100'>
-                        <div className="text-xs font-bold text-green-700 bg-green-100 p-1.5 rounded-md text-center">
-                            현관은 폴리아스파틱 (Poly) 고정입니다.
-                        </div>
+            return (
+                <div className='mt-2 pt-2 border-t border-gray-100'>
+                    <div className="text-xs font-bold text-green-700 bg-green-100 p-1.5 rounded-md text-center">
+                        현관은 폴리아스파틱 (Poly) 고정입니다.
                     </div>
-                );
+                </div>
+            );
         }
         if (['silicon_bathtub', 'silicon_sink', 'silicon_living_baseboard'].includes(areaId)) {
-                return (
-                    <div className='mt-2 pt-2 border-t border-gray-100'>
-                        <div className="text-xs font-bold text-green-700 bg-green-100 p-1.5 rounded-md text-center">
-                            실리콘 시공은 별도 소재입니다.
-                        </div>
+            return (
+                <div className='mt-2 pt-2 border-t border-gray-100'>
+                    <div className="text-xs font-bold text-green-700 bg-green-100 p-1.5 rounded-md text-center">
+                        실리콘 시공은 별도 소재입니다.
                     </div>
-                );
+                </div>
+            );
         }
         return (
                     <div className={`mt-2 ${isQuantitySelected ? 'animate-slide-down' : ''} transition-all duration-300`}>
                             <div className='flex gap-1.5 pt-2 border-t border-gray-100'>
                             {MATERIALS.map(mat => (
-                                        <button
-                                        key={mat.id}
-                                        onClick={(e) => {
-                                                e.stopPropagation();  
-                                                onChange(areaId, mat.id);
-                                        }}
-                                        className={`flex-1 py-1 text-xs font-semibold rounded-md transition-all active:scale-95 shadow-sm 
-                                            ${currentMat === mat.id 
-                                                ? 'bg-indigo-700 text-white shadow-lg' 
-                                                : 'bg-indigo-100 text-gray-700 hover:bg-indigo-200' 
-                                            }`}
-                                        >
-                                        {mat.label.split('(')[0].trim()}
-                                        </button>
+                                    <button
+                                    key={mat.id}
+                                    onClick={(e) => {
+                                             e.stopPropagation();  
+                                             onChange(areaId, mat.id);
+                                    }}
+                                    className={`flex-1 py-1 text-xs font-semibold rounded-md transition-all active:scale-95 shadow-sm 
+                                        ${currentMat === mat.id 
+                                            ? 'bg-indigo-700 text-white shadow-lg' 
+                                            : 'bg-indigo-100 text-gray-700 hover:bg-indigo-200' 
+                                        }`}
+                                    >
+                                    {mat.label.split('(')[0].trim()}
+                                    </button>
                             ))}
                             </div>
                     </div>
@@ -1501,21 +1516,8 @@ export default function App() {
                             </div>
                         </div>
 
-                        {/* 2. 견적서 확인 및 카카오톡 문의 버튼 (한 줄 배치) */}
+                        {/* 2. 상담 버튼 (메인 화면) */}
                         <div className='grid grid-cols-2 gap-3'>
-                            {/* 견적서 확인 버튼 */}
-                            <button 
-                                onClick={() => {
-                                    setShowModal(true); 
-                                    setShowToast(false); 
-                                }} 
-                                className={`w-full py-3 rounded-xl font-extrabold text-sm transition-all 
-                                    bg-indigo-700 text-white hover:bg-indigo-800 active:bg-indigo-900 shadow-md
-                                `}
-                            >
-                                견적서 확인
-                            </button>
-                            
                             {/* 카카오톡 예약 문의 버튼 */}
                             <a 
                                 href={KAKAO_CHAT_URL} 
@@ -1527,6 +1529,30 @@ export default function App() {
                             >
                                 카톡 예약 문의
                             </a>
+                            
+                            {/* 상담원 연결 버튼 */}
+                            <button 
+                                onClick={() => window.location.href = `tel:${PHONE_NUMBER}`}
+                                className={`w-full py-3 rounded-xl font-extrabold text-sm transition-all 
+                                    bg-indigo-700 text-white hover:bg-indigo-800 active:bg-indigo-900 shadow-md flex items-center justify-center
+                                `}
+                            >
+                                상담원 연결
+                            </button>
+                        </div>
+                        {/* ⭐️ 보조 기능: 견적서 상세 확인 버튼 (메인) ⭐️ */}
+                        <div className='flex justify-center mt-1'>
+                            <button 
+                                onClick={() => {
+                                    setShowModal(true); 
+                                    setShowToast(false); 
+                                }} 
+                                className={`w-1/2 py-2 rounded-xl font-bold text-xs transition-all 
+                                    bg-indigo-700/80 text-white hover:bg-indigo-700 active:bg-indigo-900 shadow-md
+                                `}
+                            >
+                                견적서 상세 확인
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -1536,12 +1562,11 @@ export default function App() {
             {/* 재료 상세 비교 모달 표시 (유지) */}
             {showMaterialModal && <MaterialDetailModal onClose={() => setShowMaterialModal(false)} />}
             
-            {/* ⭐️ [추가] 견적서 상세 모달 렌더링 ⭐️ */}
+            {/* ⭐️ [수정된] 견적서 상세 모달 렌더링 ⭐️ */}
             {showModal && (
                 <QuoteModal
                     calculation={calculation}
                     onClose={() => setShowModal(false)}
-                    onImageSave={handleImageSave}
                     quoteRef={quoteRef}
                 />
             )}
