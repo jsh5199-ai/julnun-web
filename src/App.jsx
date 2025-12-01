@@ -246,7 +246,7 @@ const PackageToast = ({ isVisible, onClose, label }) => {
 };
 
 // -------------------------------------------------------------
-// ⭐️ [수정된] 견적서 상세 모달 (첨부 이미지 디자인 및 총 할인 금액 반영) ⭐️
+// ⭐️ [수정된] 견적서 상세 모달 (첨부 이미지 디자인, 총 할인 금액, 글씨 크기 반영) ⭐️
 // -------------------------------------------------------------
 const QuoteModal = ({ calculation, onClose, quoteRef }) => {
     const { 
@@ -258,7 +258,6 @@ const QuoteModal = ({ calculation, onClose, quoteRef }) => {
     } = calculation;
 
     // 1. 총 할인 금액 계산
-    // priceBeforeAllDiscount는 정가 기준의 총 원가입니다.
     const totalDiscount = priceBeforeAllDiscount - price;
     const isDiscountApplied = totalDiscount > 0;
     
@@ -281,7 +280,7 @@ const QuoteModal = ({ calculation, onClose, quoteRef }) => {
         : (label || '선택 항목 기반 예상 견적');
     
 
-    // 이미지 저장 버튼 핸들러 (디자인에 맞게 기능 단순화)
+    // 이미지 저장 버튼 핸들러
     const handleImageSave = async () => {
         if (quoteRef.current) {
             try {
@@ -312,7 +311,7 @@ const QuoteModal = ({ calculation, onClose, quoteRef }) => {
             <div className="bg-white w-full max-w-sm rounded-xl shadow-2xl overflow-hidden animate-slide-down border border-gray-200 my-8">
                 
                 <div className="sticky top-0 bg-indigo-900 p-4 text-white flex justify-between items-center z-10">
-                    <h3 className="font-extrabold text-xl flex items-center gap-2">
+                    <h3 className="font-extrabold text-lg flex items-center gap-2">
                         <List className="h-6 w-6 text-white" /> 최종 견적서
                     </h3>
                     <button onClick={onClose} className="text-white/80 hover:text-white transition active:scale-95"><X size={24} /></button>
@@ -323,15 +322,17 @@ const QuoteModal = ({ calculation, onClose, quoteRef }) => {
                     {/* 견적서 캡처 영역 시작 (첨부 이미지 디자인 반영) */}
                     <div ref={quoteRef} className="bg-white p-4 space-y-4 rounded-lg">
                         <div className='text-center'>
-                            <h4 className='text-2xl font-extrabold text-indigo-900'>줄눈의미학 예상 견적서</h4>
+                            {/* 폰트 크기 조정: text-2xl -> text-xl */}
+                            <h4 className='text-xl font-extrabold text-indigo-900'>줄눈의미학 예상 견적서</h4>
                         </div>
 
                         {/* 패키지/할인 적용 영역 (총 할인 금액 표시 포함) */}
                         <div className='bg-indigo-50 border border-indigo-200 p-4 rounded-lg space-y-1'>
-                            <div className='font-bold text-lg text-indigo-900 flex items-center'>
+                            {/* 폰트 크기 조정: text-lg -> text-base */}
+                            <div className='font-bold text-base text-indigo-900 flex items-center'>
                                 <Crown size={20} className='mr-2 text-indigo-600'/> {displayLabel}
                             </div>
-                            <ul className='list-disc list-inside text-sm text-gray-700 ml-1'>
+                            <ul className='list-disc list-inside text-xs text-gray-700 ml-1'>
                                 <li>패키지 포함 영역이 할인 적용되었습니다.</li>
                                 {minimumFeeApplied && <li>최소 시공비(20만원)가 적용되었습니다.</li>}
                             </ul>
@@ -339,7 +340,8 @@ const QuoteModal = ({ calculation, onClose, quoteRef }) => {
                             {/* ⭐️ 2. 총 할인 금액 문구 추가 ⭐️ */}
                             {isDiscountApplied && (
                                 <div className='mt-3 pt-3 border-t border-indigo-200'>
-                                    <p className='text-base font-extrabold text-red-600 text-center'>
+                                    {/* 폰트 크기 조정: text-base -> text-sm */}
+                                    <p className='text-sm font-extrabold text-red-600 text-center'>
                                         총 {totalDiscount.toLocaleString()}원 할인 적용! 💸
                                     </p>
                                 </div>
@@ -349,11 +351,13 @@ const QuoteModal = ({ calculation, onClose, quoteRef }) => {
                         {/* 시공 내역 테이블 (간결 버전) */}
                         {packageItems.length > 0 && (
                             <div className='mt-4 pt-3 border-t border-gray-100'>
+                                {/* 폰트 크기 조정: text-sm 유지 */}
                                 <div className='grid grid-cols-3 text-sm font-bold text-gray-500 border-b pb-1 mb-2'>
                                     <div>시공 내역</div>
                                     <div className='text-center'>소재</div>
                                     <div className='text-right'>수량</div>
                                 </div>
+                                {/* 폰트 크기 조정: text-sm 유지 */}
                                 {packageItems.map((item, index) => (
                                     <div key={index} className='grid grid-cols-3 py-1.5 text-sm text-gray-800'>
                                         <div className='font-semibold'>{item.label}</div>
@@ -374,7 +378,8 @@ const QuoteModal = ({ calculation, onClose, quoteRef }) => {
                                         <div className='font-semibold text-red-600 flex items-center'>
                                             <Gift size={16} className='mr-1'/> {item.label}
                                         </div>
-                                        <div className='font-bold text-xl text-red-600'>
+                                        {/* 폰트 크기 조정: text-xl -> text-lg */}
+                                        <div className='font-bold text-lg text-red-600'>
                                             -{item.originalPrice.toLocaleString()}원 
                                         </div>
                                     </div>
@@ -386,16 +391,19 @@ const QuoteModal = ({ calculation, onClose, quoteRef }) => {
                         {/* 최종 금액 영역 */}
                         <div className='mt-6 pt-4 border-t-2 border-dashed border-gray-300 flex justify-between items-center'>
                             <div className='flex flex-col items-start'>
-                                <span className='text-lg font-bold text-gray-800'>최종 결제 금액</span>
+                                {/* 폰트 크기 조정: text-lg -> text-base */}
+                                <span className='text-base font-bold text-gray-800'>최종 결제 금액</span>
                                 <span className='text-xs text-gray-500 mt-1'>
                                     VAT 별도 / 현장상황별 상이
                                 </span>
                             </div>
                             <div className="flex items-end">
-                                <span className="text-5xl font-extrabold text-indigo-900">
+                                {/* 폰트 크기 조정: text-5xl -> text-4xl */}
+                                <span className="text-4xl font-extrabold text-indigo-900">
                                     {price.toLocaleString()}
                                 </span>
-                                <span className="text-xl font-normal ml-1 text-indigo-900">원</span>
+                                {/* 폰트 크기 조정: text-xl -> text-lg */}
+                                <span className="text-lg font-normal ml-1 text-indigo-900">원</span>
                             </div>
                         </div>
 
