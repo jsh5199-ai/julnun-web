@@ -100,7 +100,7 @@ const GlobalStyles = () => (
 );
 
 // =================================================================
-// [데이터] (변경 없음)
+// [데이터] (수정된 패키지 가격 반영)
 // =================================================================
 const HOUSING_TYPES = [
     { id: 'new', label: '신축 아파트', multiplier: 1.0 },
@@ -162,7 +162,8 @@ const ORIGINAL_MIXED_PACKAGES = [
     { id: 'P_MIX_05_OLD', price: 1050000, label: '혼합패키지 05 (구형)', E_areas: [['bathroom_floor', 2]], P_areas: [['master_bath_wall', 1], ['common_bath_wall', 1]] },
     { id: 'P_MIX_06', price: 830000, label: '혼합패키지 06', E_areas: [['bathroom_floor', 2]], P_areas: [['shower_booth', 1]] },
     { id: 'P_MIX_07', price: 830000, label: '혼합패키지 07', E_areas: [['bathroom_floor', 2]], P_areas: [['bathtub_wall', 1]] },
-    { id: 'P_MIX_08', price: 950000, label: '혼합패키지 08', E_areas: [['bathroom_floor', 2]], P_areas: [['bathtub_wall', 1], ['shower_booth', 1]] },
+    // ⭐️ 요청 반영: P_MIX_08 가격 950000 -> 850000원으로 수정 ⭐️
+    { id: 'P_MIX_08', price: 850000, label: '혼합패키지 08', E_areas: [['bathroom_floor', 2]], P_areas: [['bathtub_wall', 1], ['shower_booth', 1]] },
     { id: 'P_MIX_09', price: 1200000, label: '혼합패키지 09', E_areas: [['bathroom_floor', 2]], P_areas: [['master_bath_wall', 1], ['common_bath_wall', 1]] },
     { id: 'P_MIX_10', price: 900000, label: '혼합패키지 10', E_areas: [['bathroom_floor', 2], ['shower_booth', 1]], P_areas: [] },
     { id: 'P_MIX_11', price: 900000, label: '혼합패키지 11', E_areas: [['bathroom_floor', 2], ['bathtub_wall', 1]], P_areas: [] },
@@ -200,7 +201,7 @@ const getPackageAreaIds = (pkg) => [
 ];
 
 // =================================================================
-// [컴포넌트] (Modal 추가)
+// [컴포넌트] (Modal 포함)
 // =================================================================
 
 const PackageToast = ({ isVisible, onClose, label }) => {
@@ -238,7 +239,7 @@ const PackageToast = ({ isVisible, onClose, label }) => {
 };
 
 // -------------------------------------------------------------
-// ⭐️ [신규 컴포넌트] 견적서 상세 모달 ⭐️
+// ⭐️ [견적서 상세 모달] ⭐️
 // -------------------------------------------------------------
 const QuoteModal = ({ calculation, onClose, onImageSave, quoteRef }) => {
     const { 
@@ -256,8 +257,8 @@ const QuoteModal = ({ calculation, onClose, onImageSave, quoteRef }) => {
 
     const ItemRow = ({ label, quantity, unit, price, isDiscount, isPackageItem, materialLabel }) => {
         const isFree = price === 0 && !isDiscount;
-        const displayMaterial = materialLabel ? (
-             <span className={`text-[10px] font-medium ml-1 px-1 py-[1px] rounded ${materialLabel === 'Epoxy' ? 'bg-indigo-100 text-indigo-700' : 'bg-green-100 text-green-700'}`}>
+        const displayMaterial = materialLabel && materialLabel !== 'Event' ? (
+             <span className={`text-[10px] font-medium ml-1 px-1 py-[1px] rounded ${materialLabel === 'Epoxy' ? 'bg-indigo-100 text-indigo-700' : (materialLabel === 'Poly' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700')}`}>
                 {materialLabel}
              </span>
         ) : null;
@@ -1496,7 +1497,7 @@ export default function App() {
                             {/* 견적서 확인 버튼 */}
                             <button 
                                 onClick={() => {
-                                    setShowModal(true); // ⭐️ 이 부분이 정상 동작하도록 모달 컴포넌트를 정의했습니다 ⭐️
+                                    setShowModal(true); 
                                     setShowToast(false); 
                                 }} 
                                 className={`w-full py-3 rounded-xl font-extrabold text-sm transition-all 
