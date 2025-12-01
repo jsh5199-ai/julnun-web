@@ -37,15 +37,7 @@ const DARK_COLOR_CODE = '#565556'; // 119번 (어둡게)
 // =================================================================
 // ⭐️ [유지] 색상 혼합 로직
 // =================================================================
-/**
- * HEX 코드를 RGB로 변환하고, 두 색상을 주어진 비율로 혼합합니다.
- * @param {string} color1 - 기본 색상 HEX 코드 (#RRGGBB)
- * @param {string} color2 - 목표 색상 HEX 코드 (#RRGGBB)
- * @param {number} weight - 혼합 비율 (0.0: color1, 1.0: color2)
- * @returns {string} 혼합된 색상의 HEX 코드
- */
 const mixColors = (color1, color2, weight) => {
-    // # 제거 및 안전을 위해 6자리 코드로 가정
     color1 = color1.replace('#', '');
     color2 = color2.replace('#', '');
 
@@ -363,12 +355,12 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                      
                     {/* 2. 워터마크 레이어 (z-index 5) */}
                     <div 
-                        className="absolute inset-0 flex items-center justify-center opacity-90" 
+                        className="absolute inset-0 flex items-center justify-center opacity-30" 
                         style={{
                             zIndex: 5, 
                             backgroundImage: 'url(/logo.png)', 
-                            backgroundSize: '50%', 
-                            backgroundRepeat: 'repeat',
+                            backgroundSize: '30%', 
+                            backgroundRepeat: 'repeat', // 반복 패턴으로 수정된 상태 유지
                             backgroundPosition: 'center',
                         }}
                     >
@@ -423,9 +415,8 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                         onChange={(e) => onBrightnessChange(Number(e.target.value))}
                         className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer range-lg dark:bg-gray-700"
                         style={{ 
-                            // 밝기(화이트)를 오른쪽, 어둡기(119번)를 왼쪽으로 배치
-                            backgroundImage: 'linear-gradient(to right, #565556 50%, #ffffff 50%)' 
-                            // 참고: 여기서 #565556(119번)이 왼쪽에 오도록 배경색을 조정합니다.
+                            // 어둡기(119번)를 왼쪽, 밝기(화이트)를 오른쪽으로 배치
+                            backgroundImage: 'linear-gradient(to right, #565556 50%, #ffffff 50%)'
                         }}
                     />
                     {/* ⭐️ 수정: 밝게를 오른쪽으로 이동 ⭐️ */}
@@ -1330,7 +1321,7 @@ export default function App() {
                             {/* 견적서 확인 버튼 */}
                             <button 
                                 onClick={() => {
-                                    setShowModal(true);
+                                    setShowModal(true); // ⭐️ 모달 열림 상태 변경 ⭐️
                                     setShowToast(false); 
                                 }} 
                                 className={`w-full py-3 rounded-xl font-extrabold text-sm transition-all 
