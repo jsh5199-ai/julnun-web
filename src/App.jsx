@@ -10,7 +10,7 @@ import {
 // =================================================================
 const MIN_FEE = 200000;
 const KAKAO_CHAT_URL = 'http://pf.kakao.com/_jAxnYn/chat';
-const DEFAULT_TILE_IMAGE_URL = '/default_tile.jpg'; 
+const DEFAULT_TILE_IMAGE_URL = '/default_tile.jpg';
 
 const GROUT_COLORS = [
     { id: 'white', code: '#ffffff', label: '화이트', isDark: false },
@@ -21,12 +21,12 @@ const GROUT_COLORS = [
     { id: 'dark_gray', code: '#797671', label: '113번', isDark: true },
     { id: 'black', code: '#49494b', label: '114번', isDark: true },
     { id: 'charcoal', code: '#565556', label: '119번', isDark: true },
-    { id: 'shine_silver', code: '#c2c2c2', label: '127번', isDark: false }, 
+    { id: 'shine_silver', code: '#c2c2c2', label: '127번', isDark: false },
     { id: 'moca_beige', code: '#dbcbbd', label: '131번', isDark: false },
     { id: 'sand_brown', code: '#887965', label: '133번', isDark: true },
     { id: 'dark_brown', code: '#85786f', label: '134번', isDark: true },
     { id: 'vintage_brown', code: '#96877e', label: '141번', isDark: true },
-    { id: 'oat_brown', code: '#b0a9a4', label: '180번', isDark: false }, 
+    { id: 'oat_brown', code: '#b0a9a4', label: '180번', isDark: false },
     { id: 'burnt_brown', code: '#8b8784', label: '187번', isDark: true },
 ];
 
@@ -246,7 +246,7 @@ const PackageToast = ({ isVisible, onClose, label }) => {
 };
 
 // -------------------------------------------------------------
-// ⭐️ [수정됨] 견적서 상세 모달 (시공 내역, 디자인 일치, 할인 문구 반영) ⭐️
+// ⭐️ [수정된 부분] 견적서 상세 모달: 시공 내역 누락 방지 로직 수정 ⭐️
 // -------------------------------------------------------------
 const QuoteModal = ({ calculation, onClose, quoteRef }) => {
     const { 
@@ -261,16 +261,22 @@ const QuoteModal = ({ calculation, onClose, quoteRef }) => {
     const totalDiscount = priceBeforeAllDiscount - price;
     const isDiscountApplied = totalDiscount > 0;
     
-    // ⭐️ 수정된 필터링 로직: 계산된 가격이 0원(무료 서비스)이거나, 
-    //    패키지 적용 중일 때 가격이 0원이 아닌 모든 항목(패키지 포함 항목)을 포함 ⭐️
+    // ⭐️ [수정된 로직]: quantity > 0 인 모든 선택 항목 + 할인 항목을 포함
+    // item.isPackageItem이 true이고 item.isDiscount가 false인 항목은 가격이 0원이라도 시공 내역에 포함되어야 함
     const packageItems = itemizedPrices.filter(i => 
-        (i.isPackageItem && !i.isDiscount) // 패키지나 무료 서비스 항목
-    ).map(item => ({
-        label: item.label,
-        materialLabel: item.materialLabel,
-        quantity: item.quantity,
-        unit: item.unit
-    }));
+        i.quantity > 0 && !i.isDiscount
+    ).map(item => {
+        // 원래의 선택된 수량과 단위 정보를 사용
+        const areaInfo = ALL_AREAS.find(a => a.id === item.id);
+
+        return {
+            label: item.label,
+            materialLabel: item.materialLabel,
+            // 견적서에는 계산의 기반이 된 실제 선택 수량을 표시
+            quantity: item.quantity, 
+            unit: areaInfo ? areaInfo.unit : '개소'
+        }
+    });
 
     // 리뷰 할인 항목 필터링
     const discountItems = itemizedPrices.filter(i => i.isDiscount);
@@ -367,7 +373,7 @@ const QuoteModal = ({ calculation, onClose, quoteRef }) => {
                                         <div key={index} className='grid grid-cols-3 py-1.5 text-sm text-gray-800'>
                                             <div className='font-semibold'>{item.label}</div>
                                             <div className='text-center text-indigo-600 font-bold'>
-                                                {item.materialLabel === 'Epoxy' ? 'Epoxy' : 'Poly'}
+                                                {item.materialLabel === 'Epoxy' ? 'Epoxy' : item.materialLabel === 'Poly' ? 'Poly' : 'Silicon'}
                                             </div>
                                             <div className='text-right'>{item.quantity}{item.unit}</div>
                                         </div>
@@ -436,7 +442,7 @@ const QuoteModal = ({ calculation, onClose, quoteRef }) => {
                 <div className="p-4 bg-gray-50 border-t border-gray-200 grid grid-cols-2 gap-3">
                     <button onClick={onClose} className="py-3 bg-gray-300 text-gray-700 rounded-lg font-bold hover:bg-gray-400 transition active:scale-95">닫기</button>
                     <button onClick={handleImageSave} className="py-3 bg-indigo-700 text-white rounded-lg font-bold hover:bg-indigo-800 transition active:scale-95 flex items-center justify-center gap-2">
-                         <Download size={18} /> 이미지 저장
+                       <Download size={18} /> 이미지 저장
                     </button>
                 </div>
             </div>
@@ -509,7 +515,7 @@ const Accordion = ({ question, answer }) => {
 };
 
 // ⭐️ [ColorPalette] (로직 및 스타일 유지) ⭐️
-const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageURL, brightnessLevel, onBrightnessChange }) => {
+const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageURL, brightnessLevel, onBrightnessChange, onTileImageReset }) => {
     const baseColorData = GROUT_COLORS.find(c => c.id === selectedColorId) || GROUT_COLORS[0];
     const GROUT_LINE_WIDTH = 12; 
 
@@ -647,12 +653,23 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
             </div>
 
 
-            {/* 타일 이미지 업로드 버튼 (유지) */}
-            <div className='mb-4'>
+            {/* ⭐️ [수정된 부분] 타일 이미지 업로드 및 초기화 버튼 ⭐️ */}
+            <div className='mb-4 flex gap-2'>
                 <input type="file" id="tileFileInput" accept="image/*" onChange={onTileImageUpload} style={{ display: 'none' }} />
-                <label htmlFor="tileFileInput" className="w-full py-2.5 px-4 bg-indigo-600 text-white rounded-lg font-bold text-sm hover:bg-indigo-700 transition shadow-md cursor-pointer flex items-center justify-center gap-2">
-                    <ImageIcon size={16} /> 내 타일 사진 첨부하여 미리보기
+                <label htmlFor="tileFileInput" className="flex-1 py-2.5 px-4 bg-indigo-600 text-white rounded-lg font-bold text-sm hover:bg-indigo-700 transition shadow-md cursor-pointer flex items-center justify-center gap-2">
+                    <ImageIcon size={16} /> 내 타일 사진 첨부
                 </label>
+                
+                {/* 타일 이미지가 기본 이미지가 아닐 때만 초기화 버튼 표시 */}
+                {tileImageURL !== DEFAULT_TILE_IMAGE_URL && (
+                    <button 
+                        onClick={onTileImageReset}
+                        className="py-2.5 px-4 bg-red-500 text-white rounded-lg font-bold text-sm hover:bg-red-600 transition shadow-md flex items-center justify-center gap-2 active:scale-95 flex-shrink-0 w-1/4"
+                        title="타일 이미지 초기화"
+                    >
+                        <Eraser size={16} /> 초기화
+                    </button>
+                )}
             </div>
 
             {/* 색상 선택 버튼 그리드 (유지) */}
@@ -813,7 +830,7 @@ export default function App() {
         const filteredEpoxySelections = filterSelections(selectionSummary['kerapoxy'] || {});
             
         const totalSelectedCount = Object.values(filteredPolySelections).reduce((sum, v) => sum + v, 0) + 
-                                            Object.values(filteredEpoxySelections).reduce((sum, v) => sum + v, 0);
+                                         Object.values(filteredEpoxySelections).reduce((sum, v) => sum + v, 0);
             
         if (totalSelectedCount === 0) return null;
         const sortedPackages = MIXED_PACKAGES; 
@@ -824,97 +841,99 @@ export default function App() {
                     let appliedAutoEntrance = false;
                     
                     if (pkg.isFlexible) {
-                                           const requiredPolyAreas = pkg.P_areas.map(([id]) => id).filter(id => id !== 'entrance');
-                                           const requiredEpoxyAreas = pkg.E_areas.map(([id]) => id);
-                                           let baseMatch = true;
-                                           for (const id of requiredPolyAreas.filter(id => !pkg.flexibleGroup.includes(id))) {
-                                                const requiredQty = pkg.P_areas.find(([pkId]) => pkId === id)[1];
-                                                if ((tempPolySelections[id] || 0) !== requiredQty) {
-                                                    baseMatch = false;
-                                                    break;
-                                                }
-                                           }
-                                           if (!baseMatch) continue;
+                                               const requiredPolyAreas = pkg.P_areas.map(([id]) => id).filter(id => id !== 'entrance');
+                                               const requiredEpoxyAreas = pkg.E_areas.map(([id]) => id);
+                                               let baseMatch = true;
+                                               for (const id of requiredPolyAreas.filter(id => !pkg.flexibleGroup.includes(id))) {
+                                                   const requiredQty = pkg.P_areas.find(([pkId]) => pkId === id)[1];
+                                                   if ((tempPolySelections[id] || 0) !== requiredQty) {
+                                                       baseMatch = false;
+                                                       break;
+                                                   }
+                                               }
+                                               if (!baseMatch) continue;
 
-                                           for (const id of requiredEpoxyAreas.filter(id => !pkg.flexibleGroup.includes(id))) {
-                                                const requiredQty = pkg.E_areas.find(([pkId]) => pkId === id)[1];
-                                                if ((tempEpoxySelections[id] || 0) !== requiredQty) {
-                                                    baseMatch = false;
-                                                    break;
-                                                }
-                                           }
-                                           if (!baseMatch) continue;
+                                               for (const id of requiredEpoxyAreas.filter(id => !pkg.flexibleGroup.includes(id))) {
+                                                   const requiredQty = pkg.E_areas.find(([pkId]) => pkId === id)[1];
+                                                   if ((tempEpoxySelections[id] || 0) !== requiredQty) {
+                                                       baseMatch = false;
+                                                       break;
+                                                   }
+                                               }
+                                               if (!baseMatch) continue;
 
-                                           const flexibleSelectedPolyCount = pkg.flexibleGroup.filter(id => tempPolySelections[id] > 0).length;
-                                           const flexibleSelectedEpoxyCount = pkg.flexibleGroup.filter(id => tempEpoxySelections[id] > 0).length;
-                                           const isPolyFlexiblePackage = pkg.id.startsWith('USER_P_');
-                                           const isEpoxyFlexiblePackage = pkg.id.startsWith('USER_E_');
-                                           let flexibleMatch = false;
+                                               const flexibleSelectedPolyCount = pkg.flexibleGroup.filter(id => tempPolySelections[id] > 0).length;
+                                               const flexibleSelectedEpoxyCount = pkg.flexibleGroup.filter(id => tempEpoxySelections[id] > 0).length;
+                                               const isPolyFlexiblePackage = pkg.id.startsWith('USER_P_');
+                                               const isEpoxyFlexiblePackage = pkg.id.startsWith('USER_E_');
+                                               let flexibleMatch = false;
 
-                                           if (isPolyFlexiblePackage) {
-                                                flexibleMatch = flexibleSelectedPolyCount === 1 && flexibleSelectedEpoxyCount === 0;
-                                                if (flexibleMatch) {
-                                                    const matchedFlexibleItem = pkg.flexibleGroup.find(id => tempPolySelections[id] > 0);
-                                                    if (pkg.id.includes('MASTER') && matchedFlexibleItem !== 'master_bath_wall') flexibleMatch = false;
-                                                    if (pkg.id.includes('COMMON') && matchedFlexibleItem !== 'common_bath_wall') flexibleMatch = false;
-                                                }
-                                           } else if (isEpoxyFlexiblePackage) {
-                                                flexibleMatch = flexibleSelectedEpoxyCount === 1 && flexibleSelectedPolyCount === 0;
-                                                if (flexibleMatch) {
-                                                    const matchedFlexibleItem = pkg.flexibleGroup.find(id => tempEpoxySelections[id] > 0);
-                                                    if (pkg.id.includes('MASTER') && matchedFlexibleItem !== 'master_bath_wall') flexibleMatch = false;
-                                                    if (pkg.id.includes('COMMON') && matchedFlexibleItem !== 'common_bath_wall') flexibleMatch = false;
-                                                }
-                                           }
-                                           
-                                           if (baseMatch && flexibleMatch) {
-                                                const packageAreaIds = new Set(getPackageAreaIds(pkg));
-                                                const finalSelectedAreaIds = new Set([...Object.keys(tempPolySelections).filter(id => tempPolySelections[id] > 0), ...Object.keys(tempEpoxySelections).filter(id => tempEpoxySelections[id] > 0)]);
-                                                const isIdSetMatch = finalSelectedAreaIds.size === packageAreaIds.size && 
-                                                                               [...finalSelectedAreaIds].every(id => packageAreaIds.has(id));
+                                               if (isPolyFlexiblePackage) {
+                                                   flexibleMatch = flexibleSelectedPolyCount === 1 && flexibleSelectedEpoxyCount === 0;
+                                                   if (flexibleMatch) {
+                                                       const matchedFlexibleItem = pkg.flexibleGroup.find(id => tempPolySelections[id] > 0);
+                                                       if (pkg.id.includes('MASTER') && matchedFlexibleItem !== 'master_bath_wall') flexibleMatch = false;
+                                                       if (pkg.id.includes('COMMON') && matchedFlexibleItem !== 'common_bath_wall') flexibleMatch = false;
+                                                   }
+                                               } else if (isEpoxyFlexiblePackage) {
+                                                   flexibleMatch = flexibleSelectedEpoxyCount === 1 && flexibleSelectedPolyCount === 0;
+                                                   if (flexibleMatch) {
+                                                       const matchedFlexibleItem = pkg.flexibleGroup.find(id => tempEpoxySelections[id] > 0);
+                                                       if (pkg.id.includes('MASTER') && matchedFlexibleItem !== 'master_bath_wall') flexibleMatch = false;
+                                                       if (pkg.id.includes('COMMON') && matchedFlexibleItem !== 'common_bath_wall') flexibleMatch = false;
+                                                   }
+                                               }
+                                               
+                                               if (baseMatch && flexibleMatch) {
+                                                   const packageAreaIds = new Set(getPackageAreaIds(pkg));
+                                                   const finalSelectedAreaIds = new Set([...Object.keys(tempPolySelections).filter(id => tempPolySelections[id] > 0), ...Object.keys(tempEpoxySelections).filter(id => tempEpoxySelections[id] > 0)]);
+                                                   const isIdSetMatch = finalSelectedAreaIds.size === packageAreaIds.size && 
+                                                                                         [...finalSelectedAreaIds].every(id => packageAreaIds.has(id));
 
-                                                if (isIdSetMatch) {
-                                                    return { ...pkg, autoEntrance: appliedAutoEntrance }; 
-                                                }
-                                           }
-                                           continue; 
+                                                   if (isIdSetMatch) {
+                                                       return { ...pkg, autoEntrance: appliedAutoEntrance }; 
+                                                   }
+                                               }
+                                               continue; 
                     }
                     
                     let isMatch = true;
                     for (const [id, requiredQty] of pkg.P_areas) {
-                                 if ((tempPolySelections[id] || 0) !== requiredQty) { 
-                                     isMatch = false;
-                                     break;
-                                 }
+                                   if ((tempPolySelections[id] || 0) !== requiredQty) { 
+                                       isMatch = false;
+                                       break;
+                                   }
                     }
                     if (!isMatch) continue;
 
                     for (const [id, requiredQty] of pkg.E_areas) {
-                                 if ((tempEpoxySelections[id] || 0) !== requiredQty) { 
-                                     isMatch = false;
-                                     break;
-                                 }
+                                   if ((tempEpoxySelections[id] || 0) !== requiredQty) { 
+                                       isMatch = false;
+                                       break;
+                                   }
                     }
                     if (!isMatch) continue;
 
                     const selectedAreaIds = new Set([...Object.keys(tempPolySelections).filter(id => tempPolySelections[id] > 0), ...Object.keys(tempEpoxySelections).filter(id => tempEpoxySelections[id] > 0)]);
                     const packageAreaIds = new Set(getPackageAreaIds(pkg));
                     const isIdSetMatch = selectedAreaIds.size === packageAreaIds.size && 
-                                                 [...selectedAreaIds].every(id => packageAreaIds.has(id));
+                                                             [...selectedAreaIds].every(id => packageAreaIds.has(id));
 
                     if (isIdSetMatch) {
-                                 return { ...pkg, autoEntrance: appliedAutoEntrance }; 
+                                   return { ...pkg, autoEntrance: appliedAutoEntrance }; 
                     }
         }
         return null;
     }, []);
 
 
+    // -------------------------------------------------------------
+    // ⭐️ [수정된 부분] calculation 로직: isPackageItem 플래그를 정확하게 설정 ⭐️
+    // -------------------------------------------------------------
     const calculation = useMemo(() => {
         const selectedHousing = HOUSING_TYPES.find(h => h.id === housingType);
         let itemizedPrices = []; 
             
-        // 🚨 [수정] 의존성 최적화 반영: getSelectionSummary와 findMatchingPackage를 호출할 때 quantities와 areaMaterials 인자 명시
         const selectionSummary = getSelectionSummary(quantities, areaMaterials);
         const matchedPackageResult = findMatchingPackage(selectionSummary, quantities);
         const matchedPackage = matchedPackageResult ? matchedPackageResult : null;
@@ -934,18 +953,19 @@ export default function App() {
             // ⭐️ [요청 반영] 패키지 라벨 통합: 어떤 패키지든 "패키지 할인 적용 중" 문구 사용 ⭐️
             labelText = '패키지 할인 적용 중'; 
             packageAreas = getPackageAreaIds(matchedPackage);
+            // 패키지 항목은 임시로 0 처리하여 개별 계산에서 제외
             packageAreas.forEach(id => { q[id] = 0; });
             if (quantities['entrance'] >= 1) { 
-                        isFreeEntrance = true;
-                        q['entrance'] = 0;
+                isFreeEntrance = true;
+                q['entrance'] = 0;
             }
         } 
             
         if (quantities['bathroom_floor'] >= 2 && quantities['entrance'] >= 1 && !matchedPackage) {
-                        isFreeEntrance = true;
-                        isPackageActive = true;
-                        labelText = '현관 서비스 적용 중';
-                        q['entrance'] = 0;
+            isFreeEntrance = true;
+            isPackageActive = true;
+            labelText = '현관 서비스 적용 중';
+            q['entrance'] = 0;
         }
         
         // ⭐️ 할인 전 총 원가를 먼저 계산 (정가 기준) ⭐️
@@ -973,15 +993,15 @@ export default function App() {
             // 🚨 [유지] 견적 계산 시 사용되는 단가 로직 (할인 적용되는 가격) 🚨
             let finalUnitBasePrice = area.basePrice;
             if (area.id === 'balcony_laundry') {
-                        finalUnitBasePrice = isEpoxy ? 250000 : 100000;
+                finalUnitBasePrice = isEpoxy ? 250000 : 100000;
             } else if (area.id === 'kitchen_wall') {
-                        finalUnitBasePrice = isEpoxy ? 250000 : 150000;
+                finalUnitBasePrice = isEpoxy ? 250000 : 150000;
             } else if (area.id === 'living_room') {
-                        finalUnitBasePrice = isEpoxy ? 1100000 : 550000;
+                finalUnitBasePrice = isEpoxy ? 1100000 : 550000;
             } else if (area.id === 'entrance') {
-                        finalUnitBasePrice = 50000;
+                finalUnitBasePrice = 50000;
             } else if (BATHROOM_AREAS.some(a => a.id === area.id)) {
-                        finalUnitBasePrice = area.basePrice * (isEpoxy ? 1.8 : 1.0);
+                finalUnitBasePrice = area.basePrice * (isEpoxy ? 1.8 : 1.0);
             } 
             
             const calculatedPricePerUnit = Math.floor(finalUnitBasePrice * selectedHousing.multiplier);
@@ -991,41 +1011,48 @@ export default function App() {
             let packageCount = initialCount - count; 
             
             // ⭐️ [계산 로직 유지] 패키지/무료 서비스 적용 시 가격 0원 처리 ⭐️
+            // 🚨 [수정]: isPackageItem 플래그를 정확히 설정
+            let isPackageItemFlag = false; 
+
             if (packageCount > 0 && (matchedPackage || isFreeEntrance) && count === 0) {
-                             finalCalculatedPrice = 0;
-                             finalDiscount = itemOriginalTotal; // 할인액은 정가와 같음
-                             isFreeServiceItem = area.id === 'entrance' || packageAreas.includes(area.id); 
+                finalCalculatedPrice = 0;
+                finalDiscount = itemOriginalTotal; // 할인액은 정가와 같음
+                isFreeServiceItem = area.id === 'entrance' || packageAreas.includes(area.id); 
+                isPackageItemFlag = true; // 패키지/무료로 인해 가격이 0원이 된 경우
             } 
             else if (area.id === 'entrance' && isFreeEntrance && !matchedPackage && count === 0) {
-                             finalCalculatedPrice = 0;
-                             finalDiscount = itemOriginalTotal; // 할인액은 정가와 같음
-                             isFreeServiceItem = true;
+                finalCalculatedPrice = 0;
+                finalDiscount = itemOriginalTotal; // 할인액은 정가와 같음
+                isFreeServiceItem = true;
+                isPackageItemFlag = true; // 무료 현관 서비스 적용된 경우
             }
             else {
-                             // ⭐️ [계산 로직 유지] 패키지 미적용 시의 개별 할인 로직 ⭐️
-                             let remainingCalculatedPrice = calculatedPricePerUnit * count;
-                             let remainingDiscount = 0;
-                             
-                             if (area.id === 'silicon_bathtub' && totalAreaCount >= 3) {
-                                     const nonPackageOriginalPrice = 80000 * count; 
-                                     const fixedPriceForRemaining = 50000 * count; 
-                                     if (count > 0) {
-                                             remainingDiscount = nonPackageOriginalPrice - fixedPriceForRemaining;
-                                             remainingCalculatedPrice = fixedPriceForRemaining;
-                                     }
-                             } else if (area.id === 'silicon_living_baseboard' && totalAreaCount >= 3) {
-                                     const nonPackageOriginalPrice = 400000 * count; 
-                                     const fixedPriceForRemaining = 350000 * count; 
-                                     if (count > 0) {
-                                             remainingDiscount = nonPackageOriginalPrice - fixedPriceForRemaining;
-                                             remainingCalculatedPrice = fixedPriceForRemaining;
-                                     }
-                             } else if (area.id === 'silicon_sink') {
-                                     remainingCalculatedPrice = 30000 * count;
-                             }
-                             finalCalculatedPrice = remainingCalculatedPrice; 
-                             finalDiscount = remainingDiscount; 
-                             total += finalCalculatedPrice;
+                // ⭐️ [계산 로직 유지] 패키지 미적용 시의 개별 할인 로직 ⭐️
+                let remainingCalculatedPrice = calculatedPricePerUnit * count;
+                let remainingDiscount = 0;
+                
+                if (area.id === 'silicon_bathtub' && totalAreaCount >= 3) {
+                    const nonPackageOriginalPrice = 80000 * count; 
+                    const fixedPriceForRemaining = 50000 * count; 
+                    if (count > 0) {
+                        remainingDiscount = nonPackageOriginalPrice - fixedPriceForRemaining;
+                        remainingCalculatedPrice = fixedPriceForRemaining;
+                        isPackageItemFlag = true; // 실리콘 할인 적용된 경우
+                    }
+                } else if (area.id === 'silicon_living_baseboard' && totalAreaCount >= 3) {
+                    const nonPackageOriginalPrice = 400000 * count; 
+                    const fixedPriceForRemaining = 350000 * count; 
+                    if (count > 0) {
+                        remainingDiscount = nonPackageOriginalPrice - fixedPriceForRemaining;
+                        remainingCalculatedPrice = fixedPriceForRemaining;
+                        isPackageItemFlag = true; // 실리콘 할인 적용된 경우
+                    }
+                } else if (area.id === 'silicon_sink') {
+                    remainingCalculatedPrice = 30000 * count;
+                }
+                finalCalculatedPrice = remainingCalculatedPrice; 
+                finalDiscount = remainingDiscount; 
+                total += finalCalculatedPrice;
             }
             // ⭐️ [변경 끝] ⭐️
             
@@ -1034,17 +1061,17 @@ export default function App() {
             finalDiscount = Math.floor(finalDiscount / 1000) * 1000;
 
             itemizedPrices.push({
-                                 id: area.id, 
-                                 label: area.label, 
-                                 quantity: initialCount, 
-                                 unit: area.unit, 
-                                 originalPrice: itemOriginalTotal, // ⭐️ 새로운 정가 기준 적용 ⭐️
-                                 calculatedPrice: finalCalculatedPrice, 
-                                 discount: finalDiscount, 
-                                 isFreeService: isFreeServiceItem, 
-                                 isPackageItem: isFreeServiceItem || packageCount > 0 || (area.id === 'silicon_bathtub' && totalAreaCount >= 3) || (area.id === 'silicon_living_baseboard' && totalAreaCount >= 3), 
-                                 isDiscount: false, 
-                                 materialLabel: ['silicon_bathtub', 'silicon_sink', 'silicon_living_baseboard'].includes(area.id) ? 'Silicon' : (areaMatId === 'poly' ? 'Poly' : 'Epoxy')
+                id: area.id, 
+                label: area.label, 
+                quantity: initialCount, // ⭐️ 견적서에 표시할 실제 선택 수량 ⭐️
+                unit: area.unit, 
+                originalPrice: itemOriginalTotal, // ⭐️ 새로운 정가 기준 적용 ⭐️
+                calculatedPrice: finalCalculatedPrice, 
+                discount: finalDiscount, 
+                isFreeService: isFreeServiceItem, 
+                isPackageItem: isPackageItemFlag || !isFreeServiceItem && (packageCount > 0 || isPackageActive || finalDiscount > 0), // 할인 또는 패키지가 적용된 모든 항목 포함
+                isDiscount: false, 
+                materialLabel: ['silicon_bathtub', 'silicon_sink', 'silicon_living_baseboard'].includes(area.id) ? 'Silicon' : (areaMatId === 'poly' ? 'Poly' : 'Epoxy')
             });
         });
             
@@ -1063,31 +1090,31 @@ export default function App() {
         let minimumFeeApplied = false;
 
         if (finalPrice > 0 && finalPrice < MIN_FEE) {
-                finalPrice = MIN_FEE;
-                minimumFeeApplied = true;
+            finalPrice = MIN_FEE;
+            minimumFeeApplied = true;
         }
 
         
-            
         if (isFreeEntrance && !matchedPackage) {
-                labelText = '현관 서비스 적용 중';
+            labelText = '현관 서비스 적용 중';
         } else if (matchedPackage) {
-                // ⭐️ [요청 반영] 패키지 라벨 통합: 어떤 패키지든 "패키지 할인 적용 중" 문구 사용 ⭐️
-                labelText = '패키지 할인 적용 중'; 
+            // ⭐️ [요청 반영] 패키지 라벨 통합: 어떤 패키지든 "패키지 할인 적용 중" 문구 사용 ⭐️
+            labelText = '패키지 할인 적용 중'; 
         }
         
         // ⭐️ priceBeforeAllDiscount는 이미 itemOriginalTotal을 누적했으므로 여기서 다시 계산하지 않습니다. ⭐️
 
         return { 
-                price: finalPrice, 
-                originalCalculatedPrice, 
-                priceBeforeAllDiscount: Math.floor(priceBeforeAllDiscount / 1000) * 1000, // ⭐️ 최종 정가 ⭐️
-                label: labelText, 
-                isPackageActive: isPackageActive || isFreeEntrance, 
-                isFreeEntrance: isFreeEntrance,
-                discountAmount: priceBeforeAllDiscount - finalPrice, // ⭐️ 새로운 정가 기준의 총 할인액 ⭐️
-                minimumFeeApplied, 
-                itemizedPrices: itemizedPrices.filter(item => item.quantity > 0 || item.isDiscount),
+            price: finalPrice, 
+            originalCalculatedPrice, 
+            priceBeforeAllDiscount: Math.floor(priceBeforeAllDiscount / 1000) * 1000, // ⭐️ 최종 정가 ⭐️
+            label: labelText, 
+            isPackageActive: isPackageActive || isFreeEntrance, 
+            isFreeEntrance: isFreeEntrance,
+            discountAmount: priceBeforeAllDiscount - finalPrice, // ⭐️ 새로운 정가 기준의 총 할인액 ⭐️
+            minimumFeeApplied, 
+            // ⭐️ [수정]: quantity > 0 인 모든 선택 항목 + 할인 항목만 견적서에 포함 ⭐️
+            itemizedPrices: itemizedPrices.filter(item => item.quantity > 0 || item.isDiscount),
         };
 
     }, [quantities, selectedReviews, housingType, areaMaterials, getSelectionSummary, findMatchingPackage]);
@@ -1116,9 +1143,12 @@ export default function App() {
             reader.readAsDataURL(file);
         }
     };
-
-    // 이미지 저장 기능은 QuoteModal 내부로 이동하고, 여기서는 참조만 남깁니다.
-    // const handleImageSave = ...
+    
+    // ⭐️ [추가] 타일 이미지 초기화 핸들러 ⭐️
+    const handleTileImageReset = useCallback(() => {
+        setTileImageURL(DEFAULT_TILE_IMAGE_URL);
+        alert('✅ 타일 이미지가 기본 이미지로 초기화되었습니다.');
+    }, []);
 
     const selectedMaterialData = MATERIALS.find(m => m.id === material);
     const soomgoReviewEvent = REVIEW_EVENTS.find(evt => evt.id === 'soomgo_review');
@@ -1130,43 +1160,43 @@ export default function App() {
 
     const MaterialSelectButtons = ({ areaId, currentMat, onChange, isQuantitySelected }) => {
         if (areaId === 'entrance') {
-                return (
-                    <div className='mt-2 pt-2 border-t border-gray-100'>
-                        <div className="text-xs font-bold text-green-700 bg-green-100 p-1.5 rounded-md text-center">
-                            현관은 폴리아스파틱 (Poly) 고정입니다.
-                        </div>
+            return (
+                <div className='mt-2 pt-2 border-t border-gray-100'>
+                    <div className="text-xs font-bold text-green-700 bg-green-100 p-1.5 rounded-md text-center">
+                        현관은 폴리아스파틱 (Poly) 고정입니다.
                     </div>
-                );
+                </div>
+            );
         }
         if (['silicon_bathtub', 'silicon_sink', 'silicon_living_baseboard'].includes(areaId)) {
-                return (
-                    <div className='mt-2 pt-2 border-t border-gray-100'>
-                        <div className="text-xs font-bold text-green-700 bg-green-100 p-1.5 rounded-md text-center">
-                            실리콘 시공은 별도 소재입니다.
-                        </div>
+            return (
+                <div className='mt-2 pt-2 border-t border-gray-100'>
+                    <div className="text-xs font-bold text-green-700 bg-green-100 p-1.5 rounded-md text-center">
+                        실리콘 시공은 별도 소재입니다.
                     </div>
-                );
+                </div>
+            );
         }
         return (
                             <div className={`mt-2 ${isQuantitySelected ? 'animate-slide-down' : ''} transition-all duration-300`}>
-                                    <div className='flex gap-1.5 pt-2 border-t border-gray-100'>
-                                    {MATERIALS.map(mat => (
-                                                    <button
-                                                    key={mat.id}
-                                                    onClick={(e) => {
-                                                            e.stopPropagation();  
-                                                            onChange(areaId, mat.id);
-                                                    }}
-                                                    className={`flex-1 py-1 text-xs font-semibold rounded-md transition-all active:scale-95 shadow-sm 
-                                                        ${currentMat === mat.id 
-                                                            ? 'bg-indigo-700 text-white shadow-lg' 
-                                                            : 'bg-indigo-100 text-gray-700 hover:bg-indigo-200' 
-                                                        }`}
-                                                    >
-                                                    {mat.label.split('(')[0].trim()}
-                                                    </button>
-                                    ))}
-                                    </div>
+                                        <div className='flex gap-1.5 pt-2 border-t border-gray-100'>
+                                        {MATERIALS.map(mat => (
+                                                        <button
+                                                        key={mat.id}
+                                                        onClick={(e) => {
+                                                                e.stopPropagation();  
+                                                                onChange(areaId, mat.id);
+                                                        }}
+                                                        className={`flex-1 py-1 text-xs font-semibold rounded-md transition-all active:scale-95 shadow-sm 
+                                                            ${currentMat === mat.id 
+                                                                ? 'bg-indigo-700 text-white shadow-lg' 
+                                                                : 'bg-indigo-100 text-gray-700 hover:bg-indigo-200' 
+                                                            }`}
+                                                        >
+                                                        {mat.label.split('(')[0].trim()}
+                                                        </button>
+                                        ))}
+                                        </div>
                             </div>
         );
     };
@@ -1373,6 +1403,7 @@ export default function App() {
                         tileImageURL={tileImageURL} 
                         brightnessLevel={brightnessLevel} 
                         onBrightnessChange={setBrightnessLevel} 
+                        onTileImageReset={handleTileImageReset} // ⭐️ 초기화 함수 추가 ⭐️
                     />
 
                     {/* 재료 상세 비교 버튼 영역 (유지) */}
@@ -1418,10 +1449,10 @@ export default function App() {
                   const isSelected = quantities[area.id] > 0;
 
                   const description = area.desc || area.basePrice ? (
-                              (area.desc && area.desc.trim() !== '') ? (
-                                  <div className="text-xs text-gray-500"><span className="block text-indigo-600">{area.desc}</span></div>
-                              ) : null
-                          ) : null;
+                                     (area.desc && area.desc.trim() !== '') ? (
+                                         <div className="text-xs text-gray-500"><span className="block text-indigo-600">{area.desc}</span></div>
+                                     ) : null
+                                 ) : null;
 
                   return (
                     <div key={area.id} className={`flex flex-col p-3 rounded-lg border transition duration-150 ${isSelected ? 'bg-indigo-50 border-indigo-400' : 'bg-gray-50 border-gray-200 hover:bg-gray-100'}`}> 
