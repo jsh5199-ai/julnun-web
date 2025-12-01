@@ -10,6 +10,7 @@ import {
 // =================================================================
 const MIN_FEE = 200000;
 const KAKAO_CHAT_URL = 'http://pf.kakao.com/_jAxnYn/chat';
+const PHONE_NUMBER = '010-7734-6709'; // 추가: 상담원 연결용 전화번호 상수 정의
 const DEFAULT_TILE_IMAGE_URL = '/default_tile.jpg';
 
 const GROUT_COLORS = [
@@ -83,24 +84,24 @@ const GlobalStyles = () => (
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes slideUpFadeOut { 0% { opacity: 1; transform: translateY(0); } 80% { opacity: 1; transform: translateY(-10px); } 100% { opacity: 0; transform: translateY(-20px); } }
-        @keyframes shine { 
+        @keyframes shine {
             0% { background-position: -200% 0; }
             100% { background-position: 200% 0; }
         }
         .shine-effect {
-            background: #facc15; 
+            background: #facc15;
             background-image: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.7) 50%, rgba(255,255,255,0) 100%);
             background-size: 200% 100%;
             animation: shine 3s infinite;
-            color: #1e3a8a; 
+            color: #1e3a8a;
         }
         .animate-fade-in { animation: fadeIn 0.5s ease-out; }
         .animate-slide-down { animation: slideDown 0.3s ease-out; }
         .animate-toast { animation: slideUpFadeOut 3s forwards; }
         .selection-box { transition: all 0.2s ease-in-out; }
         .selection-selected {
-            border: 3px solid transparent; 
-            background-color: #f3f4f6; 
+            border: 3px solid transparent;
+            background-color: #f3f4f6;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
         }
         .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom); }
@@ -115,13 +116,13 @@ const HOUSING_TYPES = [
     { id: 'old', label: '구축/거주 중', multiplier: 1.0 },
 ];
 const MATERIALS = [
-    { 
-        id: 'poly', label: '폴리아스파틱', priceMod: 1.0, 
+    {
+        id: 'poly', label: '폴리아스파틱', priceMod: 1.0,
         description: '탄성과 광택이 우수하며 가성비가 좋습니다.',
         badge: '일반', badgeColor: 'bg-gray-200 text-gray-700'
     },
-    { 
-        id: 'kerapoxy', label: '에폭시(무광/무펄)', priceMod: 1.8, 
+    {
+        id: 'kerapoxy', label: '에폭시(무광/무펄)', priceMod: 1.8,
         description: '내구성이 뛰어나고 매트한 질감.',
         badge: '프리미엄', badgeColor: 'bg-indigo-500/10 text-indigo-700 border border-indigo-500/30'
     },
@@ -134,8 +135,8 @@ const BATHROOM_AREAS = [
     { id: 'common_bath_wall', label: '공용욕실 벽 전체', basePrice: 300000, icon: Bath, unit: '구역' },
 ];
 const OTHER_AREAS = [
-    { id: 'entrance', label: '현관', basePrice: 50000, icon: DoorOpen, unit: '개소', desc: '' }, 
-    { id: 'balcony_laundry', label: '베란다/세탁실', basePrice: 100000, icon: LayoutGrid, unit: '개소', desc: '' }, 
+    { id: 'entrance', label: '현관', basePrice: 50000, icon: DoorOpen, unit: '개소', desc: '' },
+    { id: 'balcony_laundry', label: '베란다/세탁실', basePrice: 100000, icon: LayoutGrid, unit: '개소', desc: '' },
     { id: 'kitchen_wall', label: '주방 벽면', basePrice: 150000, icon: Utensils, unit: '구역', desc: '' },
     { id: 'living_room', label: '거실 바닥', basePrice: 550000, icon: Sofa, unit: '구역', desc: '' },
 ];
@@ -156,8 +157,8 @@ const FAQ_ITEMS = [
     { question: "Q5. 구축 아파트도 시공이 가능한가요?", answer: "네, 가능합니다. 기존 줄눈을 제거하는 그라인딩 작업이 추가로 필요하며, 현재 견적은 신축/구축 동일하게 적용됩니다." },
 ];
 const YOUTUBE_VIDEOS = [
-    { id: 'XekG8hevWpA', title: '에폭시 시공영상 (벽면/바닥)', label: '에폭시 시공영상' }, 
-    { id: 'M6Aq_VVaG0s', title: '밑작업 영상 (라인 그라인딩)', label: '밑작업 영상' }, 
+    { id: 'XekG8hevWpA', title: '에폭시 시공영상 (벽면/바닥)', label: '에폭시 시공영상' },
+    { id: 'M6Aq_VVaG0s', title: '밑작업 영상 (라인 그라인딩)', label: '밑작업 영상' },
 ];
 const getEmbedUrl = (videoId) => `https://www.youtube.com/embed/${videoId}?autoplay=0&mute=1&rel=0`;
 
@@ -197,9 +198,9 @@ const HARDCODED_PACKAGES = [
     { id: 'EPOXY_1300K_WALLS', price: 1300000, label: '에폭시 벽 전체 5종 패키지 (130만)', P_areas: [], E_areas: [['bathroom_floor', 2], ['master_bath_wall', 1], ['common_bath_wall', 1]] },
 ];
 const MIXED_PACKAGES = [
-    ...NEW_USER_PACKAGES, 
+    ...NEW_USER_PACKAGES,
     ...CUSTOM_MIXED_PACKAGES,
-    ...ORIGINAL_MIXED_PACKAGES, 
+    ...ORIGINAL_MIXED_PACKAGES,
     ...HARDCODED_PACKAGES,
 ];
 const getPackageAreaIds = (pkg) => [
@@ -213,29 +214,29 @@ const getPackageAreaIds = (pkg) => [
 
 const PackageToast = ({ isVisible, onClose, label }) => {
     const toastLabel = label || '패키지 할인';
-        
+
         useEffect(() => {
             if (isVisible) {
                 const timer = setTimeout(() => {
                     onClose();
-                }, 3000); 
+                }, 3000);
                 return () => clearTimeout(timer);
             }
         }, [isVisible, onClose]);
-    
+
         if (!isVisible) return null;
-    
+
         return (
             <div className="fixed bottom-[120px] left-1/2 -translate-x-1/2 z-50 max-w-sm w-11/12">
                 <div className="bg-indigo-800 text-white p-3 rounded-xl shadow-2xl border border-indigo-700 flex items-center justify-between animate-toast">
                     <div className="flex items-center gap-2">
-                        <Gift size={18} className='text-white flex-shrink-0' /> 
+                        <Gift size={18} className='text-white flex-shrink-0' />
                         <div className="text-sm font-bold truncate">
-                            {label || '패키지 할인'} 적용되었습니다! 
+                            {label || '패키지 할인'} 적용되었습니다!
                         </div>
                     </div>
-                    <button 
-                        onClick={onClose} 
+                    <button
+                        onClick={onClose}
                         className="text-xs font-extrabold bg-amber-400 text-indigo-900 px-2 py-1 rounded-full hover:bg-amber-300 transition active:scale-95 flex-shrink-0"
                     >
                         확인하기
@@ -246,12 +247,12 @@ const PackageToast = ({ isVisible, onClose, label }) => {
 };
 
 // -------------------------------------------------------------
-// ⭐️ [수정된 부분] 견적서 상세 모달: 시공 내역 누락 방지 로직 수정 ⭐️
+// ⭐️ [수정됨] QuoteModal: 하단 버튼을 상담/연결로 변경 ⭐️
 // -------------------------------------------------------------
 const QuoteModal = ({ calculation, onClose, quoteRef }) => {
-    const { 
-        price, 
-        label, 
+    const {
+        price,
+        label,
         minimumFeeApplied,
         itemizedPrices,
         priceBeforeAllDiscount // 할인 전 총 원가
@@ -260,10 +261,9 @@ const QuoteModal = ({ calculation, onClose, quoteRef }) => {
     // 1. 총 할인 금액 계산
     const totalDiscount = priceBeforeAllDiscount - price;
     const isDiscountApplied = totalDiscount > 0;
-    
-    // ⭐️ [수정된 로직]: quantity > 0 인 모든 선택 항목 + 할인 항목을 포함
-    // item.isPackageItem이 true이고 item.isDiscount가 false인 항목은 가격이 0원이라도 시공 내역에 포함되어야 함
-    const packageItems = itemizedPrices.filter(i => 
+
+    // ⭐️ [로직 유지]: quantity > 0 인 모든 선택 항목 + 할인 항목을 포함
+    const packageItems = itemizedPrices.filter(i =>
         i.quantity > 0 && !i.isDiscount
     ).map(item => {
         // 원래의 선택된 수량과 단위 정보를 사용
@@ -273,7 +273,7 @@ const QuoteModal = ({ calculation, onClose, quoteRef }) => {
             label: item.label,
             materialLabel: item.materialLabel,
             // 견적서에는 계산의 기반이 된 실제 선택 수량을 표시
-            quantity: item.quantity, 
+            quantity: item.quantity,
             unit: areaInfo ? areaInfo.unit : '개소'
         }
     });
@@ -282,17 +282,17 @@ const QuoteModal = ({ calculation, onClose, quoteRef }) => {
     const discountItems = itemizedPrices.filter(i => i.isDiscount);
 
     // 최소 요금/패키지 적용 시의 라벨
-    const displayLabel = minimumFeeApplied 
-        ? '최소 시공비 적용 중' 
+    const displayLabel = minimumFeeApplied
+        ? '최소 시공비 적용 중'
         : (label || '선택 항목 기반 예상 견적');
-    
 
-    // 이미지 저장 버튼 핸들러
+
+    // 이미지 저장 버튼 핸들러 (기능은 유지)
     const handleImageSave = async () => {
         if (quoteRef.current) {
             try {
                 const canvas = await html2canvas(quoteRef.current, {
-                    scale: 3, 
+                    scale: 3,
                     useCORS: true,
                     allowTaint: true,
                     backgroundColor: '#ffffff'
@@ -317,7 +317,7 @@ const QuoteModal = ({ calculation, onClose, quoteRef }) => {
         <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 animate-fade-in overflow-y-auto">
             {/* max-w-sm을 유지하여 모바일 환경에 최적화 */}
             <div className="bg-white w-full max-w-sm rounded-xl shadow-2xl overflow-hidden animate-slide-down border border-gray-200 my-8">
-                
+
                 <div className="sticky top-0 bg-indigo-900 p-4 text-white flex justify-between items-center z-10">
                     <h3 className="font-extrabold text-lg flex items-center gap-2">
                         <List className="h-6 w-6 text-white" /> 최종 견적서
@@ -326,10 +326,10 @@ const QuoteModal = ({ calculation, onClose, quoteRef }) => {
                 </div>
 
                 <div className="p-5 max-h-[70vh] overflow-y-auto">
-                    
+
                     {/* 견적서 캡처 영역 시작 (첨부 이미지 디자인 반영) */}
                     <div ref={quoteRef} className="bg-white space-y-4">
-                        
+
                         {/* 1. 제목 영역 */}
                         <div className='text-center pt-2'>
                             <h4 className='text-xl font-extrabold' style={{ color: '#585885' }}>줄눈의미학 예상 견적서</h4>
@@ -338,7 +338,7 @@ const QuoteModal = ({ calculation, onClose, quoteRef }) => {
                         {/* 2. 패키지/할인 적용 영역 (배경색: #f0f0ff, 보더: #cccceb) */}
                         <div className='p-4 rounded-lg space-y-1' style={{ backgroundColor: '#f0f0ff', border: '1px solid #cccceb' }}>
                             {/* ⭐️ 디자인 개선: 윗줄 (메인 라벨), 아랫줄 (총 할인 금액) ⭐️ */}
-                            <div className='flex flex-col items-start'> 
+                            <div className='flex flex-col items-start'>
                                 {/* 메인 라벨 */}
                                 <div className='font-bold text-base flex items-center text-gray-800'>
                                     <Crown size={18} className='mr-2' style={{ color: '#9987ce' }}/> {displayLabel}
@@ -350,7 +350,7 @@ const QuoteModal = ({ calculation, onClose, quoteRef }) => {
                                     </p>
                                 )}
                             </div>
-                            
+
                             {/* 상세 설명 리스트 */}
                             <ul className='list-disc list-inside text-sm text-gray-700 mt-2 ml-1'>
                                 <li>패키지 포함 영역이 할인 적용되었습니다.</li>
@@ -381,7 +381,7 @@ const QuoteModal = ({ calculation, onClose, quoteRef }) => {
                                 </div>
                             </div>
                         )}
-                        
+
                         {/* 4. 이벤트 할인 영역 (숨고 리뷰 이벤트) */}
                         {discountItems.length > 0 && (
                             <div className='mt-2 pt-2 border-t border-gray-100'>
@@ -393,7 +393,7 @@ const QuoteModal = ({ calculation, onClose, quoteRef }) => {
                                         </div>
                                         {/* 할인 금액: 폰트 크기 text-lg, 색상 #ff4f4f (빨간색 계열) */}
                                         <div className='font-bold text-lg' style={{ color: '#ff4f4f' }}>
-                                            -{item.originalPrice.toLocaleString()}원 
+                                            -{item.originalPrice.toLocaleString()}원
                                         </div>
                                     </div>
                                 ))}
@@ -435,16 +435,34 @@ const QuoteModal = ({ calculation, onClose, quoteRef }) => {
                             </div>
                         </div>
 
+                        <div className='text-center pt-3'>
+                            <button onClick={handleImageSave} className="py-2.5 px-4 bg-gray-100 text-gray-700 rounded-lg font-bold text-sm hover:bg-gray-200 transition shadow-md flex items-center justify-center gap-2 mx-auto active:scale-95">
+                                <Download size={16} /> 견적서 이미지로 저장 (캡처)
+                            </button>
+                        </div>
+
                     </div>
                     {/* 견적서 캡처 영역 종료 */}
                 </div>
 
+                {/* ⭐️ [수정된 부분]: 하단 버튼을 상담/연결로 변경 ⭐️ */}
                 <div className="p-4 bg-gray-50 border-t border-gray-200 grid grid-cols-2 gap-3">
-                    <button onClick={onClose} className="py-3 bg-gray-300 text-gray-700 rounded-lg font-bold hover:bg-gray-400 transition active:scale-95">닫기</button>
-                    <button onClick={handleImageSave} className="py-3 bg-indigo-700 text-white rounded-lg font-bold hover:bg-indigo-800 transition active:scale-95 flex items-center justify-center gap-2">
-                       <Download size={18} /> 이미지 저장
-                    </button>
+                    <a
+                        href={KAKAO_CHAT_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="py-3 bg-yellow-400 text-gray-800 rounded-lg font-bold hover:bg-yellow-500 transition active:scale-95 flex items-center justify-center gap-2"
+                    >
+                        <Layers size={18} /> 카카오톡 상담
+                    </a>
+                    <a
+                        href={`tel:${PHONE_NUMBER}`}
+                        className="py-3 bg-indigo-700 text-white rounded-lg font-bold hover:bg-indigo-800 transition active:scale-95 flex items-center justify-center gap-2"
+                    >
+                       <Phone size={18} /> 상담원 연결
+                    </a>
                 </div>
+                {/* ⭐️ [수정된 부분] 끝 ⭐️ */}
             </div>
         </div>
     );
@@ -517,17 +535,17 @@ const Accordion = ({ question, answer }) => {
 // ⭐️ [ColorPalette] (로직 및 스타일 유지) ⭐️
 const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageURL, brightnessLevel, onBrightnessChange, onTileImageReset }) => {
     const baseColorData = GROUT_COLORS.find(c => c.id === selectedColorId) || GROUT_COLORS[0];
-    const GROUT_LINE_WIDTH = 12; 
+    const GROUT_LINE_WIDTH = 12;
 
     const effectiveTileImageURL = (tileImageURL && tileImageURL !== DEFAULT_TILE_IMAGE_URL)
         ? tileImageURL
         : DEFAULT_TILE_IMAGE_URL;
-    
+
     // ⭐️ [로직 유지] 밝기 레벨에 따라 최종 줄눈 색상 결정 ⭐️
     const effectiveGroutColor = useMemo(() => {
         const baseHex = baseColorData.code;
         // brightnessLevel(-50~50)을 -1.0~1.0의 비율로 변환 (50이 100% 혼합)
-        const level = brightnessLevel / 50; 
+        const level = brightnessLevel / 50;
 
         if (level === 0) {
             return baseHex; // 0%는 기본 색상
@@ -564,30 +582,30 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
             <h3 className="text-base font-extrabold flex items-center gap-2 mb-3 text-gray-800">
                 <Palette className="h-4 w-4 text-indigo-600" /> 2-1. 줄눈 색상 미리보기 및 선택
             </h3>
-            
+
             {/* 시뮬레이션 컨테이너 */}
-            <div className={`transition-all duration-300`}> 
-                <div 
-                    className="w-full aspect-video mx-auto overflow-hidden relative bg-white" 
+            <div className={`transition-all duration-300`}>
+                <div
+                    className="w-full aspect-video mx-auto overflow-hidden relative bg-white"
                 >
                     {/* 1. 타일 배경 (이미지) */}
-                    <div 
-                        className="absolute inset-0" 
-                        style={{ 
+                    <div
+                        className="absolute inset-0"
+                        style={{
                             backgroundImage: `url(${effectiveTileImageURL})`,
                             backgroundSize: 'cover',
                             backgroundPosition: 'center',
-                            zIndex: 1 
+                            zIndex: 1
                         }}
                     ></div>
-                    
+
                     {/* 2. 워터마크 레이어 (z-index 5) */}
-                    <div 
-                        className="absolute inset-0 flex items-center justify-center opacity-30" 
+                    <div
+                        className="absolute inset-0 flex items-center justify-center opacity-30"
                         style={{
-                            zIndex: 5, 
-                            backgroundImage: 'url(/logo.png)', 
-                            backgroundSize: '30%', 
+                            zIndex: 5,
+                            backgroundImage: 'url(/logo.png)',
+                            backgroundSize: '30%',
                             backgroundRepeat: 'no-repeat',
                             backgroundPosition: 'center',
                         }}
@@ -595,7 +613,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                     </div>
 
                     {/* ⭐️ 3. 줄눈 십자가 (혼합된 색상 적용) - z-index 10 (최상단) ⭐️ */}
-                    <div 
+                    <div
                         className="absolute top-0 bottom-0 left-1/2"
                         style={{
                             width: `${GROUT_LINE_WIDTH}px`,
@@ -604,7 +622,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                             zIndex: 10,
                         }}
                     ></div>
-                    <div 
+                    <div
                         className="absolute left-0 right-0 top-1/2"
                         style={{
                             height: `${GROUT_LINE_WIDTH}px`,
@@ -625,15 +643,15 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                     <CheckCircle2 size={16} className={`ml-2 flex-shrink-0 ${isDarkGrout ? 'text-amber-400' : 'text-indigo-700'}`}/>
                 </p>
             </div>
-            
+
             {/* ⭐️ [문구 위치 재수정 반영] 밝기 조절 슬라이더 ⭐️ */}
             <div className='mb-4 p-3 bg-gray-50 rounded-lg border border-gray-100'>
                 <h4 className="text-xs font-extrabold flex items-center gap-1 mb-2 text-gray-700">
-                    <TrendingUp size={14} className='text-indigo-500' /> 조색 밝기 조절 
+                    <TrendingUp size={14} className='text-indigo-500' /> 조색 밝기 조절
                 </h4>
                 <div className='flex items-center gap-3'>
                     {/* ⭐️ 수정: 어둡게를 왼쪽으로 이동 ⭐️ */}
-                    <span className='text-xs font-bold text-gray-500 whitespace-nowrap'>어둡게</span> 
+                    <span className='text-xs font-bold text-gray-500 whitespace-nowrap'>어둡게</span>
                     <input
                         type="range"
                         min="-50"
@@ -645,7 +663,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                         style={sliderTrackStyle}
                     />
                     {/* ⭐️ 수정: 밝게를 오른쪽으로 이동 ⭐️ */}
-                    <span className='text-xs font-bold text-gray-500 whitespace-nowrap'>밝게</span> 
+                    <span className='text-xs font-bold text-gray-500 whitespace-nowrap'>밝게</span>
                 </div>
                 <div className='text-center mt-1 text-sm font-extrabold text-indigo-600'>
                     현재 밝기: {brightnessLevel}%
@@ -659,10 +677,10 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                 <label htmlFor="tileFileInput" className="flex-1 py-2.5 px-4 bg-indigo-600 text-white rounded-lg font-bold text-sm hover:bg-indigo-700 transition shadow-md cursor-pointer flex items-center justify-center gap-2">
                     <ImageIcon size={16} /> 내 타일 사진 첨부
                 </label>
-                
+
                 {/* 타일 이미지가 기본 이미지가 아닐 때만 초기화 버튼 표시 */}
                 {tileImageURL !== DEFAULT_TILE_IMAGE_URL && (
-                    <button 
+                    <button
                         onClick={onTileImageReset}
                         className="py-2.5 px-4 bg-red-500 text-white rounded-lg font-bold text-sm hover:bg-red-600 transition shadow-md flex items-center justify-center gap-2 active:scale-95 flex-shrink-0 w-1/4"
                         title="타일 이미지 초기화"
@@ -711,26 +729,26 @@ export default function App() {
     const [polyOption, setPolyOption] = useState('pearl');
     const [epoxyOption, setEpoxyOption] = useState('kerapoxy');
     const [selectedGroutColor, setSelectedGroutColor] = useState(GROUT_COLORS[0].id);
-    const [brightnessLevel, setBrightnessLevel] = useState(0); 
-    const [tileImageURL, setTileImageURL] = useState(DEFAULT_TILE_IMAGE_URL); 
-    
+    const [brightnessLevel, setBrightnessLevel] = useState(0);
+    const [tileImageURL, setTileImageURL] = useState(DEFAULT_TILE_IMAGE_URL);
+
     const [quantities, setQuantities] = useState(
         [...ALL_AREAS].reduce((acc, area) => ({ ...acc, [area.id]: 0 }), {})
     );
     const [areaMaterials, setAreaMaterials] = useState(
         [...ALL_AREAS].reduce((acc, area) => ({ ...acc, [area.id]: 'poly' }), {})
     );
-        
+
     const [selectedReviews, setSelectedReviews] = useState(new Set());
     const [showModal, setShowModal] = useState(false); // 견적서 모달 상태
-    const [showMaterialModal, setShowMaterialModal] = useState(false); 
-    const [showToast, setShowToast] = useState(false); 
-    const [activeVideoId, setActiveVideoId] = useState(YOUTUBE_VIDEOS[0].id); 
+    const [showMaterialModal, setShowMaterialModal] = useState(false);
+    const [showToast, setShowToast] = useState(false);
+    const [activeVideoId, setActiveVideoId] = useState(YOUTUBE_VIDEOS[0].id);
 
-    const quoteRef = useRef(null); 
+    const quoteRef = useRef(null);
 
     const SOOMGO_REVIEW_URL = 'https://www.soomgo.com/profile/users/10755579?tab=review';
-    const PHONE_NUMBER = '010-7734-6709';
+    // PHONE_NUMBER 상수는 전역 상수 정의 섹션으로 이동됨
 
     // 🚨 [유지] areaMaterials 의존성 간소화 (cleaner guardrail)
     useEffect(() => {
@@ -757,10 +775,10 @@ export default function App() {
             // 현관 자동 선택/해제 로직 (유지)
             const isBathroomFloorUpdated = id === 'bathroom_floor';
             let bathroomFloorCount = isBathroomFloorUpdated ? newQuantities['bathroom_floor'] : prev['bathroom_floor'];
-            
+
             if (bathroomFloorCount >= 2 && newQuantities['entrance'] === 0) {
                 newQuantities['entrance'] = 1;
-            } 
+            }
             else if (bathroomFloorCount < 2 && prev['bathroom_floor'] >= 2 && prev['entrance'] === 1 && newQuantities['entrance'] === 1) {
                 if (newQuantities['entrance'] === 1) {
                     newQuantities['entrance'] = 0;
@@ -769,7 +787,7 @@ export default function App() {
             return newQuantities;
         });
     }, []);
-        
+
     const handleAreaMaterialChange = useCallback((id, mat) => {
         if (id === 'entrance') {
             setAreaMaterials(prev => ({ ...prev, [id]: 'poly' }));
@@ -777,7 +795,7 @@ export default function App() {
             setAreaMaterials(prev => ({ ...prev, [id]: mat }));
         }
     }, []);
-        
+
     const toggleReview = useCallback((id) => {
         setSelectedReviews(prev => {
             const newSet = new Set(prev);
@@ -808,12 +826,12 @@ export default function App() {
             if (!summary['poly']) summary['poly'] = {};
             summary['poly']['entrance'] = q['entrance'];
             if(summary['kerapoxy'] && summary['kerapoxy']['entrance']) {
-                delete summary['kerapoxy']['entrance']; 
+                delete summary['kerapoxy']['entrance'];
             }
         }
         return summary;
-    }, []); 
-        
+    }, []);
+
     // 🚨 [유지] useMemo/useCallback 의존성 최적화
     const findMatchingPackage = useCallback((selectionSummary, quantities) => {
         const filterSelections = (selections) => {
@@ -828,18 +846,18 @@ export default function App() {
 
         const filteredPolySelections = filterSelections(selectionSummary['poly'] || {});
         const filteredEpoxySelections = filterSelections(selectionSummary['kerapoxy'] || {});
-            
-        const totalSelectedCount = Object.values(filteredPolySelections).reduce((sum, v) => sum + v, 0) + 
+
+        const totalSelectedCount = Object.values(filteredPolySelections).reduce((sum, v) => sum + v, 0) +
                                          Object.values(filteredEpoxySelections).reduce((sum, v) => sum + v, 0);
-            
+
         if (totalSelectedCount === 0) return null;
-        const sortedPackages = MIXED_PACKAGES; 
-            
+        const sortedPackages = MIXED_PACKAGES;
+
         for (const pkg of sortedPackages) {
                     let tempPolySelections = { ...filteredPolySelections };
                     let tempEpoxySelections = { ...filteredEpoxySelections };
                     let appliedAutoEntrance = false;
-                    
+
                     if (pkg.isFlexible) {
                                                const requiredPolyAreas = pkg.P_areas.map(([id]) => id).filter(id => id !== 'entrance');
                                                const requiredEpoxyAreas = pkg.E_areas.map(([id]) => id);
@@ -883,23 +901,23 @@ export default function App() {
                                                        if (pkg.id.includes('COMMON') && matchedFlexibleItem !== 'common_bath_wall') flexibleMatch = false;
                                                    }
                                                }
-                                               
+
                                                if (baseMatch && flexibleMatch) {
                                                    const packageAreaIds = new Set(getPackageAreaIds(pkg));
                                                    const finalSelectedAreaIds = new Set([...Object.keys(tempPolySelections).filter(id => tempPolySelections[id] > 0), ...Object.keys(tempEpoxySelections).filter(id => tempEpoxySelections[id] > 0)]);
-                                                   const isIdSetMatch = finalSelectedAreaIds.size === packageAreaIds.size && 
+                                                   const isIdSetMatch = finalSelectedAreaIds.size === packageAreaIds.size &&
                                                                                          [...finalSelectedAreaIds].every(id => packageAreaIds.has(id));
 
                                                    if (isIdSetMatch) {
-                                                       return { ...pkg, autoEntrance: appliedAutoEntrance }; 
+                                                       return { ...pkg, autoEntrance: appliedAutoEntrance };
                                                    }
                                                }
-                                               continue; 
+                                               continue;
                     }
-                    
+
                     let isMatch = true;
                     for (const [id, requiredQty] of pkg.P_areas) {
-                                   if ((tempPolySelections[id] || 0) !== requiredQty) { 
+                                   if ((tempPolySelections[id] || 0) !== requiredQty) {
                                        isMatch = false;
                                        break;
                                    }
@@ -907,7 +925,7 @@ export default function App() {
                     if (!isMatch) continue;
 
                     for (const [id, requiredQty] of pkg.E_areas) {
-                                   if ((tempEpoxySelections[id] || 0) !== requiredQty) { 
+                                   if ((tempEpoxySelections[id] || 0) !== requiredQty) {
                                        isMatch = false;
                                        break;
                                    }
@@ -916,11 +934,11 @@ export default function App() {
 
                     const selectedAreaIds = new Set([...Object.keys(tempPolySelections).filter(id => tempPolySelections[id] > 0), ...Object.keys(tempEpoxySelections).filter(id => tempEpoxySelections[id] > 0)]);
                     const packageAreaIds = new Set(getPackageAreaIds(pkg));
-                    const isIdSetMatch = selectedAreaIds.size === packageAreaIds.size && 
+                    const isIdSetMatch = selectedAreaIds.size === packageAreaIds.size &&
                                                              [...selectedAreaIds].every(id => packageAreaIds.has(id));
 
                     if (isIdSetMatch) {
-                                   return { ...pkg, autoEntrance: appliedAutoEntrance }; 
+                                   return { ...pkg, autoEntrance: appliedAutoEntrance };
                     }
         }
         return null;
@@ -928,46 +946,46 @@ export default function App() {
 
 
     // -------------------------------------------------------------
-    // ⭐️ [수정된 부분] calculation 로직: isPackageItem 플래그를 정확하게 설정 ⭐️
+    // ⭐️ [로직 유지] calculation 로직 (누락 수정 반영된 버전) ⭐️
     // -------------------------------------------------------------
     const calculation = useMemo(() => {
         const selectedHousing = HOUSING_TYPES.find(h => h.id === housingType);
-        let itemizedPrices = []; 
-            
+        let itemizedPrices = [];
+
         const selectionSummary = getSelectionSummary(quantities, areaMaterials);
         const matchedPackageResult = findMatchingPackage(selectionSummary, quantities);
         const matchedPackage = matchedPackageResult ? matchedPackageResult : null;
-            
+
         let q = { ...quantities };
         let total = 0;
         let labelText = null;
-        let isPackageActive = false; 
+        let isPackageActive = false;
         let isFreeEntrance = false;
         let totalAreaCount = Object.values(quantities).some(v => v > 0) ? Object.keys(quantities).filter(k => quantities[k] > 0).length : 0;
-            
-        let packageAreas = []; 
-            
+
+        let packageAreas = [];
+
         if (matchedPackage) {
             total = matchedPackage.price;
             isPackageActive = true;
             // ⭐️ [요청 반영] 패키지 라벨 통합: 어떤 패키지든 "패키지 할인 적용 중" 문구 사용 ⭐️
-            labelText = '패키지 할인 적용 중'; 
+            labelText = '패키지 할인 적용 중';
             packageAreas = getPackageAreaIds(matchedPackage);
             // 패키지 항목은 임시로 0 처리하여 개별 계산에서 제외
             packageAreas.forEach(id => { q[id] = 0; });
-            if (quantities['entrance'] >= 1) { 
+            if (quantities['entrance'] >= 1) {
                 isFreeEntrance = true;
                 q['entrance'] = 0;
             }
-        } 
-            
+        }
+
         if (quantities['bathroom_floor'] >= 2 && quantities['entrance'] >= 1 && !matchedPackage) {
             isFreeEntrance = true;
             isPackageActive = true;
             labelText = '현관 서비스 적용 중';
             q['entrance'] = 0;
         }
-        
+
         // ⭐️ 할인 전 총 원가를 먼저 계산 (정가 기준) ⭐️
         let priceBeforeAllDiscount = 0;
 
@@ -975,15 +993,15 @@ export default function App() {
         ALL_AREAS.forEach(area => {
             const initialCount = quantities[area.id] || 0;
             if (initialCount === 0) return;
-            const count = q[area.id] || 0; 
+            const count = q[area.id] || 0;
             const areaMatId = area.id === 'entrance' ? 'poly' : areaMaterials[area.id];
             const isEpoxy = areaMatId === 'kerapoxy';
-            
+
             // ⭐️ [변경 시작] 정가(itemOriginalTotal) 계산을 ORIGINAL_PRICES 기준으로 변경 ⭐️
             const priceKey = areaMatId === 'poly' ? 'poly' : 'epoxy';
-            
+
             let originalPriceFromConst = (ORIGINAL_PRICES[area.id] && ORIGINAL_PRICES[area.id][priceKey] !== undefined)
-                ? ORIGINAL_PRICES[area.id][priceKey] 
+                ? ORIGINAL_PRICES[area.id][priceKey]
                 : (area.basePrice * (isEpoxy ? MATERIALS.find(m => m.id === 'kerapoxy').priceMod : 1.0) * selectedHousing.multiplier);
 
             let itemOriginalTotal = originalPriceFromConst * initialCount;
@@ -1002,24 +1020,24 @@ export default function App() {
                 finalUnitBasePrice = 50000;
             } else if (BATHROOM_AREAS.some(a => a.id === area.id)) {
                 finalUnitBasePrice = area.basePrice * (isEpoxy ? 1.8 : 1.0);
-            } 
-            
+            }
+
             const calculatedPricePerUnit = Math.floor(finalUnitBasePrice * selectedHousing.multiplier);
             let finalCalculatedPrice = 0;
             let finalDiscount = 0;
             let isFreeServiceItem = false;
-            let packageCount = initialCount - count; 
-            
+            let packageCount = initialCount - count;
+
             // ⭐️ [계산 로직 유지] 패키지/무료 서비스 적용 시 가격 0원 처리 ⭐️
             // 🚨 [수정]: isPackageItem 플래그를 정확히 설정
-            let isPackageItemFlag = false; 
+            let isPackageItemFlag = false;
 
             if (packageCount > 0 && (matchedPackage || isFreeEntrance) && count === 0) {
                 finalCalculatedPrice = 0;
                 finalDiscount = itemOriginalTotal; // 할인액은 정가와 같음
-                isFreeServiceItem = area.id === 'entrance' || packageAreas.includes(area.id); 
+                isFreeServiceItem = area.id === 'entrance' || packageAreas.includes(area.id);
                 isPackageItemFlag = true; // 패키지/무료로 인해 가격이 0원이 된 경우
-            } 
+            }
             else if (area.id === 'entrance' && isFreeEntrance && !matchedPackage && count === 0) {
                 finalCalculatedPrice = 0;
                 finalDiscount = itemOriginalTotal; // 할인액은 정가와 같음
@@ -1030,18 +1048,18 @@ export default function App() {
                 // ⭐️ [계산 로직 유지] 패키지 미적용 시의 개별 할인 로직 ⭐️
                 let remainingCalculatedPrice = calculatedPricePerUnit * count;
                 let remainingDiscount = 0;
-                
+
                 if (area.id === 'silicon_bathtub' && totalAreaCount >= 3) {
-                    const nonPackageOriginalPrice = 80000 * count; 
-                    const fixedPriceForRemaining = 50000 * count; 
+                    const nonPackageOriginalPrice = 80000 * count;
+                    const fixedPriceForRemaining = 50000 * count;
                     if (count > 0) {
                         remainingDiscount = nonPackageOriginalPrice - fixedPriceForRemaining;
                         remainingCalculatedPrice = fixedPriceForRemaining;
                         isPackageItemFlag = true; // 실리콘 할인 적용된 경우
                     }
                 } else if (area.id === 'silicon_living_baseboard' && totalAreaCount >= 3) {
-                    const nonPackageOriginalPrice = 400000 * count; 
-                    const fixedPriceForRemaining = 350000 * count; 
+                    const nonPackageOriginalPrice = 400000 * count;
+                    const fixedPriceForRemaining = 350000 * count;
                     if (count > 0) {
                         remainingDiscount = nonPackageOriginalPrice - fixedPriceForRemaining;
                         remainingCalculatedPrice = fixedPriceForRemaining;
@@ -1050,31 +1068,31 @@ export default function App() {
                 } else if (area.id === 'silicon_sink') {
                     remainingCalculatedPrice = 30000 * count;
                 }
-                finalCalculatedPrice = remainingCalculatedPrice; 
-                finalDiscount = remainingDiscount; 
+                finalCalculatedPrice = remainingCalculatedPrice;
+                finalDiscount = remainingDiscount;
                 total += finalCalculatedPrice;
             }
             // ⭐️ [변경 끝] ⭐️
-            
+
             finalCalculatedPrice = Math.floor(finalCalculatedPrice / 1000) * 1000;
             itemOriginalTotal = Math.floor(itemOriginalTotal / 1000) * 1000;
             finalDiscount = Math.floor(finalDiscount / 1000) * 1000;
 
             itemizedPrices.push({
-                id: area.id, 
-                label: area.label, 
+                id: area.id,
+                label: area.label,
                 quantity: initialCount, // ⭐️ 견적서에 표시할 실제 선택 수량 ⭐️
-                unit: area.unit, 
+                unit: area.unit,
                 originalPrice: itemOriginalTotal, // ⭐️ 새로운 정가 기준 적용 ⭐️
-                calculatedPrice: finalCalculatedPrice, 
-                discount: finalDiscount, 
-                isFreeService: isFreeServiceItem, 
+                calculatedPrice: finalCalculatedPrice,
+                discount: finalDiscount,
+                isFreeService: isFreeServiceItem,
                 isPackageItem: isPackageItemFlag || !isFreeServiceItem && (packageCount > 0 || isPackageActive || finalDiscount > 0), // 할인 또는 패키지가 적용된 모든 항목 포함
-                isDiscount: false, 
+                isDiscount: false,
                 materialLabel: ['silicon_bathtub', 'silicon_sink', 'silicon_living_baseboard'].includes(area.id) ? 'Silicon' : (areaMatId === 'poly' ? 'Poly' : 'Epoxy')
             });
         });
-            
+
         let discountAmount = 0;
         REVIEW_EVENTS.forEach(evt => {
             if (selectedReviews.has(evt.id)) {
@@ -1084,9 +1102,9 @@ export default function App() {
             }
         });
         total -= discountAmount;
-        
-        let originalCalculatedPrice = Math.max(0, Math.floor(total / 1000) * 1000); 
-        let finalPrice = originalCalculatedPrice; 
+
+        let originalCalculatedPrice = Math.max(0, Math.floor(total / 1000) * 1000);
+        let finalPrice = originalCalculatedPrice;
         let minimumFeeApplied = false;
 
         if (finalPrice > 0 && finalPrice < MIN_FEE) {
@@ -1094,25 +1112,25 @@ export default function App() {
             minimumFeeApplied = true;
         }
 
-        
+
         if (isFreeEntrance && !matchedPackage) {
             labelText = '현관 서비스 적용 중';
         } else if (matchedPackage) {
             // ⭐️ [요청 반영] 패키지 라벨 통합: 어떤 패키지든 "패키지 할인 적용 중" 문구 사용 ⭐️
-            labelText = '패키지 할인 적용 중'; 
+            labelText = '패키지 할인 적용 중';
         }
-        
+
         // ⭐️ priceBeforeAllDiscount는 이미 itemOriginalTotal을 누적했으므로 여기서 다시 계산하지 않습니다. ⭐️
 
-        return { 
-            price: finalPrice, 
-            originalCalculatedPrice, 
+        return {
+            price: finalPrice,
+            originalCalculatedPrice,
             priceBeforeAllDiscount: Math.floor(priceBeforeAllDiscount / 1000) * 1000, // ⭐️ 최종 정가 ⭐️
-            label: labelText, 
-            isPackageActive: isPackageActive || isFreeEntrance, 
+            label: labelText,
+            isPackageActive: isPackageActive || isFreeEntrance,
             isFreeEntrance: isFreeEntrance,
             discountAmount: priceBeforeAllDiscount - finalPrice, // ⭐️ 새로운 정가 기준의 총 할인액 ⭐️
-            minimumFeeApplied, 
+            minimumFeeApplied,
             // ⭐️ [수정]: quantity > 0 인 모든 선택 항목 + 할인 항목만 견적서에 포함 ⭐️
             itemizedPrices: itemizedPrices.filter(item => item.quantity > 0 || item.isDiscount),
         };
@@ -1124,10 +1142,10 @@ export default function App() {
     useEffect(() => {
         if (calculation.isPackageActive && !packageActiveRef.current) {
             setShowToast(true);
-        } 
+        }
         packageActiveRef.current = calculation.isPackageActive;
     }, [calculation.isPackageActive]);
-        
+
     const handleCloseToast = useCallback(() => {
         setShowToast(false);
     }, []);
@@ -1143,7 +1161,7 @@ export default function App() {
             reader.readAsDataURL(file);
         }
     };
-    
+
     // ⭐️ [추가] 타일 이미지 초기화 핸들러 ⭐️
     const handleTileImageReset = useCallback(() => {
         setTileImageURL(DEFAULT_TILE_IMAGE_URL);
@@ -1184,13 +1202,13 @@ export default function App() {
                                                         <button
                                                         key={mat.id}
                                                         onClick={(e) => {
-                                                                e.stopPropagation();  
+                                                                e.stopPropagation();
                                                                 onChange(areaId, mat.id);
                                                         }}
-                                                        className={`flex-1 py-1 text-xs font-semibold rounded-md transition-all active:scale-95 shadow-sm 
-                                                            ${currentMat === mat.id 
-                                                                ? 'bg-indigo-700 text-white shadow-lg' 
-                                                                : 'bg-indigo-100 text-gray-700 hover:bg-indigo-200' 
+                                                        className={`flex-1 py-1 text-xs font-semibold rounded-md transition-all active:scale-95 shadow-sm
+                                                            ${currentMat === mat.id
+                                                                ? 'bg-indigo-700 text-white shadow-lg'
+                                                                : 'bg-indigo-100 text-gray-700 hover:bg-indigo-200'
                                                             }`}
                                                         >
                                                         {mat.label.split('(')[0].trim()}
@@ -1208,7 +1226,7 @@ export default function App() {
                 const isSelected = quantities[area.id] > 0;
                 const currentMat = area.id === 'entrance' ? 'poly' : areaMaterials[area.id];
                 const isEntranceAutoSelected = area.id === 'entrance' && quantities['entrance'] >= 1 && quantities['bathroom_floor'] >= 2 && !calculation.isPackageActive;
-                
+
                 const description = area.desc || area.basePrice ? (
                     (area.desc && area.desc.trim() !== '') ? (
                         <div className="text-xs text-gray-500"><span className="block text-indigo-600">{area.desc}</span></div>
@@ -1219,37 +1237,37 @@ export default function App() {
                     <div key={area.id} className={`flex flex-col p-3 rounded-lg border transition duration-150 ${isSelected ? 'bg-indigo-50 border-indigo-400' : 'bg-gray-50 border-gray-200 hover:bg-gray-100'}`}>
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <div className={`p-2 rounded-full shadow-sm ${isSelected ? 'bg-indigo-700 text-white' : 'bg-gray-200 text-indigo-600'}`}><Icon size={18} /></div> 
+                                <div className={`p-2 rounded-full shadow-sm ${isSelected ? 'bg-indigo-700 text-white' : 'bg-gray-200 text-indigo-600'}`}><Icon size={18} /></div>
                                 <div>
                                     <div className="font-semibold text-gray-800">{area.label}</div>
                                     {description}
                                 </div>
                             </div>
                             <div className="flex items-center gap-1 bg-white px-1 py-1 rounded-full shadow-md">
-                                <button 
-                                    onClick={() => handleQuantityChange(area.id, -1)} 
+                                <button
+                                    onClick={() => handleQuantityChange(area.id, -1)}
                                     disabled={isEntranceAutoSelected && area.id === 'entrance'}
-                                    className={`w-7 h-7 flex items-center justify-center rounded-full transition active:scale-90 text-lg font-bold 
+                                    className={`w-7 h-7 flex items-center justify-center rounded-full transition active:scale-90 text-lg font-bold
                                         ${(quantities[area.id] > 0 && !(isEntranceAutoSelected && area.id === 'entrance')) ? 'text-indigo-600 hover:bg-gray-100' : 'text-gray-400 cursor-not-allowed'}`}
-                                >-</button> 
+                                >-</button>
                                 <span className={`w-5 text-center text-sm font-bold ${quantities[area.id] > 0 ? 'text-gray-900' : 'text-gray-400'}`}>{quantities[area.id]}</span>
-                                <button 
+                                <button
                                     onClick={() => {
                                         handleQuantityChange(area.id, 1);
                                         if (quantities[area.id] === 0) {
                                             handleAreaMaterialChange(area.id, area.id === 'entrance' ? 'poly' : material);
                                         }
-                                    }} 
+                                    }}
                                     disabled={isEntranceAutoSelected && area.id === 'entrance'}
                                     className={`w-7 h-7 flex items-center justify-center rounded-full font-bold text-lg transition active:scale-90
                                         ${isEntranceAutoSelected && area.id === 'entrance' ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'text-indigo-600 hover:bg-gray-100'}
                                     `}
-                                >+</button> 
+                                >+</button>
                             </div>
                         </div>
 
                         {isSelected && (
-                            <MaterialSelectButtons 
+                            <MaterialSelectButtons
                                 areaId={area.id}
                                 currentMat={currentMat}
                                 onChange={handleAreaMaterialChange}
@@ -1269,18 +1287,18 @@ export default function App() {
             {/* 헤더 (유지) */}
             <header className="bg-indigo-900 text-white sticky top-0 z-20 shadow-xl">
             <div className="p-4 flex items-center justify-between max-w-md mx-auto">
-              <div className="flex items-center"> 
+              <div className="flex items-center">
                 <h1 className="text-xl font-extrabold text-gray-50 tracking-wide">줄눈의미학</h1>
               </div>
-              <div className='flex gap-2'> 
-                <button 
-                  onClick={() => window.location.href = `tel:${PHONE_NUMBER}`} 
+              <div className='flex gap-2'>
+                <button
+                  onClick={() => window.location.href = `tel:${PHONE_NUMBER}`}
                   className="text-xs bg-amber-400 text-indigo-900 px-3 py-1 rounded-full font-extrabold hover:bg-amber-300 transition active:scale-95 shadow-md flex items-center"
                 >
                   <Phone size={12} className="inline mr-1" /> 상담원 연결
                 </button>
-                <button 
-                  onClick={() => window.location.reload()} 
+                <button
+                  onClick={() => window.location.reload()}
                   className="text-xs bg-indigo-800 px-3 py-1 rounded-full text-white hover:bg-indigo-700 transition active:scale-95 shadow-md flex items-center"
                 >
                   <RefreshCw size={12} className="inline mr-1" /> 초기화
@@ -1299,10 +1317,10 @@ export default function App() {
               <div className="relative">
                 <div className="aspect-video w-full">
                   <iframe
-                    key={currentVideo.id} 
+                    key={currentVideo.id}
                     width="100%"
                     height="100%"
-                    src={currentEmbedUrl} 
+                    src={currentEmbedUrl}
                     title={currentVideo.title}
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
@@ -1315,9 +1333,9 @@ export default function App() {
                             key={video.id}
                             onClick={() => setActiveVideoId(video.id)}
                             className={`flex-1 py-2 text-sm font-extrabold rounded-lg transition-all duration-300 shadow-md active:scale-[0.99] ${
-                                activeVideoId === video.id 
-                                    ? 'bg-indigo-700 text-white' 
-                                    : 'bg-white text-indigo-700 hover:bg-indigo-50' 
+                                activeVideoId === video.id
+                                    ? 'bg-indigo-700 text-white'
+                                    : 'bg-white text-indigo-700 hover:bg-indigo-50'
                             }`}
                         >
                             {video.label}
@@ -1326,7 +1344,7 @@ export default function App() {
                 </div>
               </div>
                 </section>
-                
+
                 {/* 1. 현장 유형 섹션 (유지) */}
                 <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-150">
                 <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
@@ -1338,8 +1356,8 @@ export default function App() {
                     key={type.id}
                     onClick={() => setHousingType(type.id)}
                     className={`p-4 rounded-lg text-center transition-all duration-200 selection-box active:scale-[0.99] shadow-md ${
-                      housingType === type.id 
-                        ? 'bg-indigo-700 text-white font-bold shadow-lg' 
+                      housingType === type.id
+                        ? 'bg-indigo-700 text-white font-bold shadow-lg'
                         : 'bg-white text-gray-600 hover:bg-indigo-50'
                     }`}
                   >
@@ -1383,33 +1401,33 @@ export default function App() {
                             </div>
                             )}
                             {item.id === 'kerapoxy' && item.id === material && (
-                            <div className="mt-2 ml-6 pl-4 border-l-2 border-indigo-500 space-y-2 animate-slide-down bg-indigo-50/50 p-3 rounded-md"> 
-                                <div className="text-xs font-bold text-indigo-700 flex items-center gap-1"><Crown size={12} /> 옵션 선택 (브랜드)</div> 
+                            <div className="mt-2 ml-6 pl-4 border-l-2 border-indigo-500 space-y-2 animate-slide-down bg-indigo-50/50 p-3 rounded-md">
+                                <div className="text-xs font-bold text-indigo-700 flex items-center gap-1"><Crown size={12} /> 옵션 선택 (브랜드)</div>
                                 <div className="flex gap-2">
-                                <button onClick={() => setEpoxyOption('kerapoxy')} className={`flex-1 py-2 text-sm rounded-md transition-all shadow-sm ${epoxyOption === 'kerapoxy' ? 'bg-indigo-700 text-white font-bold shadow-md' : 'bg-white text-gray-600 hover:bg-gray-100'}`}>케라폭시</button> 
-                                <button onClick={() => setEpoxyOption('starlike')} className={`flex-1 py-2 text-sm rounded-md transition-all shadow-sm ${epoxyOption === 'starlike' ? 'bg-indigo-700 text-white font-bold shadow-md' : 'bg-white text-gray-600 hover:bg-gray-100'}`}>스타라이크</button> 
+                                <button onClick={() => setEpoxyOption('kerapoxy')} className={`flex-1 py-2 text-sm rounded-md transition-all shadow-sm ${epoxyOption === 'kerapoxy' ? 'bg-indigo-700 text-white font-bold shadow-md' : 'bg-white text-gray-600 hover:bg-gray-100'}`}>케라폭시</button>
+                                <button onClick={() => setEpoxyOption('starlike')} className={`flex-1 py-2 text-sm rounded-md transition-all shadow-sm ${epoxyOption === 'starlike' ? 'bg-indigo-700 text-white font-bold shadow-md' : 'bg-white text-gray-600 hover:bg-gray-100'}`}>스타라이크</button>
                                 </div>
                             </div>
                             )}
                         </div>
                         ))}
                     </div>
-                    
+
                     {/* ⭐️ [업데이트된 ColorPalette] ⭐️ */}
-                    <ColorPalette 
-                        selectedColorId={selectedGroutColor} 
-                        onSelect={setSelectedGroutColor} 
-                        onTileImageUpload={handleTileImageUpload} 
-                        tileImageURL={tileImageURL} 
-                        brightnessLevel={brightnessLevel} 
-                        onBrightnessChange={setBrightnessLevel} 
+                    <ColorPalette
+                        selectedColorId={selectedGroutColor}
+                        onSelect={setSelectedGroutColor}
+                        onTileImageUpload={handleTileImageUpload}
+                        tileImageURL={tileImageURL}
+                        brightnessLevel={brightnessLevel}
+                        onBrightnessChange={setBrightnessLevel}
                         onTileImageReset={handleTileImageReset} // ⭐️ 초기화 함수 추가 ⭐️
                     />
 
                     {/* 재료 상세 비교 버튼 영역 (유지) */}
                     <div className="mt-5 pt-3 border-t border-gray-100 flex justify-center">
-                        <button 
-                            onClick={() => setShowMaterialModal(true)} 
+                        <button
+                            onClick={() => setShowMaterialModal(true)}
                             className="w-full py-3 bg-indigo-50 text-indigo-700 rounded-lg font-extrabold text-sm hover:bg-indigo-100 transition shadow-md flex items-center justify-center gap-2 active:scale-[0.99]"
                         >
                             <Info size={16} className='text-indigo-500' fill='currentColor'/> 소재 양생기간 확인하기
@@ -1422,7 +1440,7 @@ export default function App() {
                 <h2 className="text-lg font-extrabold flex items-center gap-2 mb-4 text-gray-800 border-b pb-2">
                 <Calculator className="h-5 w-5 text-indigo-600" /> 3. 시공범위 선택
               </h2>
-              
+
               {/* A. 욕실 범위 */}
               <h3 className="text-base font-extrabold flex items-center gap-2 mb-3 mt-4 text-gray-700">
                 <Bath size={16} className="text-indigo-500" /> A. 욕실 범위
@@ -1430,7 +1448,7 @@ export default function App() {
               {renderAreaList(BATHROOM_AREAS)}
 
               <div className="border-t border-gray-100 mt-4 pt-4"></div>
-              
+
               {/* B. 기타 범위 (현관/주방/베란다) */}
               <h3 className="text-base font-extrabold flex items-center gap-2 mb-3 mt-4 text-gray-700">
                 <LayoutGrid size={16} className="text-indigo-500" /> B. 기타 범위
@@ -1455,27 +1473,27 @@ export default function App() {
                                  ) : null;
 
                   return (
-                    <div key={area.id} className={`flex flex-col p-3 rounded-lg border transition duration-150 ${isSelected ? 'bg-indigo-50 border-indigo-400' : 'bg-gray-50 border-gray-200 hover:bg-gray-100'}`}> 
+                    <div key={area.id} className={`flex flex-col p-3 rounded-lg border transition duration-150 ${isSelected ? 'bg-indigo-50 border-indigo-400' : 'bg-gray-50 border-gray-200 hover:bg-gray-100'}`}>
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <div className={`p-2 rounded-full shadow-sm ${isSelected ? 'bg-indigo-500 text-white' : 'bg-gray-200 text-indigo-600'}`}><Icon size={18} /></div> 
+                                <div className={`p-2 rounded-full shadow-sm ${isSelected ? 'bg-indigo-500 text-white' : 'bg-gray-200 text-indigo-600'}`}><Icon size={18} /></div>
                                 <div>
                                     <div className="font-semibold text-gray-800">{area.label}</div>
                                     {description}
                                 </div>
                             </div>
                             <div className="flex items-center gap-1 bg-white px-1 py-1 rounded-full shadow-md">
-                                <button 
-                                    onClick={() => handleQuantityChange(area.id, -1)} 
+                                <button
+                                    onClick={() => handleQuantityChange(area.id, -1)}
                                     className={`w-7 h-7 flex items-center justify-center rounded-full transition active:scale-90 text-lg font-bold ${quantities[area.id] > 0 ? 'text-indigo-600 hover:bg-gray-100' : 'text-gray-400 cursor-not-allowed'}`}
-                                >-</button> 
+                                >-</button>
                                 <span className={`w-5 text-center text-sm font-bold ${quantities[area.id] > 0 ? 'text-gray-900' : 'text-gray-400'}`}>{quantities[area.id]}</span>
-                                <button 
+                                <button
                                     onClick={() => {
                                         handleQuantityChange(area.id, 1);
-                                    }} 
+                                    }}
                                     className="w-7 h-7 flex items-center justify-center text-indigo-600 hover:bg-gray-100 rounded-full font-bold text-lg transition active:scale-90"
-                                >+</button> 
+                                >+</button>
                             </div>
                         </div>
                     </div>
@@ -1483,7 +1501,7 @@ export default function App() {
                 })}
                 </div>
                 </section>
-                
+
                 {/* 자주 묻는 질문 (FAQ) (유지) */}
                 <section className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 animate-fade-in delay-750">
                 <h2 className="text-lg font-extrabold text-gray-800 mb-2 flex items-center gap-2 border-b pb-2">
@@ -1498,11 +1516,11 @@ export default function App() {
 
                 {/* 숨고 후기 바로가기 (유지) */}
                 <div className="mt-4 pt-4 border-t border-gray-200">
-                <button 
+                <button
                 onClick={() => window.open(SOOMGO_REVIEW_URL, '_blank')}
                 className="w-full py-3 rounded-lg bg-indigo-700 text-white font-bold text-base hover:bg-indigo-800 transition shadow-lg flex items-center justify-center gap-2 active:scale-95"
               >
-                <Star size={20} fill="currentColor" className="text-white" /> 
+                <Star size={20} fill="currentColor" className="text-white" />
                 고객 만족도 확인 (숨고 평점 5.0+)
               </button>
                 </div>
@@ -1515,13 +1533,13 @@ export default function App() {
             {/* ⭐️ [유지] hasSelections가 true일 때만 하단 견적 바 렌더링 ⭐️ */}
             {hasSelections && (
                 <div className="fixed bottom-0 left-0 right-0 bg-indigo-900 shadow-2xl safe-area-bottom z-20 animate-slide-down">
-                    <div className="max-w-md mx-auto p-4 flex flex-col gap-2"> 
-                        
+                    <div className="max-w-md mx-auto p-4 flex flex-col gap-2">
+
                         {/* 1. 금액 및 정보 영역 */}
-                        <div className='flex items-center justify-between w-full text-white'> 
-                            
+                        <div className='flex items-center justify-between w-full text-white'>
+
                             {/* 좌측: 금액 정보 (총 예상 견적 문구 화이트 강조) */}
-                            <div className='flex flex-col items-start gap-1'> 
+                            <div className='flex flex-col items-start gap-1'>
                                 <span className='text-sm font-semibold text-white'>총 예상 견적</span>
                                 <div className="flex items-end gap-1">
                                     {/* 2. 최종 적용 가격 */}
@@ -1529,10 +1547,10 @@ export default function App() {
                                     <span className="text-base font-normal text-white">원</span>
                                 </div>
                             </div>
-                            
+
                             {/* 🚨 [유지] 우측: 패키지/최소비용 라벨 🚨 */}
-                            <div className='flex flex-col items-end justify-end h-full pt-1'> 
-                                
+                            <div className='flex flex-col items-end justify-end h-full pt-1'>
+
                                 {/* A. 최소 출장비 적용 안내 (Clock 아이콘) */}
                                 {calculation.minimumFeeApplied && (
                                     <div className="flex items-center justify-end gap-1 text-xs font-bold text-red-300 mb-0.5 whitespace-nowrap">
@@ -1559,24 +1577,24 @@ export default function App() {
                         {/* 2. 견적서 확인 및 카카오톡 문의 버튼 (한 줄 배치) */}
                         <div className='grid grid-cols-2 gap-3'>
                             {/* 견적서 확인 버튼 */}
-                            <button 
+                            <button
                                 onClick={() => {
-                                    setShowModal(true); 
-                                    setShowToast(false); 
-                                }} 
-                                className={`w-full py-3 rounded-xl font-extrabold text-sm transition-all 
+                                    setShowModal(true);
+                                    setShowToast(false);
+                                }}
+                                className={`w-full py-3 rounded-xl font-extrabold text-sm transition-all
                                     bg-indigo-700 text-white hover:bg-indigo-800 active:bg-indigo-900 shadow-md
                                 `}
                             >
                                 견적서 확인
                             </button>
-                            
+
                             {/* 카카오톡 예약 문의 버튼 */}
-                            <a 
-                                href={KAKAO_CHAT_URL} 
-                                target="_blank" 
-                                rel="noopener noreferrer" 
-                                className={`w-full py-3 rounded-xl font-extrabold text-sm transition-all 
+                            <a
+                                href={KAKAO_CHAT_URL}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={`w-full py-3 rounded-xl font-extrabold text-sm transition-all
                                     bg-yellow-400 text-gray-800 hover:bg-yellow-500 active:bg-yellow-600 shadow-md flex items-center justify-center
                                 `}
                             >
@@ -1590,7 +1608,7 @@ export default function App() {
 
             {/* 재료 상세 비교 모달 표시 (유지) */}
             {showMaterialModal && <MaterialDetailModal onClose={() => setShowMaterialModal(false)} />}
-            
+
             {/* ⭐️ [추가] 견적서 상세 모달 렌더링 ⭐️ */}
             {showModal && (
                 <QuoteModal
