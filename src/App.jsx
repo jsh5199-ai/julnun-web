@@ -247,7 +247,7 @@ const PackageToast = ({ isVisible, onClose, label }) => {
 };
 
 // -------------------------------------------------------------
-// ⭐️ [수정됨] QuoteModal: 최종 금액 스타일 및 문구, 버튼 변경, 리뷰 이벤트 추가 ⭐️
+// ⭐️ [수정됨] QuoteModal: 이미지 저장 버튼 제거 및 텍스트 크기 축소 반영 ⭐️
 // -------------------------------------------------------------
 const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleReview }) => {
     const {
@@ -286,7 +286,7 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
         : (label || '선택 항목 기반 예상 견적');
 
 
-    // 이미지 저장 버튼 핸들러 (기능은 유지)
+    // 이미지 저장 버튼 핸들러 (기능은 제거되었으나, 함수는 로직 유지를 위해 남겨둠)
     const handleImageSave = async () => {
         if (quoteRef.current) {
             try {
@@ -441,7 +441,7 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
                             </div>
                         </div>
 
-                        {/* 6. 안내 버튼 영역 -> ⭐️ [수정된 부분] 폰트 크기 text-xs로 변경 ⭐️ */}
+                        {/* 6. 안내 버튼 영역 (텍스트 크기 축소 유지) */}
                         <div className='space-y-2 pt-3'>
                             <div className='w-full py-2.5 rounded-lg bg-gray-100 text-gray-700 text-xs font-semibold text-center shadow-sm'>
                                 바닥 30x30cm, 벽면 30x60cm 크기 기준
@@ -453,11 +453,13 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
                                 조각타일 및 대리석은 시공불가
                             </div>
                         </div>
-                        <div className='text-center pt-3'>
+                        
+                        {/* ⭐️ [제거된 부분]: 이미지 저장 버튼이 이 위치에서 제거됨 ⭐️ */}
+                        {/* <div className='text-center pt-3'>
                             <button onClick={handleImageSave} className="py-2.5 px-4 bg-gray-100 text-gray-700 rounded-lg font-bold text-sm hover:bg-gray-200 transition shadow-md flex items-center justify-center gap-2 mx-auto active:scale-95">
                                 <Download size={16} /> 견적서 이미지로 저장 (캡처)
                             </button>
-                        </div>
+                        </div> */}
                     </div>
                     {/* 견적서 캡처 영역 종료 */}
                 </div>
@@ -617,11 +619,11 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
 
                     {/* 2. 워터마크 레이어 (z-index 5) */}
                     <div
-                        className="absolute inset-0 flex items-center justify-center opacity-80"
+                        className="absolute inset-0 flex items-center justify-center opacity-60"
                         style={{
                             zIndex: 5,
                             backgroundImage: 'url(/logo.png)',
-                            backgroundSize: '70%',
+                            backgroundSize: '50%',
                             backgroundRepeat: 'repeat',
                             backgroundPosition: 'center',
                         }}
@@ -933,7 +935,7 @@ export default function App() {
 
                     let isMatch = true;
                     for (const [id, requiredQty] of pkg.P_areas) {
-                                           if ((tempPolySelections[id] || 0) !== requiredQty) {
+                                           if ((filteredPolySelections[id] || 0) !== requiredQty) {
                                                isMatch = false;
                                                break;
                                            }
@@ -941,7 +943,7 @@ export default function App() {
                     if (!isMatch) continue;
 
                     for (const [id, requiredQty] of pkg.E_areas) {
-                                           if ((tempEpoxySelections[id] || 0) !== requiredQty) {
+                                           if ((filteredEpoxySelections[id] || 0) !== requiredQty) {
                                                isMatch = false;
                                                break;
                                            }
