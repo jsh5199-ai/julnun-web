@@ -246,7 +246,7 @@ const PackageToast = ({ isVisible, onClose, label }) => {
 };
 
 // -------------------------------------------------------------
-// ⭐️ [수정된] 견적서 상세 모달 (첨부 이미지 디자인, 총 할인 금액, 글씨 크기 반영) ⭐️
+// ⭐️ [최종 수정된] 견적서 상세 모달 (디테일 및 할인 금액 반영) ⭐️
 // -------------------------------------------------------------
 const QuoteModal = ({ calculation, onClose, quoteRef }) => {
     const { 
@@ -261,9 +261,9 @@ const QuoteModal = ({ calculation, onClose, quoteRef }) => {
     const totalDiscount = priceBeforeAllDiscount - price;
     const isDiscountApplied = totalDiscount > 0;
     
-    // 패키지/무료 서비스에 포함된 항목만 필터링 (간결한 목록을 위해)
+    // 패키지/무료 서비스에 포함된 항목만 필터링 (시공 내역 목록에 표시될 항목)
     const packageItems = itemizedPrices.filter(i => 
-        (i.isPackageItem && i.calculatedPrice === 0) || (i.id === 'entrance' && calculation.isFreeEntrance)
+        (i.isPackageItem && i.calculatedPrice === 0 && !i.isDiscount) || (i.id === 'entrance' && calculation.isFreeEntrance)
     ).map(item => ({
         label: item.label,
         materialLabel: item.materialLabel,
@@ -308,6 +308,7 @@ const QuoteModal = ({ calculation, onClose, quoteRef }) => {
 
     return (
         <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 animate-fade-in overflow-y-auto">
+            {/* max-w-sm을 유지하여 모바일 환경에 최적화 */}
             <div className="bg-white w-full max-w-sm rounded-xl shadow-2xl overflow-hidden animate-slide-down border border-gray-200 my-8">
                 
                 <div className="sticky top-0 bg-indigo-900 p-4 text-white flex justify-between items-center z-10">
@@ -320,66 +321,71 @@ const QuoteModal = ({ calculation, onClose, quoteRef }) => {
                 <div className="p-5 max-h-[70vh] overflow-y-auto">
                     
                     {/* 견적서 캡처 영역 시작 (첨부 이미지 디자인 반영) */}
-                    <div ref={quoteRef} className="bg-white p-4 space-y-4 rounded-lg">
-                        <div className='text-center'>
-                            {/* 폰트 크기 조정: text-2xl -> text-xl */}
-                            <h4 className='text-xl font-extrabold text-indigo-900'>줄눈의미학 예상 견적서</h4>
+                    <div ref={quoteRef} className="bg-white space-y-4">
+                        
+                        {/* 1. 제목 영역 */}
+                        <div className='text-center pt-2'>
+                            {/* 폰트 크기: text-xl, 색상: #585885 (진한 남색 계열) */}
+                            <h4 className='text-xl font-extrabold' style={{ color: '#585885' }}>줄눈의미학 예상 견적서</h4>
                         </div>
 
-                        {/* 패키지/할인 적용 영역 (총 할인 금액 표시 포함) */}
-                        <div className='bg-indigo-50 border border-indigo-200 p-4 rounded-lg space-y-1'>
-                            {/* 폰트 크기 조정: text-lg -> text-base */}
-                            <div className='font-bold text-base text-indigo-900 flex items-center'>
-                                <Crown size={20} className='mr-2 text-indigo-600'/> {displayLabel}
+                        {/* 2. 패키지/할인 적용 영역 (배경색: #f0f0ff, 보더: #cccceb) */}
+                        <div className='p-4 rounded-lg' style={{ backgroundColor: '#f0f0ff', border: '1px solid #cccceb' }}>
+                            <div className='flex items-center justify-between'>
+                                {/* 패키지 라벨: 문구 크기 text-base, 아이콘 색상 이미지 참고 */}
+                                <div className='font-bold text-base flex items-center' style={{ color: '#585885' }}>
+                                    <Crown size={18} className='mr-2' style={{ color: '#9987ce' }}/> {displayLabel}
+                                </div>
+                                {/* 총 할인 금액 문구 (여기에 표시: 우측 상단 배치) */}
+                                {isDiscountApplied && (
+                                    <p className='text-sm font-bold text-red-600 whitespace-nowrap'>
+                                        총 {totalDiscount.toLocaleString()}원 할인!
+                                    </p>
+                                )}
                             </div>
-                            <ul className='list-disc list-inside text-xs text-gray-700 ml-1'>
+                            
+                            {/* 상세 설명 리스트 */}
+                            <ul className='list-disc list-inside text-sm text-gray-700 mt-2 ml-1'>
                                 <li>패키지 포함 영역이 할인 적용되었습니다.</li>
                                 {minimumFeeApplied && <li>최소 시공비(20만원)가 적용되었습니다.</li>}
                             </ul>
-                            
-                            {/* ⭐️ 2. 총 할인 금액 문구 추가 ⭐️ */}
-                            {isDiscountApplied && (
-                                <div className='mt-3 pt-3 border-t border-indigo-200'>
-                                    {/* 폰트 크기 조정: text-base -> text-sm */}
-                                    <p className='text-sm font-extrabold text-red-600 text-center'>
-                                        총 {totalDiscount.toLocaleString()}원 할인 적용! 💸
-                                    </p>
-                                </div>
-                            )}
                         </div>
 
-                        {/* 시공 내역 테이블 (간결 버전) */}
+                        {/* 3. 시공 내역 테이블 */}
                         {packageItems.length > 0 && (
-                            <div className='mt-4 pt-3 border-t border-gray-100'>
-                                {/* 폰트 크기 조정: text-sm 유지 */}
-                                <div className='grid grid-cols-3 text-sm font-bold text-gray-500 border-b pb-1 mb-2'>
+                            <div className='mt-4'>
+                                {/* 테이블 헤더: 폰트 크기 text-xs, 색상 #878799 (밝은 회색 계열) */}
+                                <div className='grid grid-cols-3 text-xs font-bold' style={{ color: '#878799' }}>
                                     <div>시공 내역</div>
                                     <div className='text-center'>소재</div>
                                     <div className='text-right'>수량</div>
                                 </div>
-                                {/* 폰트 크기 조정: text-sm 유지 */}
-                                {packageItems.map((item, index) => (
-                                    <div key={index} className='grid grid-cols-3 py-1.5 text-sm text-gray-800'>
-                                        <div className='font-semibold'>{item.label}</div>
-                                        <div className='text-center text-indigo-600 font-bold'>
-                                            {item.materialLabel === 'Epoxy' ? 'Epoxy' : 'Poly'}
+                                <div className='pt-1 border-t border-gray-100 mt-1'>
+                                    {/* 항목 리스트: 폰트 크기 text-sm */}
+                                    {packageItems.map((item, index) => (
+                                        <div key={index} className='grid grid-cols-3 py-1.5 text-sm text-gray-800'>
+                                            <div className='font-semibold'>{item.label}</div>
+                                            <div className='text-center text-indigo-600 font-bold'>
+                                                {item.materialLabel === 'Epoxy' ? 'Epoxy' : 'Poly'}
+                                            </div>
+                                            <div className='text-right'>{item.quantity}{item.unit}</div>
                                         </div>
-                                        <div className='text-right'>{item.quantity}{item.unit}</div>
-                                    </div>
-                                ))}
+                                    ))}
+                                </div>
                             </div>
                         )}
                         
-                        {/* 이벤트 할인 영역 (리뷰 이벤트) */}
+                        {/* 4. 이벤트 할인 영역 (숨고 리뷰 이벤트) */}
                         {discountItems.length > 0 && (
-                            <div className='mt-4 pt-3 border-t border-gray-100'>
+                            <div className='mt-2 pt-2 border-t border-gray-100'>
                                 {discountItems.map((item, index) => (
-                                    <div key={index} className='flex justify-between items-center py-2'>
-                                        <div className='font-semibold text-red-600 flex items-center'>
-                                            <Gift size={16} className='mr-1'/> {item.label}
+                                    <div key={index} className='flex justify-between items-center py-1'>
+                                        {/* 문구 크기 text-sm */}
+                                        <div className='font-semibold text-sm text-gray-700 flex items-center'>
+                                            <Gift size={16} className='mr-1 text-red-500'/> {item.label}
                                         </div>
-                                        {/* 폰트 크기 조정: text-xl -> text-lg */}
-                                        <div className='font-bold text-lg text-red-600'>
+                                        {/* 할인 금액: 폰트 크기 text-lg, 색상 #ff4f4f (빨간색 계열) */}
+                                        <div className='font-bold text-lg' style={{ color: '#ff4f4f' }}>
                                             -{item.originalPrice.toLocaleString()}원 
                                         </div>
                                     </div>
@@ -388,34 +394,35 @@ const QuoteModal = ({ calculation, onClose, quoteRef }) => {
                         )}
 
 
-                        {/* 최종 금액 영역 */}
+                        {/* 5. 최종 금액 영역 */}
                         <div className='mt-6 pt-4 border-t-2 border-dashed border-gray-300 flex justify-between items-center'>
                             <div className='flex flex-col items-start'>
-                                {/* 폰트 크기 조정: text-lg -> text-base */}
+                                {/* 문구 크기 text-base */}
                                 <span className='text-base font-bold text-gray-800'>최종 결제 금액</span>
+                                {/* 문구 크기 text-xs */}
                                 <span className='text-xs text-gray-500 mt-1'>
                                     VAT 별도 / 현장상황별 상이
                                 </span>
                             </div>
                             <div className="flex items-end">
-                                {/* 폰트 크기 조정: text-5xl -> text-4xl */}
-                                <span className="text-4xl font-extrabold text-indigo-900">
+                                {/* 최종 금액: 폰트 크기 text-4xl (이미지 참조), 색상 #585885 */}
+                                <span className="text-4xl font-extrabold" style={{ color: '#585885' }}>
                                     {price.toLocaleString()}
                                 </span>
-                                {/* 폰트 크기 조정: text-xl -> text-lg */}
-                                <span className="text-lg font-normal ml-1 text-indigo-900">원</span>
+                                {/* '원' 문구: 폰트 크기 text-lg, 색상 #585885 */}
+                                <span className="text-lg font-normal ml-1" style={{ color: '#585885' }}>원</span>
                             </div>
                         </div>
 
-                        {/* 안내 버튼 영역 (이미지 반영) */}
-                        <div className='space-y-2 mt-5'>
-                            <div className='w-full py-2.5 rounded-lg bg-gray-100 text-gray-700 text-sm font-semibold text-center'>
+                        {/* 6. 안내 버튼 영역 */}
+                        <div className='space-y-2 pt-3'>
+                            <div className='w-full py-2.5 rounded-lg bg-gray-100 text-gray-700 text-sm font-semibold text-center shadow-sm'>
                                 바닥 30x30cm, 벽면 30x60cm 크기 기준
                             </div>
-                            <div className='w-full py-2.5 rounded-lg bg-gray-100 text-gray-700 text-sm font-semibold text-center'>
+                            <div className='w-full py-2.5 rounded-lg bg-gray-100 text-gray-700 text-sm font-semibold text-center shadow-sm'>
                                 재시공(셀프포함)은 별도문의
                             </div>
-                            <div className='w-full py-2.5 rounded-lg bg-gray-100 text-gray-700 text-sm font-semibold text-center'>
+                            <div className='w-full py-2.5 rounded-lg bg-gray-100 text-gray-700 text-sm font-semibold text-center shadow-sm'>
                                 조각타일 및 대리석은 시공불가
                             </div>
                         </div>
