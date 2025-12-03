@@ -312,7 +312,7 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
                                  <div className='flex items-center gap-1.5'>
                                      {/* ⭐️ 물결 반짝임(Shimmer) 애니메이션 추가 및 위치 변경 */}
                                      {(minimumFeeApplied || label) && (
-                                         <span className={`text-[11px] font-bold px-2.5 py-1 rounded text-white shadow-sm relative overflow-hidden ${minimumFeeApplied ? 'bg-rose-500' : 'bg-indigo-600'} animate-gentle-pulse`}>
+                                         <span className={`text-[11px] font-bold px-2.5 py-1 rounded text-white shadow-sm relative overflow-hidden ${minimumFeeApplied ? 'bg-rose-500' : 'bg-indigo-600'}`}>
                                             <span className="relative z-10">{minimumFeeApplied ? '최소비용' : label}</span>
                                             <div className="absolute inset-0 animate-shimmer" style={{ background: 'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%)' }}></div>
                                          </span>
@@ -323,7 +323,6 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
                                  <div className="flex flex-col gap-1.5 mt-2 pt-2 border-t border-slate-200/60">
                                      {minimumFeeApplied && <div className="text-[11px] text-slate-500 flex items-center gap-1"><Info size={12} /> 최소 시공비(20만원) 적용</div>}
                                      
-                                     {/* ⭐️ 2개의 체크 항목으로 분리 */}
                                      {isDiscountApplied && (
                                          <div className="space-y-1">
                                              <div className="text-[11px] text-slate-600 flex items-start gap-1.5 leading-snug">
@@ -345,13 +344,18 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
                                 <div className='space-y-2'>
                                     {packageItems.map((item, index) => {
                                         const areaInfo = ALL_AREAS.find(a => a.id === item.id);
+                                        // ⭐️ 소재별 스타일링을 명확히 분리합니다.
+                                        const badgeClass = item.materialLabel === '에폭시' 
+                                            ? 'bg-amber-100 text-amber-700' 
+                                            : (item.materialLabel === '폴리아스파틱' ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-100 text-slate-600');
+                                        
                                         return (
                                             <div key={index} className='flex justify-between items-center text-sm py-1.5 border-b border-slate-50 last:border-0'>
                                                 <span className='font-medium text-slate-700 text-xs'>{item.label}</span>
                                                 <div className="flex items-center gap-2">
-                                                    {/* ⭐️ 한글 표기로 변경 */}
-                                                    <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold ${item.materialLabel === 'Epoxy' ? 'bg-amber-100 text-amber-700' : 'bg-indigo-50 text-indigo-600'}`}>
-                                                        {item.materialLabel === 'Epoxy' ? '에폭시' : (item.materialLabel === 'Poly' ? '폴리아스파틱' : '실리콘')}
+                                                    {/* ⭐️ item.materialLabel 값을 그대로 출력하여 한글 오류를 수정 */}
+                                                    <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold ${badgeClass}`}>
+                                                        {item.materialLabel}
                                                     </span>
                                                     <span className='font-bold text-slate-900 text-xs'>{item.quantity}{areaInfo ? areaInfo.unit : '개소'}</span>
                                                 </div>
@@ -531,6 +535,7 @@ const MaterialDetailModal = ({ onClose }) => (
         </div>
 );
 
+// ⭐️ Accordion 컴포넌트 재정의 (ReferenceError 해결)
 const Accordion = ({ question, answer }) => {
     const [isOpen, setIsOpen] = useState(false);
     return (
@@ -974,6 +979,7 @@ export default function App() {
                 isFreeService: isFreeServiceItem,
                 isPackageItem: isPackageItemFlag || !isFreeServiceItem && (packageCount > 0 || isPackageActive || finalDiscount > 0),
                 isDiscount: false,
+                // ⭐️ 소재 라벨을 한글로 확정하여 데이터 생성
                 materialLabel: ['silicon_bathtub', 'silicon_sink', 'silicon_living_baseboard'].includes(area.id) ? '실리콘' : (areaMatId === 'poly' ? '폴리아스파틱' : '에폭시')
             });
         });
@@ -1163,8 +1169,6 @@ export default function App() {
                         ))}
                     </div>
                 </section>
-
-                {/* ⭐️ Before/After 섹션 삭제됨 ⭐️ */}
 
                 <section className="animate-fade-in delay-200">
                       <h2 className="text-xl font-black text-slate-800 mb-5 flex items-center gap-2">
