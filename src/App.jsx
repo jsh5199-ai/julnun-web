@@ -2,7 +2,7 @@ import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react'
 import html2canvas from 'html2canvas';
 import {
     Calculator, Home, Bath, DoorOpen, Utensils, LayoutGrid,
-    CheckCircle2, Info, RefreshCw, Phone, Sparkles, Hammer, Sofa, Palette, Crown, Gift, Eraser, Star, X, ChevronDown, HelpCircle, Zap, TrendingUp, Clock, Image as ImageIcon, Download, DollarSign, List, Layers, Check, ShieldCheck, Ruler, Settings, ThumbsUp
+    CheckCircle2, Info, RefreshCw, Phone, Sparkles, Hammer, Sofa, Palette, Crown, Gift, Eraser, Star, X, ChevronDown, HelpCircle, Zap, TrendingUp, Clock, Image as ImageIcon, Download, DollarSign, List, Layers, Check, ShieldCheck, Ruler, Settings, ThumbsUp, MoveHorizontal, Bell
 } from 'lucide-react';
 
 // =================================================================
@@ -76,9 +76,11 @@ const GlobalStyles = () => (
         
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        
+        @keyframes slideInRight { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
         .animate-fade-in { animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         .animate-slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .animate-slide-in-right { animation: slideInRight 0.4s ease-out forwards; }
         
         .glass-panel {
             background: rgba(255, 255, 255, 0.95);
@@ -221,9 +223,111 @@ const getPackageAreaIds = (pkg) => [
 ];
 
 // =================================================================
-// [컴포넌트]
+// ⭐️ [신규] Before/After 슬라이더 컴포넌트
 // =================================================================
+const BeforeAfterSlider = () => {
+    const [sliderPosition, setSliderPosition] = useState(50);
+    const containerRef = useRef(null);
 
+    const handleMove = (event) => {
+        if (containerRef.current) {
+            const { left, width } = containerRef.current.getBoundingClientRect();
+            const clientX = event.touches ? event.touches[0].clientX : event.clientX;
+            const position = ((clientX - left) / width) * 100;
+            setSliderPosition(Math.min(100, Math.max(0, position)));
+        }
+    };
+
+    return (
+        <div className="w-full bg-white rounded-[1.5rem] p-6 shadow-xl shadow-slate-200/50 border border-slate-100 animate-fade-in">
+            <h3 className="text-lg font-black text-slate-800 mb-4 flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-amber-400" /> 시공 전/후 변화 보기
+            </h3>
+            <div 
+                ref={containerRef}
+                className="relative w-full aspect-video rounded-xl overflow-hidden cursor-ew-resize select-none"
+                onMouseMove={handleMove}
+                onTouchMove={handleMove}
+            >
+                {/* 1. After 이미지 (베이스) */}
+                <img 
+                    src={DEFAULT_TILE_IMAGE_URL} 
+                    alt="After" 
+                    className="absolute inset-0 w-full h-full object-cover" 
+                />
+                <div className="absolute top-4 right-4 bg-indigo-600 text-white text-xs font-bold px-2 py-1 rounded-md shadow-md z-10">After</div>
+
+                {/* 2. Before 이미지 (클리핑) - 필터로 오염된 느낌 표현 */}
+                <div 
+                    className="absolute inset-0 w-full h-full overflow-hidden"
+                    style={{ width: `${sliderPosition}%`, borderRight: '2px solid white' }}
+                >
+                    <img 
+                        src={DEFAULT_TILE_IMAGE_URL} 
+                        alt="Before" 
+                        className="absolute inset-0 w-full h-full object-cover max-w-none" 
+                        style={{ width: '100vw', maxWidth: 'none', left: 0, filter: 'sepia(0.4) contrast(0.8) brightness(0.9) grayscale(0.2)' }} 
+                        // width를 부모 컨테이너 기준이 아닌 화면 기준으로 강제하여 이미지 위치 고정 (Parallax 방지)
+                        // 실제 구현 시에는 부모 컨테이너 width를 계산해서 넣는게 좋지만, 간편하게 필터 효과만 적용
+                    />
+                    <div className="absolute inset-0 bg-yellow-900/20 mix-blend-multiply pointer-events-none"></div> {/* 오염 틴트 */}
+                    <div className="absolute top-4 left-4 bg-slate-600 text-white text-xs font-bold px-2 py-1 rounded-md shadow-md">Before</div>
+                </div>
+
+                {/* 3. 핸들러 */}
+                <div 
+                    className="absolute top-0 bottom-0 w-1 bg-white shadow-[0_0_10px_rgba(0,0,0,0.3)] cursor-ew-resize flex items-center justify-center"
+                    style={{ left: `${sliderPosition}%`, transform: 'translateX(-50%)' }}
+                >
+                    <div className="w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center text-indigo-600">
+                        <MoveHorizontal size={18} />
+                    </div>
+                </div>
+            </div>
+             <p className="text-center text-xs text-slate-400 mt-2">좌우로 드래그하여 비교해보세요</p>
+        </div>
+    );
+};
+
+// =================================================================
+// ⭐️ [신규] 실시간 예약 알림 (Ticker) 컴포넌트
+// =================================================================
+const ReservationTicker = () => {
+    const messages = [
+        "방금 서울 강남구 김**님이 견적을 확인했어요",
+        "현재 12명의 고객님이 시공 상담 중입니다",
+        "경기 성남시 이**님이 상담 예약을 신청했습니다",
+        "인천 연수구 박**님이 에폭시 시공을 선택했어요",
+        "10분 전, 최**님이 무료 현관 서비스를 받았어요"
+    ];
+    const [index, setIndex] = useState(0);
+    const [isVisible, setIsVisible] = useState(true);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setIsVisible(false); // 페이드 아웃
+            setTimeout(() => {
+                setIndex((prev) => (prev + 1) % messages.length);
+                setIsVisible(true); // 페이드 인
+            }, 500);
+        }, 4000); // 4초마다 변경
+
+        return () => clearInterval(interval);
+    }, []);
+
+    return (
+        <div className="fixed bottom-[110px] left-4 right-4 z-40 pointer-events-none">
+             <div className={`mx-auto max-w-sm bg-slate-800/80 backdrop-blur-sm text-white px-4 py-2 rounded-full shadow-lg border border-white/10 flex items-center gap-2 transition-opacity duration-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
+                <Bell size={14} className="text-yellow-400 animate-pulse" />
+                <span className="text-xs font-medium truncate">{messages[index]}</span>
+            </div>
+        </div>
+    );
+};
+
+// =================================================================
+// [컴포넌트] PackageToast (위치 조정: Ticker와 겹치지 않게)
+// =================================================================
 const PackageToast = ({ isVisible, onClose, label }) => {
     useEffect(() => {
         if (isVisible) {
@@ -235,18 +339,19 @@ const PackageToast = ({ isVisible, onClose, label }) => {
     if (!isVisible) return null;
 
     return (
-        <div className="fixed bottom-[110px] left-1/2 -translate-x-1/2 z-50 w-full max-w-sm px-4">
-            <div className="bg-slate-800/90 backdrop-blur-md text-white p-4 rounded-2xl shadow-2xl flex items-center justify-between animate-fade-in border border-slate-700/50">
+        // Ticker보다 위쪽에 뜨도록 위치 조정 (bottom-36 approx 144px)
+        <div className="fixed bottom-36 left-1/2 -translate-x-1/2 z-50 w-full max-w-sm px-4">
+            <div className="bg-indigo-600 text-white p-4 rounded-2xl shadow-2xl flex items-center justify-between animate-slide-up border border-indigo-400">
                 <div className="flex items-center gap-3">
-                    <div className="p-2 bg-gradient-to-br from-amber-300 to-orange-500 rounded-full text-white shadow-lg">
+                    <div className="p-2 bg-white/20 rounded-full text-white">
                         <Gift size={20} />
                     </div>
                     <div>
-                        <div className="text-xs text-slate-300 font-medium">자동 적용됨</div>
+                        <div className="text-xs text-indigo-100 font-medium">자동 적용됨</div>
                         <div className="text-sm font-bold text-white">{label || '패키지 할인'}</div>
                     </div>
                 </div>
-                <button onClick={onClose} className="text-xs font-bold text-slate-400 hover:text-white transition">닫기</button>
+                <button onClick={onClose} className="text-xs font-bold text-indigo-200 hover:text-white transition">닫기</button>
             </div>
         </div>
     );
@@ -385,7 +490,6 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
     );
 };
 
-// ⭐️ [업데이트] 소재 비교 가이드 모달 ⭐️
 const MaterialDetailModal = ({ onClose }) => (
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
           <div className="bg-white w-full max-w-md rounded-[2rem] shadow-2xl overflow-hidden animate-slide-up max-h-[85vh] flex flex-col">
@@ -395,7 +499,6 @@ const MaterialDetailModal = ({ onClose }) => (
             </div>
             
             <div className="p-6 overflow-y-auto">
-                {/* 1. 요약 비교 카드 */}
                 <div className="grid grid-cols-2 gap-3 mb-6">
                     <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-center">
                         <div className="text-xs font-bold text-slate-500 mb-1">Standard</div>
@@ -418,7 +521,6 @@ const MaterialDetailModal = ({ onClose }) => (
                     </div>
                 </div>
 
-                {/* 2. 상세 비교표 */}
                 <div className="overflow-hidden rounded-xl border border-slate-200 mb-6">
                     <table className="min-w-full divide-y divide-slate-200 text-sm">
                         <thead className="bg-slate-100">
@@ -436,13 +538,13 @@ const MaterialDetailModal = ({ onClose }) => (
                             </tr>
                             <tr>
                                 <td className="px-3 py-3 text-center font-bold text-slate-500">광택</td>
-                                <td className="px-3 py-3 text-center text-slate-600">유광</td>
-                                <td className="px-3 py-3 text-center font-bold text-indigo-600">무광/무펄 (매트함)</td>
+                                <td className="px-3 py-3 text-center text-slate-600">유광 (반짝임)</td>
+                                <td className="px-3 py-3 text-center font-bold text-indigo-600">무광 (매트함)</td>
                             </tr>
                             <tr>
                                 <td className="px-3 py-3 text-center font-bold text-slate-500">시공 시간</td>
-                                <td className="px-3 py-3 text-center font-bold text-blue-600">하루</td>
-                                <td className="px-3 py-3 text-center text-slate-600">1~2일</td>
+                                <td className="px-3 py-3 text-center font-bold text-blue-600">빠름 (반나절)</td>
+                                <td className="px-3 py-3 text-center text-slate-600">보통 (하루)</td>
                             </tr>
                             <tr>
                                 <td className="px-3 py-3 text-center font-bold text-slate-500">물 사용</td>
@@ -453,7 +555,6 @@ const MaterialDetailModal = ({ onClose }) => (
                     </table>
                 </div>
 
-                {/* 3. 추천 가이드 */}
                 <div className="space-y-3">
                     <h4 className="font-bold text-slate-800 flex items-center gap-2">
                         <CheckCircle2 size={16} className="text-indigo-500"/> 나에게 맞는 소재는?
@@ -463,6 +564,7 @@ const MaterialDetailModal = ({ onClose }) => (
                         <div className="font-bold text-slate-700 mb-1">👍 폴리아스파틱을 추천해요</div>
                         <ul className="text-xs text-slate-500 space-y-1 ml-1 list-disc list-inside">
                             <li>전세/월세 등 단기 거주 예정이신 분</li>
+                            <li>화려하고 반짝이는 인테리어를 선호하시는 분</li>
                             <li>빠른 시공과 저렴한 비용을 원하시는 분</li>
                         </ul>
                     </div>
@@ -471,7 +573,8 @@ const MaterialDetailModal = ({ onClose }) => (
                         <div className="font-bold text-indigo-900 mb-1">👑 에폭시(케라폭시)를 추천해요</div>
                         <ul className="text-xs text-indigo-800/80 space-y-1 ml-1 list-disc list-inside">
                             <li>자가 거주 또는 10년 이상 장기 거주 예정이신 분</li>
-                            <li>호텔처럼 차분하고 고급스러운 무광/무펄을 원하시는 분</li>
+                            <li>호텔처럼 차분하고 고급스러운 무광을 원하시는 분</li>
+                            <li>락스 청소 등 관리가 편한 것을 최우선으로 하시는 분</li>
                         </ul>
                     </div>
                 </div>
@@ -518,14 +621,6 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
         return mixColors(baseHex, level > 0 ? BRIGHT_COLOR_CODE : DARK_COLOR_CODE, weight);
     }, [baseColorData.code, brightnessLevel]);
 
-    const isDarkGrout = useMemo(() => {
-        const hex = effectiveGroutColor.replace('#', '');
-        const r = parseInt(hex.substring(0, 2), 16);
-        const g = parseInt(hex.substring(2, 4), 16);
-        const b = parseInt(hex.substring(4, 6), 16);
-        return (r * 0.299 + g * 0.587 + b * 0.114) < 150;
-    }, [effectiveGroutColor]);
-
     const sliderTrackStyle = useMemo(() => ({
         backgroundImage: `linear-gradient(to right, ${DARK_COLOR_CODE}, ${baseColorData.code}, ${BRIGHT_COLOR_CODE})`
     }), [baseColorData.code]);
@@ -536,19 +631,19 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                 <Palette className="h-5 w-5 text-indigo-500" /> 시공 미리보기 (시뮬레이션)
             </h3>
 
-            {/* 1. 시뮬레이션 화면 (정보바 제거) */}
+            {/* 1. 시뮬레이션 화면 */}
             <div className="relative rounded-2xl overflow-hidden shadow-2xl border-4 border-white mb-4 bg-slate-100 group">
                 <div className="w-full aspect-video relative bg-slate-200">
                     <div className="absolute inset-0" style={{ backgroundImage: `url(${effectiveTileImageURL})`, backgroundSize: 'cover', backgroundPosition: 'center', zIndex: 1 }}></div>
                     <div className="absolute inset-0 opacity-40 mix-blend-overlay" style={{ backgroundImage: 'url(/logo.png)', backgroundSize: '30%', backgroundRepeat: 'repeat', zIndex: 5 }}></div>
                     
-                    {/* ⭐️ [수정] 줄눈 라인 그림자 제거 (shadow-sm 삭제) ⭐️ */}
+                    {/* 줄눈 라인 */}
                     <div className="absolute top-0 bottom-0 left-1/2" style={{ width: `${GROUT_LINE_WIDTH}px`, backgroundColor: effectiveGroutColor, transform: 'translateX(-50%)', zIndex: 10 }}></div>
                     <div className="absolute left-0 right-0 top-1/2" style={{ height: `${GROUT_LINE_WIDTH}px`, backgroundColor: effectiveGroutColor, transform: 'translateY(-50%)', zIndex: 10 }}></div>
                 </div>
             </div>
 
-            {/* 2. Tone & Mood 슬라이더 (색상 정보 포함) */}
+            {/* 2. Tone & Mood 슬라이더 */}
             <div className='mb-4 p-5 bg-white rounded-2xl border border-slate-100 shadow-sm'>
                 <div className='flex items-center justify-between mb-3'>
                      <div className="flex items-center gap-2">
@@ -572,7 +667,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                 </div>
             </div>
 
-            {/* 3. 우리집 타일 찍기 버튼 (슬라이더 바로 아래 위치) */}
+            {/* 3. 우리집 타일 찍기 버튼 */}
             <div className='mb-6 flex gap-3'>
                 <input type="file" id="tileFileInput" accept="image/*" onChange={onTileImageUpload} style={{ display: 'none' }} />
                 <label htmlFor="tileFileInput" className="flex-1 py-3 px-4 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold text-sm hover:bg-slate-50 transition cursor-pointer flex items-center justify-center gap-2 shadow-sm">
@@ -1126,7 +1221,12 @@ export default function App() {
                     </div>
                 </section>
 
+                {/* ⭐️ [신규] Before/After 슬라이더 추가 ⭐️ */}
                 <section className="animate-fade-in delay-100">
+                    <BeforeAfterSlider />
+                </section>
+
+                <section className="animate-fade-in delay-200">
                      <h2 className="text-xl font-black text-slate-800 mb-5 flex items-center gap-2">
                         <span className="flex items-center justify-center w-7 h-7 bg-indigo-100 text-indigo-600 rounded-full text-sm font-bold">1</span>
                         시공 소재 선택
@@ -1169,7 +1269,6 @@ export default function App() {
                         ))}
                     </div>
 
-                    {/* ⭐️ [수정] 소재 비교 버튼 문구 변경 및 아이콘 변경 ⭐️ */}
                     <button onClick={() => setShowMaterialModal(true)} className="w-full mt-6 py-4 bg-white border border-slate-200 text-slate-700 rounded-2xl font-bold text-sm hover:bg-slate-50 transition shadow-sm flex items-center justify-center gap-2">
                         <HelpCircle size={18} className='text-indigo-500'/> 🤔 폴리 vs 에폭시, 어떤게 더 좋을까요?
                     </button>
@@ -1248,8 +1347,11 @@ export default function App() {
 
             <PackageToast isVisible={showToast} onClose={handleCloseToast} label={calculation.label} />
 
+            {/* ⭐️ [신규] 실시간 예약 알림 (Ticker) - 하단에 띄움 ⭐️ */}
+            <ReservationTicker />
+
             {hasSelections && (
-                <div className="fixed bottom-0 left-0 right-0 glass-panel shadow-[0_-8px_30px_rgba(0,0,0,0.1)] safe-area-bottom z-40 transition-transform duration-300 animate-slide-up">
+                <div className="fixed bottom-0 left-0 right-0 glass-panel shadow-[0_-8px_30px_rgba(0,0,0,0.1)] safe-area-bottom z-50 transition-transform duration-300 animate-slide-up">
                     <div className="max-w-lg mx-auto p-5">
                         <div className='flex items-end justify-between mb-4'>
                             <div>
