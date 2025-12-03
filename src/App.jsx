@@ -436,13 +436,13 @@ const MaterialDetailModal = ({ onClose }) => (
                             </tr>
                             <tr>
                                 <td className="px-3 py-3 text-center font-bold text-slate-500">광택</td>
-                                <td className="px-3 py-3 text-center text-slate-600">유광 (반짝임)</td>
-                                <td className="px-3 py-3 text-center font-bold text-indigo-600">무광 (매트함)</td>
+                                <td className="px-3 py-3 text-center text-slate-600">유광</td>
+                                <td className="px-3 py-3 text-center font-bold text-indigo-600">무광/무펄 (매트함)</td>
                             </tr>
                             <tr>
                                 <td className="px-3 py-3 text-center font-bold text-slate-500">시공 시간</td>
-                                <td className="px-3 py-3 text-center font-bold text-blue-600">빠름 (반나절)</td>
-                                <td className="px-3 py-3 text-center text-slate-600">보통 (하루)</td>
+                                <td className="px-3 py-3 text-center font-bold text-blue-600">하루</td>
+                                <td className="px-3 py-3 text-center text-slate-600">1~2일</td>
                             </tr>
                             <tr>
                                 <td className="px-3 py-3 text-center font-bold text-slate-500">물 사용</td>
@@ -463,7 +463,6 @@ const MaterialDetailModal = ({ onClose }) => (
                         <div className="font-bold text-slate-700 mb-1">👍 폴리아스파틱을 추천해요</div>
                         <ul className="text-xs text-slate-500 space-y-1 ml-1 list-disc list-inside">
                             <li>전세/월세 등 단기 거주 예정이신 분</li>
-                            <li>화려하고 반짝이는 인테리어를 선호하시는 분</li>
                             <li>빠른 시공과 저렴한 비용을 원하시는 분</li>
                         </ul>
                     </div>
@@ -472,8 +471,7 @@ const MaterialDetailModal = ({ onClose }) => (
                         <div className="font-bold text-indigo-900 mb-1">👑 에폭시(케라폭시)를 추천해요</div>
                         <ul className="text-xs text-indigo-800/80 space-y-1 ml-1 list-disc list-inside">
                             <li>자가 거주 또는 10년 이상 장기 거주 예정이신 분</li>
-                            <li>호텔처럼 차분하고 고급스러운 무광을 원하시는 분</li>
-                            <li>락스 청소 등 관리가 편한 것을 최우선으로 하시는 분</li>
+                            <li>호텔처럼 차분하고 고급스러운 무광/무펄을 원하시는 분</li>
                         </ul>
                     </div>
                 </div>
@@ -755,7 +753,7 @@ export default function App() {
                                                            if (pkg.id.includes('COMMON') && matchedFlexibleItem !== 'common_bath_wall') flexibleMatch = false;
                                                        }
                                                    } else if (isEpoxyFlexiblePackage) {
-                                                       flexibleMatch = flexibleSelectedEpoxyCount === 1 && flexibleSelectedPolyCount === 0;
+                                                       flexibleMatch = flexibleSelectedEpoxyCount === 1 && flexibleSelectedEpoxyCount === 0;
                                                        if (flexibleMatch) {
                                                            const matchedFlexibleItem = pkg.flexibleGroup.find(id => tempEpoxySelections[id] > 0);
                                                            if (pkg.id.includes('MASTER') && matchedFlexibleItem !== 'master_bath_wall') flexibleMatch = false;
@@ -1128,7 +1126,7 @@ export default function App() {
                     </div>
                 </section>
 
-                <section className="animate-fade-in delay-200">
+                <section className="animate-fade-in delay-100">
                      <h2 className="text-xl font-black text-slate-800 mb-5 flex items-center gap-2">
                         <span className="flex items-center justify-center w-7 h-7 bg-indigo-100 text-indigo-600 rounded-full text-sm font-bold">1</span>
                         시공 소재 선택
@@ -1184,9 +1182,14 @@ export default function App() {
                     />
                 </section>
 
-                {/* ⭐️ [이동됨] 정가제 안내 카드 (Step 1과 Step 2 사이로 이동) ⭐️ */}
-                <section className="animate-fade-in delay-100">
-                    <div className="bg-indigo-50 rounded-2xl p-4 border border-indigo-100 shadow-sm flex flex-col gap-3">
+                <section className="animate-fade-in delay-300">
+                     <h2 className="text-xl font-black text-slate-800 mb-5 flex items-center gap-2">
+                        <span className="flex items-center justify-center w-7 h-7 bg-indigo-100 text-indigo-600 rounded-full text-sm font-bold">2</span>
+                        시공 범위 선택
+                    </h2>
+
+                    {/* ⭐️ [이동됨] 정가제 안내 카드 (Step 2 내부, Area List 바로 위) ⭐️ */}
+                    <div className="bg-indigo-50 rounded-2xl p-4 border border-indigo-100 shadow-sm flex flex-col gap-3 mb-6">
                         <div className="flex items-center gap-3">
                              <div className="p-2 bg-white rounded-full shadow-sm text-indigo-600">
                                 <ShieldCheck size={18} strokeWidth={2.5} />
@@ -1203,17 +1206,10 @@ export default function App() {
                             </div>
                             <div className='flex-1'>
                                 <div className="text-sm font-bold text-indigo-900">견적 기준 사이즈</div>
-                                <div className="text-[11px] text-indigo-700/80 leading-tight mt-0.5">바닥 30x30cm, 벽면 30x60cm 타일크기 기준</div>
+                                <div className="text-[11px] text-indigo-700/80 leading-tight mt-0.5">바닥 300x300, 벽면 300x600 타일크기 기준</div>
                             </div>
                         </div>
                     </div>
-                </section>
-
-                <section className="animate-fade-in delay-300">
-                     <h2 className="text-xl font-black text-slate-800 mb-5 flex items-center gap-2">
-                        <span className="flex items-center justify-center w-7 h-7 bg-indigo-100 text-indigo-600 rounded-full text-sm font-bold">2</span>
-                        시공 범위 선택
-                    </h2>
                     
                     <h3 className="text-sm font-bold text-slate-400 mb-3 ml-1 uppercase tracking-wider">Bathroom</h3>
                     {renderAreaList(BATHROOM_AREAS)}
