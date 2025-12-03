@@ -2,11 +2,11 @@ import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react'
 import html2canvas from 'html2canvas';
 import {
     Calculator, Home, Bath, DoorOpen, Utensils, LayoutGrid,
-    CheckCircle2, Info, RefreshCw, Phone, Sparkles, Hammer, Sofa, Palette, Crown, Gift, Eraser, Star, X, ChevronDown, HelpCircle, Zap, TrendingUp, Clock, Image as ImageIcon, Download, DollarSign, List, Layers, Check, ShieldCheck, Ruler
+    CheckCircle2, Info, RefreshCw, Phone, Sparkles, Hammer, Sofa, Palette, Crown, Gift, Eraser, Star, X, ChevronDown, HelpCircle, Zap, TrendingUp, Clock, Image as ImageIcon, Download, DollarSign, List, Layers, Check, ShieldCheck, Ruler, Settings
 } from 'lucide-react';
 
 // =================================================================
-// ⭐️ 상수 및 데이터 (기존 로직 유지)
+// ⭐️ 상수 및 데이터
 // =================================================================
 const MIN_FEE = 200000;
 const KAKAO_CHAT_URL = 'http://pf.kakao.com/_jAxnYn/chat';
@@ -30,6 +30,9 @@ const GROUT_COLORS = [
     { id: 'oat_brown', code: '#b0a9a4', label: '180번', isDark: false },
     { id: 'burnt_brown', code: '#8b8784', label: '187번', isDark: true },
 ];
+
+// 애니메이션에 사용할 180번 색상 정의
+const ANIMATION_TARGET_COLOR = '#b0a9a4';
 
 const BRIGHT_COLOR_CODE = '#ffffff';
 const DARK_COLOR_CODE = '#565556';
@@ -63,6 +66,114 @@ const mixColors = (color1, color2, weight) => {
     const b = Math.round(b1 * (1 - weight) + b2 * weight);
     const toHex = (c) => ('0' + Math.max(0, Math.min(255, c)).toString(16)).slice(-2);
     return '#' + toHex(r) + toHex(g) + toHex(b);
+};
+
+// =================================================================
+// ⭐️ [신규] 시공 과정 애니메이션 컴포넌트
+// =================================================================
+const ProcessAnimation = () => {
+    return (
+        <div className="w-full bg-white rounded-[1.5rem] p-6 shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden mb-8">
+            <h3 className="text-lg font-black text-slate-800 mb-6 flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-indigo-500" /> 프리미엄 시공 과정
+            </h3>
+
+            {/* 애니메이션 컨테이너 */}
+            <div className="relative h-32 bg-slate-50 rounded-xl border border-slate-200 overflow-hidden flex items-center justify-center">
+                
+                {/* 1. 타일 배경 (위/아래) */}
+                <div className="absolute inset-0 flex flex-col">
+                    <div className="h-1/2 w-full bg-slate-200 border-b-4 border-white"></div>
+                    <div className="h-1/2 w-full bg-slate-200 border-t-4 border-white"></div>
+                </div>
+
+                {/* 2. 줄눈 라인 (색상 변화 애니메이션) */}
+                <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-3 z-0">
+                    <div className="w-full h-full animate-line-process"></div>
+                </div>
+
+                {/* 3. 그라인더 (제거) 애니메이션 */}
+                <div className="absolute top-1/2 left-0 -translate-y-1/2 z-10 animate-tool-grinder opacity-0">
+                    <div className="relative">
+                        {/* 그라인더 본체 */}
+                        <div className="w-12 h-12 bg-slate-700 rounded-full flex items-center justify-center shadow-lg">
+                            <Settings className="text-white w-8 h-8 animate-spin-fast" />
+                        </div>
+                        {/* 먼지 효과 */}
+                        <div className="absolute right-0 top-1/2 w-8 h-8 -translate-y-1/2 translate-x-4">
+                            <div className="w-2 h-2 bg-slate-400 rounded-full absolute animate-ping" style={{animationDelay: '0s'}}></div>
+                            <div className="w-1 h-1 bg-slate-300 rounded-full absolute top-2 animate-ping" style={{animationDelay: '0.1s'}}></div>
+                        </div>
+                        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-[10px] font-bold text-slate-600 bg-white px-2 py-1 rounded-full shadow-sm whitespace-nowrap">
+                            백시멘트 제거
+                        </div>
+                    </div>
+                </div>
+
+                {/* 4. 시공병 (충전) 애니메이션 */}
+                <div className="absolute top-1/2 left-0 -translate-y-1/2 z-10 animate-tool-bottle opacity-0">
+                    <div className="relative">
+                        {/* 시공병 본체 */}
+                        <div className="w-12 h-12 bg-indigo-600 rounded-tl-full rounded-bl-full rounded-br-full flex items-center justify-center shadow-lg rotate-[-45deg] origin-bottom-right">
+                            <div className="w-4 h-8 bg-white/20 rounded-full"></div>
+                        </div>
+                        {/* 나오는 줄눈재 (180번 색상 적용) */}
+                        <div className="absolute right-[-10px] bottom-[-5px] w-3 h-3 rounded-full" style={{ backgroundColor: ANIMATION_TARGET_COLOR }}></div>
+                        
+                        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-[10px] font-bold text-indigo-600 bg-white px-2 py-1 rounded-full shadow-sm whitespace-nowrap">
+                            친환경 줄눈재 충전
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* 스타일 정의 (애니메이션 키프레임) */}
+            <style>{`
+                /* 1. 줄눈 라인 변화: 흰색(시멘트) -> 회색(제거됨) -> 180번(줄눈) */
+                @keyframes line-process {
+                    0%, 15% { background-color: #e2e8f0; width: 100%; } /* 초기: 회색(기존매지) */
+                    
+                    /* 그라인더 지나감 (왼쪽부터 어두워짐) */
+                    25% { background: linear-gradient(to right, #334155 50%, #e2e8f0 50%); } 
+                    35% { background-color: #334155; } /* 제거완료: 어두운색 */
+                    
+                    /* 시공병 지나감 (왼쪽부터 180번 색상으로 채워짐) */
+                    50% { background: linear-gradient(to right, #334155 100%, ${ANIMATION_TARGET_COLOR} 0%); }
+                    75% { background: linear-gradient(to right, ${ANIMATION_TARGET_COLOR} 100%, #334155 0%); }
+                    85%, 100% { background-color: ${ANIMATION_TARGET_COLOR}; box-shadow: 0 0 5px ${ANIMATION_TARGET_COLOR}; } /* 완료 */
+                }
+
+                /* 2. 그라인더 이동 */
+                @keyframes tool-grinder {
+                    0% { left: -10%; opacity: 0; }
+                    10% { left: 0%; opacity: 1; }
+                    35% { left: 100%; opacity: 1; }
+                    40% { left: 120%; opacity: 0; }
+                    100% { left: 120%; opacity: 0; }
+                }
+
+                /* 3. 시공병 이동 (그라인더 이후) */
+                @keyframes tool-bottle {
+                    0%, 45% { left: -10%; opacity: 0; }
+                    50% { left: 0%; opacity: 1; }
+                    75% { left: 100%; opacity: 1; }
+                    80% { left: 120%; opacity: 0; }
+                    100% { left: 120%; opacity: 0; }
+                }
+
+                /* 회전 애니메이션 */
+                @keyframes spin-fast {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
+
+                .animate-line-process { animation: line-process 6s linear infinite; }
+                .animate-tool-grinder { animation: tool-grinder 6s linear infinite; }
+                .animate-tool-bottle { animation: tool-bottle 6s linear infinite; }
+                .animate-spin-fast { animation: spin-fast 0.5s linear infinite; }
+            `}</style>
+        </div>
+    );
 };
 
 // =================================================================
@@ -371,13 +482,13 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
                         rel="noopener noreferrer"
                         className="py-3.5 bg-yellow-400 text-slate-900 rounded-xl font-bold hover:bg-yellow-500 transition active:scale-[0.98] flex items-center justify-center gap-2 shadow-sm"
                     >
-                        <Layers size={18} /> 카카오톡 상담
+                        <Layers size={18} /> 카카오 상담
                     </a>
                     <a
                         href={`tel:${PHONE_NUMBER}`}
                         className="py-3.5 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition active:scale-[0.98] flex items-center justify-center gap-2 shadow-sm"
                     >
-                       <Phone size={18} /> 상담원 연결
+                       <Phone size={18} /> 전화 상담
                     </a>
                 </div>
             </div>
@@ -476,7 +587,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
     return (
         <div className='mt-8 pt-6 border-t border-slate-100'>
             <h3 className="text-lg font-bold flex items-center gap-2 mb-4 text-slate-800">
-                <Palette className="h-5 w-5 text-indigo-500" /> 시공색상 미리보기 (시뮬레이션)
+                <Palette className="h-5 w-5 text-indigo-500" /> 시공 미리보기 (시뮬레이션)
             </h3>
 
             {/* 1. 시뮬레이션 화면 (정보바 제거) */}
@@ -519,7 +630,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
             <div className='mb-6 flex gap-3'>
                 <input type="file" id="tileFileInput" accept="image/*" onChange={onTileImageUpload} style={{ display: 'none' }} />
                 <label htmlFor="tileFileInput" className="flex-1 py-3 px-4 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold text-sm hover:bg-slate-50 transition cursor-pointer flex items-center justify-center gap-2 shadow-sm">
-                    <ImageIcon size={16} className="text-slate-400"/> 우리집 타일 첨부
+                    <ImageIcon size={16} className="text-slate-400"/> 우리집 타일 찍기
                 </label>
                 {tileImageURL !== DEFAULT_TILE_IMAGE_URL && (
                     <button onClick={onTileImageReset} className="py-3 px-4 bg-slate-100 text-slate-500 rounded-xl font-bold text-sm hover:bg-slate-200 transition flex items-center justify-center gap-2 shadow-sm">
@@ -1051,6 +1162,12 @@ export default function App() {
             </header>
 
             <main className="max-w-lg mx-auto p-5 space-y-8">
+                
+                {/* ⭐️ [수정된 위치] 최상단: 시공 과정 애니메이션 ⭐️ */}
+                <section className="animate-fade-in">
+                    <ProcessAnimation />
+                </section>
+
                 <section className="bg-white rounded-[1.5rem] overflow-hidden shadow-xl shadow-slate-200/50 border border-white animate-fade-in group">
                     <div className="relative aspect-video w-full bg-slate-900">
                          <iframe key={currentVideo.id} width="100%" height="100%" src={currentEmbedUrl} title={currentVideo.title} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen className="w-full h-full border-0 opacity-90 group-hover:opacity-100 transition-opacity duration-500"></iframe>
@@ -1091,7 +1208,7 @@ export default function App() {
                             <div>
                                 <h2 className="text-lg font-black text-slate-900 mb-1">견적 기준 안내</h2>
                                 <p className="text-sm text-slate-500 leading-relaxed font-medium">
-                                    기본 견적가는 <span className="text-slate-900 font-bold">바닥 30x30cm, 벽면 30x60cm</span> 크기 기준입니다. (타일 크기에 따라 견적가가 상이할 수 있습니다)
+                                    기본 견적가는 <span className="text-slate-900 font-bold">바닥 300x300, 벽면 300x600</span> 타일 기준입니다. (타일 크기에 따라 견적가가 상이할 수 있습니다)
                                 </p>
                             </div>
                         </div>
