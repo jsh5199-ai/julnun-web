@@ -1,5 +1,4 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
-import html2canvas from 'html2canvas';
 import {
     Calculator, Home, Bath, DoorOpen, Utensils, LayoutGrid,
     CheckCircle2, Info, RefreshCw, Phone, Sparkles, Hammer, Sofa, Palette, Crown, Gift, Eraser, Star, X, ChevronDown, HelpCircle, Zap, TrendingUp, Clock, Image as ImageIcon, Download, DollarSign, List, Layers, Check, ShieldCheck, Ruler, Settings, ThumbsUp, MoveHorizontal, Bell, Share2, Camera
@@ -320,8 +319,8 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
                                  <div className='flex items-center gap-1.5'>
                                      {(minimumFeeApplied || label) && (
                                          <span className={`text-[11px] font-bold px-2.5 py-1 rounded text-white shadow-sm relative overflow-hidden ${minimumFeeApplied ? 'bg-rose-500' : 'bg-indigo-600'} animate-gentle-pulse`}>
-                                            <span className="relative z-10">{minimumFeeApplied ? '최소비용' : label}</span>
-                                            <div className="absolute inset-0 animate-shimmer" style={{ background: 'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%)' }}></div>
+                                             <span className="relative z-10">{minimumFeeApplied ? '최소비용' : label}</span>
+                                             <div className="absolute inset-0 animate-shimmer" style={{ background: 'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%)' }}></div>
                                          </span>
                                      )}
                                  </div>
@@ -764,60 +763,60 @@ export default function App() {
                     let appliedAutoEntrance = false;
 
                     if (pkg.isFlexible) {
-                                           const requiredPolyAreas = pkg.P_areas.map(([id]) => id).filter(id => id !== 'entrance');
-                                           const requiredEpoxyAreas = pkg.E_areas.map(([id]) => id);
-                                           let baseMatch = true;
-                                           for (const id of requiredPolyAreas.filter(id => !pkg.flexibleGroup.includes(id))) {
-                                               const requiredQty = pkg.P_areas.find(([pkId]) => pkId === id)[1];
-                                               if ((tempPolySelections[id] || 0) !== requiredQty) {
-                                                   baseMatch = false;
-                                                   break;
-                                               }
-                                           }
-                                           if (!baseMatch) continue;
+                                            const requiredPolyAreas = pkg.P_areas.map(([id]) => id).filter(id => id !== 'entrance');
+                                            const requiredEpoxyAreas = pkg.E_areas.map(([id]) => id);
+                                            let baseMatch = true;
+                                            for (const id of requiredPolyAreas.filter(id => !pkg.flexibleGroup.includes(id))) {
+                                                const requiredQty = pkg.P_areas.find(([pkId]) => pkId === id)[1];
+                                                if ((tempPolySelections[id] || 0) !== requiredQty) {
+                                                    baseMatch = false;
+                                                    break;
+                                                }
+                                            }
+                                            if (!baseMatch) continue;
 
-                                           for (const id of requiredEpoxyAreas.filter(id => !pkg.flexibleGroup.includes(id))) {
-                                               const requiredQty = pkg.E_areas.find(([pkId]) => pkId === id)[1];
-                                               if ((tempEpoxySelections[id] || 0) !== requiredQty) {
-                                                   baseMatch = false;
-                                                   break;
-                                               }
-                                           }
-                                           if (!baseMatch) continue;
+                                            for (const id of requiredEpoxyAreas.filter(id => !pkg.flexibleGroup.includes(id))) {
+                                                const requiredQty = pkg.E_areas.find(([pkId]) => pkId === id)[1];
+                                                if ((tempEpoxySelections[id] || 0) !== requiredQty) {
+                                                    baseMatch = false;
+                                                    break;
+                                                }
+                                            }
+                                            if (!baseMatch) continue;
 
-                                           const flexibleSelectedPolyCount = pkg.flexibleGroup.filter(id => tempPolySelections[id] > 0).length;
-                                           const flexibleSelectedEpoxyCount = pkg.flexibleGroup.filter(id => tempEpoxySelections[id] > 0).length;
-                                           const isPolyFlexiblePackage = pkg.id.startsWith('USER_P_');
-                                           const isEpoxyFlexiblePackage = pkg.id.startsWith('USER_E_');
-                                           let flexibleMatch = false;
+                                            const flexibleSelectedPolyCount = pkg.flexibleGroup.filter(id => tempPolySelections[id] > 0).length;
+                                            const flexibleSelectedEpoxyCount = pkg.flexibleGroup.filter(id => tempEpoxySelections[id] > 0).length;
+                                            const isPolyFlexiblePackage = pkg.id.startsWith('USER_P_');
+                                            const isEpoxyFlexiblePackage = pkg.id.startsWith('USER_E_');
+                                            let flexibleMatch = false;
 
-                                           if (isPolyFlexiblePackage) {
-                                               flexibleMatch = flexibleSelectedPolyCount === 1 && flexibleSelectedEpoxyCount === 0;
-                                               if (flexibleMatch) {
-                                                   const matchedFlexibleItem = pkg.flexibleGroup.find(id => tempPolySelections[id] > 0);
-                                                   if (pkg.id.includes('MASTER') && matchedFlexibleItem !== 'master_bath_wall') flexibleMatch = false;
-                                                   if (pkg.id.includes('COMMON') && matchedFlexibleItem !== 'common_bath_wall') flexibleMatch = false;
-                                               }
-                                           } else if (isEpoxyFlexiblePackage) {
-                                               flexibleMatch = flexibleSelectedEpoxyCount === 1 && flexibleSelectedEpoxyCount === 0;
-                                               if (flexibleMatch) {
-                                                   const matchedFlexibleItem = pkg.flexibleGroup.find(id => tempEpoxySelections[id] > 0);
-                                                   if (pkg.id.includes('MASTER') && matchedFlexibleItem !== 'master_bath_wall') flexibleMatch = false;
-                                                   if (pkg.id.includes('COMMON') && matchedFlexibleItem !== 'common_bath_wall') flexibleMatch = false;
-                                               }
-                                           }
+                                            if (isPolyFlexiblePackage) {
+                                                flexibleMatch = flexibleSelectedPolyCount === 1 && flexibleSelectedEpoxyCount === 0;
+                                                if (flexibleMatch) {
+                                                    const matchedFlexibleItem = pkg.flexibleGroup.find(id => tempPolySelections[id] > 0);
+                                                    if (pkg.id.includes('MASTER') && matchedFlexibleItem !== 'master_bath_wall') flexibleMatch = false;
+                                                    if (pkg.id.includes('COMMON') && matchedFlexibleItem !== 'common_bath_wall') flexibleMatch = false;
+                                                }
+                                            } else if (isEpoxyFlexiblePackage) {
+                                                flexibleMatch = flexibleSelectedEpoxyCount === 1 && flexibleSelectedEpoxyCount === 0;
+                                                if (flexibleMatch) {
+                                                    const matchedFlexibleItem = pkg.flexibleGroup.find(id => tempEpoxySelections[id] > 0);
+                                                    if (pkg.id.includes('MASTER') && matchedFlexibleItem !== 'master_bath_wall') flexibleMatch = false;
+                                                    if (pkg.id.includes('COMMON') && matchedFlexibleItem !== 'common_bath_wall') flexibleMatch = false;
+                                                }
+                                            }
 
-                                           if (baseMatch && flexibleMatch) {
-                                               const packageAreaIds = new Set(getPackageAreaIds(pkg));
-                                               const finalSelectedAreaIds = new Set([...Object.keys(tempPolySelections).filter(id => tempPolySelections[id] > 0), ...Object.keys(tempEpoxySelections).filter(id => tempEpoxySelections[id] > 0)]);
-                                               const isIdSetMatch = finalSelectedAreaIds.size === packageAreaIds.size &&
-                                                                   [...finalSelectedAreaIds].every(id => packageAreaIds.has(id));
+                                            if (baseMatch && flexibleMatch) {
+                                                const packageAreaIds = new Set(getPackageAreaIds(pkg));
+                                                const finalSelectedAreaIds = new Set([...Object.keys(tempPolySelections).filter(id => tempPolySelections[id] > 0), ...Object.keys(tempEpoxySelections).filter(id => tempEpoxySelections[id] > 0)]);
+                                                const isIdSetMatch = finalSelectedAreaIds.size === packageAreaIds.size &&
+                                                                        [...finalSelectedAreaIds].every(id => packageAreaIds.has(id));
 
-                                               if (isIdSetMatch) {
-                                                   return { ...pkg, autoEntrance: appliedAutoEntrance };
-                                               }
-                                           }
-                                           continue;
+                                                if (isIdSetMatch) {
+                                                    return { ...pkg, autoEntrance: appliedAutoEntrance };
+                                                }
+                                            }
+                                            continue;
                     }
 
                     let isMatch = true;
@@ -1025,9 +1024,6 @@ export default function App() {
         };
     }, [quantities, selectedReviews, housingType, areaMaterials, getSelectionSummary, findMatchingPackage]);
 
-    // ⭐️ [삭제됨] showToast Effect 제거 (더 이상 사용 안함) ⭐️
-
-    const handleCloseToast = useCallback(() => { /* No-op */ }, []); // 사용 안하지만 에러 방지용으로 남겨둠
     const handleTileImageUpload = (event) => {
         const file = event.target.files[0];
         if (file) {
@@ -1150,7 +1146,6 @@ export default function App() {
                         </button>
                     </div>
                 </div>
-                {/* ⭐️ 상단 예약 알림 (유지) ⭐️ */}
                 <ReservationTicker variant="top-bar" />
             </header>
 
@@ -1173,51 +1168,101 @@ export default function App() {
                     </div>
                 </section>
 
+                {/* ⭐️ [디자인 업그레이드됨] 시공 소재 선택 섹션 */}
                 <section className="animate-fade-in delay-200">
-                      <h2 className="text-xl font-black text-slate-800 mb-5 flex items-center gap-2">
-                        <span className="flex items-center justify-center w-7 h-7 bg-indigo-100 text-indigo-600 rounded-full text-sm font-bold">1</span>
+                    <h2 className="text-xl font-black text-slate-800 mb-5 flex items-center gap-2">
+                        <span className="flex items-center justify-center w-7 h-7 bg-indigo-600 text-white rounded-full text-sm font-bold shadow-md shadow-indigo-200">1</span>
                         시공 소재 선택
                     </h2>
-                    <div className="space-y-4">
-                        {MATERIALS.map((item) => (
-                            <div key={item.id} onClick={() => setMaterial(item.id)} className={`relative overflow-hidden rounded-[1.5rem] cursor-pointer transition-all duration-300 card-shadow border ${item.id === material ? 'bg-white border-indigo-500 ring-2 ring-indigo-500' : 'bg-white border-transparent hover:border-slate-200'}`}>
-                                <div className="p-6">
-                                    <div className="flex justify-between items-start mb-2">
-                                        <div className='flex items-center gap-3'>
-                                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${item.id === material ? 'border-indigo-600 bg-indigo-600' : 'border-slate-300'}`}>
-                                                {item.id === material && <Check size={12} className="text-white" strokeWidth={4} />}
-                                            </div>
-                                            <span className="font-bold text-lg text-slate-800">{item.label}</span>
-                                        </div>
-                                        <span className={`text-[10px] font-black tracking-wider px-3 py-1 rounded-full ${item.badgeColor}`}>{item.badge}</span>
+                    
+                    <div className="space-y-5">
+                        {MATERIALS.map((item) => {
+                            const isSelected = item.id === material;
+                            // 소재별 테마 컬러 설정
+                            const theme = item.id === 'poly' 
+                                ? { 
+                                    bg: 'bg-gradient-to-br from-white to-slate-50', 
+                                    border: 'border-slate-200', 
+                                    activeBorder: 'border-indigo-500 ring-2 ring-indigo-500 ring-offset-2',
+                                    iconColor: 'text-slate-200',
+                                    activeIconColor: 'text-indigo-600',
+                                    badge: 'bg-slate-100 text-slate-600'
+                                  }
+                                : { 
+                                    bg: 'bg-gradient-to-br from-[#fffdf5] to-[#fff7ed]', // 따뜻한 앰버톤 배경
+                                    border: 'border-amber-100', 
+                                    activeBorder: 'border-amber-500 ring-2 ring-amber-500 ring-offset-2',
+                                    iconColor: 'text-amber-100',
+                                    activeIconColor: 'text-amber-600',
+                                    badge: 'bg-amber-100 text-amber-700'
+                                  };
+
+                            return (
+                                <div 
+                                    key={item.id} 
+                                    onClick={() => setMaterial(item.id)} 
+                                    className={`relative overflow-hidden rounded-[1.5rem] cursor-pointer transition-all duration-300 group ${isSelected ? `${theme.activeBorder} shadow-xl` : `${theme.border} border shadow-sm hover:shadow-md hover:-translate-y-1`} ${theme.bg}`}
+                                >
+                                    {/* 배경 장식 아이콘 (거대하게) */}
+                                    <div className={`absolute -right-4 -bottom-4 opacity-20 transition-transform duration-500 ${isSelected ? 'scale-110 rotate-12' : 'scale-100'}`}>
+                                        {item.id === 'poly' ? <Sparkles size={120} className={theme.iconColor} /> : <Crown size={120} className={theme.iconColor} />}
                                     </div>
-                                    <p className="text-sm text-slate-500 pl-8 leading-relaxed">{item.description}</p>
-                                    
-                                    {item.id === material && (
-                                        <div className="mt-4 pl-8 animate-slide-up">
-                                            <div className="flex gap-2 p-1 bg-slate-100 rounded-xl">
-                                                {item.id === 'poly' && (
-                                                    <>
-                                                        <button onClick={(e) => { e.stopPropagation(); setPolyOption('pearl'); }} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all shadow-sm ${polyOption === 'pearl' ? 'bg-white text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}>펄 있음</button>
-                                                        <button onClick={(e) => { e.stopPropagation(); setPolyOption('no_pearl'); }} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all shadow-sm ${polyOption === 'no_pearl' ? 'bg-white text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}>펄 없음</button>
-                                                    </>
-                                                )}
-                                                {item.id === 'kerapoxy' && (
-                                                    <>
-                                                        <button onClick={(e) => { e.stopPropagation(); setEpoxyOption('starlike'); }} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all shadow-sm ${epoxyOption === 'starlike' ? 'bg-white text-amber-600' : 'text-slate-500 hover:text-slate-700'}`}>스타라이크 EVO</button>
-                                                        <button onClick={(e) => { e.stopPropagation(); setEpoxyOption('kerapoxy'); }} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all shadow-sm ${epoxyOption === 'kerapoxy' ? 'bg-white text-amber-600' : 'text-slate-500 hover:text-slate-700'}`}>케라폭시</button>
-                                                    </>
-                                                )}
+
+                                    <div className="p-6 relative z-10">
+                                        <div className="flex justify-between items-start mb-3">
+                                            <div className='flex items-center gap-3'>
+                                                {/* 체크박스 UI */}
+                                                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${isSelected ? `${theme.activeIconColor} bg-current border-transparent` : 'border-slate-300 bg-white'}`}>
+                                                    {isSelected && <Check size={14} className="text-white" strokeWidth={4} />}
+                                                </div>
+                                                <div>
+                                                    <span className={`font-black text-xl ${isSelected ? 'text-slate-900' : 'text-slate-600'}`}>{item.label}</span>
+                                                </div>
+                                            </div>
+                                            <span className={`text-[10px] font-bold tracking-wider px-3 py-1.5 rounded-full shadow-sm ${theme.badge}`}>
+                                                {item.badge}
+                                            </span>
+                                        </div>
+                                        
+                                        <p className={`text-sm pl-9 leading-relaxed font-medium ${isSelected ? 'text-slate-600' : 'text-slate-400'}`}>
+                                            {item.description}
+                                        </p>
+                                        
+                                        {/* 상세 옵션 선택 (선택되었을 때만 표시) */}
+                                        <div className={`grid grid-rows-[0fr] transition-all duration-300 ease-out ${isSelected ? 'grid-rows-[1fr] mt-5' : 'mt-0'}`}>
+                                            <div className="overflow-hidden pl-1">
+                                                <div className="p-1.5 bg-white/60 backdrop-blur-sm rounded-xl border border-white/50 shadow-inner flex gap-2">
+                                                    {item.id === 'poly' && (
+                                                        <>
+                                                            <button onClick={(e) => { e.stopPropagation(); setPolyOption('pearl'); }} className={`flex-1 py-2.5 text-xs font-bold rounded-lg transition-all shadow-sm flex items-center justify-center gap-1 ${polyOption === 'pearl' ? 'bg-indigo-600 text-white shadow-indigo-200' : 'bg-transparent text-slate-500 hover:bg-white'}`}>
+                                                                <Sparkles size={12}/> 펄 있음 (반짝임)
+                                                            </button>
+                                                            <button onClick={(e) => { e.stopPropagation(); setPolyOption('no_pearl'); }} className={`flex-1 py-2.5 text-xs font-bold rounded-lg transition-all shadow-sm flex items-center justify-center gap-1 ${polyOption === 'no_pearl' ? 'bg-indigo-600 text-white shadow-indigo-200' : 'bg-transparent text-slate-500 hover:bg-white'}`}>
+                                                                <Eraser size={12}/> 펄 없음 (심플)
+                                                            </button>
+                                                        </>
+                                                    )}
+                                                    {item.id === 'kerapoxy' && (
+                                                        <>
+                                                            <button onClick={(e) => { e.stopPropagation(); setEpoxyOption('starlike'); }} className={`flex-1 py-2.5 text-xs font-bold rounded-lg transition-all shadow-sm flex items-center justify-center gap-1 ${epoxyOption === 'starlike' ? 'bg-amber-500 text-white shadow-amber-200' : 'bg-transparent text-slate-500 hover:bg-white'}`}>
+                                                                <Star size={12}/> 스타라이크 EVO
+                                                            </button>
+                                                            <button onClick={(e) => { e.stopPropagation(); setEpoxyOption('kerapoxy'); }} className={`flex-1 py-2.5 text-xs font-bold rounded-lg transition-all shadow-sm flex items-center justify-center gap-1 ${epoxyOption === 'kerapoxy' ? 'bg-amber-500 text-white shadow-amber-200' : 'bg-transparent text-slate-500 hover:bg-white'}`}>
+                                                                <ShieldCheck size={12}/> 케라폭시
+                                                            </button>
+                                                        </>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
-                                    )}
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
 
-                    <button onClick={() => setShowMaterialModal(true)} className="w-full mt-6 py-4 bg-white border border-slate-200 text-slate-700 rounded-2xl font-bold text-sm hover:bg-slate-50 transition shadow-sm flex items-center justify-center gap-2">
-                        <HelpCircle size={18} className='text-indigo-500'/> 🤔 폴리 vs 에폭시, 어떤게 더 좋을까요?
+                    <button onClick={() => setShowMaterialModal(true)} className="w-full mt-4 py-3 bg-white border border-slate-200 text-slate-600 rounded-xl font-bold text-xs hover:bg-slate-50 transition shadow-sm flex items-center justify-center gap-1.5">
+                        <HelpCircle size={14} className='text-indigo-500'/> 소재 선택이 고민되시나요? 비교 가이드 보기
                     </button>
 
                     <ColorPalette
@@ -1228,7 +1273,7 @@ export default function App() {
                     />
                 </section>
 
-                {/* ⭐️ [수정] 간격 추가 (mt-16) ⭐️ */}
+                {/* ⭐️ [수정] 간격 추가 (mt-16) */}
                 <section className="animate-fade-in delay-300 mt-16 pt-10 border-t border-slate-200/60">
                       <h2 className="text-xl font-black text-slate-800 mb-5 flex items-center gap-2">
                         <span className="flex items-center justify-center w-7 h-7 bg-indigo-100 text-indigo-600 rounded-full text-sm font-bold">2</span>
@@ -1292,18 +1337,15 @@ export default function App() {
                 </button>
             </main>
 
-            {/* ⭐️ [삭제] PackageToast 제거됨 ⭐️ */}
-
             {hasSelections && (
                 <div className="fixed bottom-0 left-0 right-0 z-50 transition-transform duration-300 animate-slide-up">
                     <div className="max-w-lg mx-auto">
-                        {/* ⭐️ [신규] 하단 예약 알림 (견적 바 바로 위에 위치) ⭐️ */}
                         <div className="px-5 pb-2">
                             <ReservationTicker />
                         </div>
 
-                        {/* 하단 견적 바 (Glass Panel) */}
-                        <div className="glass-panel p-5 shadow-[0_-8px_30px_rgba(0,0,0,0.1)] safe-area-bottom">
+                        {/* ⭐️ [수정됨] 하단바: pb-10으로 하단 여백 확보, safe-area-bottom 클래스 유지 */}
+                        <div className="glass-panel px-5 pt-5 pb-10 shadow-[0_-8px_30px_rgba(0,0,0,0.12)] safe-area-bottom rounded-t-[2rem]">
                             <div className='flex items-end justify-between mb-4'>
                                 <div>
                                     <div className="text-xs font-bold text-slate-400 mb-1">예상 견적 금액</div>
@@ -1312,8 +1354,9 @@ export default function App() {
                                         <span className="text-base font-bold text-slate-600">원</span>
                                     </div>
                                 </div>
+                                
                                 <div className='flex flex-col items-end'>
-                                    {calculation.minimumFeeApplied && (
+                                     {calculation.minimumFeeApplied && (
                                         <div className="text-[10px] font-bold text-rose-500 bg-rose-50 px-2 py-1 rounded-full mb-1">
                                             최소 출장비 적용
                                         </div>
@@ -1333,16 +1376,16 @@ export default function App() {
 
                             <div className='grid grid-cols-5 gap-3'>
                                 <button
-                                    onClick={() => { setShowModal(true); setShowToast(false); }}
+                                    onClick={() => { setShowModal(true); }}
                                     className="col-span-3 py-4 rounded-2xl font-bold text-white bg-slate-900 hover:bg-slate-800 shadow-lg shadow-slate-300 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                                 >
-                                    <List size={18} /> 견적서 상세보기
+                                    <List size={18} /> 견적서 확인
                                 </button>
-                                 <a
+                                <a
                                     href={KAKAO_CHAT_URL}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="col-span-2 py-4 rounded-2xl font-bold text-slate-900 bg-yellow-400 hover:bg-yellow-500 shadow-lg shadow-yellow-200 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                                    className="col-span-2 py-4 rounded-2xl font-bold text-slate-900 bg-[#FAE100] hover:bg-[#FCE620] shadow-lg shadow-yellow-200/50 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                                 >
                                     <Layers size={18} /> 카톡상담
                                 </a>
