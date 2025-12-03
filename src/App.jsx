@@ -306,10 +306,11 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
                 <div className="p-4 overflow-y-auto max-h-[65vh] bg-slate-50">
                     <div ref={quoteRef} className="bg-white rounded-2xl shadow-sm p-5 space-y-4 border border-slate-100">
                         
-                        {/* 상단 요약 박스 */}
+                        {/* 상단 요약 박스: 높이를 줄이고 가로 배치로 공간 효율화 + 애니메이션 추가 + 체크박스 분리 */}
                         <div className='bg-slate-50 rounded-xl p-4 border border-slate-200'>
                              <div className='flex justify-between items-start mb-2'>
                                  <div className='flex items-center gap-1.5'>
+                                     {/* ⭐️ 물결 반짝임(Shimmer) 애니메이션 추가 및 위치 변경 */}
                                      {(minimumFeeApplied || label) && (
                                          <span className={`text-[11px] font-bold px-2.5 py-1 rounded text-white shadow-sm relative overflow-hidden ${minimumFeeApplied ? 'bg-rose-500' : 'bg-indigo-600'} animate-gentle-pulse`}>
                                             <span className="relative z-10">{minimumFeeApplied ? '최소비용' : label}</span>
@@ -322,6 +323,7 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
                                  <div className="flex flex-col gap-1.5 mt-2 pt-2 border-t border-slate-200/60">
                                      {minimumFeeApplied && <div className="text-[11px] text-slate-500 flex items-center gap-1"><Info size={12} /> 최소 시공비(20만원) 적용</div>}
                                      
+                                     {/* ⭐️ 2개의 체크 항목으로 분리 */}
                                      {isDiscountApplied && (
                                          <div className="space-y-1">
                                              <div className="text-[11px] text-slate-600 flex items-start gap-1.5 leading-snug">
@@ -348,8 +350,8 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
                                                 <span className='font-medium text-slate-700 text-xs'>{item.label}</span>
                                                 <div className="flex items-center gap-2">
                                                     {/* ⭐️ 한글 표기로 변경 */}
-                                                    <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold ${item.materialLabel === '에폭시' ? 'bg-amber-100 text-amber-700' : 'bg-indigo-50 text-indigo-600'}`}>
-                                                        {item.materialLabel}
+                                                    <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold ${item.materialLabel === 'Epoxy' ? 'bg-amber-100 text-amber-700' : 'bg-indigo-50 text-indigo-600'}`}>
+                                                        {item.materialLabel === 'Epoxy' ? '에폭시' : (item.materialLabel === 'Poly' ? '폴리아스파틱' : '실리콘')}
                                                     </span>
                                                     <span className='font-bold text-slate-900 text-xs'>{item.quantity}{areaInfo ? areaInfo.unit : '개소'}</span>
                                                 </div>
@@ -393,11 +395,13 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
 
                         <div className='pt-4 border-t-2 border-slate-100 flex flex-col items-end gap-1'>
                             <div className='flex items-baseline gap-2'>
+                                {/* ⭐️ 정가 취소선 표시 (할인 적용 시) */}
                                 {(isDiscountApplied || minimumFeeApplied) && (priceBeforeAllDiscount > price) && (
                                     <span className="text-sm text-slate-400 line-through font-medium">
                                         {priceBeforeAllDiscount.toLocaleString()}원
                                     </span>
                                 )}
+                                {/* ⭐️ 최종 금액 네이비 색상 */}
                                 <span className="text-3xl font-black text-[#0f172a] tracking-tighter">
                                     {price.toLocaleString()}
                                 </span>
@@ -526,6 +530,26 @@ const MaterialDetailModal = ({ onClose }) => (
           </div>
         </div>
 );
+
+const Accordion = ({ question, answer }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    return (
+        <div className="border-b border-slate-100 last:border-0">
+            <button
+                className="flex justify-between items-center w-full py-4 text-left font-bold text-slate-700 hover:text-indigo-600 transition duration-200"
+                onClick={() => setIsOpen(!isOpen)}
+            >
+                <span className='pr-4 leading-relaxed'>{question}</span>
+                <ChevronDown size={20} className={`text-slate-400 transition-transform duration-300 flex-shrink-0 ${isOpen ? 'rotate-180' : ''}`} />
+            </button>
+            {isOpen && (
+                <div className="pb-4 text-sm text-slate-500 leading-relaxed animate-fade-in bg-slate-50/50 p-3 rounded-lg mb-2">
+                    {answer}
+                </div>
+            )}
+        </div>
+    );
+};
 
 const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageURL, brightnessLevel, onBrightnessChange, onTileImageReset }) => {
     const baseColorData = GROUT_COLORS.find(c => c.id === selectedColorId) || GROUT_COLORS[0];
@@ -1139,6 +1163,8 @@ export default function App() {
                         ))}
                     </div>
                 </section>
+
+                {/* ⭐️ Before/After 섹션 삭제됨 ⭐️ */}
 
                 <section className="animate-fade-in delay-200">
                       <h2 className="text-xl font-black text-slate-800 mb-5 flex items-center gap-2">
