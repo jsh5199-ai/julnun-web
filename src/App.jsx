@@ -441,8 +441,8 @@ const MaterialDetailModal = ({ onClose }) => (
                             </tr>
                             <tr>
                                 <td className="px-3 py-3 text-center font-bold text-slate-500">시공 시간</td>
-                                <td className="px-3 py-3 text-center font-bold text-blue-600">빠름 (반나절)</td>
-                                <td className="px-3 py-3 text-center text-slate-600">보통 (하루)</td>
+                                <td className="px-3 py-3 text-center font-bold text-blue-600">하루</td>
+                                <td className="px-3 py-3 text-center text-slate-600">1~2일</td>
                             </tr>
                             <tr>
                                 <td className="px-3 py-3 text-center font-bold text-slate-500">물 사용</td>
@@ -462,18 +462,16 @@ const MaterialDetailModal = ({ onClose }) => (
                     <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
                         <div className="font-bold text-slate-700 mb-1">👍 폴리아스파틱을 추천해요</div>
                         <ul className="text-xs text-slate-500 space-y-1 ml-1 list-disc list-inside">
-                            <li>전세/월세 등 단기 거주 예정이신 분</li>
-                            <li>화려하고 반짝이는 인테리어를 선호하시는 분</li>
+                            <li>3~5년 단기 거주 예정이신 분</li>
                             <li>빠른 시공과 저렴한 비용을 원하시는 분</li>
                         </ul>
                     </div>
 
                     <div className="bg-indigo-50 p-4 rounded-xl border border-indigo-100">
-                        <div className="font-bold text-indigo-900 mb-1">👑 에폭시(케라폭시)를 추천해요</div>
+                        <div className="font-bold text-indigo-900 mb-1">👑 에폭시를 추천해요</div>
                         <ul className="text-xs text-indigo-800/80 space-y-1 ml-1 list-disc list-inside">
                             <li>자가 거주 또는 10년 이상 장기 거주 예정이신 분</li>
                             <li>호텔처럼 차분하고 고급스러운 무광을 원하시는 분</li>
-                            <li>락스 청소 등 관리가 편한 것을 최우선으로 하시는 분</li>
                         </ul>
                     </div>
                 </div>
