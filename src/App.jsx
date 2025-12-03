@@ -82,13 +82,16 @@ const GlobalStyles = () => (
         @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes slideInRight { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         
-        /* ⭐️ 부드러운 펄스 애니메이션 (배지용) */
-        @keyframes gentlePulse {
-            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); }
-            50% { transform: scale(1.05); box-shadow: 0 0 0 4px rgba(99, 102, 241, 0); }
-            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+        /* ⭐️ 물결 반짝임 (Shimmer) 애니메이션 */
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
         }
-        .animate-gentle-pulse { animation: gentlePulse 2s infinite; }
+        .animate-shimmer {
+            background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite linear;
+        }
 
         .glass-panel {
             background: rgba(255, 255, 255, 0.95);
@@ -375,10 +378,11 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
                         <div className='bg-slate-50 rounded-xl p-4 border border-slate-200'>
                              <div className='flex justify-between items-start mb-2'>
                                  <div className='flex items-center gap-1.5'>
-                                     {/* ⭐️ 애니메이션 추가 및 위치 변경 */}
+                                     {/* ⭐️ 물결 반짝임(Shimmer) 애니메이션 추가 및 위치 변경 */}
                                      {(minimumFeeApplied || label) && (
-                                         <span className={`text-[11px] font-bold px-2.5 py-1 rounded text-white shadow-sm ${minimumFeeApplied ? 'bg-rose-500' : 'bg-indigo-600'} animate-gentle-pulse`}>
-                                            {minimumFeeApplied ? '최소비용' : label}
+                                         <span className={`text-[11px] font-bold px-2.5 py-1 rounded text-white shadow-sm relative overflow-hidden ${minimumFeeApplied ? 'bg-rose-500' : 'bg-indigo-600'}`}>
+                                            <span className="relative z-10">{minimumFeeApplied ? '최소비용' : label}</span>
+                                            <div className="absolute inset-0 animate-shimmer" style={{ background: 'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%)' }}></div>
                                          </span>
                                      )}
                                  </div>
@@ -413,8 +417,9 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
                                             <div key={index} className='flex justify-between items-center text-sm py-1.5 border-b border-slate-50 last:border-0'>
                                                 <span className='font-medium text-slate-700 text-xs'>{item.label}</span>
                                                 <div className="flex items-center gap-2">
+                                                    {/* ⭐️ 한글 표기로 변경 */}
                                                     <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold ${item.materialLabel === 'Epoxy' ? 'bg-amber-100 text-amber-700' : 'bg-indigo-50 text-indigo-600'}`}>
-                                                        {item.materialLabel}
+                                                        {item.materialLabel === 'Epoxy' ? '에폭시' : (item.materialLabel === 'Poly' ? '폴리아스파틱' : '실리콘')}
                                                     </span>
                                                     <span className='font-bold text-slate-900 text-xs'>{item.quantity}{areaInfo ? areaInfo.unit : '개소'}</span>
                                                 </div>
@@ -471,8 +476,9 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
                                 </span>
                                 <span className="text-base font-bold text-slate-600">원</span>
                             </div>
+                            {/* ⭐️ 하단 안내 문구 추가 */}
                             <div className="text-[9px] text-slate-400 text-right mt-1 leading-tight">
-                                * 타일크기(300/600각) 기준 · 재시공(구축) 별도 문의
+                                * 타일크기 바닥 30x30cm, 벽 30x60cm 기준, 재시공은 별도문의
                             </div>
                         </div>
                     </div>
