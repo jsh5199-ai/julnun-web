@@ -155,7 +155,7 @@ const BATHROOM_AREAS = [
     { id: 'common_bath_wall', label: '공용욕실 벽 전체', basePrice: 300000, icon: LayoutGrid, unit: '구역' },
 ];
 const OTHER_AREAS = [
-    { id: 'entrance', label: '현관', basePrice: 50000, icon: DoorOpen, unit: '개소', desc: '바닥 2곳 이상 시공 시 무료 서비스' },
+    { id: 'entrance', label: '현관', basePrice: 50000, icon: DoorOpen, unit: '개소', desc: '바닥 2곳 이상 시공 시 무료' },
     { id: 'balcony_laundry', label: '베란다/세탁실', basePrice: 100000, icon: Layers, unit: '개소', desc: '' },
     { id: 'kitchen_wall', label: '주방 벽면', basePrice: 150000, icon: Utensils, unit: '구역', desc: '' },
     { id: 'living_room', label: '거실 바닥', basePrice: 550000, icon: Sofa, unit: '구역', desc: '' },
@@ -551,17 +551,15 @@ const MaterialDetailModal = ({ onClose }) => (
                         <div className="font-bold text-slate-700 mb-1">👍 폴리아스파틱을 추천해요</div>
                         <ul className="text-xs text-slate-500 space-y-1 ml-1 list-disc list-inside">
                             <li>전세/월세 등 단기 거주 예정이신 분</li>
-                            <li>화려하고 반짝이는 인테리어를 선호하시는 분</li>
                             <li>빠른 시공과 저렴한 비용을 원하시는 분</li>
                         </ul>
                     </div>
 
                     <div className="bg-indigo-50 p-4 rounded-xl border border-indigo-100">
-                        <div className="font-bold text-indigo-900 mb-1">👑 에폭시(케라폭시)를 추천해요</div>
+                        <div className="font-bold text-indigo-900 mb-1">👑 에폭시를 추천해요</div>
                         <ul className="text-xs text-indigo-800/80 space-y-1 ml-1 list-disc list-inside">
                             <li>자가 거주 또는 10년 이상 장기 거주 예정이신 분</li>
-                            <li>호텔처럼 차분하고 고급스러운 무광을 원하시는 분</li>
-                            <li>락스 청소 등 관리가 편한 것을 최우선으로 하시는 분</li>
+                            <li>호텔처럼 차분하고 고급스러운 미관을 원하시는 분</li>
                         </ul>
                     </div>
                 </div>
@@ -1382,7 +1380,7 @@ export default function App() {
                                     rel="noopener noreferrer"
                                     className="col-span-2 py-4 rounded-2xl font-bold text-slate-900 bg-yellow-400 hover:bg-yellow-500 shadow-lg shadow-yellow-200 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                                 >
-                                    <Layers size={18} /> 상담하기
+                                    <Layers size={18} /> 카톡상담
                                 </a>
                             </div>
                         </div>
