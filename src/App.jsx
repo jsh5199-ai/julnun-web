@@ -13,10 +13,6 @@ const KAKAO_CHAT_URL = 'http://pf.kakao.com/_jAxnYn/chat';
 const PHONE_NUMBER = '010-7734-6709'; 
 const DEFAULT_TILE_IMAGE_URL = '/default_tile.jpg';
 
-// Before/After 이미지 경로
-const BEFORE_IMAGE_URL = '/photo1.png'; 
-const AFTER_IMAGE_URL = '/photo2.png';
-
 const GROUT_COLORS = [
     { id: 'white', code: '#ffffff', label: '화이트', isDark: false },
     { id: 'light_beige', code: '#e2dfda', label: '103번', isDark: false },
@@ -236,70 +232,6 @@ const getPackageAreaIds = (pkg) => [
 ];
 
 // =================================================================
-// [컴포넌트] Before/After 슬라이더
-// =================================================================
-const BeforeAfterSlider = () => {
-    const [sliderPosition, setSliderPosition] = useState(50);
-    const containerRef = useRef(null);
-
-    const handleMove = (event) => {
-        if (containerRef.current) {
-            const { left, width } = containerRef.current.getBoundingClientRect();
-            const clientX = event.touches ? event.touches[0].clientX : event.clientX;
-            const position = ((clientX - left) / width) * 100;
-            setSliderPosition(Math.min(100, Math.max(0, position)));
-        }
-    };
-
-    return (
-        <div className="w-full bg-white rounded-[1.5rem] p-6 shadow-xl shadow-slate-200/50 border border-slate-100 animate-fade-in">
-            <h3 className="text-lg font-black text-slate-800 mb-4 flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-amber-400" /> 시공 전/후 변화 보기
-            </h3>
-            <div 
-                ref={containerRef}
-                className="relative w-full aspect-video rounded-xl overflow-hidden cursor-ew-resize select-none"
-                onMouseMove={handleMove}
-                onTouchMove={handleMove}
-            >
-                {/* 1. After 이미지 */}
-                <img 
-                    src={AFTER_IMAGE_URL} 
-                    alt="After" 
-                    className="absolute inset-0 w-full h-full object-cover" 
-                />
-                <div className="absolute top-4 right-4 bg-indigo-600 text-white text-xs font-bold px-2 py-1 rounded-md shadow-md z-10">After</div>
-
-                {/* 2. Before 이미지 */}
-                <div 
-                    className="absolute inset-0 w-full h-full overflow-hidden"
-                    style={{ width: `${sliderPosition}%`, borderRight: '2px solid white' }}
-                >
-                    <img 
-                        src={BEFORE_IMAGE_URL} 
-                        alt="Before" 
-                        className="absolute inset-0 w-full h-full object-cover max-w-none" 
-                        style={{ width: '100%', maxWidth: 'none' }} 
-                    />
-                    <div className="absolute top-4 left-4 bg-slate-600 text-white text-xs font-bold px-2 py-1 rounded-md shadow-md">Before</div>
-                </div>
-
-                {/* 3. 핸들러 */}
-                <div 
-                    className="absolute top-0 bottom-0 w-1 bg-white shadow-[0_0_10px_rgba(0,0,0,0.3)] cursor-ew-resize flex items-center justify-center"
-                    style={{ left: `${sliderPosition}%`, transform: 'translateX(-50%)' }}
-                >
-                    <div className="w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center text-indigo-600">
-                        <MoveHorizontal size={18} />
-                    </div>
-                </div>
-            </div>
-             <p className="text-center text-xs text-slate-400 mt-2">좌우로 드래그하여 비교해보세요</p>
-        </div>
-    );
-};
-
-// =================================================================
 // [컴포넌트] 실시간 예약 알림 (Ticker)
 // =================================================================
 const ReservationTicker = ({ variant = 'default' }) => {
@@ -374,13 +306,12 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
                 <div className="p-4 overflow-y-auto max-h-[65vh] bg-slate-50">
                     <div ref={quoteRef} className="bg-white rounded-2xl shadow-sm p-5 space-y-4 border border-slate-100">
                         
-                        {/* 상단 요약 박스: 높이를 줄이고 가로 배치로 공간 효율화 + 애니메이션 추가 + 체크박스 분리 */}
+                        {/* 상단 요약 박스 */}
                         <div className='bg-slate-50 rounded-xl p-4 border border-slate-200'>
                              <div className='flex justify-between items-start mb-2'>
                                  <div className='flex items-center gap-1.5'>
-                                     {/* ⭐️ 물결 반짝임(Shimmer) 애니메이션 추가 및 위치 변경 */}
                                      {(minimumFeeApplied || label) && (
-                                         <span className={`text-[11px] font-bold px-2.5 py-1 rounded text-white shadow-sm relative overflow-hidden ${minimumFeeApplied ? 'bg-rose-500' : 'bg-indigo-600'}`}>
+                                         <span className={`text-[11px] font-bold px-2.5 py-1 rounded text-white shadow-sm relative overflow-hidden ${minimumFeeApplied ? 'bg-rose-500' : 'bg-indigo-600'} animate-gentle-pulse`}>
                                             <span className="relative z-10">{minimumFeeApplied ? '최소비용' : label}</span>
                                             <div className="absolute inset-0 animate-shimmer" style={{ background: 'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%)' }}></div>
                                          </span>
@@ -391,7 +322,6 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
                                  <div className="flex flex-col gap-1.5 mt-2 pt-2 border-t border-slate-200/60">
                                      {minimumFeeApplied && <div className="text-[11px] text-slate-500 flex items-center gap-1"><Info size={12} /> 최소 시공비(20만원) 적용</div>}
                                      
-                                     {/* ⭐️ 2개의 체크 항목으로 분리 */}
                                      {isDiscountApplied && (
                                          <div className="space-y-1">
                                              <div className="text-[11px] text-slate-600 flex items-start gap-1.5 leading-snug">
@@ -418,8 +348,8 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
                                                 <span className='font-medium text-slate-700 text-xs'>{item.label}</span>
                                                 <div className="flex items-center gap-2">
                                                     {/* ⭐️ 한글 표기로 변경 */}
-                                                    <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold ${item.materialLabel === 'Epoxy' ? 'bg-amber-100 text-amber-700' : 'bg-indigo-50 text-indigo-600'}`}>
-                                                        {item.materialLabel === 'Epoxy' ? '에폭시' : (item.materialLabel === 'Poly' ? '폴리아스파틱' : '실리콘')}
+                                                    <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold ${item.materialLabel === '에폭시' ? 'bg-amber-100 text-amber-700' : 'bg-indigo-50 text-indigo-600'}`}>
+                                                        {item.materialLabel}
                                                     </span>
                                                     <span className='font-bold text-slate-900 text-xs'>{item.quantity}{areaInfo ? areaInfo.unit : '개소'}</span>
                                                 </div>
@@ -462,22 +392,19 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
                         </button>
 
                         <div className='pt-4 border-t-2 border-slate-100 flex flex-col items-end gap-1'>
-                            <span className="text-[10px] font-medium text-slate-400">최종 예상 금액 (VAT별도)</span>
                             <div className='flex items-baseline gap-2'>
-                                {/* ⭐️ 정가 취소선 표시 (할인 적용 시) */}
                                 {(isDiscountApplied || minimumFeeApplied) && (priceBeforeAllDiscount > price) && (
                                     <span className="text-sm text-slate-400 line-through font-medium">
                                         {priceBeforeAllDiscount.toLocaleString()}원
                                     </span>
                                 )}
-                                {/* ⭐️ 최종 금액 네이비 색상 */}
                                 <span className="text-3xl font-black text-[#0f172a] tracking-tighter">
                                     {price.toLocaleString()}
                                 </span>
                                 <span className="text-base font-bold text-slate-600">원</span>
                             </div>
-                            {/* ⭐️ 하단 안내 문구 추가 */}
-                            <div className="text-[9px] text-slate-400 text-right mt-1 leading-tight">
+                            {/* ⭐️ 하단 안내 문구 수정 및 강조 */}
+                            <div className="text-[9px] font-bold text-slate-600 text-right mt-1 leading-tight bg-slate-100 px-2 py-1 rounded inline-block ml-auto">
                                 * 타일크기 바닥 30x30cm, 벽 30x60cm 기준, 재시공은 별도문의
                             </div>
                         </div>
@@ -599,26 +526,6 @@ const MaterialDetailModal = ({ onClose }) => (
           </div>
         </div>
 );
-
-const Accordion = ({ question, answer }) => {
-    const [isOpen, setIsOpen] = useState(false);
-    return (
-        <div className="border-b border-slate-100 last:border-0">
-            <button
-                className="flex justify-between items-center w-full py-4 text-left font-bold text-slate-700 hover:text-indigo-600 transition duration-200"
-                onClick={() => setIsOpen(!isOpen)}
-            >
-                <span className='pr-4 leading-relaxed'>{question}</span>
-                <ChevronDown size={20} className={`text-slate-400 transition-transform duration-300 flex-shrink-0 ${isOpen ? 'rotate-180' : ''}`} />
-            </button>
-            {isOpen && (
-                <div className="pb-4 text-sm text-slate-500 leading-relaxed animate-fade-in bg-slate-50/50 p-3 rounded-lg mb-2">
-                    {answer}
-                </div>
-            )}
-        </div>
-    );
-};
 
 const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageURL, brightnessLevel, onBrightnessChange, onTileImageReset }) => {
     const baseColorData = GROUT_COLORS.find(c => c.id === selectedColorId) || GROUT_COLORS[0];
@@ -1231,10 +1138,6 @@ export default function App() {
                             </button>
                         ))}
                     </div>
-                </section>
-
-                <section className="animate-fade-in delay-100">
-                    <BeforeAfterSlider />
                 </section>
 
                 <section className="animate-fade-in delay-200">
