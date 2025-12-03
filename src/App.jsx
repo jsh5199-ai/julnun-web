@@ -2,11 +2,11 @@ import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react'
 import html2canvas from 'html2canvas';
 import {
     Calculator, Home, Bath, DoorOpen, Utensils, LayoutGrid,
-    CheckCircle2, Info, RefreshCw, Phone, Sparkles, Hammer, Sofa, Palette, Crown, Gift, Eraser, Star, X, ChevronDown, HelpCircle, Zap, TrendingUp, Clock, Image as ImageIcon, Download, DollarSign, List, Layers, Check, ShieldCheck
+    CheckCircle2, Info, RefreshCw, Phone, Sparkles, Hammer, Sofa, Palette, Crown, Gift, Eraser, Star, X, ChevronDown, HelpCircle, Zap, TrendingUp, Clock, Image as ImageIcon, Download, DollarSign, List, Layers, Check, ShieldCheck, Ruler
 } from 'lucide-react';
 
 // =================================================================
-// ⭐️ 상수 및 데이터 (기존 로직 유지)
+// ⭐️ 상수 및 데이터
 // =================================================================
 const MIN_FEE = 200000;
 const KAKAO_CHAT_URL = 'http://pf.kakao.com/_jAxnYn/chat';
@@ -98,7 +98,6 @@ const GlobalStyles = () => (
         .card-shadow { box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); }
         .card-hover:hover { box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06); transform: translateY(-2px); }
         
-        /* Custom Range Slider */
         input[type=range] {
             -webkit-appearance: none;
             background: transparent;
@@ -125,7 +124,7 @@ const GlobalStyles = () => (
     `}</style>
 );
 
-// 데이터셋 유지 (HOUSING_TYPES는 더 이상 UI에 노출되지 않으나 계산 로직 호환성을 위해 유지)
+// 데이터셋 유지
 const HOUSING_TYPES = [
     { id: 'new', label: '신축 아파트 (입주예정)', multiplier: 1.0 },
     { id: 'old', label: '구축/거주 중', multiplier: 1.0 },
@@ -137,7 +136,8 @@ const MATERIALS = [
         badge: 'STANDARD', badgeColor: 'bg-slate-100 text-slate-600'
     },
     {
-        id: 'kerapoxy', label: '케라폭시/에폭시', priceMod: 1.8,
+        // ⭐️ 수정: 케라폭시/에폭시 -> 에폭시로 문구 변경
+        id: 'kerapoxy', label: '에폭시', priceMod: 1.8,
         description: '반영구적인 내구성과 고급스러운 무광 텍스처',
         badge: 'PREMIUM', badgeColor: 'bg-amber-100 text-amber-700'
     },
@@ -568,7 +568,6 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
 // ⭐️ [App Main] ⭐️
 export default function App() {
     // ... (기존 state 로직 유지) ...
-    // housingType state는 유지하되 UI에서 제어하지 않음 (기본값 'new' 유지하여 로직 호환성 확보)
     const [housingType, setHousingType] = useState('new'); 
     const [material, setMaterial] = useState('poly');
     const [polyOption, setPolyOption] = useState('pearl');
@@ -1042,7 +1041,6 @@ export default function App() {
         <div className={`min-h-screen bg-slate-50 font-sans pb-48 selection:bg-indigo-100 selection:text-indigo-900`}>
             <GlobalStyles />
 
-            {/* 헤더 개선: Glassmorphism */}
             <header className="glass-header sticky top-0 z-30 transition-all duration-300">
                 <div className="px-5 py-4 flex items-center justify-between max-w-lg mx-auto">
                     <div className="flex items-center gap-2">
@@ -1063,7 +1061,6 @@ export default function App() {
             </header>
 
             <main className="max-w-lg mx-auto p-5 space-y-8">
-                {/* 동영상 섹션 */}
                 <section className="bg-white rounded-[1.5rem] overflow-hidden shadow-xl shadow-slate-200/50 border border-white animate-fade-in group">
                     <div className="relative aspect-video w-full bg-slate-900">
                          <iframe key={currentVideo.id} width="100%" height="100%" src={currentEmbedUrl} title={currentVideo.title} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen className="w-full h-full border-0 opacity-90 group-hover:opacity-100 transition-opacity duration-500"></iframe>
@@ -1081,22 +1078,36 @@ export default function App() {
                     </div>
                 </section>
 
-                {/* ⭐️ [수정된 부분] 1. 신뢰 강조 배너 (기존 현장 유형 선택 대체) ⭐️ */}
                 <section className="animate-fade-in delay-100">
-                    <div className="bg-white rounded-[1.5rem] p-6 shadow-xl shadow-slate-200/50 border border-slate-100 flex items-start gap-4">
-                        <div className="p-3 bg-indigo-50 rounded-2xl text-indigo-600 flex-shrink-0">
-                            <ShieldCheck size={28} strokeWidth={2} />
+                    <div className="bg-white rounded-[1.5rem] p-6 shadow-xl shadow-slate-200/50 border border-slate-100">
+                        {/* 정가제 안내 */}
+                        <div className="flex items-start gap-4 mb-5 pb-5 border-b border-slate-100">
+                             <div className="p-3 bg-indigo-50 rounded-2xl text-indigo-600 flex-shrink-0">
+                                <ShieldCheck size={28} strokeWidth={2} />
+                            </div>
+                            <div>
+                                <h2 className="text-lg font-black text-slate-900 mb-1">신축·구축 동일 정가제</h2>
+                                <p className="text-sm text-slate-500 leading-relaxed font-medium">
+                                    현장 난이도가 높은 구축이라도 추가 비용을 요구하지 않습니다. 줄눈의미학은 모든 고객님께 <span className="text-indigo-600 font-bold underline underline-offset-2">투명한 가격</span>을 약속드립니다.
+                                </p>
+                            </div>
                         </div>
-                        <div>
-                            <h2 className="text-lg font-black text-slate-900 mb-1">신축·구축 동일 정가제</h2>
-                            <p className="text-sm text-slate-500 leading-relaxed font-medium">
-                                현장 난이도가 높은 구축이라도 추가 비용을 요구하지 않습니다. 줄눈의미학은 모든 고객님께 <span className="text-indigo-600 font-bold underline underline-offset-2">투명한 가격</span>을 약속드립니다.
-                            </p>
+
+                        {/* ⭐️ [추가] 기준 타일 사이즈 안내 ⭐️ */}
+                        <div className="flex items-start gap-4">
+                             <div className="p-3 bg-slate-50 rounded-2xl text-slate-500 flex-shrink-0">
+                                <Ruler size={28} strokeWidth={2} />
+                            </div>
+                            <div>
+                                <h2 className="text-lg font-black text-slate-900 mb-1">견적 기준 안내</h2>
+                                <p className="text-sm text-slate-500 leading-relaxed font-medium">
+                                    기본 견적가는 <span className="text-slate-900 font-bold">바닥 300x300, 벽면 300x600</span> 타일 기준입니다. (타일 크기에 따라 견적가가 상이할 수 있습니다)
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </section>
 
-                {/* 2. 소재 선택 */}
                 <section className="animate-fade-in delay-200">
                      <h2 className="text-xl font-black text-slate-800 mb-5 flex items-center gap-2">
                         <span className="flex items-center justify-center w-7 h-7 bg-indigo-100 text-indigo-600 rounded-full text-sm font-bold">1</span>
@@ -1117,7 +1128,6 @@ export default function App() {
                                     </div>
                                     <p className="text-sm text-slate-500 pl-8 leading-relaxed">{item.description}</p>
                                     
-                                    {/* 옵션 선택 영역 */}
                                     {item.id === material && (
                                         <div className="mt-4 pl-8 animate-slide-up">
                                             <div className="flex gap-2 p-1 bg-slate-100 rounded-xl">
@@ -1129,8 +1139,9 @@ export default function App() {
                                                 )}
                                                 {item.id === 'kerapoxy' && (
                                                     <>
+                                                        {/* ⭐️ 수정: 스타라이크 EVO 우선 배치 및 라벨 변경 ⭐️ */}
+                                                        <button onClick={(e) => { e.stopPropagation(); setEpoxyOption('starlike'); }} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all shadow-sm ${epoxyOption === 'starlike' ? 'bg-white text-amber-600' : 'text-slate-500 hover:text-slate-700'}`}>스타라이크 EVO</button>
                                                         <button onClick={(e) => { e.stopPropagation(); setEpoxyOption('kerapoxy'); }} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all shadow-sm ${epoxyOption === 'kerapoxy' ? 'bg-white text-amber-600' : 'text-slate-500 hover:text-slate-700'}`}>케라폭시</button>
-                                                        <button onClick={(e) => { e.stopPropagation(); setEpoxyOption('starlike'); }} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all shadow-sm ${epoxyOption === 'starlike' ? 'bg-white text-amber-600' : 'text-slate-500 hover:text-slate-700'}`}>스타라이크</button>
                                                     </>
                                                 )}
                                             </div>
@@ -1153,7 +1164,6 @@ export default function App() {
                     </button>
                 </section>
 
-                {/* 3. 시공 범위 */}
                 <section className="animate-fade-in delay-300">
                      <h2 className="text-xl font-black text-slate-800 mb-5 flex items-center gap-2">
                         <span className="flex items-center justify-center w-7 h-7 bg-indigo-100 text-indigo-600 rounded-full text-sm font-bold">2</span>
@@ -1169,7 +1179,6 @@ export default function App() {
                     {renderAreaList(OTHER_AREAS)}
                 </section>
 
-                 {/* 4. 실리콘 */}
                  <section className="animate-fade-in delay-500">
                      <h2 className="text-xl font-black text-slate-800 mb-5 flex items-center gap-2">
                         <span className="flex items-center justify-center w-7 h-7 bg-indigo-100 text-indigo-600 rounded-full text-sm font-bold">3</span>
@@ -1178,7 +1187,6 @@ export default function App() {
                     {renderAreaList(SILICON_AREAS)}
                 </section>
 
-                {/* FAQ */}
                 <section className="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 animate-fade-in delay-700">
                     <h2 className="text-lg font-black text-slate-800 mb-4 flex items-center gap-2">
                         <HelpCircle className="h-5 w-5 text-amber-400"/> 자주 묻는 질문
@@ -1188,7 +1196,6 @@ export default function App() {
                     </div>
                 </section>
 
-                {/* 숨고 리뷰 */}
                 <button
                     onClick={() => window.open(SOOMGO_REVIEW_URL, '_blank')}
                     className="w-full py-4 rounded-2xl bg-slate-900 text-white font-bold text-base hover:bg-slate-800 transition shadow-xl shadow-slate-300 flex items-center justify-center gap-2 active:scale-95"
@@ -1198,7 +1205,6 @@ export default function App() {
                 </button>
             </main>
 
-            {/* 하단 고정 바 개선 */}
             <PackageToast isVisible={showToast} onClose={handleCloseToast} label={calculation.label} />
 
             {hasSelections && (
