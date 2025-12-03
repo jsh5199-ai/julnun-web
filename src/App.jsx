@@ -31,7 +31,7 @@ const GROUT_COLORS = [
     { id: 'burnt_brown', code: '#8b8784', label: '187번', isDark: true },
 ];
 
-// 애니메이션에 사용할 180번 색상 정의
+// 애니메이션 타겟 컬러 (180번 오트 브라운)
 const ANIMATION_TARGET_COLOR = '#b0a9a4';
 
 const BRIGHT_COLOR_CODE = '#ffffff';
@@ -69,108 +69,123 @@ const mixColors = (color1, color2, weight) => {
 };
 
 // =================================================================
-// ⭐️ [신규] 시공 과정 애니메이션 컴포넌트
+// ⭐️ [신규] 테크니컬 라인 아트 애니메이션 (SVG)
 // =================================================================
 const ProcessAnimation = () => {
     return (
         <div className="w-full bg-white rounded-[1.5rem] p-6 shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden mb-8">
             <h3 className="text-lg font-black text-slate-800 mb-6 flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-indigo-500" /> 프리미엄 시공 과정
+                <Sparkles className="h-5 w-5 text-indigo-500" /> Professional Process
             </h3>
 
-            {/* 애니메이션 컨테이너 */}
-            <div className="relative h-32 bg-slate-50 rounded-xl border border-slate-200 overflow-hidden flex items-center justify-center">
-                
-                {/* 1. 타일 배경 (위/아래) */}
-                <div className="absolute inset-0 flex flex-col">
-                    <div className="h-1/2 w-full bg-slate-200 border-b-4 border-white"></div>
-                    <div className="h-1/2 w-full bg-slate-200 border-t-4 border-white"></div>
-                </div>
+            <div className="relative w-full h-32 bg-slate-50 rounded-xl border border-slate-200 overflow-hidden flex items-center justify-center">
+                <svg viewBox="0 0 400 120" className="w-full h-full" preserveAspectRatio="xMidYMid slice">
+                    
+                    {/* 1. 타일 그리드 (배경) - 얇은 회색 선 */}
+                    <g stroke="#cbd5e1" strokeWidth="1">
+                        <line x1="0" y1="20" x2="400" y2="20" />
+                        <line x1="0" y1="100" x2="400" y2="100" />
+                        <line x1="100" y1="0" x2="100" y2="120" />
+                        <line x1="300" y1="0" x2="300" y2="120" />
+                    </g>
 
-                {/* 2. 줄눈 라인 (색상 변화 애니메이션) */}
-                <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-3 z-0">
-                    <div className="w-full h-full animate-line-process"></div>
-                </div>
+                    {/* 2. 작업 대상 라인 (중앙 수평선) */}
+                    {/* 기존 백시멘트 (짙은 회색 실선) */}
+                    <line x1="0" y1="60" x2="400" y2="60" stroke="#64748b" strokeWidth="6" className="animate-fade-out-line" />
+                    
+                    {/* 제거된 라인 (비어있는 두 선으로 표현) */}
+                    <line x1="0" y1="58" x2="400" y2="58" stroke="#94a3b8" strokeWidth="1" className="animate-draw-empty-top" />
+                    <line x1="0" y1="62" x2="400" y2="62" stroke="#94a3b8" strokeWidth="1" className="animate-draw-empty-bottom" />
 
-                {/* 3. 그라인더 (제거) 애니메이션 */}
-                <div className="absolute top-1/2 left-0 -translate-y-1/2 z-10 animate-tool-grinder opacity-0">
-                    <div className="relative">
-                        {/* 그라인더 본체 */}
-                        <div className="w-12 h-12 bg-slate-700 rounded-full flex items-center justify-center shadow-lg">
-                            <Settings className="text-white w-8 h-8 animate-spin-fast" />
-                        </div>
-                        {/* 먼지 효과 */}
-                        <div className="absolute right-0 top-1/2 w-8 h-8 -translate-y-1/2 translate-x-4">
-                            <div className="w-2 h-2 bg-slate-400 rounded-full absolute animate-ping" style={{animationDelay: '0s'}}></div>
-                            <div className="w-1 h-1 bg-slate-300 rounded-full absolute top-2 animate-ping" style={{animationDelay: '0.1s'}}></div>
-                        </div>
-                        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-[10px] font-bold text-slate-600 bg-white px-2 py-1 rounded-full shadow-sm whitespace-nowrap">
-                            백시멘트 제거
-                        </div>
-                    </div>
-                </div>
+                    {/* 채워지는 줄눈 (180번 색상) */}
+                    <line x1="0" y1="60" x2="400" y2="60" stroke={ANIMATION_TARGET_COLOR} strokeWidth="6" strokeLinecap="round" className="animate-fill-grout" />
 
-                {/* 4. 시공병 (충전) 애니메이션 */}
-                <div className="absolute top-1/2 left-0 -translate-y-1/2 z-10 animate-tool-bottle opacity-0">
-                    <div className="relative">
-                        {/* 시공병 본체 */}
-                        <div className="w-12 h-12 bg-indigo-600 rounded-tl-full rounded-bl-full rounded-br-full flex items-center justify-center shadow-lg rotate-[-45deg] origin-bottom-right">
-                            <div className="w-4 h-8 bg-white/20 rounded-full"></div>
-                        </div>
-                        {/* 나오는 줄눈재 (180번 색상 적용) */}
-                        <div className="absolute right-[-10px] bottom-[-5px] w-3 h-3 rounded-full" style={{ backgroundColor: ANIMATION_TARGET_COLOR }}></div>
-                        
-                        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-[10px] font-bold text-indigo-600 bg-white px-2 py-1 rounded-full shadow-sm whitespace-nowrap">
-                            친환경 줄눈재 충전
-                        </div>
-                    </div>
-                </div>
+
+                    {/* 3. 그라인더 도구 (선 드로잉) */}
+                    <g className="animate-move-grinder">
+                        {/* 톱날 (회전) */}
+                        <circle cx="0" cy="60" r="12" stroke="#334155" strokeWidth="2" fill="none" strokeDasharray="4 3" className="animate-spin-blade" />
+                        <circle cx="0" cy="60" r="4" fill="#334155" />
+                        {/* 튀는 먼지 (선) */}
+                        <path d="M -8 50 L -12 40 M 8 50 L 12 40 M 0 48 L 0 35" stroke="#94a3b8" strokeWidth="1.5" className="animate-dust" />
+                        {/* 텍스트 라벨 */}
+                        <text x="0" y="30" textAnchor="middle" fontSize="10" fontWeight="bold" fill="#475569">Cutting</text>
+                    </g>
+
+                    {/* 4. 시공병 도구 (선 드로잉) */}
+                    <g className="animate-move-bottle">
+                        {/* 병 몸통 (단순화된 라인) */}
+                        <path d="M -8 30 L -8 50 L 0 60 L 8 50 L 8 30 Z" stroke="#4f46e5" strokeWidth="2" fill="white" />
+                        {/* 노즐 */}
+                        <path d="M -3 30 L 0 20 L 3 30" stroke="#4f46e5" strokeWidth="2" fill="white" />
+                        {/* 텍스트 라벨 */}
+                        <text x="0" y="15" textAnchor="middle" fontSize="10" fontWeight="bold" fill="#4f46e5">Filling</text>
+                    </g>
+
+                </svg>
             </div>
 
-            {/* 스타일 정의 (애니메이션 키프레임) */}
             <style>{`
-                /* 1. 줄눈 라인 변화: 흰색(시멘트) -> 회색(제거됨) -> 180번(줄눈) */
-                @keyframes line-process {
-                    0%, 15% { background-color: #e2e8f0; width: 100%; } /* 초기: 회색(기존매지) */
-                    
-                    /* 그라인더 지나감 (왼쪽부터 어두워짐) */
-                    25% { background: linear-gradient(to right, #334155 50%, #e2e8f0 50%); } 
-                    35% { background-color: #334155; } /* 제거완료: 어두운색 */
-                    
-                    /* 시공병 지나감 (왼쪽부터 180번 색상으로 채워짐) */
-                    50% { background: linear-gradient(to right, #334155 100%, ${ANIMATION_TARGET_COLOR} 0%); }
-                    75% { background: linear-gradient(to right, ${ANIMATION_TARGET_COLOR} 100%, #334155 0%); }
-                    85%, 100% { background-color: ${ANIMATION_TARGET_COLOR}; box-shadow: 0 0 5px ${ANIMATION_TARGET_COLOR}; } /* 완료 */
+                /* 애니메이션 정의 */
+                
+                /* 1. 그라인더 이동 (0s ~ 3s) */
+                .animate-move-grinder { animation: move-tool 8s linear infinite; }
+                .animate-spin-blade { animation: spin 0.3s linear infinite; transform-origin: 0px 60px; }
+                .animate-dust { animation: dust-flicker 0.2s linear infinite; }
+
+                /* 2. 기존 라인 사라짐 (마스킹 효과 대신 투명도 조절로 구현) */
+                .animate-fade-out-line { animation: fade-out 8s linear infinite; }
+                
+                /* 3. 빈 라인 그려짐 */
+                .animate-draw-empty-top { stroke-dasharray: 400; stroke-dashoffset: 400; animation: draw-line 8s linear infinite; }
+                .animate-draw-empty-bottom { stroke-dasharray: 400; stroke-dashoffset: 400; animation: draw-line 8s linear infinite; }
+
+                /* 4. 시공병 이동 (4s ~ 7s) */
+                .animate-move-bottle { animation: move-tool-bottle 8s linear infinite; }
+
+                /* 5. 새 줄눈 채움 */
+                .animate-fill-grout { stroke-dasharray: 400; stroke-dashoffset: 400; animation: draw-fill 8s linear infinite; }
+
+
+                @keyframes move-tool {
+                    0% { transform: translateX(-50px); opacity: 0; }
+                    5% { opacity: 1; }
+                    35% { transform: translateX(450px); opacity: 1; }
+                    40% { transform: translateX(450px); opacity: 0; }
+                    100% { transform: translateX(450px); opacity: 0; }
                 }
 
-                /* 2. 그라인더 이동 */
-                @keyframes tool-grinder {
-                    0% { left: -10%; opacity: 0; }
-                    10% { left: 0%; opacity: 1; }
-                    35% { left: 100%; opacity: 1; }
-                    40% { left: 120%; opacity: 0; }
-                    100% { left: 120%; opacity: 0; }
+                @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+                
+                @keyframes dust-flicker { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+
+                /* 기존 라인이 그라인더 뒤를 따라 사라지는 효과 (클리핑 비슷하게 타이밍 조절) */
+                @keyframes fade-out {
+                    0% { stroke-dasharray: 400; stroke-dashoffset: 0; }
+                    35% { stroke-dasharray: 400; stroke-dashoffset: -400; } /* 왼쪽으로 사라짐 */
+                    100% { stroke-dasharray: 400; stroke-dashoffset: -400; }
                 }
 
-                /* 3. 시공병 이동 (그라인더 이후) */
-                @keyframes tool-bottle {
-                    0%, 45% { left: -10%; opacity: 0; }
-                    50% { left: 0%; opacity: 1; }
-                    75% { left: 100%; opacity: 1; }
-                    80% { left: 120%; opacity: 0; }
-                    100% { left: 120%; opacity: 0; }
+                @keyframes draw-line {
+                    0% { stroke-dashoffset: 400; }
+                    35% { stroke-dashoffset: 0; }
+                    100% { stroke-dashoffset: 0; }
                 }
 
-                /* 회전 애니메이션 */
-                @keyframes spin-fast {
-                    from { transform: rotate(0deg); }
-                    to { transform: rotate(360deg); }
+                @keyframes move-tool-bottle {
+                    0%, 40% { transform: translateX(-50px); opacity: 0; }
+                    45% { opacity: 1; }
+                    75% { transform: translateX(450px); opacity: 1; }
+                    80% { transform: translateX(450px); opacity: 0; }
+                    100% { transform: translateX(450px); opacity: 0; }
                 }
 
-                .animate-line-process { animation: line-process 6s linear infinite; }
-                .animate-tool-grinder { animation: tool-grinder 6s linear infinite; }
-                .animate-tool-bottle { animation: tool-bottle 6s linear infinite; }
-                .animate-spin-fast { animation: spin-fast 0.5s linear infinite; }
+                @keyframes draw-fill {
+                    0%, 40% { stroke-dashoffset: 400; }
+                    75% { stroke-dashoffset: 0; }
+                    100% { stroke-dashoffset: 0; }
+                }
+
             `}</style>
         </div>
     );
@@ -1163,7 +1178,7 @@ export default function App() {
 
             <main className="max-w-lg mx-auto p-5 space-y-8">
                 
-                {/* ⭐️ [수정된 위치] 최상단: 시공 과정 애니메이션 ⭐️ */}
+                {/* ⭐️ [신규] 테크니컬 라인 아트 애니메이션 (SVG) ⭐️ */}
                 <section className="animate-fade-in">
                     <ProcessAnimation />
                 </section>
@@ -1258,7 +1273,6 @@ export default function App() {
                         ))}
                     </div>
 
-                    {/* ⭐️ [수정] 소재 비교 버튼을 소재 선택 바로 아래로 이동 ⭐️ */}
                     <button onClick={() => setShowMaterialModal(true)} className="w-full mt-6 py-4 bg-white border border-slate-200 text-slate-600 rounded-2xl font-bold text-sm hover:bg-slate-50 transition shadow-sm flex items-center justify-center gap-2">
                         <Info size={18} className='text-slate-400'/> 소재별 양생기간 및 특징 비교
                     </button>
