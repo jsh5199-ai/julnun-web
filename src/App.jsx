@@ -34,7 +34,7 @@ const BRIGHT_COLOR_CODE = '#ffffff';
 const DARK_COLOR_CODE = '#565556';
 
 const ORIGINAL_PRICES = {
-    // ⭐️ [수정] 바닥 분리에 따른 가격 데이터 매핑 (기존 바닥 가격 동일 적용)
+    // ⭐️ 바닥 분리에 따른 가격 데이터 매핑 (기존 바닥 가격 동일 적용)
     'master_bath_floor': { poly: 230000, epoxy: 400000 },
     'common_bath_floor': { poly: 230000, epoxy: 400000 },
     'shower_booth': { poly: 150000, epoxy: 300000 },
@@ -46,7 +46,7 @@ const ORIGINAL_PRICES = {
     'kitchen_wall': { poly: 150000, epoxy: 250000 },
     'living_room': { poly: 550000, epoxy: 1100000 },
     'silicon_bathtub': { poly: 80000, epoxy: 80000 },
-    'silicon_kitchen_top': { poly: 50000, epoxy: 50000 }, // ⭐️ [수정] 주방상판 5만원
+    'silicon_kitchen_top': { poly: 50000, epoxy: 50000 }, // 주방상판 5만원
     'silicon_living_baseboard': { poly: 400000, epoxy: 400000 },
 };
 
@@ -151,7 +151,7 @@ const MATERIALS = [
     },
 ];
 
-// ⭐️ [수정] 욕실 바닥 분리 (안방/공용)
+// 욕실 바닥 분리 (안방/공용)
 const BATHROOM_AREAS = [
     { id: 'master_bath_floor', label: '안방 욕실바닥', basePrice: 150000, icon: Bath, unit: '개소' },
     { id: 'common_bath_floor', label: '공용 욕실바닥', basePrice: 150000, icon: Bath, unit: '개소' },
@@ -166,7 +166,7 @@ const OTHER_AREAS = [
     { id: 'kitchen_wall', label: '주방 벽면', basePrice: 150000, icon: Utensils, unit: '구역', desc: '' },
     { id: 'living_room', label: '거실 바닥', basePrice: 550000, icon: Sofa, unit: '구역', desc: '' },
 ];
-// ⭐️ [수정] 실리콘 항목 변경 (주방상판)
+// 실리콘 항목
 const SILICON_AREAS = [
     { id: 'silicon_bathtub', label: '욕조 테두리', basePrice: 80000, icon: Eraser, unit: '개소', desc: '' },
     { id: 'silicon_kitchen_top', label: '주방 상판 실리콘', basePrice: 50000, icon: Utensils, unit: '개소', desc: '' },
@@ -191,7 +191,7 @@ const getEmbedUrl = (videoId) => `https://www.youtube.com/embed/${videoId}?autop
 
 const OTHER_AREA_IDS_FOR_PACKAGE_EXCLUSION = ['entrance', 'balcony_laundry', 'kitchen_wall', 'living_room', 'silicon_bathtub', 'silicon_kitchen_top', 'silicon_living_baseboard'];
 
-// 패키지 정의는 'bathroom_floor'를 기준으로 유지 (로직에서 합산 처리)
+// 패키지 정의
 const ORIGINAL_MIXED_PACKAGES = [
     { id: 'P_MIX_01', price: 750000, label: '혼합패키지 01', E_areas: [['bathroom_floor', 2]], P_areas: [['shower_booth', 1]] },
     { id: 'P_MIX_02', price: 750000, label: '혼합패키지 02', E_areas: [['bathroom_floor', 2]], P_areas: [['bathtub_wall', 1]] },
@@ -212,6 +212,23 @@ const CUSTOM_MIXED_PACKAGES = [
     { id: 'P_MIX_NEW_B', price: 1150000, label: '혼합벽면B (바닥/공용벽E, 안방벽P) 115만', E_areas: [['bathroom_floor', 2], ['common_bath_wall', 1]], P_areas: [['master_bath_wall', 1]] },
 ];
 const NEW_USER_PACKAGES = [
+    // ⭐️ [추가] 교차 바닥 패키지 (안방P+공용E 또는 안방E+공용P) = 50만원
+    { 
+        id: 'MIXED_FLOOR_500K_A', 
+        price: 500000, 
+        label: '복합 바닥 2곳 (폴리+에폭시)', 
+        P_areas: [['master_bath_floor', 1]], 
+        E_areas: [['common_bath_floor', 1]],
+        isFlexible: false 
+    },
+    { 
+        id: 'MIXED_FLOOR_500K_B', 
+        price: 500000, 
+        label: '복합 바닥 2곳 (에폭시+폴리)', 
+        P_areas: [['common_bath_floor', 1]], 
+        E_areas: [['master_bath_floor', 1]],
+        isFlexible: false 
+    },
     { id: 'USER_E_700K_MASTER', price: 700000, label: '에폭시 벽면 패키지 (70만)', E_areas: [['bathroom_floor', 1], ['master_bath_wall', 1]], P_areas: [], isFlexible: true, flexibleGroup: ['master_bath_wall', 'common_bath_wall'] },
     { id: 'USER_E_700K_COMMON', price: 700000, label: '에폭시 벽면 패키지 (70만)', E_areas: [['bathroom_floor', 1], ['common_bath_wall', 1]], P_areas: [], isFlexible: true, flexibleGroup: ['master_bath_wall', 'common_bath_wall'] },
     { id: 'USER_P_500K_MASTER', price: 500000, label: '폴리 벽면 패키지 (50만)', E_areas: [], P_areas: [['bathroom_floor', 1], ['master_bath_wall', 1]], isFlexible: true, flexibleGroup: ['master_bath_wall', 'common_bath_wall'] },
@@ -672,14 +689,13 @@ export default function App() {
     const quoteRef = useRef(null);
     const SOOMGO_REVIEW_URL = 'https://www.soomgo.com/profile/users/10755579?tab=review';
 
-    // (기존 useEffect 및 핸들러들 생략 없이 유지됨 - 이전 코드와 동일)
     useEffect(() => {
         if (quantities['entrance'] > 0 && areaMaterials['entrance'] !== 'poly') {
             setAreaMaterials(prev => ({ ...prev, 'entrance': 'poly' }));
         }
     }, [quantities['entrance']]);
 
-    // ⭐️ [수정] 수량 변경 핸들러 (바닥 2곳 합산 로직 추가)
+    // ⭐️ 수량 변경 핸들러 (바닥 2곳 합산 로직 포함)
     const handleQuantityChange = useCallback((id, delta) => {
         setQuantities(prev => {
             const currentQty = prev[id] || 0;
@@ -692,7 +708,7 @@ export default function App() {
                 if (id === 'bathtub_wall' && (newQuantities['common_bath_wall'] || 0) > 0) newQuantities['common_bath_wall'] = 0;
             }
             
-            // ⭐️ 바닥 합산 계산 (안방+공용)
+            // 바닥 합산 계산 (안방+공용)
             const prevFloorCount = (prev['master_bath_floor'] || 0) + (prev['common_bath_floor'] || 0);
             const newFloorCount = (newQuantities['master_bath_floor'] || 0) + (newQuantities['common_bath_floor'] || 0);
 
@@ -819,15 +835,13 @@ export default function App() {
                                             }
 
                                             if (baseMatch && flexibleMatch) {
-                                                // ID Set 매칭은 Flexible에서는 복잡하므로 수량 기반으로만 체크 (단순화)
-                                                // 여기서는 바닥 합산 로직이 이미 적용됨
                                                  return { ...pkg, autoEntrance: appliedAutoEntrance };
                                             }
                                             continue;
                     }
 
                     let isMatch = true;
-                    // 일반 패키지 매칭 (bathroom_floor 등 가상 키 활용)
+                    // 일반 패키지 매칭
                     for (const [id, requiredQty] of pkg.P_areas) {
                                if ((filteredPolySelections[id] || 0) !== requiredQty) {
                                    isMatch = false;
@@ -844,7 +858,6 @@ export default function App() {
                     }
                     if (!isMatch) continue;
 
-                    // ID Set 확인은 생략 (가상 키 때문에 정확한 Set 매칭이 어려움, 수량 매칭으로 충분)
                     return { ...pkg, autoEntrance: appliedAutoEntrance };
         }
         return null;
@@ -877,7 +890,7 @@ export default function App() {
             labelText = '패키지 할인 적용 중';
             packageAreas = getPackageAreaIds(matchedPackage);
             
-            // 패키지에 포함된 항목 수량 0 처리 (가격 계산 제외용)
+            // 패키지에 포함된 항목 수량 0 처리
             packageAreas.forEach(id => { 
                 if (id === 'bathroom_floor') {
                     q['master_bath_floor'] = 0;
@@ -1001,7 +1014,7 @@ export default function App() {
                 isFreeService: isFreeServiceItem,
                 isPackageItem: isPackageItemFlag || !isFreeServiceItem && (isPackageActive || finalDiscount > 0),
                 isDiscount: false,
-                // ⭐️ [수정] 한글로 데이터 직접 생성 (렌더링 시 오류 방지)
+                // 한글로 데이터 직접 생성 (렌더링 시 오류 방지)
                 materialLabel: ['silicon_bathtub', 'silicon_kitchen_top', 'silicon_living_baseboard'].includes(area.id) 
                     ? '실리콘' 
                     : (areaMatId === 'poly' ? '폴리아스파틱' : '에폭시')
@@ -1110,7 +1123,7 @@ export default function App() {
                 const isSelected = quantities[area.id] > 0;
                 const currentMat = area.id === 'entrance' ? 'poly' : areaMaterials[area.id];
                 
-                // ⭐️ [수정] 자동선택 로직 (안방+공용 바닥 합산 >= 2 이면 현관 자동)
+                // ⭐️ 자동선택 로직 (안방+공용 바닥 합산 >= 2 이면 현관 자동)
                 const totalBathroomFloor = (quantities['master_bath_floor'] || 0) + (quantities['common_bath_floor'] || 0);
                 const isEntranceAutoSelected = area.id === 'entrance' && quantities['entrance'] >= 1 && totalBathroomFloor >= 2 && !calculation.isPackageActive;
                 
@@ -1194,7 +1207,7 @@ export default function App() {
                     </div>
                 </section>
 
-                {/* ⭐️ [디자인 수정됨] 시공 소재 선택 섹션 - 아이콘 제거 */}
+                {/* ⭐️ [디자인 수정됨] 시공 소재 선택 섹션 - 배경 아이콘 복구, 문구 아이콘 제거 */}
                 <section className="animate-fade-in delay-200">
                     <h2 className="text-xl font-black text-slate-800 mb-5 flex items-center gap-2">
                         <span className="flex items-center justify-center w-7 h-7 bg-indigo-600 text-white rounded-full text-sm font-bold shadow-md shadow-indigo-200">1</span>
@@ -1204,18 +1217,22 @@ export default function App() {
                     <div className="space-y-5">
                         {MATERIALS.map((item) => {
                             const isSelected = item.id === material;
-                            // 소재별 테마 컬러 설정 (배경색은 유지, 아이콘 관련 제거)
+                            // 소재별 테마 컬러 설정
                             const theme = item.id === 'poly' 
                                 ? { 
                                     bg: 'bg-gradient-to-br from-white to-slate-50', 
                                     border: 'border-slate-200', 
                                     activeBorder: 'border-indigo-500 ring-2 ring-indigo-500 ring-offset-2',
+                                    iconColor: 'text-slate-200',
+                                    activeIconColor: 'text-indigo-600',
                                     badge: 'bg-slate-100 text-slate-600'
                                   }
                                 : { 
                                     bg: 'bg-gradient-to-br from-[#fffdf5] to-[#fff7ed]', 
                                     border: 'border-amber-100', 
                                     activeBorder: 'border-amber-500 ring-2 ring-amber-500 ring-offset-2',
+                                    iconColor: 'text-amber-100',
+                                    activeIconColor: 'text-amber-600',
                                     badge: 'bg-amber-100 text-amber-700'
                                   };
 
@@ -1225,11 +1242,15 @@ export default function App() {
                                     onClick={() => setMaterial(item.id)} 
                                     className={`relative overflow-hidden rounded-[1.5rem] cursor-pointer transition-all duration-300 group ${isSelected ? `${theme.activeBorder} shadow-xl` : `${theme.border} border shadow-sm hover:shadow-md hover:-translate-y-1`} ${theme.bg}`}
                                 >
+                                    {/* ⭐️ [복구] 배경 장식 아이콘 */}
+                                    <div className={`absolute -right-4 -bottom-4 opacity-20 transition-transform duration-500 ${isSelected ? 'scale-110 rotate-12' : 'scale-100'}`}>
+                                        {item.id === 'poly' ? <Sparkles size={120} className={theme.iconColor} /> : <Crown size={120} className={theme.iconColor} />}
+                                    </div>
+
                                     <div className="p-6 relative z-10">
                                         <div className="flex justify-between items-start mb-3">
                                             <div className='flex items-center gap-3'>
-                                                {/* 체크박스 UI */}
-                                                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${isSelected ? `bg-slate-900 border-transparent` : 'border-slate-300 bg-white'}`}>
+                                                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${isSelected ? `${theme.activeIconColor} bg-current border-transparent` : 'border-slate-300 bg-white'}`}>
                                                     {isSelected && <Check size={14} className="text-white" strokeWidth={4} />}
                                                 </div>
                                                 <div>
@@ -1245,27 +1266,27 @@ export default function App() {
                                             {item.description}
                                         </p>
                                         
-                                        {/* 상세 옵션 선택 (선택되었을 때만 표시) */}
+                                        {/* ⭐️ [수정] 상세 옵션 버튼 - 문구 아이콘 제거 */}
                                         <div className={`grid grid-rows-[0fr] transition-all duration-300 ease-out ${isSelected ? 'grid-rows-[1fr] mt-5' : 'mt-0'}`}>
                                             <div className="overflow-hidden pl-1">
                                                 <div className="p-1.5 bg-white/60 backdrop-blur-sm rounded-xl border border-white/50 shadow-inner flex gap-2">
                                                     {item.id === 'poly' && (
                                                         <>
                                                             <button onClick={(e) => { e.stopPropagation(); setPolyOption('pearl'); }} className={`flex-1 py-2.5 text-xs font-bold rounded-lg transition-all shadow-sm flex items-center justify-center gap-1 ${polyOption === 'pearl' ? 'bg-indigo-600 text-white shadow-indigo-200' : 'bg-transparent text-slate-500 hover:bg-white'}`}>
-                                                                <Sparkles size={12}/> 펄 있음
+                                                                펄 있음
                                                             </button>
                                                             <button onClick={(e) => { e.stopPropagation(); setPolyOption('no_pearl'); }} className={`flex-1 py-2.5 text-xs font-bold rounded-lg transition-all shadow-sm flex items-center justify-center gap-1 ${polyOption === 'no_pearl' ? 'bg-indigo-600 text-white shadow-indigo-200' : 'bg-transparent text-slate-500 hover:bg-white'}`}>
-                                                                <Eraser size={12}/> 펄 없음
+                                                                펄 없음
                                                             </button>
                                                         </>
                                                     )}
                                                     {item.id === 'kerapoxy' && (
                                                         <>
                                                             <button onClick={(e) => { e.stopPropagation(); setEpoxyOption('starlike'); }} className={`flex-1 py-2.5 text-xs font-bold rounded-lg transition-all shadow-sm flex items-center justify-center gap-1 ${epoxyOption === 'starlike' ? 'bg-amber-500 text-white shadow-amber-200' : 'bg-transparent text-slate-500 hover:bg-white'}`}>
-                                                                <Star size={12}/> 스타라이크 EVO
+                                                                스타라이크 EVO
                                                             </button>
                                                             <button onClick={(e) => { e.stopPropagation(); setEpoxyOption('kerapoxy'); }} className={`flex-1 py-2.5 text-xs font-bold rounded-lg transition-all shadow-sm flex items-center justify-center gap-1 ${epoxyOption === 'kerapoxy' ? 'bg-amber-500 text-white shadow-amber-200' : 'bg-transparent text-slate-500 hover:bg-white'}`}>
-                                                                <ShieldCheck size={12}/> 케라폭시
+                                                                케라폭시
                                                             </button>
                                                         </>
                                                     )}
@@ -1290,7 +1311,6 @@ export default function App() {
                     />
                 </section>
 
-                {/* ⭐️ [수정] 간격 추가 (mt-16) */}
                 <section className="animate-fade-in delay-300 mt-16 pt-10 border-t border-slate-200/60">
                       <h2 className="text-xl font-black text-slate-800 mb-5 flex items-center gap-2">
                         <span className="flex items-center justify-center w-7 h-7 bg-indigo-100 text-indigo-600 rounded-full text-sm font-bold">2</span>
@@ -1361,7 +1381,7 @@ export default function App() {
                             <ReservationTicker />
                         </div>
 
-                        {/* ⭐️ [수정됨] 하단바: pb-12로 하단 여백 추가 확보 */}
+                        {/* ⭐️ 하단바: pb-12로 하단 여백 추가 확보 */}
                         <div className="glass-panel px-5 pt-5 pb-12 shadow-[0_-8px_30px_rgba(0,0,0,0.12)] safe-area-bottom rounded-t-[2rem]">
                             <div className='flex items-end justify-between mb-4'>
                                 <div>
