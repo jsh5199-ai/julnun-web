@@ -13,6 +13,10 @@ const KAKAO_CHAT_URL = 'http://pf.kakao.com/_jAxnYn/chat';
 const PHONE_NUMBER = '010-7734-6709'; 
 const DEFAULT_TILE_IMAGE_URL = '/default_tile.jpg';
 
+// ⭐️ [신규] Before/After 이미지 경로 상수 정의
+const BEFORE_IMAGE_URL = '/photo1.png'; // 시공 전 사진
+const AFTER_IMAGE_URL = '/photo2.png';  // 시공 후 사진
+
 const GROUT_COLORS = [
     { id: 'white', code: '#ffffff', label: '화이트', isDark: false },
     { id: 'light_beige', code: '#e2dfda', label: '103번', isDark: false },
@@ -223,7 +227,7 @@ const getPackageAreaIds = (pkg) => [
 ];
 
 // =================================================================
-// ⭐️ [신규] Before/After 슬라이더 컴포넌트
+// ⭐️ [신규] Before/After 슬라이더 컴포넌트 (실제 이미지 적용)
 // =================================================================
 const BeforeAfterSlider = () => {
     const [sliderPosition, setSliderPosition] = useState(50);
@@ -249,28 +253,25 @@ const BeforeAfterSlider = () => {
                 onMouseMove={handleMove}
                 onTouchMove={handleMove}
             >
-                {/* 1. After 이미지 (베이스) */}
+                {/* 1. After 이미지 (베이스 - 시공 후) */}
                 <img 
-                    src={DEFAULT_TILE_IMAGE_URL} 
-                    alt="After" 
+                    src={AFTER_IMAGE_URL} 
+                    alt="시공 후" 
                     className="absolute inset-0 w-full h-full object-cover" 
                 />
                 <div className="absolute top-4 right-4 bg-indigo-600 text-white text-xs font-bold px-2 py-1 rounded-md shadow-md z-10">After</div>
 
-                {/* 2. Before 이미지 (클리핑) - 필터로 오염된 느낌 표현 */}
+                {/* 2. Before 이미지 (클리핑 - 시공 전) */}
                 <div 
                     className="absolute inset-0 w-full h-full overflow-hidden"
                     style={{ width: `${sliderPosition}%`, borderRight: '2px solid white' }}
                 >
                     <img 
-                        src={DEFAULT_TILE_IMAGE_URL} 
-                        alt="Before" 
+                        src={BEFORE_IMAGE_URL} 
+                        alt="시공 전" 
                         className="absolute inset-0 w-full h-full object-cover max-w-none" 
-                        style={{ width: '100vw', maxWidth: 'none', left: 0, filter: 'sepia(0.4) contrast(0.8) brightness(0.9) grayscale(0.2)' }} 
-                        // width를 부모 컨테이너 기준이 아닌 화면 기준으로 강제하여 이미지 위치 고정 (Parallax 방지)
-                        // 실제 구현 시에는 부모 컨테이너 width를 계산해서 넣는게 좋지만, 간편하게 필터 효과만 적용
+                        style={{ width: '100%', maxWidth: 'none' }} 
                     />
-                    <div className="absolute inset-0 bg-yellow-900/20 mix-blend-multiply pointer-events-none"></div> {/* 오염 틴트 */}
                     <div className="absolute top-4 left-4 bg-slate-600 text-white text-xs font-bold px-2 py-1 rounded-md shadow-md">Before</div>
                 </div>
 
@@ -620,6 +621,14 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
         const weight = Math.abs(level);
         return mixColors(baseHex, level > 0 ? BRIGHT_COLOR_CODE : DARK_COLOR_CODE, weight);
     }, [baseColorData.code, brightnessLevel]);
+
+    const isDarkGrout = useMemo(() => {
+        const hex = effectiveGroutColor.replace('#', '');
+        const r = parseInt(hex.substring(0, 2), 16);
+        const g = parseInt(hex.substring(2, 4), 16);
+        const b = parseInt(hex.substring(4, 6), 16);
+        return (r * 0.299 + g * 0.587 + b * 0.114) < 150;
+    }, [effectiveGroutColor]);
 
     const sliderTrackStyle = useMemo(() => ({
         backgroundImage: `linear-gradient(to right, ${DARK_COLOR_CODE}, ${baseColorData.code}, ${BRIGHT_COLOR_CODE})`
@@ -1287,7 +1296,7 @@ export default function App() {
                         시공 범위 선택
                     </h2>
 
-                    {/* ⭐️ [이동됨] 정가제 안내 카드 (Step 2 내부, Area List 바로 위) ⭐️ */}
+                    {/* ⭐️ [유지] 정가제 안내 카드 (Step 2 내부, Area List 바로 위) ⭐️ */}
                     <div className="bg-indigo-50 rounded-2xl p-4 border border-indigo-100 shadow-sm flex flex-col gap-3 mb-6">
                         <div className="flex items-center gap-3">
                              <div className="p-2 bg-white rounded-full shadow-sm text-indigo-600">
