@@ -89,6 +89,14 @@ const GlobalStyles = () => (
             animation: shimmer 2s infinite linear;
         }
 
+        /* ⭐️ 체크 아이콘 팝업 애니메이션 */
+        @keyframes scaleIn {
+            0% { transform: scale(0); }
+            80% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        .animate-scale-in { animation: scaleIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
         .glass-panel {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(12px);
@@ -306,13 +314,12 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
                 <div className="p-4 overflow-y-auto max-h-[65vh] bg-slate-50">
                     <div ref={quoteRef} className="bg-white rounded-2xl shadow-sm p-5 space-y-4 border border-slate-100">
                         
-                        {/* 상단 요약 박스: 높이를 줄이고 가로 배치로 공간 효율화 + 애니메이션 추가 + 체크박스 분리 */}
+                        {/* 상단 요약 박스 */}
                         <div className='bg-slate-50 rounded-xl p-4 border border-slate-200'>
                              <div className='flex justify-between items-start mb-2'>
                                  <div className='flex items-center gap-1.5'>
-                                     {/* ⭐️ 물결 반짝임(Shimmer) 애니메이션 추가 및 위치 변경 */}
                                      {(minimumFeeApplied || label) && (
-                                         <span className={`text-[11px] font-bold px-2.5 py-1 rounded text-white shadow-sm relative overflow-hidden ${minimumFeeApplied ? 'bg-rose-500' : 'bg-indigo-600'}`}>
+                                         <span className={`text-[11px] font-bold px-2.5 py-1 rounded text-white shadow-sm relative overflow-hidden ${minimumFeeApplied ? 'bg-rose-500' : 'bg-indigo-600'} animate-gentle-pulse`}>
                                             <span className="relative z-10">{minimumFeeApplied ? '최소비용' : label}</span>
                                             <div className="absolute inset-0 animate-shimmer" style={{ background: 'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%)' }}></div>
                                          </span>
@@ -344,16 +351,16 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
                                 <div className='space-y-2'>
                                     {packageItems.map((item, index) => {
                                         const areaInfo = ALL_AREAS.find(a => a.id === item.id);
-                                        // ⭐️ 소재별 스타일링을 명확히 분리합니다.
-                                        const badgeClass = item.materialLabel === '에폭시' 
-                                            ? 'bg-amber-100 text-amber-700' 
-                                            : (item.materialLabel === '폴리아스파틱' ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-100 text-slate-600');
                                         
+                                        let badgeClass = 'bg-slate-100 text-slate-600';
+                                        if (item.materialLabel === '에폭시') badgeClass = 'bg-amber-100 text-amber-700';
+                                        else if (item.materialLabel === '폴리아스파틱') badgeClass = 'bg-indigo-50 text-indigo-600';
+                                        else if (item.materialLabel === '실리콘') badgeClass = 'bg-emerald-50 text-emerald-600';
+
                                         return (
                                             <div key={index} className='flex justify-between items-center text-sm py-1.5 border-b border-slate-50 last:border-0'>
                                                 <span className='font-medium text-slate-700 text-xs'>{item.label}</span>
                                                 <div className="flex items-center gap-2">
-                                                    {/* ⭐️ item.materialLabel 값을 그대로 출력하여 한글 오류를 수정 */}
                                                     <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold ${badgeClass}`}>
                                                         {item.materialLabel}
                                                     </span>
@@ -399,19 +406,16 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
 
                         <div className='pt-4 border-t-2 border-slate-100 flex flex-col items-end gap-1'>
                             <div className='flex items-baseline gap-2'>
-                                {/* ⭐️ 정가 취소선 표시 (할인 적용 시) */}
                                 {(isDiscountApplied || minimumFeeApplied) && (priceBeforeAllDiscount > price) && (
                                     <span className="text-sm text-slate-400 line-through font-medium">
                                         {priceBeforeAllDiscount.toLocaleString()}원
                                     </span>
                                 )}
-                                {/* ⭐️ 최종 금액 네이비 색상 */}
                                 <span className="text-3xl font-black text-[#0f172a] tracking-tighter">
                                     {price.toLocaleString()}
                                 </span>
                                 <span className="text-base font-bold text-slate-600">원</span>
                             </div>
-                            {/* ⭐️ 하단 안내 문구 수정 및 강조 */}
                             <div className="text-[9px] font-bold text-slate-600 text-right mt-1 leading-tight bg-slate-100 px-2 py-1 rounded inline-block ml-auto">
                                 * 타일크기 바닥 30x30cm, 벽 30x60cm 기준, 재시공은 별도문의
                             </div>
@@ -535,7 +539,6 @@ const MaterialDetailModal = ({ onClose }) => (
         </div>
 );
 
-// ⭐️ Accordion 컴포넌트 재정의 (ReferenceError 해결)
 const Accordion = ({ question, answer }) => {
     const [isOpen, setIsOpen] = useState(false);
     return (
@@ -671,8 +674,6 @@ export default function App() {
     const [selectedReviews, setSelectedReviews] = useState(new Set());
     const [showModal, setShowModal] = useState(false);
     const [showMaterialModal, setShowMaterialModal] = useState(false);
-    // ⭐️ [삭제] showToast state 제거 (PackageToast 컴포넌트 삭제됨)
-    // const [showToast, setShowToast] = useState(false);
     const [activeVideoId, setActiveVideoId] = useState(YOUTUBE_VIDEOS[0].id);
     const quoteRef = useRef(null);
     const SOOMGO_REVIEW_URL = 'https://www.soomgo.com/profile/users/10755579?tab=review';
@@ -979,8 +980,10 @@ export default function App() {
                 isFreeService: isFreeServiceItem,
                 isPackageItem: isPackageItemFlag || !isFreeServiceItem && (packageCount > 0 || isPackageActive || finalDiscount > 0),
                 isDiscount: false,
-                // ⭐️ 소재 라벨을 한글로 확정하여 데이터 생성
-                materialLabel: ['silicon_bathtub', 'silicon_sink', 'silicon_living_baseboard'].includes(area.id) ? '실리콘' : (areaMatId === 'poly' ? '폴리아스파틱' : '에폭시')
+                // ⭐️ [수정] 한글로 데이터 직접 생성 (렌더링 시 오류 방지)
+                materialLabel: ['silicon_bathtub', 'silicon_sink', 'silicon_living_baseboard'].includes(area.id) 
+                    ? '실리콘' 
+                    : (areaMatId === 'poly' ? '폴리아스파틱' : '에폭시')
             });
         });
 
