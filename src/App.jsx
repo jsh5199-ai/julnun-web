@@ -2,7 +2,7 @@ import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react'
 import html2canvas from 'html2canvas';
 import {
     Calculator, Home, Bath, DoorOpen, Utensils, LayoutGrid,
-    CheckCircle2, Info, RefreshCw, Phone, Sparkles, Hammer, Sofa, Palette, Crown, Gift, Eraser, Star, X, ChevronDown, HelpCircle, Zap, TrendingUp, Clock, Image as ImageIcon, Download, DollarSign, List, Layers, Check, ShieldCheck, Ruler, Settings
+    CheckCircle2, Info, RefreshCw, Phone, Sparkles, Hammer, Sofa, Palette, Crown, Gift, Eraser, Star, X, ChevronDown, HelpCircle, Zap, TrendingUp, Clock, Image as ImageIcon, Download, DollarSign, List, Layers, Check, ShieldCheck, Ruler, Settings, ThumbsUp, AlertCircle
 } from 'lucide-react';
 
 // =================================================================
@@ -147,7 +147,7 @@ const BATHROOM_AREAS = [
     { id: 'common_bath_wall', label: '공용욕실 벽 전체', basePrice: 300000, icon: LayoutGrid, unit: '구역' },
 ];
 const OTHER_AREAS = [
-    { id: 'entrance', label: '현관', basePrice: 50000, icon: DoorOpen, unit: '개소', desc: '바닥 2곳 이상 시공 시 무료시공' },
+    { id: 'entrance', label: '현관', basePrice: 50000, icon: DoorOpen, unit: '개소', desc: '바닥 2곳 이상 시공 시 무료 서비스' },
     { id: 'balcony_laundry', label: '베란다/세탁실', basePrice: 100000, icon: Layers, unit: '개소', desc: '' },
     { id: 'kitchen_wall', label: '주방 벽면', basePrice: 150000, icon: Utensils, unit: '구역', desc: '' },
     { id: 'living_room', label: '거실 바닥', basePrice: 550000, icon: Sofa, unit: '구역', desc: '' },
@@ -371,13 +371,13 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
                         rel="noopener noreferrer"
                         className="py-3.5 bg-yellow-400 text-slate-900 rounded-xl font-bold hover:bg-yellow-500 transition active:scale-[0.98] flex items-center justify-center gap-2 shadow-sm"
                     >
-                        <Layers size={18} /> 카톡상담
+                        <Layers size={18} /> 카카오 상담
                     </a>
                     <a
                         href={`tel:${PHONE_NUMBER}`}
                         className="py-3.5 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition active:scale-[0.98] flex items-center justify-center gap-2 shadow-sm"
                     >
-                       <Phone size={18} /> 상담원 연결
+                       <Phone size={18} /> 전화 상담
                     </a>
                 </div>
             </div>
@@ -385,43 +385,102 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
     );
 };
 
+// ⭐️ [업데이트] 소재 비교 가이드 모달 ⭐️
 const MaterialDetailModal = ({ onClose }) => (
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white w-full max-w-md rounded-[2rem] shadow-2xl overflow-hidden animate-slide-up">
-            <div className="bg-slate-900 p-6 text-white flex justify-between items-center">
-              <h3 className="font-bold text-lg flex items-center gap-2"><Info className="h-5 w-5 text-amber-400" /> 소재별 상세 스펙</h3>
+          <div className="bg-white w-full max-w-md rounded-[2rem] shadow-2xl overflow-hidden animate-slide-up max-h-[85vh] flex flex-col">
+            <div className="bg-slate-900 p-6 text-white flex justify-between items-center shrink-0">
+              <h3 className="font-bold text-lg flex items-center gap-2"><Info className="h-5 w-5 text-amber-400" /> 소재별 장단점 및 추천</h3>
               <button onClick={onClose} className="bg-white/10 p-2 rounded-full hover:bg-white/20 transition"><X size={20} /></button>
             </div>
-            <div className="p-6">
-              <div className="overflow-hidden rounded-xl border border-slate-200">
-                  <table className="min-w-full divide-y divide-slate-200 text-sm">
-                    <thead className="bg-slate-50">
-                      <tr>
-                        <th className="px-4 py-3 text-left font-bold text-slate-500">구분</th>
-                        <th className="px-4 py-3 text-center font-bold text-slate-800">폴리아스파틱</th>
-                        <th className="px-4 py-3 text-center font-bold text-indigo-600">에폭시</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 bg-white">
-                      <tr>
-                        <td className="px-4 py-3 font-medium text-slate-600">내구성</td>
-                        <td className="px-4 py-3 text-center text-slate-500">우수</td>
-                        <td className="px-4 py-3 text-center font-bold text-indigo-600">최상 (반영구)</td>
-                      </tr>
-                      <tr>
-                        <td className="px-4 py-3 font-medium text-slate-600">A/S 기간</td>
-                        <td className="px-4 py-3 text-center font-bold text-slate-800">2년</td>
-                        <td className="px-4 py-3 text-center font-bold text-indigo-600">5년</td>
-                      </tr>
-                      <tr>
-                        <td className="px-4 py-3 font-medium text-slate-600">양생 시간</td>
-                        <td className="px-4 py-3 text-center text-slate-500">6시간</td>
-                        <td className="px-4 py-3 text-center text-slate-500">24시간 ~ 3일</td>
-                      </tr>
-                    </tbody>
-                  </table>
-              </div>
-              <button onClick={onClose} className="w-full mt-6 py-3.5 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition shadow-lg active:scale-[0.98]">확인했습니다</button>
+            
+            <div className="p-6 overflow-y-auto">
+                {/* 1. 요약 비교 카드 */}
+                <div className="grid grid-cols-2 gap-3 mb-6">
+                    <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-center">
+                        <div className="text-xs font-bold text-slate-500 mb-1">Standard</div>
+                        <div className="text-lg font-black text-slate-800 mb-2">폴리</div>
+                        <ul className="text-xs text-slate-600 space-y-1 text-left">
+                            <li className="flex gap-1.5"><ThumbsUp size={12} className="text-indigo-500 mt-0.5"/> 우수한 광택</li>
+                            <li className="flex gap-1.5"><ThumbsUp size={12} className="text-indigo-500 mt-0.5"/> 합리적 비용</li>
+                            <li className="flex gap-1.5"><ThumbsUp size={12} className="text-indigo-500 mt-0.5"/> 6시간 빠른양생</li>
+                        </ul>
+                    </div>
+                    <div className="p-4 rounded-2xl bg-indigo-50 border border-indigo-100 text-center relative overflow-hidden">
+                        <div className="absolute top-0 right-0 bg-amber-400 text-white text-[9px] px-2 py-0.5 font-bold rounded-bl-lg">BEST</div>
+                        <div className="text-xs font-bold text-indigo-500 mb-1">Premium</div>
+                        <div className="text-lg font-black text-indigo-900 mb-2">에폭시</div>
+                        <ul className="text-xs text-slate-700 space-y-1 text-left">
+                            <li className="flex gap-1.5"><Star size={12} className="text-amber-500 mt-0.5"/> 반영구적 수명</li>
+                            <li className="flex gap-1.5"><Star size={12} className="text-amber-500 mt-0.5"/> 고급 무광택</li>
+                            <li className="flex gap-1.5"><Star size={12} className="text-amber-500 mt-0.5"/> 강력한 방수</li>
+                        </ul>
+                    </div>
+                </div>
+
+                {/* 2. 상세 비교표 */}
+                <div className="overflow-hidden rounded-xl border border-slate-200 mb-6">
+                    <table className="min-w-full divide-y divide-slate-200 text-sm">
+                        <thead className="bg-slate-100">
+                            <tr>
+                                <th className="px-3 py-3 text-center font-bold text-slate-600 w-1/3">구분</th>
+                                <th className="px-3 py-3 text-center font-bold text-slate-700 w-1/3">폴리</th>
+                                <th className="px-3 py-3 text-center font-bold text-indigo-700 w-1/3">에폭시</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 bg-white">
+                            <tr>
+                                <td className="px-3 py-3 text-center font-bold text-slate-500">내구성</td>
+                                <td className="px-3 py-3 text-center text-slate-600">우수 (5년+)</td>
+                                <td className="px-3 py-3 text-center font-bold text-indigo-600">최상 (반영구)</td>
+                            </tr>
+                            <tr>
+                                <td className="px-3 py-3 text-center font-bold text-slate-500">광택</td>
+                                <td className="px-3 py-3 text-center text-slate-600">유광 (반짝임)</td>
+                                <td className="px-3 py-3 text-center font-bold text-indigo-600">무광 (매트함)</td>
+                            </tr>
+                            <tr>
+                                <td className="px-3 py-3 text-center font-bold text-slate-500">시공 시간</td>
+                                <td className="px-3 py-3 text-center font-bold text-blue-600">빠름 (반나절)</td>
+                                <td className="px-3 py-3 text-center text-slate-600">보통 (하루)</td>
+                            </tr>
+                            <tr>
+                                <td className="px-3 py-3 text-center font-bold text-slate-500">물 사용</td>
+                                <td className="px-3 py-3 text-center font-bold text-blue-600">6시간 후</td>
+                                <td className="px-3 py-3 text-center text-slate-600">24~48시간 후</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* 3. 추천 가이드 */}
+                <div className="space-y-3">
+                    <h4 className="font-bold text-slate-800 flex items-center gap-2">
+                        <CheckCircle2 size={16} className="text-indigo-500"/> 나에게 맞는 소재는?
+                    </h4>
+                    
+                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                        <div className="font-bold text-slate-700 mb-1">👍 폴리아스파틱을 추천해요</div>
+                        <ul className="text-xs text-slate-500 space-y-1 ml-1 list-disc list-inside">
+                            <li>전세/월세 등 단기 거주 예정이신 분</li>
+                            <li>화려하고 반짝이는 인테리어를 선호하시는 분</li>
+                            <li>빠른 시공과 저렴한 비용을 원하시는 분</li>
+                        </ul>
+                    </div>
+
+                    <div className="bg-indigo-50 p-4 rounded-xl border border-indigo-100">
+                        <div className="font-bold text-indigo-900 mb-1">👑 에폭시(케라폭시)를 추천해요</div>
+                        <ul className="text-xs text-indigo-800/80 space-y-1 ml-1 list-disc list-inside">
+                            <li>자가 거주 또는 10년 이상 장기 거주 예정이신 분</li>
+                            <li>호텔처럼 차분하고 고급스러운 무광을 원하시는 분</li>
+                            <li>락스 청소 등 관리가 편한 것을 최우선으로 하시는 분</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div className="p-4 bg-white border-t border-slate-100">
+                <button onClick={onClose} className="w-full py-3.5 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition shadow-lg active:scale-[0.98]">확인했습니다</button>
             </div>
           </div>
         </div>
@@ -476,7 +535,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
     return (
         <div className='mt-8 pt-6 border-t border-slate-100'>
             <h3 className="text-lg font-bold flex items-center gap-2 mb-4 text-slate-800">
-                <Palette className="h-5 w-5 text-indigo-500" /> 시공색상 미리보기 (시뮬레이션)
+                <Palette className="h-5 w-5 text-indigo-500" /> 시공 미리보기 (시뮬레이션)
             </h3>
 
             {/* 1. 시뮬레이션 화면 (정보바 제거) */}
@@ -519,7 +578,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
             <div className='mb-6 flex gap-3'>
                 <input type="file" id="tileFileInput" accept="image/*" onChange={onTileImageUpload} style={{ display: 'none' }} />
                 <label htmlFor="tileFileInput" className="flex-1 py-3 px-4 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold text-sm hover:bg-slate-50 transition cursor-pointer flex items-center justify-center gap-2 shadow-sm">
-                    <ImageIcon size={16} className="text-slate-400"/> 우리집 타일 첨부하기
+                    <ImageIcon size={16} className="text-slate-400"/> 우리집 타일 찍기
                 </label>
                 {tileImageURL !== DEFAULT_TILE_IMAGE_URL && (
                     <button onClick={onTileImageReset} className="py-3 px-4 bg-slate-100 text-slate-500 rounded-xl font-bold text-sm hover:bg-slate-200 transition flex items-center justify-center gap-2 shadow-sm">
@@ -1069,7 +1128,6 @@ export default function App() {
                     </div>
                 </section>
 
-                {/* ⭐️ [수정] 배경색이 들어간 통합 안내 카드 ⭐️ */}
                 <section className="animate-fade-in delay-100">
                     <div className="bg-indigo-50 rounded-2xl p-4 border border-indigo-100 shadow-sm flex flex-col gap-3">
                         <div className="flex items-center gap-3">
@@ -1088,7 +1146,7 @@ export default function App() {
                             </div>
                             <div className='flex-1'>
                                 <div className="text-sm font-bold text-indigo-900">견적 기준 사이즈</div>
-                                <div className="text-[11px] text-indigo-700/80 leading-tight mt-0.5">바닥 30x30cm, 벽면 30x60cm 타일크기 기준</div>
+                                <div className="text-[11px] text-indigo-700/80 leading-tight mt-0.5">바닥 300x300, 벽면 300x600 타일 기준</div>
                             </div>
                         </div>
                     </div>
@@ -1125,7 +1183,6 @@ export default function App() {
                                                 )}
                                                 {item.id === 'kerapoxy' && (
                                                     <>
-                                                        {/* ⭐️ 수정: 스타라이크 EVO 우선 배치 ⭐️ */}
                                                         <button onClick={(e) => { e.stopPropagation(); setEpoxyOption('starlike'); }} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all shadow-sm ${epoxyOption === 'starlike' ? 'bg-white text-amber-600' : 'text-slate-500 hover:text-slate-700'}`}>스타라이크 EVO</button>
                                                         <button onClick={(e) => { e.stopPropagation(); setEpoxyOption('kerapoxy'); }} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all shadow-sm ${epoxyOption === 'kerapoxy' ? 'bg-white text-amber-600' : 'text-slate-500 hover:text-slate-700'}`}>케라폭시</button>
                                                     </>
@@ -1138,9 +1195,9 @@ export default function App() {
                         ))}
                     </div>
 
-                    {/* ⭐️ [수정] 소재 비교 버튼을 소재 선택 바로 아래로 이동 ⭐️ */}
-                    <button onClick={() => setShowMaterialModal(true)} className="w-full mt-6 py-4 bg-white border border-slate-200 text-slate-600 rounded-2xl font-bold text-sm hover:bg-slate-50 transition shadow-sm flex items-center justify-center gap-2">
-                        <Info size={18} className='text-slate-400'/> 소재별 양생기간 및 특징 비교
+                    {/* ⭐️ [수정] 소재 비교 버튼 문구 변경 및 아이콘 변경 ⭐️ */}
+                    <button onClick={() => setShowMaterialModal(true)} className="w-full mt-6 py-4 bg-white border border-slate-200 text-slate-700 rounded-2xl font-bold text-sm hover:bg-slate-50 transition shadow-sm flex items-center justify-center gap-2">
+                        <HelpCircle size={18} className='text-indigo-500'/> 🤔 폴리 vs 에폭시, 어떤게 더 좋을까요?
                     </button>
 
                     <ColorPalette
