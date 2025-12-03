@@ -392,7 +392,7 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
                              {(minimumFeeApplied || isDiscountApplied) && (
                                  <div className="flex flex-col gap-0.5 mt-1">
                                      {minimumFeeApplied && <div className="text-[10px] text-slate-500 flex items-center gap-1">· 최소 시공비(20만원) 적용</div>}
-                                     {isDiscountApplied && <div className="text-[10px] text-slate-500 flex items-start gap-1 leading-snug"><Check size={10} className="mt-0.5 shrink-0"/> 변기/바닥테두리, 젠다이 실리콘 오염방지코팅 서비스 적용</div>}
+                                     {isDiscountApplied && <div className="text-[10px] text-slate-500 flex items-start gap-1 leading-snug"><Check size={10} className="mt-0.5 shrink-0"/> 변기/바닥테두리, 욕실 선반 실리콘 서비스</div>}
                                  </div>
                              )}
                         </div>
@@ -472,13 +472,13 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
                         rel="noopener noreferrer"
                         className="py-3 bg-yellow-400 text-slate-900 rounded-xl font-bold hover:bg-yellow-500 transition active:scale-[0.98] flex items-center justify-center gap-2 shadow-sm text-sm"
                     >
-                        <Layers size={16} /> 카카오 상담
+                        <Layers size={16} /> 카톡상담
                     </a>
                     <a
                         href={`tel:${PHONE_NUMBER}`}
                         className="py-3 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition active:scale-[0.98] flex items-center justify-center gap-2 shadow-sm text-sm"
                     >
-                       <Phone size={16} /> 전화 상담
+                       <Phone size={16} /> 상담원 연결
                     </a>
                 </div>
             </div>
