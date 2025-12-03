@@ -81,11 +81,15 @@ const GlobalStyles = () => (
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes slideInRight { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-
-        .animate-fade-in { animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .animate-slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .animate-slide-in-right { animation: slideInRight 0.4s ease-out forwards; }
         
+        /* ⭐️ 부드러운 펄스 애니메이션 (배지용) */
+        @keyframes gentlePulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); }
+            50% { transform: scale(1.05); box-shadow: 0 0 0 4px rgba(99, 102, 241, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+        }
+        .animate-gentle-pulse { animation: gentlePulse 2s infinite; }
+
         .glass-panel {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(12px);
@@ -366,59 +370,44 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
 
                 <div className="p-4 overflow-y-auto max-h-[65vh] bg-slate-50">
                     <div ref={quoteRef} className="bg-white rounded-2xl shadow-sm p-5 space-y-4 border border-slate-100">
-                        {/* 헤더 단순화 */}
+                        {/* 헤더 단순화: 제목과 날짜를 한 줄로 */}
                         <div className='flex justify-between items-baseline border-b border-slate-100 pb-3'>
                             <h4 className='font-bold text-slate-800 tracking-tight'>줄눈의미학 예상 견적</h4>
                             <span className="text-[11px] text-slate-400">{new Date().toLocaleDateString()} 기준</span>
                         </div>
 
-                        {/* ⭐️ NEW DESIGN: 쿠폰/영수증 스타일 혜택 카드 */}
-                        {(minimumFeeApplied || isDiscountApplied) && (
-                            <div className='bg-indigo-50/80 rounded-2xl p-5 border border-indigo-100 relative overflow-hidden'>
-                                 {/* 배경 장식 아이콘 */}
-                                 <div className="absolute -right-4 -top-4 text-indigo-200/50 opacity-50"><Gift size={80} /></div>
-                                 
-                                 <div className="relative z-10">
-                                     {/* 상단: 혜택 제목 및 금액 */}
-                                     <div className='flex justify-between items-start mb-3'>
-                                         <span className="text-indigo-900 font-bold text-sm flex items-center gap-1.5">
-                                             <Sparkles size={14} className="text-indigo-500"/> 혜택 적용 내역
+                        {/* 상단 요약 박스: 높이를 줄이고 가로 배치로 공간 효율화 + 애니메이션 추가 + 체크박스 분리 */}
+                        <div className='bg-slate-50 rounded-xl p-4 border border-slate-200'>
+                             <div className='flex justify-between items-start mb-2'>
+                                 <div className='flex items-center gap-1.5'>
+                                     {/* ⭐️ 애니메이션 추가 및 위치 변경 */}
+                                     {(minimumFeeApplied || label) && (
+                                         <span className={`text-[11px] font-bold px-2.5 py-1 rounded text-white shadow-sm ${minimumFeeApplied ? 'bg-rose-500' : 'bg-indigo-600'} animate-gentle-pulse`}>
+                                            {minimumFeeApplied ? '최소비용' : label}
                                          </span>
-                                         <div className="text-right">
-                                             <div className='text-2xl font-black text-rose-500 tracking-tight leading-none'>
-                                                 -{totalDiscount.toLocaleString()}원
-                                             </div>
-                                         </div>
-                                     </div>
-                                     
-                                     {/* 중단: 구분선 */}
-                                     <div className="w-full h-px bg-indigo-200/50 my-3 border-t border-dashed border-indigo-300"></div>
-                                     
-                                     {/* 하단: 배지 및 상세 설명 */}
-                                     <div className="space-y-2">
-                                         <div className="flex gap-1.5 flex-wrap">
-                                             {minimumFeeApplied && (
-                                                 <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-500 text-white shadow-sm">
-                                                     최소비용 적용
-                                                 </span>
-                                             )}
-                                             {label && !minimumFeeApplied && (
-                                                 <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-indigo-600 text-white shadow-sm">
-                                                     {label}
-                                                 </span>
-                                             )}
-                                         </div>
-                                         
-                                         {isDiscountApplied && (
-                                             <div className="text-xs text-indigo-800/90 font-medium flex items-start gap-1.5 leading-snug">
-                                                 <Check size={12} className="mt-0.5 shrink-0 text-indigo-600"/>
-                                                 <span>변기/바닥테두리, 젠다이 실리콘 오염방지코팅 서비스 적용</span>
-                                             </div>
-                                         )}
-                                     </div>
+                                     )}
                                  </div>
-                            </div>
-                        )}
+                             </div>
+                             {(minimumFeeApplied || isDiscountApplied) && (
+                                 <div className="flex flex-col gap-1.5 mt-2 pt-2 border-t border-slate-200/60">
+                                     {minimumFeeApplied && <div className="text-[11px] text-slate-500 flex items-center gap-1"><Info size={12} /> 최소 시공비(20만원) 적용</div>}
+                                     
+                                     {/* ⭐️ 2개의 체크 항목으로 분리 */}
+                                     {isDiscountApplied && (
+                                         <div className="space-y-1">
+                                             <div className="text-[11px] text-slate-600 flex items-start gap-1.5 leading-snug">
+                                                 <Check size={12} className="mt-0.5 shrink-0 text-indigo-600"/>
+                                                 <span>변기테두리, 바닥테두리 서비스</span>
+                                             </div>
+                                             <div className="text-[11px] text-slate-600 flex items-start gap-1.5 leading-snug">
+                                                 <Check size={12} className="mt-0.5 shrink-0 text-indigo-600"/>
+                                                 <span>젠다이 실리콘 오염방지코팅</span>
+                                             </div>
+                                         </div>
+                                     )}
+                                 </div>
+                             )}
+                        </div>
 
                         {packageItems.length > 0 && (
                             <div>
@@ -478,7 +467,14 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
 
                         <div className='pt-4 border-t-2 border-slate-100 flex flex-col items-end gap-1'>
                             <span className="text-[10px] font-medium text-slate-400">최종 예상 금액 (VAT별도)</span>
-                            <div className='flex items-baseline gap-1'>
+                            <div className='flex items-baseline gap-2'>
+                                {/* ⭐️ 정가 취소선 표시 (할인 적용 시) */}
+                                {(isDiscountApplied || minimumFeeApplied) && (priceBeforeAllDiscount > price) && (
+                                    <span className="text-sm text-slate-400 line-through font-medium">
+                                        {priceBeforeAllDiscount.toLocaleString()}원
+                                    </span>
+                                )}
+                                {/* ⭐️ 최종 금액 네이비 색상 */}
                                 <span className="text-3xl font-black text-[#0f172a] tracking-tighter">
                                     {price.toLocaleString()}
                                 </span>
