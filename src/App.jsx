@@ -69,7 +69,7 @@ const mixColors = (color1, color2, weight) => {
 };
 
 // =================================================================
-// ⭐️ [신규] 테크니컬 라인 아트 애니메이션 (SVG)
+// ⭐️ [신규] 사실적인 3D 스타일 애니메이션 (SVG + CSS)
 // =================================================================
 const ProcessAnimation = () => {
     return (
@@ -78,48 +78,79 @@ const ProcessAnimation = () => {
                 <Sparkles className="h-5 w-5 text-indigo-500" /> Professional Process
             </h3>
 
-            <div className="relative w-full h-32 bg-slate-50 rounded-xl border border-slate-200 overflow-hidden flex items-center justify-center">
-                <svg viewBox="0 0 400 120" className="w-full h-full" preserveAspectRatio="xMidYMid slice">
-                    
-                    {/* 1. 타일 그리드 (배경) - 얇은 회색 선 */}
-                    <g stroke="#cbd5e1" strokeWidth="1">
-                        <line x1="0" y1="20" x2="400" y2="20" />
-                        <line x1="0" y1="100" x2="400" y2="100" />
-                        <line x1="100" y1="0" x2="100" y2="120" />
-                        <line x1="300" y1="0" x2="300" y2="120" />
-                    </g>
+            <div className="relative w-full h-40 bg-slate-100 rounded-xl border border-slate-200 overflow-hidden flex items-center justify-center" style={{ perspective: '1000px' }}>
+                
+                {/* 1. 타일 배경 (그라데이션으로 질감 표현) */}
+                <div className="absolute inset-0 bg-gradient-to-br from-slate-50 to-slate-200">
+                    <div className="w-full h-full" style={{ backgroundImage: 'linear-gradient(to right, rgba(0,0,0,0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,0.05) 1px, transparent 1px)', backgroundSize: '100px 100px' }}></div>
+                </div>
+
+                <svg viewBox="0 0 400 160" className="w-full h-full absolute inset-0" preserveAspectRatio="xMidYMid slice">
+                    <defs>
+                        {/* 그림자 필터 */}
+                        <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+                            <feDropShadow dx="2" dy="4" stdDeviation="3" floodColor="#000" floodOpacity="0.3"/>
+                        </filter>
+                        {/* 그라인더 날 그라데이션 */}
+                        <linearGradient id="bladeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stopColor="#94a3b8" />
+                            <stop offset="50%" stopColor="#cbd5e1" />
+                            <stop offset="100%" stopColor="#64748b" />
+                        </linearGradient>
+                        {/* 그라인더 몸체 그라데이션 */}
+                        <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stopColor="#334155" />
+                            <stop offset="100%" stopColor="#1e293b" />
+                        </linearGradient>
+                         {/* 시공병 그라데이션 */}
+                         <linearGradient id="bottleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stopColor="#6366f1" />
+                            <stop offset="100%" stopColor="#4f46e5" />
+                        </linearGradient>
+                        {/* 줄눈재 질감 */}
+                        <linearGradient id="groutGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                             <stop offset="0%" stopColor={ANIMATION_TARGET_COLOR} stopOpacity="0.8" />
+                             <stop offset="100%" stopColor={ANIMATION_TARGET_COLOR} />
+                        </linearGradient>
+                    </defs>
 
                     {/* 2. 작업 대상 라인 (중앙 수평선) */}
-                    {/* 기존 백시멘트 (짙은 회색 실선) */}
-                    <line x1="0" y1="60" x2="400" y2="60" stroke="#64748b" strokeWidth="6" className="animate-fade-out-line" />
+                    {/* 기존 백시멘트 (깊이감 있는 그라데이션) */}
+                    <rect x="0" y="76" width="400" height="8" fill="#64748b" className="animate-fade-out-line" style={{filter: 'inset 0 2px 4px rgba(0,0,0,0.2)'}}/>
                     
-                    {/* 제거된 라인 (비어있는 두 선으로 표현) */}
-                    <line x1="0" y1="58" x2="400" y2="58" stroke="#94a3b8" strokeWidth="1" className="animate-draw-empty-top" />
-                    <line x1="0" y1="62" x2="400" y2="62" stroke="#94a3b8" strokeWidth="1" className="animate-draw-empty-bottom" />
+                    {/* 제거된 빈 공간 (어두운 그림자) */}
+                    <rect x="0" y="76" width="400" height="8" fill="#1e293b" className="animate-draw-empty" />
 
-                    {/* 채워지는 줄눈 (180번 색상) */}
-                    <line x1="0" y1="60" x2="400" y2="60" stroke={ANIMATION_TARGET_COLOR} strokeWidth="6" strokeLinecap="round" className="animate-fill-grout" />
+                    {/* 채워지는 줄눈 (180번 색상, 약간의 광택) */}
+                    <rect x="0" y="77" width="400" height="6" fill="url(#groutGrad)" className="animate-fill-grout" style={{filter: 'drop-shadow(0 1px 1px rgba(255,255,255,0.2))'}} />
 
 
-                    {/* 3. 그라인더 도구 (선 드로잉) */}
-                    <g className="animate-move-grinder">
-                        {/* 톱날 (회전) */}
-                        <circle cx="0" cy="60" r="12" stroke="#334155" strokeWidth="2" fill="none" strokeDasharray="4 3" className="animate-spin-blade" />
-                        <circle cx="0" cy="60" r="4" fill="#334155" />
-                        {/* 튀는 먼지 (선) */}
-                        <path d="M -8 50 L -12 40 M 8 50 L 12 40 M 0 48 L 0 35" stroke="#94a3b8" strokeWidth="1.5" className="animate-dust" />
-                        {/* 텍스트 라벨 */}
-                        <text x="0" y="30" textAnchor="middle" fontSize="10" fontWeight="bold" fill="#475569">Cutting</text>
+                    {/* 3. 그라인더 도구 (입체적인 표현) */}
+                    <g className="animate-move-grinder" filter="url(#shadow)">
+                        {/* 톱날 (회전, 그라데이션 적용) */}
+                        <circle cx="0" cy="80" r="20" fill="url(#bladeGrad)" stroke="#475569" strokeWidth="1" className="animate-spin-blade" />
+                        <circle cx="0" cy="80" r="6" fill="#1e293b" />
+                        
+                        {/* 몸체 (손잡이 부분) */}
+                        <path d="M -5 80 L -40 60 L -40 100 L -5 80" fill="url(#bodyGrad)" />
+
+                        {/* 튀는 먼지 (파티클 효과) */}
+                        <g className="animate-dust">
+                             <circle cx="-10" cy="70" r="2" fill="#cbd5e1" opacity="0.8" />
+                             <circle cx="5" cy="65" r="1.5" fill="#cbd5e1" opacity="0.6" />
+                             <circle cx="15" cy="75" r="2.5" fill="#cbd5e1" opacity="0.9" />
+                             <circle cx="0" cy="90" r="1" fill="#cbd5e1" opacity="0.7" />
+                        </g>
                     </g>
 
-                    {/* 4. 시공병 도구 (선 드로잉) */}
-                    <g className="animate-move-bottle">
-                        {/* 병 몸통 (단순화된 라인) */}
-                        <path d="M -8 30 L -8 50 L 0 60 L 8 50 L 8 30 Z" stroke="#4f46e5" strokeWidth="2" fill="white" />
+                    {/* 4. 시공병 도구 (입체적인 표현) */}
+                    <g className="animate-move-bottle" filter="url(#shadow)">
+                        {/* 병 몸통 (입체감 있는 그라데이션) */}
+                        <path d="M -15 40 L -15 80 C -15 95 15 95 15 80 L 15 40 Z" fill="url(#bottleGrad)" />
                         {/* 노즐 */}
-                        <path d="M -3 30 L 0 20 L 3 30" stroke="#4f46e5" strokeWidth="2" fill="white" />
-                        {/* 텍스트 라벨 */}
-                        <text x="0" y="15" textAnchor="middle" fontSize="10" fontWeight="bold" fill="#4f46e5">Filling</text>
+                        <path d="M -5 40 L 0 20 L 5 40 Z" fill="#e2e8f0" />
+                        {/* 나오는 줄눈재 */}
+                        <circle cx="0" cy="80" r="4" fill={ANIMATION_TARGET_COLOR} />
                     </g>
 
                 </svg>
@@ -129,61 +160,56 @@ const ProcessAnimation = () => {
                 /* 애니메이션 정의 */
                 
                 /* 1. 그라인더 이동 (0s ~ 3s) */
-                .animate-move-grinder { animation: move-tool 8s linear infinite; }
-                .animate-spin-blade { animation: spin 0.3s linear infinite; transform-origin: 0px 60px; }
-                .animate-dust { animation: dust-flicker 0.2s linear infinite; }
+                .animate-move-grinder { animation: move-tool 8s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+                .animate-spin-blade { animation: spin 0.2s linear infinite; transform-origin: 0px 80px; }
+                .animate-dust circle { animation: dust-rise 0.5s ease-out infinite; }
 
-                /* 2. 기존 라인 사라짐 (마스킹 효과 대신 투명도 조절로 구현) */
-                .animate-fade-out-line { animation: fade-out 8s linear infinite; }
+                /* 2. 기존 라인 사라짐 (마스킹 효과) */
+                .animate-fade-out-line { mask: url(#mask-fade-out); }
                 
-                /* 3. 빈 라인 그려짐 */
-                .animate-draw-empty-top { stroke-dasharray: 400; stroke-dashoffset: 400; animation: draw-line 8s linear infinite; }
-                .animate-draw-empty-bottom { stroke-dasharray: 400; stroke-dashoffset: 400; animation: draw-line 8s linear infinite; }
+                /* 3. 빈 공간 나타남 */
+                .animate-draw-empty { animation: clip-reveal 8s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
 
                 /* 4. 시공병 이동 (4s ~ 7s) */
-                .animate-move-bottle { animation: move-tool-bottle 8s linear infinite; }
+                .animate-move-bottle { animation: move-tool-bottle 8s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
 
                 /* 5. 새 줄눈 채움 */
-                .animate-fill-grout { stroke-dasharray: 400; stroke-dashoffset: 400; animation: draw-fill 8s linear infinite; }
+                .animate-fill-grout { animation: clip-fill 8s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
 
 
                 @keyframes move-tool {
-                    0% { transform: translateX(-50px); opacity: 0; }
+                    0% { transform: translateX(-60px) rotate(-5deg); opacity: 0; }
                     5% { opacity: 1; }
-                    35% { transform: translateX(450px); opacity: 1; }
-                    40% { transform: translateX(450px); opacity: 0; }
-                    100% { transform: translateX(450px); opacity: 0; }
+                    35% { transform: translateX(460px) rotate(0deg); opacity: 1; }
+                    40% { transform: translateX(460px); opacity: 0; }
+                    100% { transform: translateX(460px); opacity: 0; }
                 }
 
                 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
                 
-                @keyframes dust-flicker { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
-
-                /* 기존 라인이 그라인더 뒤를 따라 사라지는 효과 (클리핑 비슷하게 타이밍 조절) */
-                @keyframes fade-out {
-                    0% { stroke-dasharray: 400; stroke-dashoffset: 0; }
-                    35% { stroke-dasharray: 400; stroke-dashoffset: -400; } /* 왼쪽으로 사라짐 */
-                    100% { stroke-dasharray: 400; stroke-dashoffset: -400; }
+                @keyframes dust-rise {
+                    0% { transform: translateY(0) scale(1); opacity: 1; }
+                    100% { transform: translateY(-20px) scale(2); opacity: 0; }
                 }
 
-                @keyframes draw-line {
-                    0% { stroke-dashoffset: 400; }
-                    35% { stroke-dashoffset: 0; }
-                    100% { stroke-dashoffset: 0; }
+                @keyframes clip-reveal {
+                    0% { clip-path: inset(0 100% 0 0); }
+                    35% { clip-path: inset(0 0 0 0); }
+                    100% { clip-path: inset(0 0 0 0); }
                 }
 
                 @keyframes move-tool-bottle {
-                    0%, 40% { transform: translateX(-50px); opacity: 0; }
-                    45% { opacity: 1; }
-                    75% { transform: translateX(450px); opacity: 1; }
-                    80% { transform: translateX(450px); opacity: 0; }
-                    100% { transform: translateX(450px); opacity: 0; }
+                    0%, 40% { transform: translateX(-60px) translateY(-10px) rotate(10deg); opacity: 0; }
+                    45% { opacity: 1; transform: translateX(-60px) translateY(0) rotate(0deg); }
+                    75% { transform: translateX(460px) translateY(0) rotate(0deg); opacity: 1; }
+                    80% { transform: translateX(460px) translateY(-10px) rotate(10deg); opacity: 0; }
+                    100% { transform: translateX(460px); opacity: 0; }
                 }
 
-                @keyframes draw-fill {
-                    0%, 40% { stroke-dashoffset: 400; }
-                    75% { stroke-dashoffset: 0; }
-                    100% { stroke-dashoffset: 0; }
+                @keyframes clip-fill {
+                    0%, 40% { clip-path: inset(0 100% 0 0); }
+                    75% { clip-path: inset(0 0 0 0); }
+                    100% { clip-path: inset(0 0 0 0); }
                 }
 
             `}</style>
@@ -1178,7 +1204,7 @@ export default function App() {
 
             <main className="max-w-lg mx-auto p-5 space-y-8">
                 
-                {/* ⭐️ [신규] 테크니컬 라인 아트 애니메이션 (SVG) ⭐️ */}
+                {/* ⭐️ [신규] 사실적인 3D 스타일 애니메이션 (SVG + CSS) ⭐️ */}
                 <section className="animate-fade-in">
                     <ProcessAnimation />
                 </section>
