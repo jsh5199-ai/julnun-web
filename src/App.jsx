@@ -13,9 +13,9 @@ const KAKAO_CHAT_URL = 'http://pf.kakao.com/_jAxnYn/chat';
 const PHONE_NUMBER = '010-7734-6709'; 
 const DEFAULT_TILE_IMAGE_URL = '/default_tile.jpg';
 
-// ⭐️ [신규] Before/After 이미지 경로 상수 정의
-const BEFORE_IMAGE_URL = '/photo1.png'; // 시공 전 사진
-const AFTER_IMAGE_URL = '/photo2.png';  // 시공 후 사진
+// Before/After 이미지 경로
+const BEFORE_IMAGE_URL = '/photo1.png'; 
+const AFTER_IMAGE_URL = '/photo2.png';
 
 const GROUT_COLORS = [
     { id: 'white', code: '#ffffff', label: '화이트', isDark: false },
@@ -245,7 +245,7 @@ const BeforeAfterSlider = () => {
     return (
         <div className="w-full bg-white rounded-[1.5rem] p-6 shadow-xl shadow-slate-200/50 border border-slate-100 animate-fade-in">
             <h3 className="text-lg font-black text-slate-800 mb-4 flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-amber-400" /> Before/After
+                <Sparkles className="h-5 w-5 text-amber-400" /> 시공 전/후 변화 보기
             </h3>
             <div 
                 ref={containerRef}
@@ -291,18 +291,15 @@ const BeforeAfterSlider = () => {
 };
 
 // =================================================================
-// ⭐️ [신규] 실시간 예약 알림 (Ticker) 컴포넌트
+// ⭐️ [수정] 실시간 예약 알림 (Ticker) - static 위치로 변경
 // =================================================================
 const ReservationTicker = () => {
     const messages = [
-        "인천 연수구 박**님 12월 22일 예약완료",
-        "인천 서구 한**님 12월 23일 예약완료",
-        "경기 성남시 이**님 2월 13일 예약완료",
-        "경기 용인시 하**님 12월 18일 예약완료",
-        "서울 양천구 오**님 12월 14일 예약완료",
-        "서울 송파구 김**님 1월 26일 예약완료",
-        "서울 송파구 임**님 1월 14일 예약완료",
-        "경기 시흥시 이**님 12월 11일 예약완료"
+        "방금 서울 강남구 김**님이 견적을 확인했어요",
+        "현재 12명의 고객님이 시공 상담 중입니다",
+        "경기 성남시 이**님이 상담 예약을 신청했습니다",
+        "인천 연수구 박**님이 에폭시 시공을 선택했어요",
+        "10분 전, 최**님이 무료 현관 서비스를 받았어요"
     ];
     const [index, setIndex] = useState(0);
     const [isVisible, setIsVisible] = useState(true);
@@ -320,17 +317,18 @@ const ReservationTicker = () => {
     }, []);
 
     return (
-        <div className="fixed bottom-[110px] left-4 right-4 z-40 pointer-events-none">
-             <div className={`mx-auto max-w-sm bg-slate-800/80 backdrop-blur-sm text-white px-4 py-2 rounded-full shadow-lg border border-white/10 flex items-center gap-2 transition-opacity duration-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
-                <Bell size={14} className="text-yellow-400 animate-pulse" />
-                <span className="text-xs font-medium truncate">{messages[index]}</span>
+        // ⭐️ 수정: fixed 제거하고 일반 정적(Static) 컴포넌트로 스타일 변경 ⭐️
+        <div className="w-full flex justify-center mt-6 mb-8">
+             <div className={`bg-slate-100 text-slate-600 px-4 py-2 rounded-full shadow-sm flex items-center gap-2 transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+                <Bell size={14} className="text-indigo-500" />
+                <span className="text-xs font-medium">{messages[index]}</span>
             </div>
         </div>
     );
 };
 
 // =================================================================
-// [컴포넌트] PackageToast (위치 조정: Ticker와 겹치지 않게)
+// [컴포넌트] PackageToast
 // =================================================================
 const PackageToast = ({ isVisible, onClose, label }) => {
     useEffect(() => {
@@ -343,8 +341,8 @@ const PackageToast = ({ isVisible, onClose, label }) => {
     if (!isVisible) return null;
 
     return (
-        // Ticker보다 위쪽에 뜨도록 위치 조정 (bottom-36 approx 144px)
-        <div className="fixed bottom-36 left-1/2 -translate-x-1/2 z-50 w-full max-w-sm px-4">
+        // Ticker가 하단으로 이동했으므로 Toast 위치는 원래대로 좀 더 내려도 됨 (bottom-[110px])
+        <div className="fixed bottom-[110px] left-1/2 -translate-x-1/2 z-50 w-full max-w-sm px-4">
             <div className="bg-indigo-600 text-white p-4 rounded-2xl shadow-2xl flex items-center justify-between animate-slide-up border border-indigo-400">
                 <div className="flex items-center gap-3">
                     <div className="p-2 bg-white/20 rounded-full text-white">
@@ -624,14 +622,6 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
         const weight = Math.abs(level);
         return mixColors(baseHex, level > 0 ? BRIGHT_COLOR_CODE : DARK_COLOR_CODE, weight);
     }, [baseColorData.code, brightnessLevel]);
-
-    const isDarkGrout = useMemo(() => {
-        const hex = effectiveGroutColor.replace('#', '');
-        const r = parseInt(hex.substring(0, 2), 16);
-        const g = parseInt(hex.substring(2, 4), 16);
-        const b = parseInt(hex.substring(4, 6), 16);
-        return (r * 0.299 + g * 0.587 + b * 0.114) < 150;
-    }, [effectiveGroutColor]);
 
     const sliderTrackStyle = useMemo(() => ({
         backgroundImage: `linear-gradient(to right, ${DARK_COLOR_CODE}, ${baseColorData.code}, ${BRIGHT_COLOR_CODE})`
@@ -1293,13 +1283,14 @@ export default function App() {
                     />
                 </section>
 
-                <section className="animate-fade-in delay-300">
+                {/* ⭐️ [수정] 시공 범위 선택 섹션: mt-16, border-t 추가 ⭐️ */}
+                <section className="animate-fade-in delay-300 mt-16 pt-10 border-t border-slate-200/60">
                      <h2 className="text-xl font-black text-slate-800 mb-5 flex items-center gap-2">
                         <span className="flex items-center justify-center w-7 h-7 bg-indigo-100 text-indigo-600 rounded-full text-sm font-bold">2</span>
                         시공 범위 선택
                     </h2>
 
-                    {/* ⭐️ [유지] 정가제 안내 카드 (Step 2 내부, Area List 바로 위) ⭐️ */}
+                    {/* ⭐️ [이동됨] 정가제 안내 카드 (Step 2 내부, Area List 바로 위) ⭐️ */}
                     <div className="bg-indigo-50 rounded-2xl p-4 border border-indigo-100 shadow-sm flex flex-col gap-3 mb-6">
                         <div className="flex items-center gap-3">
                              <div className="p-2 bg-white rounded-full shadow-sm text-indigo-600">
@@ -1355,12 +1346,12 @@ export default function App() {
                     <Star size={20} className="text-amber-400" fill="currentColor" />
                     실제 고객 후기 보러가기 (5.0점)
                 </button>
+
+                {/* ⭐️ [신규] 실시간 예약 알림 (Ticker) - 하단 고정 해제, 맨 아래 배치 ⭐️ */}
+                <ReservationTicker />
             </main>
 
             <PackageToast isVisible={showToast} onClose={handleCloseToast} label={calculation.label} />
-
-            {/* ⭐️ [신규] 실시간 예약 알림 (Ticker) - 하단에 띄움 ⭐️ */}
-            <ReservationTicker />
 
             {hasSelections && (
                 <div className="fixed bottom-0 left-0 right-0 glass-panel shadow-[0_-8px_30px_rgba(0,0,0,0.1)] safe-area-bottom z-50 transition-transform duration-300 animate-slide-up">
