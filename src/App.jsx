@@ -90,12 +90,11 @@ const GlobalStyles = () => (
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-top: 1px solid rgba(255, 255, 255, 0.5);
         }
         
-        /* ⭐️ 헤더 스타일 수정: flex-col 추가하여 내부 요소(메인바+알림바) 정렬 */
         .glass-header {
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border-bottom: 1px solid rgba(0, 0, 0, 0.05);
@@ -230,7 +229,7 @@ const getPackageAreaIds = (pkg) => [
 ];
 
 // =================================================================
-// ⭐️ [신규] Before/After 슬라이더 컴포넌트
+// [컴포넌트] Before/After 슬라이더
 // =================================================================
 const BeforeAfterSlider = () => {
     const [sliderPosition, setSliderPosition] = useState(50);
@@ -294,9 +293,9 @@ const BeforeAfterSlider = () => {
 };
 
 // =================================================================
-// ⭐️ [수정] 실시간 예약 알림 (Ticker) - 디자인 변경
+// [컴포넌트] 실시간 예약 알림 (Ticker)
 // =================================================================
-const ReservationTicker = () => {
+const ReservationTicker = ({ variant = 'default' }) => {
     const messages = [
         "인천 연수구 박**님 12월 22일 예약완료",
         "인천 서구 한**님 12월 23일 예약완료",
@@ -322,43 +321,24 @@ const ReservationTicker = () => {
         return () => clearInterval(interval);
     }, []);
 
-    return (
-        // ⭐️ 수정: 헤더 하단에 부착되는 바(Bar) 형태로 변경 ⭐️
-        <div className="w-full bg-indigo-50 border-t border-indigo-100/50 py-2 flex justify-center items-center overflow-hidden relative">
-             <div className={`flex items-center gap-2 transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
-                <Bell size={12} className="text-indigo-600 animate-pulse" />
-                <span className="text-xs font-bold text-indigo-800 truncate">{messages[index]}</span>
-            </div>
-        </div>
-    );
-};
-
-// =================================================================
-// [컴포넌트] PackageToast
-// =================================================================
-const PackageToast = ({ isVisible, onClose, label }) => {
-    useEffect(() => {
-        if (isVisible) {
-            const timer = setTimeout(() => onClose(), 3000);
-            return () => clearTimeout(timer);
-        }
-    }, [isVisible, onClose]);
-
-    if (!isVisible) return null;
-
-    return (
-        <div className="fixed bottom-[110px] left-1/2 -translate-x-1/2 z-50 w-full max-w-sm px-4">
-            <div className="bg-indigo-600 text-white p-4 rounded-2xl shadow-2xl flex items-center justify-between animate-slide-up border border-indigo-400">
-                <div className="flex items-center gap-3">
-                    <div className="p-2 bg-white/20 rounded-full text-white">
-                        <Gift size={20} />
-                    </div>
-                    <div>
-                        <div className="text-xs text-indigo-100 font-medium">자동 적용됨</div>
-                        <div className="text-sm font-bold text-white">{label || '패키지 할인'}</div>
-                    </div>
+    // 상단 고정 스타일 (Bar 형태)
+    if (variant === 'top-bar') {
+        return (
+            <div className="w-full bg-indigo-50 border-t border-indigo-100/50 py-2 flex justify-center items-center overflow-hidden relative">
+                <div className={`flex items-center gap-2 transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+                    <Bell size={12} className="text-indigo-600 animate-pulse" />
+                    <span className="text-xs font-bold text-indigo-800 truncate">{messages[index]}</span>
                 </div>
-                <button onClick={onClose} className="text-xs font-bold text-indigo-200 hover:text-white transition">닫기</button>
+            </div>
+        );
+    }
+
+    // 하단 플로팅 스타일 (Pill 형태) - 하단바 위쪽용
+    return (
+        <div className={`w-full flex justify-center pb-2 transition-all duration-500`}>
+             <div className={`bg-slate-800/80 backdrop-blur-sm text-white px-4 py-1.5 rounded-full shadow-lg border border-white/10 flex items-center gap-2 transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+                <Bell size={12} className="text-yellow-400 animate-pulse" />
+                <span className="text-[11px] font-medium truncate">{messages[index]}</span>
             </div>
         </div>
     );
@@ -729,7 +709,8 @@ export default function App() {
     const [selectedReviews, setSelectedReviews] = useState(new Set());
     const [showModal, setShowModal] = useState(false);
     const [showMaterialModal, setShowMaterialModal] = useState(false);
-    const [showToast, setShowToast] = useState(false);
+    // ⭐️ [삭제] showToast state 제거 (PackageToast 컴포넌트 삭제됨)
+    // const [showToast, setShowToast] = useState(false);
     const [activeVideoId, setActiveVideoId] = useState(YOUTUBE_VIDEOS[0].id);
     const quoteRef = useRef(null);
     const SOOMGO_REVIEW_URL = 'https://www.soomgo.com/profile/users/10755579?tab=review';
@@ -1078,13 +1059,9 @@ export default function App() {
         };
     }, [quantities, selectedReviews, housingType, areaMaterials, getSelectionSummary, findMatchingPackage]);
 
-    const packageActiveRef = useRef(calculation.isPackageActive);
-    useEffect(() => {
-        if (calculation.isPackageActive && !packageActiveRef.current) { setShowToast(true); }
-        packageActiveRef.current = calculation.isPackageActive;
-    }, [calculation.isPackageActive]);
+    // ⭐️ [삭제됨] showToast Effect 제거 (더 이상 사용 안함) ⭐️
 
-    const handleCloseToast = useCallback(() => { setShowToast(false); }, []);
+    const handleCloseToast = useCallback(() => { /* No-op */ }, []); // 사용 안하지만 에러 방지용으로 남겨둠
     const handleTileImageUpload = (event) => {
         const file = event.target.files[0];
         if (file) {
@@ -1191,7 +1168,6 @@ export default function App() {
             <GlobalStyles />
 
             <header className="glass-header sticky top-0 z-30 transition-all duration-300">
-                {/* 상단 메인 바 */}
                 <div className="px-5 py-4 flex items-center justify-between max-w-lg mx-auto w-full">
                     <div className="flex items-center gap-2">
                         <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-black shadow-lg shadow-indigo-200">
@@ -1208,9 +1184,8 @@ export default function App() {
                         </button>
                     </div>
                 </div>
-                
-                {/* ⭐️ [수정] 헤더 내부에 통합된 알림 바 (Notification Bar) ⭐️ */}
-                <ReservationTicker />
+                {/* ⭐️ 상단 예약 알림 (유지) ⭐️ */}
+                <ReservationTicker variant="top-bar" />
             </header>
 
             <main className="max-w-lg mx-auto p-5 space-y-8">
@@ -1232,7 +1207,6 @@ export default function App() {
                     </div>
                 </section>
 
-                {/* ⭐️ [신규] Before/After 슬라이더 추가 ⭐️ */}
                 <section className="animate-fade-in delay-100">
                     <BeforeAfterSlider />
                 </section>
@@ -1280,7 +1254,7 @@ export default function App() {
                         ))}
                     </div>
 
-                    <button onClick={() => setShowMaterialModal(true)} className="w-full mt-6 py-4 bg-white border border-slate-200 text-slate-600 rounded-2xl font-bold text-sm hover:bg-slate-50 transition shadow-sm flex items-center justify-center gap-2">
+                    <button onClick={() => setShowMaterialModal(true)} className="w-full mt-6 py-4 bg-white border border-slate-200 text-slate-700 rounded-2xl font-bold text-sm hover:bg-slate-50 transition shadow-sm flex items-center justify-center gap-2">
                         <HelpCircle size={18} className='text-indigo-500'/> 🤔 폴리 vs 에폭시, 어떤게 더 좋을까요?
                     </button>
 
@@ -1292,14 +1266,13 @@ export default function App() {
                     />
                 </section>
 
-                {/* ⭐️ [수정] 시공 범위 선택 섹션: mt-16, border-t 추가 ⭐️ */}
+                {/* ⭐️ [수정] 간격 추가 (mt-16) ⭐️ */}
                 <section className="animate-fade-in delay-300 mt-16 pt-10 border-t border-slate-200/60">
                      <h2 className="text-xl font-black text-slate-800 mb-5 flex items-center gap-2">
                         <span className="flex items-center justify-center w-7 h-7 bg-indigo-100 text-indigo-600 rounded-full text-sm font-bold">2</span>
                         시공 범위 선택
                     </h2>
 
-                    {/* ⭐️ [이동됨] 정가제 안내 카드 (Step 2 내부, Area List 바로 위) ⭐️ */}
                     <div className="bg-indigo-50 rounded-2xl p-4 border border-indigo-100 shadow-sm flex flex-col gap-3 mb-6">
                         <div className="flex items-center gap-3">
                              <div className="p-2 bg-white rounded-full shadow-sm text-indigo-600">
@@ -1357,53 +1330,61 @@ export default function App() {
                 </button>
             </main>
 
-            <PackageToast isVisible={showToast} onClose={handleCloseToast} label={calculation.label} />
+            {/* ⭐️ [삭제] PackageToast 제거됨 ⭐️ */}
 
             {hasSelections && (
-                <div className="fixed bottom-0 left-0 right-0 glass-panel shadow-[0_-8px_30px_rgba(0,0,0,0.1)] safe-area-bottom z-50 transition-transform duration-300 animate-slide-up">
-                    <div className="max-w-lg mx-auto p-5">
-                        <div className='flex items-end justify-between mb-4'>
-                            <div>
-                                <div className="text-xs font-bold text-slate-400 mb-1">예상 견적 금액</div>
-                                <div className="flex items-baseline gap-1">
-                                    <span className="text-3xl font-black text-slate-900 tracking-tighter">{calculation.price.toLocaleString()}</span>
-                                    <span className="text-base font-bold text-slate-600">원</span>
-                                </div>
-                            </div>
-                            <div className='flex flex-col items-end'>
-                                {calculation.minimumFeeApplied && (
-                                    <div className="text-[10px] font-bold text-rose-500 bg-rose-50 px-2 py-1 rounded-full mb-1">
-                                        최소 출장비 적용
-                                    </div>
-                                )}
-                                {calculation.label && !calculation.minimumFeeApplied && (
-                                     <div className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded-full mb-1 flex items-center gap-1">
-                                        <Crown size={10} fill="currentColor"/> {calculation.label}
-                                    </div>
-                                )}
-                                {((calculation.minimumFeeApplied || calculation.isPackageActive) && (calculation.priceBeforeAllDiscount > calculation.price)) && (
-                                    <span className="text-xs text-slate-400 line-through font-medium">
-                                        {calculation.priceBeforeAllDiscount.toLocaleString()}원
-                                    </span>
-                                )}
-                            </div>
+                <div className="fixed bottom-0 left-0 right-0 z-50 transition-transform duration-300 animate-slide-up">
+                    <div className="max-w-lg mx-auto">
+                        {/* ⭐️ [신규] 하단 예약 알림 (견적 바 바로 위에 위치) ⭐️ */}
+                        <div className="px-5 pb-2">
+                            <ReservationTicker />
                         </div>
 
-                        <div className='grid grid-cols-5 gap-3'>
-                            <button
-                                onClick={() => { setShowModal(true); setShowToast(false); }}
-                                className="col-span-3 py-4 rounded-2xl font-bold text-white bg-slate-900 hover:bg-slate-800 shadow-lg shadow-slate-300 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-                            >
-                                <List size={18} /> 견적서 상세보기
-                            </button>
-                             <a
-                                href={KAKAO_CHAT_URL}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="col-span-2 py-4 rounded-2xl font-bold text-slate-900 bg-yellow-400 hover:bg-yellow-500 shadow-lg shadow-yellow-200 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-                            >
-                                <Layers size={18} /> 상담하기
-                            </a>
+                        {/* 하단 견적 바 (Glass Panel) */}
+                        <div className="glass-panel p-5 shadow-[0_-8px_30px_rgba(0,0,0,0.1)] safe-area-bottom">
+                            <div className='flex items-end justify-between mb-4'>
+                                <div>
+                                    <div className="text-xs font-bold text-slate-400 mb-1">예상 견적 금액</div>
+                                    <div className="flex items-baseline gap-1">
+                                        <span className="text-3xl font-black text-slate-900 tracking-tighter">{calculation.price.toLocaleString()}</span>
+                                        <span className="text-base font-bold text-slate-600">원</span>
+                                    </div>
+                                </div>
+                                <div className='flex flex-col items-end'>
+                                    {calculation.minimumFeeApplied && (
+                                        <div className="text-[10px] font-bold text-rose-500 bg-rose-50 px-2 py-1 rounded-full mb-1">
+                                            최소 출장비 적용
+                                        </div>
+                                    )}
+                                    {calculation.label && !calculation.minimumFeeApplied && (
+                                         <div className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded-full mb-1 flex items-center gap-1">
+                                            <Crown size={10} fill="currentColor"/> {calculation.label}
+                                        </div>
+                                    )}
+                                    {((calculation.minimumFeeApplied || calculation.isPackageActive) && (calculation.priceBeforeAllDiscount > calculation.price)) && (
+                                        <span className="text-xs text-slate-400 line-through font-medium">
+                                            {calculation.priceBeforeAllDiscount.toLocaleString()}원
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className='grid grid-cols-5 gap-3'>
+                                <button
+                                    onClick={() => { setShowModal(true); setShowToast(false); }}
+                                    className="col-span-3 py-4 rounded-2xl font-bold text-white bg-slate-900 hover:bg-slate-800 shadow-lg shadow-slate-300 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                                >
+                                    <List size={18} /> 견적서 상세보기
+                                </button>
+                                 <a
+                                    href={KAKAO_CHAT_URL}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="col-span-2 py-4 rounded-2xl font-bold text-slate-900 bg-yellow-400 hover:bg-yellow-500 shadow-lg shadow-yellow-200 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                                >
+                                    <Layers size={18} /> 상담하기
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
