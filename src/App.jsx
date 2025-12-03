@@ -371,13 +371,13 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
                         rel="noopener noreferrer"
                         className="py-3.5 bg-yellow-400 text-slate-900 rounded-xl font-bold hover:bg-yellow-500 transition active:scale-[0.98] flex items-center justify-center gap-2 shadow-sm"
                     >
-                        <Layers size={18} /> 카카오 상담
+                        <Layers size={18} /> 카톡상담
                     </a>
                     <a
                         href={`tel:${PHONE_NUMBER}`}
                         className="py-3.5 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition active:scale-[0.98] flex items-center justify-center gap-2 shadow-sm"
                     >
-                       <Phone size={18} /> 전화 상담
+                       <Phone size={18} /> 상담원 연결
                     </a>
                 </div>
             </div>
@@ -476,7 +476,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
     return (
         <div className='mt-8 pt-6 border-t border-slate-100'>
             <h3 className="text-lg font-bold flex items-center gap-2 mb-4 text-slate-800">
-                <Palette className="h-5 w-5 text-indigo-500" /> 시공 미리보기 (시뮬레이션)
+                <Palette className="h-5 w-5 text-indigo-500" /> 시공색상 미리보기 (시뮬레이션)
             </h3>
 
             {/* 1. 시뮬레이션 화면 (정보바 제거) */}
@@ -519,7 +519,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
             <div className='mb-6 flex gap-3'>
                 <input type="file" id="tileFileInput" accept="image/*" onChange={onTileImageUpload} style={{ display: 'none' }} />
                 <label htmlFor="tileFileInput" className="flex-1 py-3 px-4 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold text-sm hover:bg-slate-50 transition cursor-pointer flex items-center justify-center gap-2 shadow-sm">
-                    <ImageIcon size={16} className="text-slate-400"/> 우리집 타일 찍기
+                    <ImageIcon size={16} className="text-slate-400"/> 우리집 타일 첨부하기
                 </label>
                 {tileImageURL !== DEFAULT_TILE_IMAGE_URL && (
                     <button onClick={onTileImageReset} className="py-3 px-4 bg-slate-100 text-slate-500 rounded-xl font-bold text-sm hover:bg-slate-200 transition flex items-center justify-center gap-2 shadow-sm">
@@ -1088,7 +1088,7 @@ export default function App() {
                             </div>
                             <div className='flex-1'>
                                 <div className="text-sm font-bold text-indigo-900">견적 기준 사이즈</div>
-                                <div className="text-[11px] text-indigo-700/80 leading-tight mt-0.5">바닥 300x300, 벽면 300x600 타일 기준</div>
+                                <div className="text-[11px] text-indigo-700/80 leading-tight mt-0.5">바닥 30x30cm, 벽면 30x60cm 타일크기 기준</div>
                             </div>
                         </div>
                     </div>
