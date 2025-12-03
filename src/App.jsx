@@ -34,7 +34,7 @@ const BRIGHT_COLOR_CODE = '#ffffff';
 const DARK_COLOR_CODE = '#565556';
 
 const ORIGINAL_PRICES = {
-    // ⭐️ 바닥 분리에 따른 가격 데이터 매핑 (기존 바닥 가격 동일 적용)
+    // ⭐️ 바닥 분리에 따른 가격 데이터 매핑
     'master_bath_floor': { poly: 230000, epoxy: 400000 },
     'common_bath_floor': { poly: 230000, epoxy: 400000 },
     'shower_booth': { poly: 150000, epoxy: 300000 },
@@ -46,7 +46,7 @@ const ORIGINAL_PRICES = {
     'kitchen_wall': { poly: 150000, epoxy: 250000 },
     'living_room': { poly: 550000, epoxy: 1100000 },
     'silicon_bathtub': { poly: 80000, epoxy: 80000 },
-    'silicon_kitchen_top': { poly: 50000, epoxy: 50000 }, // 주방상판 5만원
+    'silicon_kitchen_top': { poly: 50000, epoxy: 50000 },
     'silicon_living_baseboard': { poly: 400000, epoxy: 400000 },
 };
 
@@ -786,79 +786,107 @@ export default function App() {
         const sortedPackages = MIXED_PACKAGES;
 
         for (const pkg of sortedPackages) {
-                    let tempPolySelections = { ...filteredPolySelections };
-                    let tempEpoxySelections = { ...filteredEpoxySelections };
-                    let appliedAutoEntrance = false;
+            let tempPolySelections = { ...filteredPolySelections };
+            let tempEpoxySelections = { ...filteredEpoxySelections };
+            let appliedAutoEntrance = false;
 
-                    if (pkg.isFlexible) {
-                                            const requiredPolyAreas = pkg.P_areas.map(([id]) => id).filter(id => id !== 'entrance');
-                                            const requiredEpoxyAreas = pkg.E_areas.map(([id]) => id);
-                                            let baseMatch = true;
-                                            for (const id of requiredPolyAreas.filter(id => !pkg.flexibleGroup.includes(id))) {
-                                                const requiredQty = pkg.P_areas.find(([pkId]) => pkId === id)[1];
-                                                if ((tempPolySelections[id] || 0) !== requiredQty) {
-                                                    baseMatch = false;
-                                                    break;
-                                                }
-                                            }
-                                            if (!baseMatch) continue;
+            // ⭐️ 패키지 타입에 따라 비교할 키(Key) 정리 (Aliasing 처리)
+            const pkgAreaIds = getPackageAreaIds(pkg);
+            const usesGenericFloor = pkgAreaIds.includes('bathroom_floor');
+            
+            // 이 패키지가 'bathroom_floor'를 쓴다면 -> 구체적 바닥 키(master/common)는 비교 대상에서 제거
+            // 이 패키지가 구체적 바닥 키를 쓴다면 -> 가상 키(bathroom_floor)는 비교 대상에서 제거
+            if (usesGenericFloor) {
+                delete tempPolySelections['master_bath_floor'];
+                delete tempPolySelections['common_bath_floor'];
+                delete tempEpoxySelections['master_bath_floor'];
+                delete tempEpoxySelections['common_bath_floor'];
+            } else {
+                delete tempPolySelections['bathroom_floor'];
+                delete tempEpoxySelections['bathroom_floor'];
+            }
 
-                                            for (const id of requiredEpoxyAreas.filter(id => !pkg.flexibleGroup.includes(id))) {
-                                                const requiredQty = pkg.E_areas.find(([pkId]) => pkId === id)[1];
-                                                if ((tempEpoxySelections[id] || 0) !== requiredQty) {
-                                                    baseMatch = false;
-                                                    break;
-                                                }
-                                            }
-                                            if (!baseMatch) continue;
-
-                                            const flexibleSelectedPolyCount = pkg.flexibleGroup.filter(id => tempPolySelections[id] > 0).length;
-                                            const flexibleSelectedEpoxyCount = pkg.flexibleGroup.filter(id => tempEpoxySelections[id] > 0).length;
-                                            const isPolyFlexiblePackage = pkg.id.startsWith('USER_P_');
-                                            const isEpoxyFlexiblePackage = pkg.id.startsWith('USER_E_');
-                                            let flexibleMatch = false;
-
-                                            if (isPolyFlexiblePackage) {
-                                                flexibleMatch = flexibleSelectedPolyCount === 1 && flexibleSelectedEpoxyCount === 0;
-                                                if (flexibleMatch) {
-                                                    const matchedFlexibleItem = pkg.flexibleGroup.find(id => tempPolySelections[id] > 0);
-                                                    if (pkg.id.includes('MASTER') && matchedFlexibleItem !== 'master_bath_wall') flexibleMatch = false;
-                                                    if (pkg.id.includes('COMMON') && matchedFlexibleItem !== 'common_bath_wall') flexibleMatch = false;
-                                                }
-                                            } else if (isEpoxyFlexiblePackage) {
-                                                flexibleMatch = flexibleSelectedEpoxyCount === 1 && flexibleSelectedEpoxyCount === 0;
-                                                if (flexibleMatch) {
-                                                    const matchedFlexibleItem = pkg.flexibleGroup.find(id => tempEpoxySelections[id] > 0);
-                                                    if (pkg.id.includes('MASTER') && matchedFlexibleItem !== 'master_bath_wall') flexibleMatch = false;
-                                                    if (pkg.id.includes('COMMON') && matchedFlexibleItem !== 'common_bath_wall') flexibleMatch = false;
-                                                }
-                                            }
-
-                                            if (baseMatch && flexibleMatch) {
-                                                 return { ...pkg, autoEntrance: appliedAutoEntrance };
-                                            }
-                                            continue;
+            // Flexible 패키지 로직 (기존 유지)
+            if (pkg.isFlexible) {
+                // ...
+                const requiredPolyAreas = pkg.P_areas.map(([id]) => id).filter(id => id !== 'entrance');
+                const requiredEpoxyAreas = pkg.E_areas.map(([id]) => id);
+                let baseMatch = true;
+                for (const id of requiredPolyAreas.filter(id => !pkg.flexibleGroup.includes(id))) {
+                    const requiredQty = pkg.P_areas.find(([pkId]) => pkId === id)[1];
+                    if ((tempPolySelections[id] || 0) !== requiredQty) {
+                        baseMatch = false;
+                        break;
                     }
+                }
+                if (!baseMatch) continue;
 
-                    let isMatch = true;
-                    // 일반 패키지 매칭
-                    for (const [id, requiredQty] of pkg.P_areas) {
-                               if ((filteredPolySelections[id] || 0) !== requiredQty) {
-                                   isMatch = false;
-                                   break;
-                               }
+                for (const id of requiredEpoxyAreas.filter(id => !pkg.flexibleGroup.includes(id))) {
+                    const requiredQty = pkg.E_areas.find(([pkId]) => pkId === id)[1];
+                    if ((tempEpoxySelections[id] || 0) !== requiredQty) {
+                        baseMatch = false;
+                        break;
                     }
-                    if (!isMatch) continue;
+                }
+                if (!baseMatch) continue;
 
-                    for (const [id, requiredQty] of pkg.E_areas) {
-                               if ((filteredEpoxySelections[id] || 0) !== requiredQty) {
-                                   isMatch = false;
-                                   break;
-                               }
+                const flexibleSelectedPolyCount = pkg.flexibleGroup.filter(id => tempPolySelections[id] > 0).length;
+                const flexibleSelectedEpoxyCount = pkg.flexibleGroup.filter(id => tempEpoxySelections[id] > 0).length;
+                const isPolyFlexiblePackage = pkg.id.startsWith('USER_P_');
+                const isEpoxyFlexiblePackage = pkg.id.startsWith('USER_E_');
+                let flexibleMatch = false;
+
+                if (isPolyFlexiblePackage) {
+                    flexibleMatch = flexibleSelectedPolyCount === 1 && flexibleSelectedEpoxyCount === 0;
+                    if (flexibleMatch) {
+                        const matchedFlexibleItem = pkg.flexibleGroup.find(id => tempPolySelections[id] > 0);
+                        if (pkg.id.includes('MASTER') && matchedFlexibleItem !== 'master_bath_wall') flexibleMatch = false;
+                        if (pkg.id.includes('COMMON') && matchedFlexibleItem !== 'common_bath_wall') flexibleMatch = false;
                     }
-                    if (!isMatch) continue;
+                } else if (isEpoxyFlexiblePackage) {
+                    flexibleMatch = flexibleSelectedEpoxyCount === 1 && flexibleSelectedEpoxyCount === 0;
+                    if (flexibleMatch) {
+                        const matchedFlexibleItem = pkg.flexibleGroup.find(id => tempEpoxySelections[id] > 0);
+                        if (pkg.id.includes('MASTER') && matchedFlexibleItem !== 'master_bath_wall') flexibleMatch = false;
+                        if (pkg.id.includes('COMMON') && matchedFlexibleItem !== 'common_bath_wall') flexibleMatch = false;
+                    }
+                }
 
-                    return { ...pkg, autoEntrance: appliedAutoEntrance };
+                if (baseMatch && flexibleMatch) {
+                        return { ...pkg, autoEntrance: appliedAutoEntrance };
+                }
+                continue;
+            }
+
+            // Standard Package Logic
+            let isMatch = true;
+            for (const [id, requiredQty] of pkg.P_areas) {
+                if ((tempPolySelections[id] || 0) !== requiredQty) {
+                    isMatch = false; break;
+                }
+            }
+            if (!isMatch) continue;
+
+            for (const [id, requiredQty] of pkg.E_areas) {
+                if ((tempEpoxySelections[id] || 0) !== requiredQty) {
+                    isMatch = false; break;
+                }
+            }
+            if (!isMatch) continue;
+
+            // ID Set Check
+            const selectedAreaIds = new Set([
+                ...Object.keys(tempPolySelections).filter(id => tempPolySelections[id] > 0), 
+                ...Object.keys(tempEpoxySelections).filter(id => tempEpoxySelections[id] > 0)
+            ]);
+            const packageAreaIdsSet = new Set(getPackageAreaIds(pkg));
+            
+            const isIdSetMatch = selectedAreaIds.size === packageAreaIdsSet.size &&
+                                 [...selectedAreaIds].every(id => packageAreaIdsSet.has(id));
+
+            if (isIdSetMatch) {
+                return { ...pkg, autoEntrance: appliedAutoEntrance };
+            }
         }
         return null;
     }, []);
