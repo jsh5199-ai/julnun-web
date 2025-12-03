@@ -2,7 +2,7 @@ import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react'
 import html2canvas from 'html2canvas';
 import {
     Calculator, Home, Bath, DoorOpen, Utensils, LayoutGrid,
-    CheckCircle2, Info, RefreshCw, Phone, Sparkles, Hammer, Sofa, Palette, Crown, Gift, Eraser, Star, X, ChevronDown, HelpCircle, Zap, TrendingUp, Clock, Image as ImageIcon, Download, DollarSign, List, Layers, Check, ShieldCheck, Ruler, Settings, ThumbsUp, AlertCircle
+    CheckCircle2, Info, RefreshCw, Phone, Sparkles, Hammer, Sofa, Palette, Crown, Gift, Eraser, Star, X, ChevronDown, HelpCircle, Zap, TrendingUp, Clock, Image as ImageIcon, Download, DollarSign, List, Layers, Check, ShieldCheck, Ruler, Settings, ThumbsUp
 } from 'lucide-react';
 
 // =================================================================
@@ -441,8 +441,8 @@ const MaterialDetailModal = ({ onClose }) => (
                             </tr>
                             <tr>
                                 <td className="px-3 py-3 text-center font-bold text-slate-500">시공 시간</td>
-                                <td className="px-3 py-3 text-center font-bold text-blue-600">하루</td>
-                                <td className="px-3 py-3 text-center text-slate-600">1~2일</td>
+                                <td className="px-3 py-3 text-center font-bold text-blue-600">빠름 (반나절)</td>
+                                <td className="px-3 py-3 text-center text-slate-600">보통 (하루)</td>
                             </tr>
                             <tr>
                                 <td className="px-3 py-3 text-center font-bold text-slate-500">물 사용</td>
@@ -462,16 +462,18 @@ const MaterialDetailModal = ({ onClose }) => (
                     <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
                         <div className="font-bold text-slate-700 mb-1">👍 폴리아스파틱을 추천해요</div>
                         <ul className="text-xs text-slate-500 space-y-1 ml-1 list-disc list-inside">
-                            <li>3~5년 단기 거주 예정이신 분</li>
+                            <li>전세/월세 등 단기 거주 예정이신 분</li>
+                            <li>화려하고 반짝이는 인테리어를 선호하시는 분</li>
                             <li>빠른 시공과 저렴한 비용을 원하시는 분</li>
                         </ul>
                     </div>
 
                     <div className="bg-indigo-50 p-4 rounded-xl border border-indigo-100">
-                        <div className="font-bold text-indigo-900 mb-1">👑 에폭시를 추천해요</div>
+                        <div className="font-bold text-indigo-900 mb-1">👑 에폭시(케라폭시)를 추천해요</div>
                         <ul className="text-xs text-indigo-800/80 space-y-1 ml-1 list-disc list-inside">
                             <li>자가 거주 또는 10년 이상 장기 거주 예정이신 분</li>
                             <li>호텔처럼 차분하고 고급스러운 무광을 원하시는 분</li>
+                            <li>락스 청소 등 관리가 편한 것을 최우선으로 하시는 분</li>
                         </ul>
                     </div>
                 </div>
@@ -542,9 +544,9 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                     <div className="absolute inset-0" style={{ backgroundImage: `url(${effectiveTileImageURL})`, backgroundSize: 'cover', backgroundPosition: 'center', zIndex: 1 }}></div>
                     <div className="absolute inset-0 opacity-40 mix-blend-overlay" style={{ backgroundImage: 'url(/logo.png)', backgroundSize: '30%', backgroundRepeat: 'repeat', zIndex: 5 }}></div>
                     
-                    {/* 줄눈 라인 */}
-                    <div className="absolute top-0 bottom-0 left-1/2 shadow-sm" style={{ width: `${GROUT_LINE_WIDTH}px`, backgroundColor: effectiveGroutColor, transform: 'translateX(-50%)', zIndex: 10 }}></div>
-                    <div className="absolute left-0 right-0 top-1/2 shadow-sm" style={{ height: `${GROUT_LINE_WIDTH}px`, backgroundColor: effectiveGroutColor, transform: 'translateY(-50%)', zIndex: 10 }}></div>
+                    {/* ⭐️ [수정] 줄눈 라인 그림자 제거 (shadow-sm 삭제) ⭐️ */}
+                    <div className="absolute top-0 bottom-0 left-1/2" style={{ width: `${GROUT_LINE_WIDTH}px`, backgroundColor: effectiveGroutColor, transform: 'translateX(-50%)', zIndex: 10 }}></div>
+                    <div className="absolute left-0 right-0 top-1/2" style={{ height: `${GROUT_LINE_WIDTH}px`, backgroundColor: effectiveGroutColor, transform: 'translateY(-50%)', zIndex: 10 }}></div>
                 </div>
             </div>
 
@@ -576,7 +578,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
             <div className='mb-6 flex gap-3'>
                 <input type="file" id="tileFileInput" accept="image/*" onChange={onTileImageUpload} style={{ display: 'none' }} />
                 <label htmlFor="tileFileInput" className="flex-1 py-3 px-4 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold text-sm hover:bg-slate-50 transition cursor-pointer flex items-center justify-center gap-2 shadow-sm">
-                    <ImageIcon size={16} className="text-slate-400"/> 우리집 타일 찍기
+                    <ImageIcon size={16} className="text-slate-400"/> 우리집 타일 첨부하기
                 </label>
                 {tileImageURL !== DEFAULT_TILE_IMAGE_URL && (
                     <button onClick={onTileImageReset} className="py-3 px-4 bg-slate-100 text-slate-500 rounded-xl font-bold text-sm hover:bg-slate-200 transition flex items-center justify-center gap-2 shadow-sm">
@@ -1126,30 +1128,6 @@ export default function App() {
                     </div>
                 </section>
 
-                <section className="animate-fade-in delay-100">
-                    <div className="bg-indigo-50 rounded-2xl p-4 border border-indigo-100 shadow-sm flex flex-col gap-3">
-                        <div className="flex items-center gap-3">
-                             <div className="p-2 bg-white rounded-full shadow-sm text-indigo-600">
-                                <ShieldCheck size={18} strokeWidth={2.5} />
-                            </div>
-                            <div className='flex-1'>
-                                <div className="text-sm font-bold text-indigo-900">신축·구축 동일 정가제</div>
-                                <div className="text-[11px] text-indigo-700/80 leading-tight mt-0.5">난이도에 따른 추가금 없는 정직한 시공</div>
-                            </div>
-                        </div>
-                        <div className="h-px bg-indigo-200/50 w-full"></div>
-                        <div className="flex items-center gap-3">
-                             <div className="p-2 bg-white rounded-full shadow-sm text-indigo-600">
-                                <Ruler size={18} strokeWidth={2.5} />
-                            </div>
-                            <div className='flex-1'>
-                                <div className="text-sm font-bold text-indigo-900">견적 기준 사이즈</div>
-                                <div className="text-[11px] text-indigo-700/80 leading-tight mt-0.5">바닥 300x300, 벽면 300x600 타일 기준</div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
                 <section className="animate-fade-in delay-200">
                      <h2 className="text-xl font-black text-slate-800 mb-5 flex items-center gap-2">
                         <span className="flex items-center justify-center w-7 h-7 bg-indigo-100 text-indigo-600 rounded-full text-sm font-bold">1</span>
@@ -1204,6 +1182,31 @@ export default function App() {
                         brightnessLevel={brightnessLevel} onBrightnessChange={setBrightnessLevel}
                         onTileImageReset={handleTileImageReset}
                     />
+                </section>
+
+                {/* ⭐️ [이동됨] 정가제 안내 카드 (Step 1과 Step 2 사이로 이동) ⭐️ */}
+                <section className="animate-fade-in delay-100">
+                    <div className="bg-indigo-50 rounded-2xl p-4 border border-indigo-100 shadow-sm flex flex-col gap-3">
+                        <div className="flex items-center gap-3">
+                             <div className="p-2 bg-white rounded-full shadow-sm text-indigo-600">
+                                <ShieldCheck size={18} strokeWidth={2.5} />
+                            </div>
+                            <div className='flex-1'>
+                                <div className="text-sm font-bold text-indigo-900">신축·구축 동일 정가제</div>
+                                <div className="text-[11px] text-indigo-700/80 leading-tight mt-0.5">난이도에 따른 추가금 없는 정직한 시공</div>
+                            </div>
+                        </div>
+                        <div className="h-px bg-indigo-200/50 w-full"></div>
+                        <div className="flex items-center gap-3">
+                             <div className="p-2 bg-white rounded-full shadow-sm text-indigo-600">
+                                <Ruler size={18} strokeWidth={2.5} />
+                            </div>
+                            <div className='flex-1'>
+                                <div className="text-sm font-bold text-indigo-900">견적 기준 사이즈</div>
+                                <div className="text-[11px] text-indigo-700/80 leading-tight mt-0.5">바닥 30x30cm, 벽면 30x60cm 타일크기 기준</div>
+                            </div>
+                        </div>
+                    </div>
                 </section>
 
                 <section className="animate-fade-in delay-300">
