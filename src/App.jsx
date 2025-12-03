@@ -297,14 +297,14 @@ const BeforeAfterSlider = () => {
 // =================================================================
 const ReservationTicker = ({ variant = 'default' }) => {
     const messages = [
-        "인천 연수구 박**님 12월 22일 예약완료",
-        "인천 서구 한**님 12월 23일 예약완료",
-        "경기 성남시 이**님 2월 13일 예약완료",
-        "경기 용인시 하**님 12월 18일 예약완료",
-        "서울 양천구 오**님 12월 14일 예약완료",
-        "서울 송파구 김**님 1월 26일 예약완료",
-        "서울 송파구 임**님 1월 14일 예약완료",
-        "경기 시흥시 이**님 12월 11일 예약완료"
+        "인천 연수구 박**님 12월 22일 예약이 완료되었습니다.",
+        "인천 서구 한**님 12월 23일 예약이 완료되었습니다.",
+        "경기 성남시 이**님 2월 13일 예약이 완료되었습니다.",
+        "경기 용인시 하**님 12월 18일 예약이 완료되었습니다.",
+        "서울 양천구 오**님 12월 14일 예약이 완료되었습니다.",
+        "서울 송파구 김**님 1월 26일 예약이 완료되었습니다.",
+        "서울 송파구 임**님 1월 14일 예약이 완료되었습니다.",
+        "경기 시흥시 이**님 12월 11일 예약이 완료되었습니다."
     ];
     const [index, setIndex] = useState(0);
     const [isVisible, setIsVisible] = useState(true);
@@ -615,7 +615,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
     return (
         <div className='mt-8 pt-6 border-t border-slate-100'>
             <h3 className="text-lg font-bold flex items-center gap-2 mb-4 text-slate-800">
-                <Palette className="h-5 w-5 text-indigo-500" /> 시공 미리보기 (시뮬레이션)
+                <Palette className="h-5 w-5 text-indigo-500" /> 색상 미리보기 (시뮬레이션)
             </h3>
 
             {/* 1. 시뮬레이션 화면 */}
@@ -1290,7 +1290,7 @@ export default function App() {
                             </div>
                             <div className='flex-1'>
                                 <div className="text-sm font-bold text-indigo-900">견적 기준 사이즈</div>
-                                <div className="text-[11px] text-indigo-700/80 leading-tight mt-0.5">바닥 300x300, 벽면 300x600 타일크기 기준</div>
+                                <div className="text-[11px] text-indigo-700/80 leading-tight mt-0.5">바닥 30x30cm, 벽면 30x60cm 타일크기 기준</div>
                             </div>
                         </div>
                     </div>
