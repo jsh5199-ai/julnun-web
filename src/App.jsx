@@ -372,27 +372,44 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
                             <span className="text-[11px] text-slate-400">{new Date().toLocaleDateString()} 기준</span>
                         </div>
 
-                        {/* 상단 요약 박스: 높이를 줄이고 가로 배치로 공간 효율화 */}
-                        <div className='bg-slate-50 rounded-xl p-3 border border-slate-200'>
-                             <div className='flex justify-between items-start mb-1'>
-                                 <div className='flex items-center gap-1.5'>
-                                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded text-white ${minimumFeeApplied ? 'bg-rose-500' : 'bg-indigo-600'}`}>
+                        {/* 상단 요약 박스: 참고 이미지 스타일 적용 (구도 변경) */}
+                        <div className='bg-slate-50 rounded-xl p-4 border border-slate-200'>
+                             {/* Top Row: Badge and Price */}
+                             <div className='flex justify-between items-start mb-3'>
+                                 {/* Left: Badge */}
+                                 <div>
+                                     <span className={`text-[11px] font-bold px-2.5 py-1 rounded text-white ${minimumFeeApplied ? 'bg-rose-500' : 'bg-indigo-600'}`}>
                                         {minimumFeeApplied ? '최소비용' : (label || '맞춤견적')}
                                      </span>
                                  </div>
+
+                                 {/* Right: Price and Label */}
                                  {isDiscountApplied && (
-                                     <div className="flex flex-col items-end">
-                                        <div className='text-base font-black text-rose-500 tracking-tight'>
+                                     <div className="text-right">
+                                        <div className='text-lg font-black text-rose-500 leading-none'>
                                             -{totalDiscount.toLocaleString()}원
                                         </div>
-                                        <span className="text-[9px] text-rose-500 font-bold mt-0.5">할인적용</span>
+                                        <div className="text-[10px] text-rose-500 font-bold mt-1">
+                                            할인적용
+                                        </div>
                                      </div>
                                  )}
                              </div>
+
+                             {/* Bottom Row: Description */}
                              {(minimumFeeApplied || isDiscountApplied) && (
-                                 <div className="flex flex-col gap-0.5 mt-1">
-                                     {minimumFeeApplied && <div className="text-[10px] text-slate-500 flex items-center gap-1">· 최소 시공비(20만원) 적용</div>}
-                                     {isDiscountApplied && <div className="text-[10px] text-slate-500 flex items-start gap-1 leading-snug"><Check size={10} className="mt-0.5 shrink-0"/> 변기/바닥테두리, 욕실 선반 실리콘 서비스</div>}
+                                 <div className="pt-3 border-t border-slate-200/60">
+                                     {minimumFeeApplied && (
+                                         <div className="text-[11px] text-slate-500 flex items-center gap-1.5">
+                                             <Info size={12} /> 최소 시공비(20만원) 적용
+                                         </div>
+                                     )}
+                                     {isDiscountApplied && (
+                                         <div className="text-[11px] text-slate-600 flex items-start gap-1.5 leading-snug">
+                                             <Check size={12} className="mt-0.5 text-indigo-500 shrink-0"/>
+                                             <span>변기/바닥테두리, 젠다이 실리콘 오염방지코팅 서비스 적용</span>
+                                         </div>
+                                     )}
                                  </div>
                              )}
                         </div>
@@ -456,7 +473,7 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
                         <div className='pt-4 border-t-2 border-slate-100 flex flex-col items-end gap-1'>
                             <span className="text-[10px] font-medium text-slate-400">최종 예상 금액 (VAT별도)</span>
                             <div className='flex items-baseline gap-1'>
-                                <span className="text-3xl font-black text-[#1e3a8a] tracking-tighter">
+                                <span className="text-3xl font-black text-[#0f172a] tracking-tighter">
                                     {price.toLocaleString()}
                                 </span>
                                 <span className="text-base font-bold text-slate-600">원</span>
@@ -472,13 +489,13 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
                         rel="noopener noreferrer"
                         className="py-3 bg-yellow-400 text-slate-900 rounded-xl font-bold hover:bg-yellow-500 transition active:scale-[0.98] flex items-center justify-center gap-2 shadow-sm text-sm"
                     >
-                        <Layers size={16} /> 카톡상담
+                        <Layers size={16} /> 카카오 상담
                     </a>
                     <a
                         href={`tel:${PHONE_NUMBER}`}
                         className="py-3 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition active:scale-[0.98] flex items-center justify-center gap-2 shadow-sm text-sm"
                     >
-                       <Phone size={16} /> 상담원 연결
+                       <Phone size={16} /> 전화 상담
                     </a>
                 </div>
             </div>
@@ -1353,7 +1370,7 @@ export default function App() {
                                 <div>
                                     <div className="text-xs font-bold text-slate-400 mb-1">예상 견적 금액</div>
                                     <div className="flex items-baseline gap-1">
-                                        <span className="text-3xl font-black text-[#1e3a8a] tracking-tighter">{calculation.price.toLocaleString()}</span>
+                                        <span className="text-3xl font-black text-[#0f172a] tracking-tighter">{calculation.price.toLocaleString()}</span>
                                         <span className="text-base font-bold text-slate-600">원</span>
                                     </div>
                                 </div>
