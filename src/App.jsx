@@ -349,7 +349,7 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
                                              </div>
                                              <div className="text-[11px] text-slate-600 flex items-start gap-1.5 leading-snug">
                                                  <Check size={12} className="mt-0.5 shrink-0 text-indigo-600"/>
-                                                 <span>젠다이 실리콘 오염방지코팅</span>
+                                                 <span>젠다이 실리콘 오염방지코팅 서비스</span>
                                              </div>
                                          </div>
                                      )}
@@ -441,13 +441,13 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
                         rel="noopener noreferrer"
                         className="py-3 bg-yellow-400 text-slate-900 rounded-xl font-bold hover:bg-yellow-500 transition active:scale-[0.98] flex items-center justify-center gap-2 shadow-sm text-sm"
                     >
-                        <Layers size={16} /> 카카오 상담
+                        <Layers size={16} /> 카톡상담
                     </a>
                     <a
                         href={`tel:${PHONE_NUMBER}`}
                         className="py-3 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition active:scale-[0.98] flex items-center justify-center gap-2 shadow-sm text-sm"
                     >
-                       <Phone size={16} /> 전화 상담
+                       <Phone size={16} /> 상담원 연결
                     </a>
                 </div>
             </div>
@@ -503,13 +503,13 @@ const MaterialDetailModal = ({ onClose }) => (
                             </tr>
                             <tr>
                                 <td className="px-3 py-3 text-center font-bold text-slate-500">광택</td>
-                                <td className="px-3 py-3 text-center text-slate-600">유광 (반짝임)</td>
-                                <td className="px-3 py-3 text-center font-bold text-indigo-600">무광 (매트함)</td>
+                                <td className="px-3 py-3 text-center text-slate-600">유광</td>
+                                <td className="px-3 py-3 text-center font-bold text-indigo-600">무광/무펄</td>
                             </tr>
                             <tr>
                                 <td className="px-3 py-3 text-center font-bold text-slate-500">시공 시간</td>
-                                <td className="px-3 py-3 text-center font-bold text-blue-600">빠름 (반나절)</td>
-                                <td className="px-3 py-3 text-center text-slate-600">보통 (하루)</td>
+                                <td className="px-3 py-3 text-center font-bold text-blue-600">4~8시간</td>
+                                <td className="px-3 py-3 text-center text-slate-600">1~2일</td>
                             </tr>
                             <tr>
                                 <td className="px-3 py-3 text-center font-bold text-slate-500">물 사용</td>
@@ -1239,7 +1239,7 @@ export default function App() {
                 <section className="animate-fade-in delay-200">
                     <h2 className="text-xl font-black text-slate-800 mb-5 flex items-center gap-2">
                         <span className="flex items-center justify-center w-7 h-7 bg-indigo-600 text-white rounded-full text-sm font-bold shadow-md shadow-indigo-200">1</span>
-                        시공 소재 선택
+                        시공 소재 안내
                     </h2>
                     
                     <div className="space-y-5">
@@ -1301,10 +1301,10 @@ export default function App() {
                                                     {item.id === 'poly' && (
                                                         <>
                                                             <button onClick={(e) => { e.stopPropagation(); setPolyOption('pearl'); }} className={`flex-1 py-2.5 text-xs font-bold rounded-lg transition-all shadow-sm flex items-center justify-center gap-1 ${polyOption === 'pearl' ? 'bg-indigo-600 text-white shadow-indigo-200' : 'bg-transparent text-slate-500 hover:bg-white'}`}>
-                                                                펄 있음
+                                                                펄
                                                             </button>
                                                             <button onClick={(e) => { e.stopPropagation(); setPolyOption('no_pearl'); }} className={`flex-1 py-2.5 text-xs font-bold rounded-lg transition-all shadow-sm flex items-center justify-center gap-1 ${polyOption === 'no_pearl' ? 'bg-indigo-600 text-white shadow-indigo-200' : 'bg-transparent text-slate-500 hover:bg-white'}`}>
-                                                                펄 없음
+                                                                무펄
                                                             </button>
                                                         </>
                                                     )}
