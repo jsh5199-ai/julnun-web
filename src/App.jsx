@@ -31,9 +31,6 @@ const GROUT_COLORS = [
     { id: 'burnt_brown', code: '#8b8784', label: '187번', isDark: true },
 ];
 
-// 애니메이션 타겟 컬러 (180번 오트 브라운)
-const ANIMATION_TARGET_COLOR = '#b0a9a4';
-
 const BRIGHT_COLOR_CODE = '#ffffff';
 const DARK_COLOR_CODE = '#565556';
 
@@ -66,155 +63,6 @@ const mixColors = (color1, color2, weight) => {
     const b = Math.round(b1 * (1 - weight) + b2 * weight);
     const toHex = (c) => ('0' + Math.max(0, Math.min(255, c)).toString(16)).slice(-2);
     return '#' + toHex(r) + toHex(g) + toHex(b);
-};
-
-// =================================================================
-// ⭐️ [신규] 사실적인 3D 스타일 애니메이션 (SVG + CSS)
-// =================================================================
-const ProcessAnimation = () => {
-    return (
-        <div className="w-full bg-white rounded-[1.5rem] p-6 shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden mb-8">
-            <h3 className="text-lg font-black text-slate-800 mb-6 flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-indigo-500" /> Professional Process
-            </h3>
-
-            <div className="relative w-full h-40 bg-slate-100 rounded-xl border border-slate-200 overflow-hidden flex items-center justify-center" style={{ perspective: '1000px' }}>
-                
-                {/* 1. 타일 배경 (그라데이션으로 질감 표현) */}
-                <div className="absolute inset-0 bg-gradient-to-br from-slate-50 to-slate-200">
-                    <div className="w-full h-full" style={{ backgroundImage: 'linear-gradient(to right, rgba(0,0,0,0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,0.05) 1px, transparent 1px)', backgroundSize: '100px 100px' }}></div>
-                </div>
-
-                <svg viewBox="0 0 400 160" className="w-full h-full absolute inset-0" preserveAspectRatio="xMidYMid slice">
-                    <defs>
-                        {/* 그림자 필터 */}
-                        <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
-                            <feDropShadow dx="2" dy="4" stdDeviation="3" floodColor="#000" floodOpacity="0.3"/>
-                        </filter>
-                        {/* 그라인더 날 그라데이션 */}
-                        <linearGradient id="bladeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stopColor="#94a3b8" />
-                            <stop offset="50%" stopColor="#cbd5e1" />
-                            <stop offset="100%" stopColor="#64748b" />
-                        </linearGradient>
-                        {/* 그라인더 몸체 그라데이션 */}
-                        <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                            <stop offset="0%" stopColor="#334155" />
-                            <stop offset="100%" stopColor="#1e293b" />
-                        </linearGradient>
-                         {/* 시공병 그라데이션 */}
-                         <linearGradient id="bottleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stopColor="#6366f1" />
-                            <stop offset="100%" stopColor="#4f46e5" />
-                        </linearGradient>
-                        {/* 줄눈재 질감 */}
-                        <linearGradient id="groutGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                             <stop offset="0%" stopColor={ANIMATION_TARGET_COLOR} stopOpacity="0.8" />
-                             <stop offset="100%" stopColor={ANIMATION_TARGET_COLOR} />
-                        </linearGradient>
-                    </defs>
-
-                    {/* 2. 작업 대상 라인 (중앙 수평선) */}
-                    {/* 기존 백시멘트 (깊이감 있는 그라데이션) */}
-                    <rect x="0" y="76" width="400" height="8" fill="#64748b" className="animate-fade-out-line" style={{filter: 'inset 0 2px 4px rgba(0,0,0,0.2)'}}/>
-                    
-                    {/* 제거된 빈 공간 (어두운 그림자) */}
-                    <rect x="0" y="76" width="400" height="8" fill="#1e293b" className="animate-draw-empty" />
-
-                    {/* 채워지는 줄눈 (180번 색상, 약간의 광택) */}
-                    <rect x="0" y="77" width="400" height="6" fill="url(#groutGrad)" className="animate-fill-grout" style={{filter: 'drop-shadow(0 1px 1px rgba(255,255,255,0.2))'}} />
-
-
-                    {/* 3. 그라인더 도구 (입체적인 표현) */}
-                    <g className="animate-move-grinder" filter="url(#shadow)">
-                        {/* 톱날 (회전, 그라데이션 적용) */}
-                        <circle cx="0" cy="80" r="20" fill="url(#bladeGrad)" stroke="#475569" strokeWidth="1" className="animate-spin-blade" />
-                        <circle cx="0" cy="80" r="6" fill="#1e293b" />
-                        
-                        {/* 몸체 (손잡이 부분) */}
-                        <path d="M -5 80 L -40 60 L -40 100 L -5 80" fill="url(#bodyGrad)" />
-
-                        {/* 튀는 먼지 (파티클 효과) */}
-                        <g className="animate-dust">
-                             <circle cx="-10" cy="70" r="2" fill="#cbd5e1" opacity="0.8" />
-                             <circle cx="5" cy="65" r="1.5" fill="#cbd5e1" opacity="0.6" />
-                             <circle cx="15" cy="75" r="2.5" fill="#cbd5e1" opacity="0.9" />
-                             <circle cx="0" cy="90" r="1" fill="#cbd5e1" opacity="0.7" />
-                        </g>
-                    </g>
-
-                    {/* 4. 시공병 도구 (입체적인 표현) */}
-                    <g className="animate-move-bottle" filter="url(#shadow)">
-                        {/* 병 몸통 (입체감 있는 그라데이션) */}
-                        <path d="M -15 40 L -15 80 C -15 95 15 95 15 80 L 15 40 Z" fill="url(#bottleGrad)" />
-                        {/* 노즐 */}
-                        <path d="M -5 40 L 0 20 L 5 40 Z" fill="#e2e8f0" />
-                        {/* 나오는 줄눈재 */}
-                        <circle cx="0" cy="80" r="4" fill={ANIMATION_TARGET_COLOR} />
-                    </g>
-
-                </svg>
-            </div>
-
-            <style>{`
-                /* 애니메이션 정의 */
-                
-                /* 1. 그라인더 이동 (0s ~ 3s) */
-                .animate-move-grinder { animation: move-tool 8s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
-                .animate-spin-blade { animation: spin 0.2s linear infinite; transform-origin: 0px 80px; }
-                .animate-dust circle { animation: dust-rise 0.5s ease-out infinite; }
-
-                /* 2. 기존 라인 사라짐 (마스킹 효과) */
-                .animate-fade-out-line { mask: url(#mask-fade-out); }
-                
-                /* 3. 빈 공간 나타남 */
-                .animate-draw-empty { animation: clip-reveal 8s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
-
-                /* 4. 시공병 이동 (4s ~ 7s) */
-                .animate-move-bottle { animation: move-tool-bottle 8s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
-
-                /* 5. 새 줄눈 채움 */
-                .animate-fill-grout { animation: clip-fill 8s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
-
-
-                @keyframes move-tool {
-                    0% { transform: translateX(-60px) rotate(-5deg); opacity: 0; }
-                    5% { opacity: 1; }
-                    35% { transform: translateX(460px) rotate(0deg); opacity: 1; }
-                    40% { transform: translateX(460px); opacity: 0; }
-                    100% { transform: translateX(460px); opacity: 0; }
-                }
-
-                @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-                
-                @keyframes dust-rise {
-                    0% { transform: translateY(0) scale(1); opacity: 1; }
-                    100% { transform: translateY(-20px) scale(2); opacity: 0; }
-                }
-
-                @keyframes clip-reveal {
-                    0% { clip-path: inset(0 100% 0 0); }
-                    35% { clip-path: inset(0 0 0 0); }
-                    100% { clip-path: inset(0 0 0 0); }
-                }
-
-                @keyframes move-tool-bottle {
-                    0%, 40% { transform: translateX(-60px) translateY(-10px) rotate(10deg); opacity: 0; }
-                    45% { opacity: 1; transform: translateX(-60px) translateY(0) rotate(0deg); }
-                    75% { transform: translateX(460px) translateY(0) rotate(0deg); opacity: 1; }
-                    80% { transform: translateX(460px) translateY(-10px) rotate(10deg); opacity: 0; }
-                    100% { transform: translateX(460px); opacity: 0; }
-                }
-
-                @keyframes clip-fill {
-                    0%, 40% { clip-path: inset(0 100% 0 0); }
-                    75% { clip-path: inset(0 0 0 0); }
-                    100% { clip-path: inset(0 0 0 0); }
-                }
-
-            `}</style>
-        </div>
-    );
 };
 
 // =================================================================
@@ -1204,11 +1052,6 @@ export default function App() {
 
             <main className="max-w-lg mx-auto p-5 space-y-8">
                 
-                {/* ⭐️ [신규] 사실적인 3D 스타일 애니메이션 (SVG + CSS) ⭐️ */}
-                <section className="animate-fade-in">
-                    <ProcessAnimation />
-                </section>
-
                 <section className="bg-white rounded-[1.5rem] overflow-hidden shadow-xl shadow-slate-200/50 border border-white animate-fade-in group">
                     <div className="relative aspect-video w-full bg-slate-900">
                          <iframe key={currentVideo.id} width="100%" height="100%" src={currentEmbedUrl} title={currentVideo.title} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen className="w-full h-full border-0 opacity-90 group-hover:opacity-100 transition-opacity duration-500"></iframe>
@@ -1226,31 +1069,26 @@ export default function App() {
                     </div>
                 </section>
 
+                {/* ⭐️ [수정] 통합된 안내 카드 ⭐️ */}
                 <section className="animate-fade-in delay-100">
-                    <div className="bg-white rounded-[1.5rem] p-6 shadow-xl shadow-slate-200/50 border border-slate-100">
-                        {/* 정가제 안내 */}
-                        <div className="flex items-start gap-4 mb-5 pb-5 border-b border-slate-100">
-                             <div className="p-3 bg-indigo-50 rounded-2xl text-indigo-600 flex-shrink-0">
-                                <ShieldCheck size={28} strokeWidth={2} />
+                    <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200 flex flex-col gap-3">
+                        <div className="flex items-center gap-3">
+                             <div className="p-2 bg-white rounded-full shadow-sm text-indigo-600">
+                                <ShieldCheck size={18} strokeWidth={2.5} />
                             </div>
-                            <div>
-                                <h2 className="text-lg font-black text-slate-900 mb-1">신축·구축 동일 정가제</h2>
-                                <p className="text-sm text-slate-500 leading-relaxed font-medium">
-                                    현장 난이도가 높은 구축이라도 추가 비용을 요구하지 않습니다. 줄눈의미학은 모든 고객님께 <span className="text-indigo-600 font-bold underline underline-offset-2">투명한 가격</span>을 약속드립니다.
-                                </p>
+                            <div className='flex-1'>
+                                <div className="text-sm font-bold text-slate-800">신축·구축 동일 정가제</div>
+                                <div className="text-[11px] text-slate-500 leading-tight mt-0.5">난이도에 따른 추가금 없는 정직한 시공</div>
                             </div>
                         </div>
-
-                        {/* 견적 기준 안내 */}
-                        <div className="flex items-start gap-4">
-                             <div className="p-3 bg-slate-50 rounded-2xl text-slate-500 flex-shrink-0">
-                                <Ruler size={28} strokeWidth={2} />
+                        <div className="h-px bg-slate-200 w-full"></div>
+                        <div className="flex items-center gap-3">
+                             <div className="p-2 bg-white rounded-full shadow-sm text-slate-500">
+                                <Ruler size={18} strokeWidth={2.5} />
                             </div>
-                            <div>
-                                <h2 className="text-lg font-black text-slate-900 mb-1">견적 기준 안내</h2>
-                                <p className="text-sm text-slate-500 leading-relaxed font-medium">
-                                    기본 견적가는 <span className="text-slate-900 font-bold">바닥 300x300, 벽면 300x600</span> 타일 기준입니다. (타일 크기에 따라 견적가가 상이할 수 있습니다)
-                                </p>
+                            <div className='flex-1'>
+                                <div className="text-sm font-bold text-slate-800">견적 기준 사이즈</div>
+                                <div className="text-[11px] text-slate-500 leading-tight mt-0.5">바닥 300x300, 벽면 300x600 타일 기준</div>
                             </div>
                         </div>
                     </div>
@@ -1287,6 +1125,7 @@ export default function App() {
                                                 )}
                                                 {item.id === 'kerapoxy' && (
                                                     <>
+                                                        {/* ⭐️ 수정: 스타라이크 EVO 우선 배치 ⭐️ */}
                                                         <button onClick={(e) => { e.stopPropagation(); setEpoxyOption('starlike'); }} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all shadow-sm ${epoxyOption === 'starlike' ? 'bg-white text-amber-600' : 'text-slate-500 hover:text-slate-700'}`}>스타라이크 EVO</button>
                                                         <button onClick={(e) => { e.stopPropagation(); setEpoxyOption('kerapoxy'); }} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all shadow-sm ${epoxyOption === 'kerapoxy' ? 'bg-white text-amber-600' : 'text-slate-500 hover:text-slate-700'}`}>케라폭시</button>
                                                     </>
@@ -1299,6 +1138,7 @@ export default function App() {
                         ))}
                     </div>
 
+                    {/* ⭐️ [수정] 소재 비교 버튼을 소재 선택 바로 아래로 이동 ⭐️ */}
                     <button onClick={() => setShowMaterialModal(true)} className="w-full mt-6 py-4 bg-white border border-slate-200 text-slate-600 rounded-2xl font-bold text-sm hover:bg-slate-50 transition shadow-sm flex items-center justify-center gap-2">
                         <Info size={18} className='text-slate-400'/> 소재별 양생기간 및 특징 비교
                     </button>
