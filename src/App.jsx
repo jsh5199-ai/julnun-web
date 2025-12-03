@@ -93,11 +93,14 @@ const GlobalStyles = () => (
             border: 1px solid rgba(255, 255, 255, 0.5);
         }
         
+        /* ⭐️ 헤더 스타일 수정: flex-col 추가하여 내부 요소(메인바+알림바) 정렬 */
         .glass-header {
-            background: rgba(255, 255, 255, 0.85);
+            background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column; 
         }
 
         .card-shadow { box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); }
@@ -227,7 +230,7 @@ const getPackageAreaIds = (pkg) => [
 ];
 
 // =================================================================
-// ⭐️ [신규] Before/After 슬라이더 컴포넌트 (실제 이미지 적용)
+// ⭐️ [신규] Before/After 슬라이더 컴포넌트
 // =================================================================
 const BeforeAfterSlider = () => {
     const [sliderPosition, setSliderPosition] = useState(50);
@@ -253,22 +256,22 @@ const BeforeAfterSlider = () => {
                 onMouseMove={handleMove}
                 onTouchMove={handleMove}
             >
-                {/* 1. After 이미지 (베이스 - 시공 후) */}
+                {/* 1. After 이미지 */}
                 <img 
                     src={AFTER_IMAGE_URL} 
-                    alt="시공 후" 
+                    alt="After" 
                     className="absolute inset-0 w-full h-full object-cover" 
                 />
                 <div className="absolute top-4 right-4 bg-indigo-600 text-white text-xs font-bold px-2 py-1 rounded-md shadow-md z-10">After</div>
 
-                {/* 2. Before 이미지 (클리핑 - 시공 전) */}
+                {/* 2. Before 이미지 */}
                 <div 
                     className="absolute inset-0 w-full h-full overflow-hidden"
                     style={{ width: `${sliderPosition}%`, borderRight: '2px solid white' }}
                 >
                     <img 
                         src={BEFORE_IMAGE_URL} 
-                        alt="시공 전" 
+                        alt="Before" 
                         className="absolute inset-0 w-full h-full object-cover max-w-none" 
                         style={{ width: '100%', maxWidth: 'none' }} 
                     />
@@ -291,7 +294,7 @@ const BeforeAfterSlider = () => {
 };
 
 // =================================================================
-// ⭐️ [수정] 실시간 예약 알림 (Ticker) - static 위치로 변경
+// ⭐️ [수정] 실시간 예약 알림 (Ticker) - 디자인 변경
 // =================================================================
 const ReservationTicker = () => {
     const messages = [
@@ -317,11 +320,11 @@ const ReservationTicker = () => {
     }, []);
 
     return (
-        // ⭐️ 수정: fixed 제거하고 일반 정적(Static) 컴포넌트로 스타일 변경 ⭐️
-        <div className="w-full flex justify-center mt-6 mb-8">
-             <div className={`bg-slate-100 text-slate-600 px-4 py-2 rounded-full shadow-sm flex items-center gap-2 transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
-                <Bell size={14} className="text-indigo-500" />
-                <span className="text-xs font-medium">{messages[index]}</span>
+        // ⭐️ 수정: 헤더 하단에 부착되는 바(Bar) 형태로 변경 ⭐️
+        <div className="w-full bg-indigo-50 border-t border-indigo-100/50 py-2 flex justify-center items-center overflow-hidden relative">
+             <div className={`flex items-center gap-2 transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+                <Bell size={12} className="text-indigo-600 animate-pulse" />
+                <span className="text-xs font-bold text-indigo-800 truncate">{messages[index]}</span>
             </div>
         </div>
     );
@@ -341,7 +344,6 @@ const PackageToast = ({ isVisible, onClose, label }) => {
     if (!isVisible) return null;
 
     return (
-        // Ticker가 하단으로 이동했으므로 Toast 위치는 원래대로 좀 더 내려도 됨 (bottom-[110px])
         <div className="fixed bottom-[110px] left-1/2 -translate-x-1/2 z-50 w-full max-w-sm px-4">
             <div className="bg-indigo-600 text-white p-4 rounded-2xl shadow-2xl flex items-center justify-between animate-slide-up border border-indigo-400">
                 <div className="flex items-center gap-3">
@@ -1186,7 +1188,8 @@ export default function App() {
             <GlobalStyles />
 
             <header className="glass-header sticky top-0 z-30 transition-all duration-300">
-                <div className="px-5 py-4 flex items-center justify-between max-w-lg mx-auto">
+                {/* 상단 메인 바 */}
+                <div className="px-5 py-4 flex items-center justify-between max-w-lg mx-auto w-full">
                     <div className="flex items-center gap-2">
                         <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-black shadow-lg shadow-indigo-200">
                              M
@@ -1202,6 +1205,9 @@ export default function App() {
                         </button>
                     </div>
                 </div>
+                
+                {/* ⭐️ [수정] 헤더 내부에 통합된 알림 바 (Notification Bar) ⭐️ */}
+                <ReservationTicker />
             </header>
 
             <main className="max-w-lg mx-auto p-5 space-y-8">
@@ -1271,7 +1277,7 @@ export default function App() {
                         ))}
                     </div>
 
-                    <button onClick={() => setShowMaterialModal(true)} className="w-full mt-6 py-4 bg-white border border-slate-200 text-slate-700 rounded-2xl font-bold text-sm hover:bg-slate-50 transition shadow-sm flex items-center justify-center gap-2">
+                    <button onClick={() => setShowMaterialModal(true)} className="w-full mt-6 py-4 bg-white border border-slate-200 text-slate-600 rounded-2xl font-bold text-sm hover:bg-slate-50 transition shadow-sm flex items-center justify-center gap-2">
                         <HelpCircle size={18} className='text-indigo-500'/> 🤔 폴리 vs 에폭시, 어떤게 더 좋을까요?
                     </button>
 
@@ -1346,9 +1352,6 @@ export default function App() {
                     <Star size={20} className="text-amber-400" fill="currentColor" />
                     실제 고객 후기 보러가기 (5.0점)
                 </button>
-
-                {/* ⭐️ [신규] 실시간 예약 알림 (Ticker) - 하단 고정 해제, 맨 아래 배치 ⭐️ */}
-                <ReservationTicker />
             </main>
 
             <PackageToast isVisible={showToast} onClose={handleCloseToast} label={calculation.label} />
