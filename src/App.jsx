@@ -370,12 +370,7 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
 
                 <div className="p-4 overflow-y-auto max-h-[65vh] bg-slate-50">
                     <div ref={quoteRef} className="bg-white rounded-2xl shadow-sm p-5 space-y-4 border border-slate-100">
-                        {/* 헤더 단순화: 제목과 날짜를 한 줄로 */}
-                        <div className='flex justify-between items-baseline border-b border-slate-100 pb-3'>
-                            <h4 className='font-bold text-slate-800 tracking-tight'>줄눈의미학 예상 견적</h4>
-                            <span className="text-[11px] text-slate-400">{new Date().toLocaleDateString()} 기준</span>
-                        </div>
-
+                        
                         {/* 상단 요약 박스: 높이를 줄이고 가로 배치로 공간 효율화 + 애니메이션 추가 + 체크박스 분리 */}
                         <div className='bg-slate-50 rounded-xl p-4 border border-slate-200'>
                              <div className='flex justify-between items-start mb-2'>
@@ -411,10 +406,6 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
 
                         {packageItems.length > 0 && (
                             <div>
-                                <div className='flex justify-between text-xs font-bold text-slate-400 mb-2 px-1'>
-                                    <span>시공 항목</span>
-                                    <span>내역</span>
-                                </div>
                                 <div className='space-y-2'>
                                     {packageItems.map((item, index) => {
                                         const areaInfo = ALL_AREAS.find(a => a.id === item.id);
@@ -479,6 +470,9 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
                                     {price.toLocaleString()}
                                 </span>
                                 <span className="text-base font-bold text-slate-600">원</span>
+                            </div>
+                            <div className="text-[9px] text-slate-400 text-right mt-1 leading-tight">
+                                * 타일크기(300/600각) 기준 · 재시공(구축) 별도 문의
                             </div>
                         </div>
                     </div>
@@ -1043,7 +1037,7 @@ export default function App() {
                 isFreeService: isFreeServiceItem,
                 isPackageItem: isPackageItemFlag || !isFreeServiceItem && (packageCount > 0 || isPackageActive || finalDiscount > 0),
                 isDiscount: false,
-                materialLabel: ['silicon_bathtub', 'silicon_sink', 'silicon_living_baseboard'].includes(area.id) ? 'Silicon' : (areaMatId === 'poly' ? 'Poly' : 'Epoxy')
+                materialLabel: ['silicon_bathtub', 'silicon_sink', 'silicon_living_baseboard'].includes(area.id) ? '실리콘' : (areaMatId === 'poly' ? '폴리아스파틱' : '에폭시')
             });
         });
 
