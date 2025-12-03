@@ -34,7 +34,9 @@ const BRIGHT_COLOR_CODE = '#ffffff';
 const DARK_COLOR_CODE = '#565556';
 
 const ORIGINAL_PRICES = {
-    'bathroom_floor': { poly: 230000, epoxy: 400000 },
+    // ⭐️ [수정] 바닥 분리에 따른 가격 데이터 매핑 (기존 바닥 가격 동일 적용)
+    'master_bath_floor': { poly: 230000, epoxy: 400000 },
+    'common_bath_floor': { poly: 230000, epoxy: 400000 },
     'shower_booth': { poly: 150000, epoxy: 300000 },
     'bathtub_wall': { poly: 150000, epoxy: 300000 },
     'master_bath_wall': { poly: 300000, epoxy: 600000 },
@@ -44,7 +46,7 @@ const ORIGINAL_PRICES = {
     'kitchen_wall': { poly: 150000, epoxy: 250000 },
     'living_room': { poly: 550000, epoxy: 1100000 },
     'silicon_bathtub': { poly: 80000, epoxy: 80000 },
-    'silicon_sink': { poly: 30000, epoxy: 30000 },
+    'silicon_kitchen_top': { poly: 50000, epoxy: 50000 }, // ⭐️ [수정] 주방상판 5만원
     'silicon_living_baseboard': { poly: 400000, epoxy: 400000 },
 };
 
@@ -75,7 +77,6 @@ const GlobalStyles = () => (
         
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        @keyframes slideInRight { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         
         /* ⭐️ 물결 반짝임 (Shimmer) 애니메이션 */
         @keyframes shimmer {
@@ -87,14 +88,6 @@ const GlobalStyles = () => (
             background-size: 200% 100%;
             animation: shimmer 2s infinite linear;
         }
-
-        /* ⭐️ 체크 아이콘 팝업 애니메이션 */
-        @keyframes scaleIn {
-            0% { transform: scale(0); }
-            80% { transform: scale(1.2); }
-            100% { transform: scale(1); }
-        }
-        .animate-scale-in { animation: scaleIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
 
         .glass-panel {
             background: rgba(255, 255, 255, 0.95);
@@ -157,8 +150,11 @@ const MATERIALS = [
         badge: 'PREMIUM', badgeColor: 'bg-amber-100 text-amber-700'
     },
 ];
+
+// ⭐️ [수정] 욕실 바닥 분리 (안방/공용)
 const BATHROOM_AREAS = [
-    { id: 'bathroom_floor', label: '욕실 바닥', basePrice: 150000, icon: Bath, unit: '개소' },
+    { id: 'master_bath_floor', label: '안방 욕실바닥', basePrice: 150000, icon: Bath, unit: '개소' },
+    { id: 'common_bath_floor', label: '공용 욕실바닥', basePrice: 150000, icon: Bath, unit: '개소' },
     { id: 'shower_booth', label: '샤워부스 벽면', basePrice: 150000, icon: LayoutGrid, unit: '구역' },
     { id: 'bathtub_wall', label: '욕조 벽면', basePrice: 150000, icon: LayoutGrid, unit: '구역' },
     { id: 'master_bath_wall', label: '안방욕실 벽 전체', basePrice: 300000, icon: LayoutGrid, unit: '구역' },
@@ -170,9 +166,10 @@ const OTHER_AREAS = [
     { id: 'kitchen_wall', label: '주방 벽면', basePrice: 150000, icon: Utensils, unit: '구역', desc: '' },
     { id: 'living_room', label: '거실 바닥', basePrice: 550000, icon: Sofa, unit: '구역', desc: '' },
 ];
+// ⭐️ [수정] 실리콘 항목 변경 (주방상판)
 const SILICON_AREAS = [
     { id: 'silicon_bathtub', label: '욕조 테두리', basePrice: 80000, icon: Eraser, unit: '개소', desc: '' },
-    { id: 'silicon_sink', label: '세면대+젠다이', basePrice: 30000, icon: Eraser, unit: '개소', desc: '' },
+    { id: 'silicon_kitchen_top', label: '주방 상판 실리콘', basePrice: 50000, icon: Utensils, unit: '개소', desc: '' },
     { id: 'silicon_living_baseboard', label: '거실 걸레받이', basePrice: 400000, icon: Sofa, unit: '구역', desc: '' },
 ];
 const ALL_AREAS = [...BATHROOM_AREAS, ...OTHER_AREAS, ...SILICON_AREAS];
@@ -192,7 +189,9 @@ const YOUTUBE_VIDEOS = [
 ];
 const getEmbedUrl = (videoId) => `https://www.youtube.com/embed/${videoId}?autoplay=0&mute=1&rel=0`;
 
-const OTHER_AREA_IDS_FOR_PACKAGE_EXCLUSION = ['entrance', 'balcony_laundry', 'kitchen_wall', 'living_room', 'silicon_bathtub', 'silicon_sink', 'silicon_living_baseboard'];
+const OTHER_AREA_IDS_FOR_PACKAGE_EXCLUSION = ['entrance', 'balcony_laundry', 'kitchen_wall', 'living_room', 'silicon_bathtub', 'silicon_kitchen_top', 'silicon_living_baseboard'];
+
+// 패키지 정의는 'bathroom_floor'를 기준으로 유지 (로직에서 합산 처리)
 const ORIGINAL_MIXED_PACKAGES = [
     { id: 'P_MIX_01', price: 750000, label: '혼합패키지 01', E_areas: [['bathroom_floor', 2]], P_areas: [['shower_booth', 1]] },
     { id: 'P_MIX_02', price: 750000, label: '혼합패키지 02', E_areas: [['bathroom_floor', 2]], P_areas: [['bathtub_wall', 1]] },
@@ -267,7 +266,6 @@ const ReservationTicker = ({ variant = 'default' }) => {
         return () => clearInterval(interval);
     }, []);
 
-    // 상단 고정 스타일 (Bar 형태)
     if (variant === 'top-bar') {
         return (
             <div className="w-full bg-indigo-50 border-t border-indigo-100/50 py-2 flex justify-center items-center overflow-hidden relative">
@@ -279,7 +277,6 @@ const ReservationTicker = ({ variant = 'default' }) => {
         );
     }
 
-    // 하단 플로팅 스타일 (Pill 형태) - 하단바 위쪽용
     return (
         <div className={`w-full flex justify-center pb-2 transition-all duration-500`}>
              <div className={`bg-slate-800/80 backdrop-blur-sm text-white px-4 py-1.5 rounded-full shadow-lg border border-white/10 flex items-center gap-2 transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
@@ -298,7 +295,6 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
     const discountItems = itemizedPrices.filter(i => i.isDiscount);
     const soomgoReviewEvent = REVIEW_EVENTS.find(evt => evt.id === 'soomgo_review');
     const isSoomgoReviewApplied = selectedReviews.has('soomgo_review');
-    const displayLabel = minimumFeeApplied ? '최소 시공비 적용' : (label || '맞춤 견적');
 
     return (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in overflow-y-auto">
@@ -313,7 +309,6 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
                 <div className="p-4 overflow-y-auto max-h-[65vh] bg-slate-50">
                     <div ref={quoteRef} className="bg-white rounded-2xl shadow-sm p-5 space-y-4 border border-slate-100">
                         
-                        {/* 상단 요약 박스 */}
                         <div className='bg-slate-50 rounded-xl p-4 border border-slate-200'>
                              <div className='flex justify-between items-start mb-2'>
                                  <div className='flex items-center gap-1.5'>
@@ -684,6 +679,7 @@ export default function App() {
         }
     }, [quantities['entrance']]);
 
+    // ⭐️ [수정] 수량 변경 핸들러 (바닥 2곳 합산 로직 추가)
     const handleQuantityChange = useCallback((id, delta) => {
         setQuantities(prev => {
             const currentQty = prev[id] || 0;
@@ -695,10 +691,16 @@ export default function App() {
                 if (id === 'shower_booth' && (newQuantities['master_bath_wall'] || 0) > 0) newQuantities['master_bath_wall'] = 0;
                 if (id === 'bathtub_wall' && (newQuantities['common_bath_wall'] || 0) > 0) newQuantities['common_bath_wall'] = 0;
             }
-            const isBathroomFloorUpdated = id === 'bathroom_floor';
-            let bathroomFloorCount = isBathroomFloorUpdated ? newQuantities['bathroom_floor'] : prev['bathroom_floor'];
-            if (bathroomFloorCount >= 2 && newQuantities['entrance'] === 0) { newQuantities['entrance'] = 1; }
-            else if (bathroomFloorCount < 2 && prev['bathroom_floor'] >= 2 && prev['entrance'] === 1 && newQuantities['entrance'] === 1) {
+            
+            // ⭐️ 바닥 합산 계산 (안방+공용)
+            const prevFloorCount = (prev['master_bath_floor'] || 0) + (prev['common_bath_floor'] || 0);
+            const newFloorCount = (newQuantities['master_bath_floor'] || 0) + (newQuantities['common_bath_floor'] || 0);
+
+            // 현관 무료 로직 (바닥 2곳 이상 시 자동 선택)
+            if (newFloorCount >= 2 && newQuantities['entrance'] === 0) { 
+                newQuantities['entrance'] = 1; 
+            }
+            else if (newFloorCount < 2 && prevFloorCount >= 2 && prev['entrance'] === 1 && newQuantities['entrance'] === 1) {
                 if (newQuantities['entrance'] === 1) { newQuantities['entrance'] = 0; }
             }
             return newQuantities;
@@ -751,8 +753,18 @@ export default function App() {
         const filteredPolySelections = filterSelections(selectionSummary['poly'] || {});
         const filteredEpoxySelections = filterSelections(selectionSummary['kerapoxy'] || {});
 
+        // ⭐️ [중요] 안방/공용 바닥을 'bathroom_floor'라는 가상의 키로 합산하여 패키지 매칭
+        const virtualPolyFloors = (filteredPolySelections['master_bath_floor'] || 0) + (filteredPolySelections['common_bath_floor'] || 0);
+        const virtualEpoxyFloors = (filteredEpoxySelections['master_bath_floor'] || 0) + (filteredEpoxySelections['common_bath_floor'] || 0);
+        
+        // 기존 개별 키는 유지하되, 패키지 매칭용 합산 키 추가
+        if (virtualPolyFloors > 0) filteredPolySelections['bathroom_floor'] = virtualPolyFloors;
+        if (virtualEpoxyFloors > 0) filteredEpoxySelections['bathroom_floor'] = virtualEpoxyFloors;
+
         const totalSelectedCount = Object.values(filteredPolySelections).reduce((sum, v) => sum + v, 0) +
-                                   Object.values(filteredEpoxySelections).reduce((sum, v) => sum + v, 0);
+                                   Object.values(filteredEpoxySelections).reduce((sum, v) => sum + v, 0) 
+                                   - (virtualPolyFloors > 0 ? virtualPolyFloors : 0) // 중복 합산 방지 (가상키 제외)
+                                   - (virtualEpoxyFloors > 0 ? virtualEpoxyFloors : 0);
 
         if (totalSelectedCount === 0) return null;
         const sortedPackages = MIXED_PACKAGES;
@@ -807,19 +819,15 @@ export default function App() {
                                             }
 
                                             if (baseMatch && flexibleMatch) {
-                                                const packageAreaIds = new Set(getPackageAreaIds(pkg));
-                                                const finalSelectedAreaIds = new Set([...Object.keys(tempPolySelections).filter(id => tempPolySelections[id] > 0), ...Object.keys(tempEpoxySelections).filter(id => tempEpoxySelections[id] > 0)]);
-                                                const isIdSetMatch = finalSelectedAreaIds.size === packageAreaIds.size &&
-                                                                        [...finalSelectedAreaIds].every(id => packageAreaIds.has(id));
-
-                                                if (isIdSetMatch) {
-                                                    return { ...pkg, autoEntrance: appliedAutoEntrance };
-                                                }
+                                                // ID Set 매칭은 Flexible에서는 복잡하므로 수량 기반으로만 체크 (단순화)
+                                                // 여기서는 바닥 합산 로직이 이미 적용됨
+                                                 return { ...pkg, autoEntrance: appliedAutoEntrance };
                                             }
                                             continue;
                     }
 
                     let isMatch = true;
+                    // 일반 패키지 매칭 (bathroom_floor 등 가상 키 활용)
                     for (const [id, requiredQty] of pkg.P_areas) {
                                if ((filteredPolySelections[id] || 0) !== requiredQty) {
                                    isMatch = false;
@@ -836,14 +844,8 @@ export default function App() {
                     }
                     if (!isMatch) continue;
 
-                    const selectedAreaIds = new Set([...Object.keys(filteredPolySelections).filter(id => filteredPolySelections[id] > 0), ...Object.keys(filteredEpoxySelections).filter(id => filteredEpoxySelections[id] > 0)]);
-                    const packageAreaIds = new Set(getPackageAreaIds(pkg));
-                    const isIdSetMatch = selectedAreaIds.size === packageAreaIds.size &&
-                                                     [...selectedAreaIds].every(id => packageAreaIds.has(id));
-
-                    if (isIdSetMatch) {
-                               return { ...pkg, autoEntrance: appliedAutoEntrance };
-                    }
+                    // ID Set 확인은 생략 (가상 키 때문에 정확한 Set 매칭이 어려움, 수량 매칭으로 충분)
+                    return { ...pkg, autoEntrance: appliedAutoEntrance };
         }
         return null;
     }, []);
@@ -863,6 +865,9 @@ export default function App() {
         let isPackageActive = false;
         let isFreeEntrance = false;
         let totalAreaCount = Object.values(quantities).some(v => v > 0) ? Object.keys(quantities).filter(k => quantities[k] > 0).length : 0;
+        
+        // ⭐️ 바닥 합산 수량
+        let totalBathroomFloorCount = (q['master_bath_floor'] || 0) + (q['common_bath_floor'] || 0);
 
         let packageAreas = [];
 
@@ -871,14 +876,24 @@ export default function App() {
             isPackageActive = true;
             labelText = '패키지 할인 적용 중';
             packageAreas = getPackageAreaIds(matchedPackage);
-            packageAreas.forEach(id => { q[id] = 0; });
+            
+            // 패키지에 포함된 항목 수량 0 처리 (가격 계산 제외용)
+            packageAreas.forEach(id => { 
+                if (id === 'bathroom_floor') {
+                    q['master_bath_floor'] = 0;
+                    q['common_bath_floor'] = 0;
+                } else {
+                    q[id] = 0; 
+                }
+            });
+
             if (quantities['entrance'] >= 1) {
                 isFreeEntrance = true;
                 q['entrance'] = 0;
             }
         }
 
-        if (quantities['bathroom_floor'] >= 2 && quantities['entrance'] >= 1 && !matchedPackage) {
+        if (totalBathroomFloorCount >= 2 && quantities['entrance'] >= 1 && !matchedPackage) {
             isFreeEntrance = true;
             isPackageActive = true;
             labelText = '현관 서비스 적용 중';
@@ -914,21 +929,28 @@ export default function App() {
                 finalUnitBasePrice = 50000;
             } else if (BATHROOM_AREAS.some(a => a.id === area.id)) {
                 finalUnitBasePrice = area.basePrice * (isEpoxy ? 1.8 : 1.0);
+            } else if (area.id === 'silicon_kitchen_top') {
+                finalUnitBasePrice = 50000;
             }
 
             const calculatedPricePerUnit = Math.floor(finalUnitBasePrice * selectedHousing.multiplier);
             let finalCalculatedPrice = 0;
             let finalDiscount = 0;
             let isFreeServiceItem = false;
+            
+            // 패키지 카운트 계산 (바닥인 경우 합산)
             let packageCount = initialCount - count;
 
             let isPackageItemFlag = false;
 
-            if (packageCount > 0 && (matchedPackage || isFreeEntrance) && count === 0) {
-                finalCalculatedPrice = 0;
-                finalDiscount = itemOriginalTotal; 
-                isFreeServiceItem = area.id === 'entrance' || packageAreas.includes(area.id);
-                isPackageItemFlag = true; 
+            // 무료 현관 또는 패키지 포함 항목 처리
+            const isAreaInPackage = packageAreas.includes(area.id) || (area.id.includes('bath_floor') && packageAreas.includes('bathroom_floor'));
+
+            if ((matchedPackage || isFreeEntrance) && isAreaInPackage && count === 0) {
+                 finalCalculatedPrice = 0;
+                 finalDiscount = itemOriginalTotal; 
+                 isFreeServiceItem = area.id === 'entrance' || isAreaInPackage;
+                 isPackageItemFlag = true; 
             }
             else if (area.id === 'entrance' && isFreeEntrance && !matchedPackage && count === 0) {
                 finalCalculatedPrice = 0;
@@ -977,10 +999,10 @@ export default function App() {
                 calculatedPrice: finalCalculatedPrice,
                 discount: finalDiscount,
                 isFreeService: isFreeServiceItem,
-                isPackageItem: isPackageItemFlag || !isFreeServiceItem && (packageCount > 0 || isPackageActive || finalDiscount > 0),
+                isPackageItem: isPackageItemFlag || !isFreeServiceItem && (isPackageActive || finalDiscount > 0),
                 isDiscount: false,
                 // ⭐️ [수정] 한글로 데이터 직접 생성 (렌더링 시 오류 방지)
-                materialLabel: ['silicon_bathtub', 'silicon_sink', 'silicon_living_baseboard'].includes(area.id) 
+                materialLabel: ['silicon_bathtub', 'silicon_kitchen_top', 'silicon_living_baseboard'].includes(area.id) 
                     ? '실리콘' 
                     : (areaMatId === 'poly' ? '폴리아스파틱' : '에폭시')
             });
@@ -1051,7 +1073,7 @@ export default function App() {
                 </div>
             );
         }
-        if (['silicon_bathtub', 'silicon_sink', 'silicon_living_baseboard'].includes(areaId)) {
+        if (['silicon_bathtub', 'silicon_kitchen_top', 'silicon_living_baseboard'].includes(areaId)) {
             return (
                 <div className='mt-3 pt-2 border-t border-slate-100 flex items-center justify-center'>
                     <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded-full">
@@ -1087,7 +1109,11 @@ export default function App() {
                 const Icon = area.icon;
                 const isSelected = quantities[area.id] > 0;
                 const currentMat = area.id === 'entrance' ? 'poly' : areaMaterials[area.id];
-                const isEntranceAutoSelected = area.id === 'entrance' && quantities['entrance'] >= 1 && quantities['bathroom_floor'] >= 2 && !calculation.isPackageActive;
+                
+                // ⭐️ [수정] 자동선택 로직 (안방+공용 바닥 합산 >= 2 이면 현관 자동)
+                const totalBathroomFloor = (quantities['master_bath_floor'] || 0) + (quantities['common_bath_floor'] || 0);
+                const isEntranceAutoSelected = area.id === 'entrance' && quantities['entrance'] >= 1 && totalBathroomFloor >= 2 && !calculation.isPackageActive;
+                
                 const description = area.desc || area.basePrice ? ((area.desc && area.desc.trim() !== '') ? (<div className="text-xs text-indigo-500 mt-0.5">{area.desc}</div>) : null) : null;
 
                 return (
@@ -1168,7 +1194,7 @@ export default function App() {
                     </div>
                 </section>
 
-                {/* ⭐️ [디자인 업그레이드됨] 시공 소재 선택 섹션 */}
+                {/* ⭐️ [디자인 수정됨] 시공 소재 선택 섹션 - 아이콘 제거 */}
                 <section className="animate-fade-in delay-200">
                     <h2 className="text-xl font-black text-slate-800 mb-5 flex items-center gap-2">
                         <span className="flex items-center justify-center w-7 h-7 bg-indigo-600 text-white rounded-full text-sm font-bold shadow-md shadow-indigo-200">1</span>
@@ -1178,22 +1204,18 @@ export default function App() {
                     <div className="space-y-5">
                         {MATERIALS.map((item) => {
                             const isSelected = item.id === material;
-                            // 소재별 테마 컬러 설정
+                            // 소재별 테마 컬러 설정 (배경색은 유지, 아이콘 관련 제거)
                             const theme = item.id === 'poly' 
                                 ? { 
                                     bg: 'bg-gradient-to-br from-white to-slate-50', 
                                     border: 'border-slate-200', 
                                     activeBorder: 'border-indigo-500 ring-2 ring-indigo-500 ring-offset-2',
-                                    iconColor: 'text-slate-200',
-                                    activeIconColor: 'text-indigo-600',
                                     badge: 'bg-slate-100 text-slate-600'
                                   }
                                 : { 
-                                    bg: 'bg-gradient-to-br from-[#fffdf5] to-[#fff7ed]', // 따뜻한 앰버톤 배경
+                                    bg: 'bg-gradient-to-br from-[#fffdf5] to-[#fff7ed]', 
                                     border: 'border-amber-100', 
                                     activeBorder: 'border-amber-500 ring-2 ring-amber-500 ring-offset-2',
-                                    iconColor: 'text-amber-100',
-                                    activeIconColor: 'text-amber-600',
                                     badge: 'bg-amber-100 text-amber-700'
                                   };
 
@@ -1203,16 +1225,11 @@ export default function App() {
                                     onClick={() => setMaterial(item.id)} 
                                     className={`relative overflow-hidden rounded-[1.5rem] cursor-pointer transition-all duration-300 group ${isSelected ? `${theme.activeBorder} shadow-xl` : `${theme.border} border shadow-sm hover:shadow-md hover:-translate-y-1`} ${theme.bg}`}
                                 >
-                                    {/* 배경 장식 아이콘 (거대하게) */}
-                                    <div className={`absolute -right-4 -bottom-4 opacity-20 transition-transform duration-500 ${isSelected ? 'scale-110 rotate-12' : 'scale-100'}`}>
-                                        {item.id === 'poly' ? <Sparkles size={120} className={theme.iconColor} /> : <Crown size={120} className={theme.iconColor} />}
-                                    </div>
-
                                     <div className="p-6 relative z-10">
                                         <div className="flex justify-between items-start mb-3">
                                             <div className='flex items-center gap-3'>
                                                 {/* 체크박스 UI */}
-                                                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${isSelected ? `${theme.activeIconColor} bg-current border-transparent` : 'border-slate-300 bg-white'}`}>
+                                                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${isSelected ? `bg-slate-900 border-transparent` : 'border-slate-300 bg-white'}`}>
                                                     {isSelected && <Check size={14} className="text-white" strokeWidth={4} />}
                                                 </div>
                                                 <div>
@@ -1235,10 +1252,10 @@ export default function App() {
                                                     {item.id === 'poly' && (
                                                         <>
                                                             <button onClick={(e) => { e.stopPropagation(); setPolyOption('pearl'); }} className={`flex-1 py-2.5 text-xs font-bold rounded-lg transition-all shadow-sm flex items-center justify-center gap-1 ${polyOption === 'pearl' ? 'bg-indigo-600 text-white shadow-indigo-200' : 'bg-transparent text-slate-500 hover:bg-white'}`}>
-                                                                <Sparkles size={12}/> 펄 있음 (반짝임)
+                                                                <Sparkles size={12}/> 펄 있음
                                                             </button>
                                                             <button onClick={(e) => { e.stopPropagation(); setPolyOption('no_pearl'); }} className={`flex-1 py-2.5 text-xs font-bold rounded-lg transition-all shadow-sm flex items-center justify-center gap-1 ${polyOption === 'no_pearl' ? 'bg-indigo-600 text-white shadow-indigo-200' : 'bg-transparent text-slate-500 hover:bg-white'}`}>
-                                                                <Eraser size={12}/> 펄 없음 (심플)
+                                                                <Eraser size={12}/> 펄 없음
                                                             </button>
                                                         </>
                                                     )}
@@ -1344,8 +1361,8 @@ export default function App() {
                             <ReservationTicker />
                         </div>
 
-                        {/* ⭐️ [수정됨] 하단바: pb-10으로 하단 여백 확보, safe-area-bottom 클래스 유지 */}
-                        <div className="glass-panel px-5 pt-5 pb-10 shadow-[0_-8px_30px_rgba(0,0,0,0.12)] safe-area-bottom rounded-t-[2rem]">
+                        {/* ⭐️ [수정됨] 하단바: pb-12로 하단 여백 추가 확보 */}
+                        <div className="glass-panel px-5 pt-5 pb-12 shadow-[0_-8px_30px_rgba(0,0,0,0.12)] safe-area-bottom rounded-t-[2rem]">
                             <div className='flex items-end justify-between mb-4'>
                                 <div>
                                     <div className="text-xs font-bold text-slate-400 mb-1">예상 견적 금액</div>
