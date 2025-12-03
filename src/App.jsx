@@ -2,7 +2,7 @@ import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react'
 import html2canvas from 'html2canvas';
 import {
     Calculator, Home, Bath, DoorOpen, Utensils, LayoutGrid,
-    CheckCircle2, Info, RefreshCw, Phone, Sparkles, Hammer, Sofa, Palette, Crown, Gift, Eraser, Star, X, ChevronDown, HelpCircle, Zap, TrendingUp, Clock, Image as ImageIcon, Download, DollarSign, List, Layers, Check
+    CheckCircle2, Info, RefreshCw, Phone, Sparkles, Hammer, Sofa, Palette, Crown, Gift, Eraser, Star, X, ChevronDown, HelpCircle, Zap, TrendingUp, Clock, Image as ImageIcon, Download, DollarSign, List, Layers, Check, ShieldCheck
 } from 'lucide-react';
 
 // =================================================================
@@ -125,7 +125,7 @@ const GlobalStyles = () => (
     `}</style>
 );
 
-// 데이터셋 유지
+// 데이터셋 유지 (HOUSING_TYPES는 더 이상 UI에 노출되지 않으나 계산 로직 호환성을 위해 유지)
 const HOUSING_TYPES = [
     { id: 'new', label: '신축 아파트 (입주예정)', multiplier: 1.0 },
     { id: 'old', label: '구축/거주 중', multiplier: 1.0 },
@@ -568,7 +568,8 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
 // ⭐️ [App Main] ⭐️
 export default function App() {
     // ... (기존 state 로직 유지) ...
-    const [housingType, setHousingType] = useState('new');
+    // housingType state는 유지하되 UI에서 제어하지 않음 (기본값 'new' 유지하여 로직 호환성 확보)
+    const [housingType, setHousingType] = useState('new'); 
     const [material, setMaterial] = useState('poly');
     const [polyOption, setPolyOption] = useState('pearl');
     const [epoxyOption, setEpoxyOption] = useState('kerapoxy');
@@ -1080,32 +1081,25 @@ export default function App() {
                     </div>
                 </section>
 
-                {/* 1. 현장 유형 */}
+                {/* ⭐️ [수정된 부분] 1. 신뢰 강조 배너 (기존 현장 유형 선택 대체) ⭐️ */}
                 <section className="animate-fade-in delay-100">
-                     <h2 className="text-xl font-black text-slate-800 mb-5 flex items-center gap-2">
-                        <span className="flex items-center justify-center w-7 h-7 bg-indigo-100 text-indigo-600 rounded-full text-sm font-bold">1</span>
-                        현장 유형 선택
-                    </h2>
-                    <div className="grid grid-cols-2 gap-4">
-                        {HOUSING_TYPES.map((type) => (
-                            <button
-                                key={type.id}
-                                onClick={() => setHousingType(type.id)}
-                                className={`p-5 rounded-2xl text-left transition-all duration-300 card-shadow border ${housingType === type.id ? 'bg-indigo-600 text-white border-indigo-600 shadow-xl shadow-indigo-200 ring-2 ring-offset-2 ring-indigo-600' : 'bg-white text-slate-500 border-transparent hover:bg-white hover:text-slate-800'}`}
-                            >
-                                <div className="text-base font-bold mb-1">{type.label}</div>
-                                <div className={`text-xs ${housingType === type.id ? 'text-indigo-200' : 'text-slate-400'}`}>
-                                    {type.id === 'new' ? '입주 전 상태' : '거주 중/구축'}
-                                </div>
-                            </button>
-                        ))}
+                    <div className="bg-white rounded-[1.5rem] p-6 shadow-xl shadow-slate-200/50 border border-slate-100 flex items-start gap-4">
+                        <div className="p-3 bg-indigo-50 rounded-2xl text-indigo-600 flex-shrink-0">
+                            <ShieldCheck size={28} strokeWidth={2} />
+                        </div>
+                        <div>
+                            <h2 className="text-lg font-black text-slate-900 mb-1">신축·구축 동일 정가제</h2>
+                            <p className="text-sm text-slate-500 leading-relaxed font-medium">
+                                현장 난이도가 높은 구축이라도 추가 비용을 요구하지 않습니다. 줄눈의미학은 모든 고객님께 <span className="text-indigo-600 font-bold underline underline-offset-2">투명한 가격</span>을 약속드립니다.
+                            </p>
+                        </div>
                     </div>
                 </section>
 
                 {/* 2. 소재 선택 */}
                 <section className="animate-fade-in delay-200">
                      <h2 className="text-xl font-black text-slate-800 mb-5 flex items-center gap-2">
-                        <span className="flex items-center justify-center w-7 h-7 bg-indigo-100 text-indigo-600 rounded-full text-sm font-bold">2</span>
+                        <span className="flex items-center justify-center w-7 h-7 bg-indigo-100 text-indigo-600 rounded-full text-sm font-bold">1</span>
                         시공 소재 선택
                     </h2>
                     <div className="space-y-4">
@@ -1162,7 +1156,7 @@ export default function App() {
                 {/* 3. 시공 범위 */}
                 <section className="animate-fade-in delay-300">
                      <h2 className="text-xl font-black text-slate-800 mb-5 flex items-center gap-2">
-                        <span className="flex items-center justify-center w-7 h-7 bg-indigo-100 text-indigo-600 rounded-full text-sm font-bold">3</span>
+                        <span className="flex items-center justify-center w-7 h-7 bg-indigo-100 text-indigo-600 rounded-full text-sm font-bold">2</span>
                         시공 범위 선택
                     </h2>
                     
@@ -1178,7 +1172,7 @@ export default function App() {
                  {/* 4. 실리콘 */}
                  <section className="animate-fade-in delay-500">
                      <h2 className="text-xl font-black text-slate-800 mb-5 flex items-center gap-2">
-                        <span className="flex items-center justify-center w-7 h-7 bg-indigo-100 text-indigo-600 rounded-full text-sm font-bold">4</span>
+                        <span className="flex items-center justify-center w-7 h-7 bg-indigo-100 text-indigo-600 rounded-full text-sm font-bold">3</span>
                         실리콘 리폼
                     </h2>
                     {renderAreaList(SILICON_AREAS)}
