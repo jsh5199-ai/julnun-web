@@ -245,7 +245,7 @@ const BeforeAfterSlider = () => {
     return (
         <div className="w-full bg-white rounded-[1.5rem] p-6 shadow-xl shadow-slate-200/50 border border-slate-100 animate-fade-in">
             <h3 className="text-lg font-black text-slate-800 mb-4 flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-amber-400" /> 시공 전/후 변화 보기
+                <Sparkles className="h-5 w-5 text-amber-400" /> Before/After
             </h3>
             <div 
                 ref={containerRef}
@@ -295,11 +295,11 @@ const BeforeAfterSlider = () => {
 // =================================================================
 const ReservationTicker = () => {
     const messages = [
-        "방금 서울 강남구 김**님이 견적을 확인했어요",
-        "현재 12명의 고객님이 시공 상담 중입니다",
-        "경기 성남시 이**님이 상담 예약을 신청했습니다",
-        "인천 연수구 박**님이 에폭시 시공을 선택했어요",
-        "10분 전, 최**님이 무료 현관 서비스를 받았어요"
+        "인천 연수구 박**님 12월 22일로 예약 완료",
+        "현재 7명의 고객님이 시공 상담 중입니다",
+        "경기 성남시 이**님 2월 13일로 예약 완료",
+        "인천 연수구 박**님 1월 3일로 예약 완료",
+        "서울 양천구 오**님 12월 14일로 예약 완료"
     ];
     const [index, setIndex] = useState(0);
     const [isVisible, setIsVisible] = useState(true);
