@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 
 // =================================================================
-// ⭐️ 상수 및 데이터
+// ⭐️ 상수 및 데이터 (기존 로직 유지)
 // =================================================================
 const MIN_FEE = 200000;
 const KAKAO_CHAT_URL = 'http://pf.kakao.com/_jAxnYn/chat';
@@ -66,7 +66,7 @@ const mixColors = (color1, color2, weight) => {
 };
 
 // =================================================================
-// ⭐️ [스타일 개선] 애니메이션 및 커스텀 스크롤
+// ⭐️ 스타일 정의
 // =================================================================
 const GlobalStyles = () => (
     <style>{`
@@ -76,7 +76,6 @@ const GlobalStyles = () => (
         
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        @keyframes pulse-soft { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02); } }
         
         .animate-fade-in { animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         .animate-slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
@@ -124,7 +123,6 @@ const GlobalStyles = () => (
     `}</style>
 );
 
-// 데이터셋 유지
 const HOUSING_TYPES = [
     { id: 'new', label: '신축 아파트 (입주예정)', multiplier: 1.0 },
     { id: 'old', label: '구축/거주 중', multiplier: 1.0 },
@@ -136,7 +134,6 @@ const MATERIALS = [
         badge: 'STANDARD', badgeColor: 'bg-slate-100 text-slate-600'
     },
     {
-        // ⭐️ 수정: 케라폭시/에폭시 -> 에폭시로 문구 변경
         id: 'kerapoxy', label: '에폭시', priceMod: 1.8,
         description: '반영구적인 내구성과 고급스러운 무광 텍스처',
         badge: 'PREMIUM', badgeColor: 'bg-amber-100 text-amber-700'
@@ -178,7 +175,6 @@ const YOUTUBE_VIDEOS = [
 const getEmbedUrl = (videoId) => `https://www.youtube.com/embed/${videoId}?autoplay=0&mute=1&rel=0`;
 
 const OTHER_AREA_IDS_FOR_PACKAGE_EXCLUSION = ['entrance', 'balcony_laundry', 'kitchen_wall', 'living_room', 'silicon_bathtub', 'silicon_sink', 'silicon_living_baseboard'];
-// ... (패키지 데이터 상수는 기존 코드와 동일하게 유지)
 const ORIGINAL_MIXED_PACKAGES = [
     { id: 'P_MIX_01', price: 750000, label: '혼합패키지 01', E_areas: [['bathroom_floor', 2]], P_areas: [['shower_booth', 1]] },
     { id: 'P_MIX_02', price: 750000, label: '혼합패키지 02', E_areas: [['bathroom_floor', 2]], P_areas: [['bathtub_wall', 1]] },
@@ -225,7 +221,7 @@ const getPackageAreaIds = (pkg) => [
 ];
 
 // =================================================================
-// [컴포넌트] 디자인 개선
+// [컴포넌트]
 // =================================================================
 
 const PackageToast = ({ isVisible, onClose, label }) => {
@@ -338,7 +334,6 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
                             </div>
                         )}
 
-                        {/* 숨고 리뷰 이벤트 버튼 */}
                         <button
                             onClick={() => toggleReview('soomgo_review')}
                             className={`w-full p-4 rounded-xl border transition-all duration-300 flex items-center justify-between group ${isSoomgoReviewApplied ? 'bg-rose-50 border-rose-200' : 'bg-white border-slate-200 hover:border-slate-300'}`}
@@ -484,7 +479,8 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                 <Palette className="h-5 w-5 text-indigo-500" /> 시공 미리보기 (시뮬레이션)
             </h3>
 
-            <div className="relative rounded-2xl overflow-hidden shadow-2xl border-4 border-white mb-6 bg-slate-100 group">
+            {/* 1. 시뮬레이션 화면 (정보바 제거) */}
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl border-4 border-white mb-4 bg-slate-100 group">
                 <div className="w-full aspect-video relative bg-slate-200">
                     <div className="absolute inset-0" style={{ backgroundImage: `url(${effectiveTileImageURL})`, backgroundSize: 'cover', backgroundPosition: 'center', zIndex: 1 }}></div>
                     <div className="absolute inset-0 opacity-40 mix-blend-overlay" style={{ backgroundImage: 'url(/logo.png)', backgroundSize: '30%', backgroundRepeat: 'repeat', zIndex: 5 }}></div>
@@ -493,23 +489,15 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                     <div className="absolute top-0 bottom-0 left-1/2 shadow-sm" style={{ width: `${GROUT_LINE_WIDTH}px`, backgroundColor: effectiveGroutColor, transform: 'translateX(-50%)', zIndex: 10 }}></div>
                     <div className="absolute left-0 right-0 top-1/2 shadow-sm" style={{ height: `${GROUT_LINE_WIDTH}px`, backgroundColor: effectiveGroutColor, transform: 'translateY(-50%)', zIndex: 10 }}></div>
                 </div>
-
-                {/* 현재 색상 정보 뱃지 */}
-                <div className="absolute bottom-4 left-4 right-4 z-20">
-                     <div className={`p-3 rounded-xl shadow-lg backdrop-blur-md flex items-center justify-between transition-colors duration-300 border border-white/20`} style={{ backgroundColor: isDarkGrout ? 'rgba(30,41,59,0.8)' : 'rgba(255,255,255,0.9)' }}>
-                        <span className={`text-sm font-bold truncate pr-2 ${isDarkGrout ? 'text-white' : 'text-slate-900'}`}>
-                            {baseColorData.label} {brightnessLevel !== 0 && `(${brightnessLevel > 0 ? '+' : ''}${brightnessLevel}%)`}
-                        </span>
-                        <div className="w-6 h-6 rounded-full border border-white/30 shadow-inner" style={{backgroundColor: effectiveGroutColor}}></div>
-                    </div>
-                </div>
             </div>
 
-            <div className='mb-6 p-5 bg-white rounded-2xl border border-slate-100 shadow-sm'>
+            {/* 2. Tone & Mood 슬라이더 (색상 정보 포함) */}
+            <div className='mb-4 p-5 bg-white rounded-2xl border border-slate-100 shadow-sm'>
                 <div className='flex items-center justify-between mb-3'>
-                     <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
-                        <TrendingUp size={12} /> Tone & Mood
-                    </h4>
+                     <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-full border border-slate-200 shadow-sm" style={{backgroundColor: effectiveGroutColor}}></div>
+                        <span className="text-sm font-bold text-slate-800">{baseColorData.label}</span>
+                     </div>
                     <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">
                         {brightnessLevel > 0 ? '밝게' : brightnessLevel < 0 ? '어둡게' : '기본'} {Math.abs(brightnessLevel)}%
                     </span>
@@ -527,6 +515,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                 </div>
             </div>
 
+            {/* 3. 우리집 타일 찍기 버튼 (슬라이더 바로 아래 위치) */}
             <div className='mb-6 flex gap-3'>
                 <input type="file" id="tileFileInput" accept="image/*" onChange={onTileImageUpload} style={{ display: 'none' }} />
                 <label htmlFor="tileFileInput" className="flex-1 py-3 px-4 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold text-sm hover:bg-slate-50 transition cursor-pointer flex items-center justify-center gap-2 shadow-sm">
@@ -539,6 +528,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                 )}
             </div>
 
+            {/* 4. 색상 선택 그리드 */}
             <div className='grid grid-cols-5 gap-3'>
                 {GROUT_COLORS.map((color) => (
                     <button
@@ -567,7 +557,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
 
 // ⭐️ [App Main] ⭐️
 export default function App() {
-    // ... (기존 state 로직 유지) ...
+    // ... (기존 state 및 로직 유지) ...
     const [housingType, setHousingType] = useState('new'); 
     const [material, setMaterial] = useState('poly');
     const [polyOption, setPolyOption] = useState('pearl');
@@ -585,7 +575,7 @@ export default function App() {
     const quoteRef = useRef(null);
     const SOOMGO_REVIEW_URL = 'https://www.soomgo.com/profile/users/10755579?tab=review';
 
-    // ... (기존 useEffect, Handler 로직 유지 - 코드 길이상 생략하지 않고 핵심 로직 포함) ...
+    // (기존 useEffect 및 핸들러들 생략 없이 유지됨 - 이전 코드와 동일)
     useEffect(() => {
         if (quantities['entrance'] > 0 && areaMaterials['entrance'] !== 'poly') {
             setAreaMaterials(prev => ({ ...prev, 'entrance': 'poly' }));
@@ -1093,7 +1083,7 @@ export default function App() {
                             </div>
                         </div>
 
-                        {/* ⭐️ [추가] 기준 타일 사이즈 안내 ⭐️ */}
+                        {/* 견적 기준 안내 */}
                         <div className="flex items-start gap-4">
                              <div className="p-3 bg-slate-50 rounded-2xl text-slate-500 flex-shrink-0">
                                 <Ruler size={28} strokeWidth={2} />
@@ -1139,7 +1129,6 @@ export default function App() {
                                                 )}
                                                 {item.id === 'kerapoxy' && (
                                                     <>
-                                                        {/* ⭐️ 수정: 스타라이크 EVO 우선 배치 및 라벨 변경 ⭐️ */}
                                                         <button onClick={(e) => { e.stopPropagation(); setEpoxyOption('starlike'); }} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all shadow-sm ${epoxyOption === 'starlike' ? 'bg-white text-amber-600' : 'text-slate-500 hover:text-slate-700'}`}>스타라이크 EVO</button>
                                                         <button onClick={(e) => { e.stopPropagation(); setEpoxyOption('kerapoxy'); }} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all shadow-sm ${epoxyOption === 'kerapoxy' ? 'bg-white text-amber-600' : 'text-slate-500 hover:text-slate-700'}`}>케라폭시</button>
                                                     </>
@@ -1152,16 +1141,17 @@ export default function App() {
                         ))}
                     </div>
 
+                    {/* ⭐️ [수정] 소재 비교 버튼을 소재 선택 바로 아래로 이동 ⭐️ */}
+                    <button onClick={() => setShowMaterialModal(true)} className="w-full mt-6 py-4 bg-white border border-slate-200 text-slate-600 rounded-2xl font-bold text-sm hover:bg-slate-50 transition shadow-sm flex items-center justify-center gap-2">
+                        <Info size={18} className='text-slate-400'/> 소재별 양생기간 및 특징 비교
+                    </button>
+
                     <ColorPalette
                         selectedColorId={selectedGroutColor} onSelect={setSelectedGroutColor}
                         onTileImageUpload={handleTileImageUpload} tileImageURL={tileImageURL}
                         brightnessLevel={brightnessLevel} onBrightnessChange={setBrightnessLevel}
                         onTileImageReset={handleTileImageReset}
                     />
-                    
-                    <button onClick={() => setShowMaterialModal(true)} className="w-full mt-6 py-4 bg-white border border-slate-200 text-slate-600 rounded-2xl font-bold text-sm hover:bg-slate-50 transition shadow-sm flex items-center justify-center gap-2">
-                        <Info size={18} className='text-slate-400'/> 소재별 양생기간 및 특징 비교
-                    </button>
                 </section>
 
                 <section className="animate-fade-in delay-300">
