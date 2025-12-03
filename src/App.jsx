@@ -1069,26 +1069,26 @@ export default function App() {
                     </div>
                 </section>
 
-                {/* ⭐️ [수정] 통합된 안내 카드 ⭐️ */}
+                {/* ⭐️ [수정] 배경색이 들어간 통합 안내 카드 ⭐️ */}
                 <section className="animate-fade-in delay-100">
-                    <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200 flex flex-col gap-3">
+                    <div className="bg-indigo-50 rounded-2xl p-4 border border-indigo-100 shadow-sm flex flex-col gap-3">
                         <div className="flex items-center gap-3">
                              <div className="p-2 bg-white rounded-full shadow-sm text-indigo-600">
                                 <ShieldCheck size={18} strokeWidth={2.5} />
                             </div>
                             <div className='flex-1'>
-                                <div className="text-sm font-bold text-slate-800">신축·구축 동일 정가제</div>
-                                <div className="text-[11px] text-slate-500 leading-tight mt-0.5">난이도에 따른 추가금 없는 정직한 시공</div>
+                                <div className="text-sm font-bold text-indigo-900">신축·구축 동일 정가제</div>
+                                <div className="text-[11px] text-indigo-700/80 leading-tight mt-0.5">난이도에 따른 추가금 없는 정직한 시공</div>
                             </div>
                         </div>
-                        <div className="h-px bg-slate-200 w-full"></div>
+                        <div className="h-px bg-indigo-200/50 w-full"></div>
                         <div className="flex items-center gap-3">
-                             <div className="p-2 bg-white rounded-full shadow-sm text-slate-500">
+                             <div className="p-2 bg-white rounded-full shadow-sm text-indigo-600">
                                 <Ruler size={18} strokeWidth={2.5} />
                             </div>
                             <div className='flex-1'>
-                                <div className="text-sm font-bold text-slate-800">견적 기준 사이즈</div>
-                                <div className="text-[11px] text-slate-500 leading-tight mt-0.5">바닥 300x300, 벽면 300x600 타일 기준</div>
+                                <div className="text-sm font-bold text-indigo-900">견적 기준 사이즈</div>
+                                <div className="text-[11px] text-indigo-700/80 leading-tight mt-0.5">바닥 300x300, 벽면 300x600 타일 기준</div>
                             </div>
                         </div>
                     </div>
