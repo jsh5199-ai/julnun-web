@@ -374,23 +374,25 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
 
                         {/* 상단 요약 박스: 높이를 줄이고 가로 배치로 공간 효율화 */}
                         <div className='bg-slate-50 rounded-xl p-3 border border-slate-200'>
-                             <div className='flex justify-between items-center mb-1'>
+                             <div className='flex justify-between items-start mb-1'>
                                  <div className='flex items-center gap-1.5'>
                                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded text-white ${minimumFeeApplied ? 'bg-rose-500' : 'bg-indigo-600'}`}>
                                         {minimumFeeApplied ? '최소비용' : (label || '맞춤견적')}
                                      </span>
-                                     {isDiscountApplied && <span className="text-[10px] text-rose-500 font-bold">할인적용</span>}
                                  </div>
                                  {isDiscountApplied && (
-                                     <div className='text-base font-black text-rose-500 tracking-tight'>
-                                         -{totalDiscount.toLocaleString()}원
+                                     <div className="flex flex-col items-end">
+                                        <div className='text-base font-black text-rose-500 tracking-tight'>
+                                            -{totalDiscount.toLocaleString()}원
+                                        </div>
+                                        <span className="text-[9px] text-rose-500 font-bold mt-0.5">할인적용</span>
                                      </div>
                                  )}
                              </div>
                              {(minimumFeeApplied || isDiscountApplied) && (
                                  <div className="flex flex-col gap-0.5 mt-1">
                                      {minimumFeeApplied && <div className="text-[10px] text-slate-500 flex items-center gap-1">· 최소 시공비(20만원) 적용</div>}
-                                     {isDiscountApplied && <div className="text-[10px] text-slate-500 flex items-center gap-1">· 패키지 및 이벤트 혜택 적용</div>}
+                                     {isDiscountApplied && <div className="text-[10px] text-slate-500 flex items-start gap-1 leading-snug"><Check size={10} className="mt-0.5 shrink-0"/> 변기/바닥테두리, 젠다이 실리콘 오염방지코팅 서비스 적용</div>}
                                  </div>
                              )}
                         </div>
@@ -454,7 +456,7 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
                         <div className='pt-4 border-t-2 border-slate-100 flex flex-col items-end gap-1'>
                             <span className="text-[10px] font-medium text-slate-400">최종 예상 금액 (VAT별도)</span>
                             <div className='flex items-baseline gap-1'>
-                                <span className="text-3xl font-black text-slate-900 tracking-tighter">
+                                <span className="text-3xl font-black text-[#1e3a8a] tracking-tighter">
                                     {price.toLocaleString()}
                                 </span>
                                 <span className="text-base font-bold text-slate-600">원</span>
@@ -1351,7 +1353,7 @@ export default function App() {
                                 <div>
                                     <div className="text-xs font-bold text-slate-400 mb-1">예상 견적 금액</div>
                                     <div className="flex items-baseline gap-1">
-                                        <span className="text-3xl font-black text-slate-900 tracking-tighter">{calculation.price.toLocaleString()}</span>
+                                        <span className="text-3xl font-black text-[#1e3a8a] tracking-tighter">{calculation.price.toLocaleString()}</span>
                                         <span className="text-base font-bold text-slate-600">원</span>
                                     </div>
                                 </div>
