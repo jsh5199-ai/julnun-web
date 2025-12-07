@@ -186,7 +186,8 @@ const YOUTUBE_VIDEOS = [
     { id: 'XekG8hevWpA', title: '에폭시 시공영상 (벽면/바닥)', label: '에폭시 시공' },
     { id: 'M6Aq_VVaG0s', title: '밑작업 영상 (라인 그라인딩)', label: '밑작업 과정' },
 ];
-const getEmbedUrl = (videoId) => `https://www.youtube.com/embed/${videoId}?autoplay=0&mute=1&rel=0`;
+// ⭐️ [수정된 부분] controls=0, modestbranding=1, disablekb=1 추가
+const getEmbedUrl = (videoId) => `https://www.youtube.com/embed/${videoId}?autoplay=0&mute=1&rel=0&controls=0&modestbranding=1&disablekb=1`; 
 
 const OTHER_AREA_IDS_FOR_PACKAGE_EXCLUSION = ['entrance', 'balcony_laundry', 'kitchen_wall', 'living_room', 'silicon_bathtub', 'silicon_kitchen_top', 'silicon_living_baseboard'];
 
@@ -456,7 +457,7 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
 
 const MaterialDetailModal = ({ onClose }) => (
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white w-full max-w-md rounded-[2rem] shadow-2xl overflow-hidden animate-slide-up max-h-[85vh] flex flex-col">
+         <div className="bg-white w-full max-w-md rounded-[2rem] shadow-2xl overflow-hidden animate-slide-up max-h-[85vh] flex flex-col">
             <div className="bg-slate-900 p-6 text-white flex justify-between items-center shrink-0">
               <h3 className="font-bold text-lg flex items-center gap-2"><Info className="h-5 w-5 text-amber-400" /> 소재별 장단점 및 추천</h3>
               <button onClick={onClose} className="bg-white/10 p-2 rounded-full hover:bg-white/20 transition"><X size={20} /></button>
@@ -545,7 +546,7 @@ const MaterialDetailModal = ({ onClose }) => (
             <div className="p-4 bg-white border-t border-slate-100">
                 <button onClick={onClose} className="w-full py-3.5 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition shadow-lg active:scale-[0.98]">확인했습니다</button>
             </div>
-          </div>
+         </div>
         </div>
 );
 
@@ -631,7 +632,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
 
             {/* 3. 우리집 타일 찍기 버튼 */}
             <div className='mb-6 flex gap-3'>
-                <input type="file" id="tileFileInput" accept="image/*" onChange={onTileImageUpload} style={{ display: 'none' }} />
+                <input type="file" id="tileFileInput" accept="image/*" onChange={handleTileImageUpload} style={{ display: 'none' }} />
                 <label htmlFor="tileFileInput" className="flex-1 py-3 px-4 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold text-sm hover:bg-slate-50 transition cursor-pointer flex items-center justify-center gap-2 shadow-sm">
                     <ImageIcon size={16} className="text-slate-400"/> 우리집 타일 첨부하기
                 </label>
@@ -755,7 +756,7 @@ export default function App() {
     }, []);
 
     const findMatchingPackage = useCallback((selectionSummary, quantities) => {
-           const filterSelections = (selections) => {
+            const filterSelections = (selections) => {
              const filtered = {};
              for (const id in selections) {
                  if (!OTHER_AREA_IDS_FOR_PACKAGE_EXCLUSION.includes(id)) {
@@ -763,7 +764,7 @@ export default function App() {
                  }
              }
              return filtered;
-         };
+           };
 
         const filteredPolySelections = filterSelections(selectionSummary['poly'] || {});
         const filteredEpoxySelections = filterSelections(selectionSummary['kerapoxy'] || {});
@@ -777,9 +778,9 @@ export default function App() {
         if (virtualEpoxyFloors > 0) filteredEpoxySelections['bathroom_floor'] = virtualEpoxyFloors;
 
         const totalSelectedCount = Object.values(filteredPolySelections).reduce((sum, v) => sum + v, 0) +
-                                       Object.values(filteredEpoxySelections).reduce((sum, v) => sum + v, 0) 
-                                       - (virtualPolyFloors > 0 ? virtualPolyFloors : 0) // 중복 합산 방지 (가상키 제외)
-                                       - (virtualEpoxyFloors > 0 ? virtualEpoxyFloors : 0);
+                                         Object.values(filteredEpoxySelections).reduce((sum, v) => sum + v, 0) 
+                                         - (virtualPolyFloors > 0 ? virtualPolyFloors : 0) // 중복 합산 방지 (가상키 제외)
+                                         - (virtualEpoxyFloors > 0 ? virtualEpoxyFloors : 0);
 
         if (totalSelectedCount === 0) return null;
         const sortedPackages = MIXED_PACKAGES;
@@ -881,7 +882,7 @@ export default function App() {
             const packageAreaIdsSet = new Set(getPackageAreaIds(pkg));
             
             const isIdSetMatch = selectedAreaIds.size === packageAreaIdsSet.size &&
-                                     [...selectedAreaIds].every(id => packageAreaIdsSet.has(id));
+                                         [...selectedAreaIds].every(id => packageAreaIdsSet.has(id));
 
             if (isIdSetMatch) {
                 return { ...pkg, autoEntrance: appliedAutoEntrance };
@@ -892,7 +893,7 @@ export default function App() {
 
     const calculation = useMemo(() => {
         // ... (계산 로직 전체 유지) ...
-          const selectedHousing = HOUSING_TYPES.find(h => h.id === housingType);
+            const selectedHousing = HOUSING_TYPES.find(h => h.id === housingType);
         let itemizedPrices = [];
 
         const selectionSummary = getSelectionSummary(quantities, areaMaterials);
@@ -1220,7 +1221,7 @@ export default function App() {
                 
                 <section className="bg-white rounded-[1.5rem] overflow-hidden shadow-xl shadow-slate-200/50 border border-white animate-fade-in group">
                     <div className="relative aspect-video w-full bg-slate-900">
-                         <iframe key={currentVideo.id} width="100%" height="100%" src={currentEmbedUrl} title={currentVideo.title} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen className="w-full h-full border-0 opacity-90 group-hover:opacity-100 transition-opacity duration-500"></iframe>
+                        <iframe key={currentVideo.id} width="100%" height="100%" src={currentEmbedUrl} title={currentVideo.title} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen className="w-full h-full border-0 opacity-90 group-hover:opacity-100 transition-opacity duration-500"></iframe>
                     </div>
                     <div className="p-2 flex gap-2 bg-white">
                         {YOUTUBE_VIDEOS.map((video) => (
@@ -1376,8 +1377,8 @@ export default function App() {
                     {renderAreaList(OTHER_AREAS)}
                 </section>
 
-                   <section className="animate-fade-in delay-500">
-                       <h2 className="text-xl font-black text-slate-800 mb-5 flex items-center gap-2">
+                    <section className="animate-fade-in delay-500">
+                         <h2 className="text-xl font-black text-slate-800 mb-5 flex items-center gap-2">
                         <span className="flex items-center justify-center w-7 h-7 bg-indigo-100 text-indigo-600 rounded-full text-sm font-bold">3</span>
                         실리콘 리폼
                     </h2>
@@ -1427,9 +1428,9 @@ export default function App() {
                                         </div>
                                     )}
                                     {calculation.label && !calculation.minimumFeeApplied && (
-                                            <div className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded-full mb-1 flex items-center gap-1">
-                                                <Crown size={10} fill="currentColor"/> {calculation.label}
-                                            </div>
+                                                <div className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded-full mb-1 flex items-center gap-1">
+                                                    <Crown size={10} fill="currentColor"/> {calculation.label}
+                                                </div>
                                     )}
                                     {((calculation.minimumFeeApplied || calculation.isPackageActive) && (calculation.priceBeforeAllDiscount > calculation.price)) && (
                                         <span className="text-xs text-slate-400 line-through font-medium">
