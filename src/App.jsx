@@ -1,3 +1,8 @@
+import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
+import {
+    Calculator, Home, Bath, DoorOpen, Utensils, LayoutGrid,
+    CheckCircle2, Info, RefreshCw, Phone, Sparkles, Hammer, Sofa, Palette, Crown, Gift, Eraser, Star, X, ChevronDown, HelpCircle, Zap, TrendingUp, Clock, Image as ImageIcon, Download, DollarSign, List, Layers, Check, ShieldCheck, Ruler, Settings, ThumbsUp, MoveHorizontal, Bell, Share2, Camera
+} from 'lucide-react';
 // ⭐️ [App Main] ⭐️
 export default function App() {
     // ... (기존 state 및 로직 유지) ...
