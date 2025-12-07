@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import {
     Calculator, Home, Bath, DoorOpen, Utensils, LayoutGrid,
-    CheckCircle2, Info, RefreshCw, Phone, Sparkles, Hammer, Sofa, Palette, Crown, Gift, Eraser, Star, X, ChevronDown, HelpCircle, Zap, TrendingUp, Clock, Image as ImageIcon, Download, DollarSign, List, Layers, Check, ShieldCheck, Ruler, Settings, ThumbsUp, MoveHorizontal, Bell, Share2, Camera
+    CheckCircle2, Info, RefreshCw, Phone, Sparkles, Hammer, Sofa, Palette, Crown, Gift, Eraser, Star, X, ChevronDown, HelpCircle, Zap, TrendingUp, Clock, Image as ImageIcon, Download, DollarSign, List, Layers, Check, ShieldCheck, Ruler, Settings, ThumbsUp, MoveHorizontal, Bell, Share2, Camera, ArrowRight
 } from 'lucide-react';
 
 // =================================================================
@@ -304,6 +304,67 @@ const ReservationTicker = ({ variant = 'default' }) => {
     );
 };
 
+// =================================================================
+// ⭐️ [추가] Hero Section (비주얼 섹션)
+// =================================================================
+const HeroSection = ({ onScrollToQuote }) => {
+  return (
+    <div className="relative w-full overflow-hidden rounded-[2rem] shadow-2xl mb-8 group animate-fade-in">
+      {/* 1. 배경 이미지 */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center transition-transform duration-[2s] group-hover:scale-105"
+        style={{ 
+          backgroundImage: 'url("https://images.unsplash.com/photo-1584622050111-993a426fbf0a?q=80&w=2070&auto=format&fit=crop")',
+        }}
+      />
+      
+      {/* 2. 어두운 그라데이션 오버레이 */}
+      <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/60 to-transparent" />
+
+      {/* 3. 텍스트 및 콘텐츠 */}
+      <div className="relative z-10 p-6 pt-24 flex flex-col items-start justify-end h-[400px]">
+        
+        {/* 뱃지 */}
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-[10px] font-bold mb-3 shadow-lg animate-slide-up">
+          <Sparkles size={12} className="text-yellow-400" />
+          <span>Premium Grout Service</span>
+        </div>
+
+        {/* 메인 카피 */}
+        <h2 className="text-3xl font-black text-white leading-tight mb-2 drop-shadow-lg tracking-tight animate-slide-up" style={{ animationDelay: '0.1s' }}>
+          공간의 품격,<br />
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-300">줄눈의미학</span>에서 완성하다.
+        </h2>
+
+        {/* 서브 카피 */}
+        <p className="text-slate-300 text-sm font-medium mb-6 leading-relaxed max-w-[80%] animate-slide-up" style={{ animationDelay: '0.2s' }}>
+          현존 최상의 소재와 독보적인 기술력으로<br/>
+          변하지 않는 아름다움을 시공합니다.
+        </p>
+
+        {/* CTA 버튼들 */}
+        <div className="flex gap-3 w-full animate-slide-up" style={{ animationDelay: '0.3s' }}>
+          <button 
+            onClick={onScrollToQuote}
+            className="flex-1 py-3.5 bg-indigo-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-indigo-900/30 flex items-center justify-center gap-2 hover:bg-indigo-500 transition active:scale-95"
+          >
+            무료 견적 보기 <ArrowRight size={16} />
+          </button>
+          <button className="px-4 py-3.5 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-xl font-bold text-sm flex items-center justify-center hover:bg-white/20 transition active:scale-95">
+             시공 갤러리
+          </button>
+        </div>
+        
+        {/* 하단 신뢰도 문구 */}
+        <div className="mt-5 flex items-center gap-4 text-[10px] font-medium text-slate-400">
+           <div className="flex items-center gap-1"><ShieldCheck size={12} className="text-emerald-400"/> A/S 최대 5년 보장</div>
+           <div className="flex items-center gap-1"><Star size={12} className="text-yellow-400"/> 고객만족도 1위</div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleReview }) => {
     const { price, label, minimumFeeApplied, itemizedPrices, priceBeforeAllDiscount } = calculation;
     const totalDiscount = priceBeforeAllDiscount - price;
@@ -329,12 +390,12 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
                         <div className='bg-slate-50 rounded-xl p-4 border border-slate-200'>
                              <div className='flex justify-between items-start mb-2'>
                                  <div className='flex items-center gap-1.5'>
-                                     {(minimumFeeApplied || label) && (
+                                      {(minimumFeeApplied || label) && (
                                          <span className={`text-[11px] font-bold px-2.5 py-1 rounded text-white shadow-sm relative overflow-hidden ${minimumFeeApplied ? 'bg-rose-500' : 'bg-indigo-600'} animate-gentle-pulse`}>
                                              <span className="relative z-10">{minimumFeeApplied ? '최소비용' : label}</span>
                                              <div className="absolute inset-0 animate-shimmer" style={{ background: 'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%)' }}></div>
                                          </span>
-                                     )}
+                                      )}
                                  </div>
                              </div>
                              {(minimumFeeApplied || isDiscountApplied) && (
@@ -687,6 +748,7 @@ export default function App() {
     const [showMaterialModal, setShowMaterialModal] = useState(false);
     const [activeVideoId, setActiveVideoId] = useState(YOUTUBE_VIDEOS[0].id);
     const quoteRef = useRef(null);
+    const quoteStartRef = useRef(null); // ⭐️ 견적 시작 섹션을 가리키는 ref 추가
     const SOOMGO_REVIEW_URL = 'https://www.soomgo.com/profile/users/10755579?tab=review';
 
     useEffect(() => {
@@ -1097,6 +1159,11 @@ export default function App() {
     };
     const handleTileImageReset = useCallback(() => { setTileImageURL(DEFAULT_TILE_IMAGE_URL); }, []);
 
+    // ⭐️ [추가] 스크롤 핸들러 (HeroSection 버튼 클릭 시 이동)
+    const scrollToQuote = useCallback(() => {
+        quoteStartRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, []);
+
     const selectedMaterialData = MATERIALS.find(m => m.id === material);
     const soomgoReviewEvent = REVIEW_EVENTS.find(evt => evt.id === 'soomgo_review');
     const isSoomgoReviewApplied = selectedReviews.has('soomgo_review');
@@ -1218,6 +1285,9 @@ export default function App() {
 
             <main className="max-w-lg mx-auto p-5 space-y-8">
                 
+                {/* ⭐️ [추가] 비주얼 섹션 (Hero) */}
+                <HeroSection onScrollToQuote={scrollToQuote} />
+
                 <section className="bg-white rounded-[1.5rem] overflow-hidden shadow-xl shadow-slate-200/50 border border-white animate-fade-in group">
                     <div className="relative aspect-video w-full bg-slate-900">
                          <iframe key={currentVideo.id} width="100%" height="100%" src={currentEmbedUrl} title={currentVideo.title} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen className="w-full h-full border-0 opacity-90 group-hover:opacity-100 transition-opacity duration-500"></iframe>
@@ -1235,8 +1305,8 @@ export default function App() {
                     </div>
                 </section>
 
-                {/* ⭐️ [디자인 수정됨] 시공 소재 선택 섹션 - 배경 아이콘 복구, 문구 아이콘 제거 */}
-                <section className="animate-fade-in delay-200">
+                {/* ⭐️ [수정] 스크롤 타겟 ref 연결 (소재 선택 섹션) */}
+                <section ref={quoteStartRef} className="animate-fade-in delay-200">
                     <h2 className="text-xl font-black text-slate-800 mb-5 flex items-center gap-2">
                         <span className="flex items-center justify-center w-7 h-7 bg-indigo-600 text-white rounded-full text-sm font-bold shadow-md shadow-indigo-200">1</span>
                         시공 소재 안내
