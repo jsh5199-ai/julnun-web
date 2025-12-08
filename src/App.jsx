@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 
 // =================================================================
-// ⭐️ 상수 및 데이터
+// ⭐️ 상수 및 데이터 (로직 유지)
 // =================================================================
 const MIN_FEE = 200000;
 const KAKAO_CHAT_URL = 'http://pf.kakao.com/_jAxnYn/chat';
@@ -351,7 +351,7 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
                         {packageItems.length > 0 && (
                             <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100/50">
                                 <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">상세 내역</h4>
-                                <div className='space-y-3'>
+                                <div className='space-y-1'>
                                     {packageItems.map((item, index) => {
                                         const areaInfo = ALL_AREAS.find(a => a.id === item.id);
                                         
@@ -361,14 +361,14 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
                                         else if (item.materialLabel === '실리콘') badgeClass = 'bg-emerald-50 text-emerald-600';
 
                                         return (
-                                            <div key={index} className='flex justify-between items-center text-sm'>
-                                                <div className="flex flex-col">
-                                                    <span className='font-bold text-slate-700'>{item.label}</span>
-                                                    <span className={`text-[10px] font-semibold w-fit px-1.5 py-0.5 rounded mt-0.5 ${badgeClass}`}>
-                                                        {item.materialLabel}
-                                                    </span>
+                                            <div key={index} className='flex justify-between items-center py-2.5 border-b border-slate-50 last:border-0'>
+                                                <div className="flex items-center gap-1.5">
+                                                    <span className='font-bold text-slate-700 text-sm'>{item.label}</span>
+                                                    <span className='text-slate-400 text-xs font-semibold'>x{item.quantity}</span>
                                                 </div>
-                                                <span className='font-bold text-slate-900 bg-slate-50 px-2 py-1 rounded-lg text-xs'>{item.quantity}{areaInfo ? areaInfo.unit : '개소'}</span>
+                                                <span className={`text-[10px] font-bold px-2 py-1 rounded ${badgeClass}`}>
+                                                    {item.materialLabel}
+                                                </span>
                                             </div>
                                         )
                                     })}
@@ -517,8 +517,8 @@ const MaterialDetailModal = ({ onClose }) => (
                     <div className="bg-indigo-50/50 p-4 rounded-2xl border border-indigo-100 shadow-sm flex gap-3">
                          <div className="shrink-0 mt-0.5"><Crown size={16} className="text-indigo-500"/></div>
                          <div>
-                            <div className="font-bold text-indigo-700 text-sm mb-1">에폭시 추천</div>
-                            <p className="text-xs text-indigo-600/80 leading-snug">자가 거주로 5년 이상 계획하시거나, 호텔 같은 고급스러운 인테리어 효과를 원하시는 분께 적합합니다.</p>
+                            <div className="font-bold text-indigo-700 text-sm mb-1">에폭시(케라폭시) 추천</div>
+                            <p className="text-xs text-indigo-600/80 leading-snug">자가 거주로 10년 이상 계획하시거나, 호텔 같은 고급스러운 인테리어 효과를 원하시는 분께 적합합니다.</p>
                          </div>
                     </div>
                 </div>
@@ -1199,6 +1199,7 @@ export default function App() {
             <header className="sticky top-0 z-40 transition-all duration-300 bg-white/80 backdrop-blur-md border-b border-slate-100/50">
                  <ReservationTicker variant="top-bar" />
                 <div className="px-5 py-4 flex items-center justify-between max-w-lg mx-auto w-full">
+                    {/* ⭐️ [수정] 아이콘 제거 및 한글 로고 적용 + PRO 복원 */}
                     <div className="flex items-center gap-2">
                         <h1 className="text-xl font-black text-slate-900 tracking-tight">
                             줄눈의미학<span className="text-indigo-600 text-[10px] font-bold ml-1 align-top">PRO</span>
@@ -1217,11 +1218,14 @@ export default function App() {
 
             <main className="max-w-lg mx-auto p-5 space-y-10">
                 
+                {/* ⭐️ [수정된 비디오 섹션] 분리된 디자인 */}
                 <section className="animate-fade-in">
+                    {/* 1. 비디오 플레이어 카드 */}
                     <div className="bg-slate-900 rounded-[2rem] overflow-hidden shadow-soft mb-4 aspect-video relative group">
                         <iframe key={currentVideo.id} width="100%" height="100%" src={currentEmbedUrl} title={currentVideo.title} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen className="w-full h-full border-0 opacity-90 group-hover:opacity-100 transition-opacity duration-500"></iframe>
                     </div>
 
+                    {/* 2. 분리된 선택 바 (Segmented Control 스타일) */}
                     <div className="bg-white p-1.5 rounded-2xl border border-slate-100 shadow-sm flex gap-1">
                         {YOUTUBE_VIDEOS.map((video) => (
                             <button
@@ -1270,6 +1274,7 @@ export default function App() {
                                             <p className="text-xs text-slate-400 leading-snug">{item.description}</p>
                                         </div>
 
+                                        {/* 상세 옵션 버튼 - 트렌디한 디자인 */}
                                         <div className={`transition-all duration-300 overflow-hidden ${isSelected ? 'max-h-20 opacity-100 mt-auto pt-2' : 'max-h-0 opacity-0'}`}>
                                             <div className="bg-slate-50 rounded-xl p-1 flex gap-1">
                                                 {item.id === 'poly' && (
@@ -1319,7 +1324,7 @@ export default function App() {
                             </div>
                             <div>
                                 <div className="text-sm font-bold text-indigo-900">신축·구축 동일 정가제</div>
-                                <div className="text-xs text-indigo-600/70 mt-0.5">바닥 30X30cm, 벽 30X60cm 타일크기 기준</div>
+                                <div className="text-xs text-indigo-600/70 mt-0.5">바닥 30x30cm, 벽 30x60cm 타일 크기 기준</div>
                             </div>
                         </div>
                     </div>
@@ -1369,8 +1374,12 @@ export default function App() {
             {hasSelections && (
                 <div className="fixed bottom-0 left-0 right-0 z-50 animate-slide-up">
                     <div className="max-w-lg mx-auto">
-                        <div className="bg-white shadow-[0_-10px_40px_rgba(0,0,0,0.1)] border-t border-slate-100 px-6 pt-5 pb-10 rounded-t-3xl safe-area-bottom">
-                            <div className='flex items-center justify-between mb-5'>
+                        {/* pb-10: 버튼 아래 40px 여백 강제 추가
+                            safe-area-bottom: 모바일 하단 제스처 바 대응
+                            shadow-2xl: 위쪽으로 그림자를 주어 바닥에서 올라온 느낌 강조
+                        */}
+                        <div className="bg-white shadow-2xl border-t border-slate-100 px-6 pt-5 pb-10 safe-area-bottom rounded-t-[2rem]">
+                            <div className='flex items-end justify-between mb-5'>
                                 <div>
                                     <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Total Estimate</div>
                                     <div className="flex items-baseline gap-1">
@@ -1378,16 +1387,22 @@ export default function App() {
                                         <span className="text-lg font-bold text-slate-400">원</span>
                                     </div>
                                 </div>
-                                <div className='flex flex-col items-end gap-1'>
+                                
+                                <div className='flex flex-col items-end gap-1.5'>
                                     {calculation.minimumFeeApplied && (
                                         <div className="text-[10px] font-bold text-rose-500 bg-rose-50 px-2.5 py-1 rounded-full border border-rose-100">
                                             최소 출장비 적용
                                         </div>
                                     )}
                                     {calculation.label && !calculation.minimumFeeApplied && (
-                                        <div className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-100 flex items-center gap-1">
+                                        <div className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-100 flex items-center gap-1.5">
                                             <Sparkles size={10} fill="currentColor"/> {calculation.label}
                                         </div>
+                                    )}
+                                    {((calculation.minimumFeeApplied || calculation.isPackageActive) && (calculation.priceBeforeAllDiscount > calculation.price)) && (
+                                        <span className="text-xs text-slate-300 line-through font-medium">
+                                            {calculation.priceBeforeAllDiscount.toLocaleString()}원
+                                        </span>
                                     )}
                                 </div>
                             </div>
