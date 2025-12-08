@@ -318,7 +318,7 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
 
     return (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center sm:p-4 animate-premium-in">
-            <div className="bg-white w-full max-w-sm sm:rounded-[2rem] rounded-t-[2rem] shadow-2xl overflow-hidden animate-slide-up-premium max-h-[90vh] flex flex-col">
+            <div className="bg-white w-full max-w-sm sm:rounded-[2rem] rounded-t-[2rem] shadow-2xl overflow-hidden animate-slide-up-premium max-h-[85vh] flex flex-col">
                 <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-white/80 backdrop-blur-md sticky top-0 z-10">
                     <h3 className="font-extrabold text-xl text-slate-900 tracking-tight">상세 견적서</h3>
                     <button onClick={onClose} className="bg-slate-100 p-2.5 rounded-full text-slate-500 hover:bg-slate-200 transition"><X size={18} /></button>
@@ -352,7 +352,7 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
                             )}
                         </div>
 
-                        {/* ⭐️ 상세 내역 리스트: 이름+갯수 / 소재뱃지 (금액 제거) */}
+                        {/* 상세 내역 리스트: 이름+갯수 / 소재뱃지 (금액 제거) */}
                         <div className="space-y-3 relative z-10">
                             {packageItems.map((item, index) => (
                                 <div key={index} className="flex justify-between items-center text-sm group border-b border-slate-50 last:border-0 py-2">
@@ -362,7 +362,6 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
                                             x{item.quantity}
                                         </span>
                                     </div>
-                                    {/* ⭐️ 소재별 색상 적용된 뱃지 */}
                                     <span className={`text-[10px] font-bold px-2 py-1 rounded ${getBadgeStyle(item.materialLabel)}`}>
                                         {item.materialLabel}
                                     </span>
@@ -405,8 +404,8 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
                     </div>
                 </div>
 
-                {/* 하단 버튼 그룹 */}
-                <div className="p-4 bg-white border-t border-slate-100 grid grid-cols-2 gap-3 safe-area-bottom">
+                {/* ⭐️ [수정됨] 하단 버튼 그룹: 여백 및 간격 조정 */}
+                <div className="p-6 bg-white border-t border-slate-100 grid grid-cols-2 gap-4 safe-area-bottom mb-2">
                      <a href={KAKAO_CHAT_URL} target="_blank" rel="noopener noreferrer" className="py-4 bg-[#FAE100] text-[#371D1E] rounded-2xl font-black text-sm hover:bg-[#ffe600] transition active:scale-[0.98] flex items-center justify-center gap-2 shadow-sm">
                         <Layers size={18} fill="currentColor"/> 카톡 상담
                     </a>
@@ -1351,12 +1350,12 @@ export default function App() {
 
             {/* 💎 ⭐️ [수정됨] Bottom Floating Island Bar: 바닥에서 띄워진 완전 불투명 카드 */}
             {hasSelections && (
-                <div className="fixed bottom-6 left-4 right-4 z-50 animate-slide-up-premium">
+                <div className="fixed bottom-8 left-4 right-4 z-50 animate-slide-up-premium">
                     <div className="max-w-lg mx-auto">
                         <div className="px-5 pb-2">
                             <ReservationTicker />
                         </div>
-                        {/* glass-premium 제거 -> 완전 불투명 bg-white, 둥근 모서리, 강한 그림자 */}
+                        {/* glass-premium 제거 -> 완전 불투명 bg-white, 둥근 모서리, 강한 그림자, 내부 패딩 증가 */}
                         <div className="bg-white border border-slate-100 px-6 pt-6 pb-8 rounded-[2.5rem] shadow-2xl shadow-slate-400/20 safe-area-bottom">
                             <div className='flex items-end justify-between mb-5'>
                                 <div>
@@ -1381,7 +1380,7 @@ export default function App() {
                                 </div>
                             </div>
 
-                            <div className='grid grid-cols-5 gap-3'>
+                            <div className='grid grid-cols-5 gap-4'>
                                 <button
                                     onClick={() => { setShowModal(true); }}
                                     className="col-span-3 py-4 rounded-2xl font-bold text-white bg-slate-900 hover:bg-slate-800 shadow-lg shadow-slate-400/30 active:scale-[0.96] transition-all flex items-center justify-center gap-2 text-base"
