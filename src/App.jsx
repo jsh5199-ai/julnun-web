@@ -318,7 +318,7 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
 
     return (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center sm:p-4 animate-premium-in">
-            <div className="bg-white w-full max-w-sm sm:rounded-[2rem] rounded-t-[2rem] shadow-2xl overflow-hidden animate-slide-up-premium max-h-[85vh] flex flex-col">
+            <div className="bg-white w-full max-w-sm sm:rounded-[2rem] rounded-t-[2rem] shadow-2xl overflow-hidden animate-slide-up-premium max-h-[90vh] flex flex-col">
                 <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-white/80 backdrop-blur-md sticky top-0 z-10">
                     <h3 className="font-extrabold text-xl text-slate-900 tracking-tight">상세 견적서</h3>
                     <button onClick={onClose} className="bg-slate-100 p-2.5 rounded-full text-slate-500 hover:bg-slate-200 transition"><X size={18} /></button>
@@ -345,6 +345,12 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
                                 </span>
                                 <span className="text-lg font-bold text-slate-400">원</span>
                             </div>
+                            
+                            {/* ⭐️ 안내 문구 추가 */}
+                            <div className="text-[10px] text-slate-400 mt-2 text-center font-medium">
+                                * 타일크기 바닥 30x30cm, 벽 30x60cm 기준
+                            </div>
+
                             {(isDiscountApplied || minimumFeeApplied) && (priceBeforeAllDiscount > price) && (
                                 <div className="text-sm text-slate-400 line-through font-medium mt-1">
                                     {priceBeforeAllDiscount.toLocaleString()}원
@@ -404,8 +410,8 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
                     </div>
                 </div>
 
-                {/* ⭐️ [수정됨] 하단 버튼 그룹: 여백 및 간격 조정 */}
-                <div className="p-6 bg-white border-t border-slate-100 grid grid-cols-2 gap-4 safe-area-bottom mb-2">
+                {/* ⭐️ [수정됨] 하단 버튼 그룹: 여백(padding)을 늘려 바닥과 분리 */}
+                <div className="p-6 pb-8 bg-white border-t border-slate-100 grid grid-cols-2 gap-4 safe-area-bottom">
                      <a href={KAKAO_CHAT_URL} target="_blank" rel="noopener noreferrer" className="py-4 bg-[#FAE100] text-[#371D1E] rounded-2xl font-black text-sm hover:bg-[#ffe600] transition active:scale-[0.98] flex items-center justify-center gap-2 shadow-sm">
                         <Layers size={18} fill="currentColor"/> 카톡 상담
                     </a>
@@ -853,202 +859,6 @@ export default function App() {
         }
         return null;
     }, []);
-
-    const calculation = useMemo(() => {
-        // ... (계산 로직 전체 유지) ...
-          const selectedHousing = HOUSING_TYPES.find(h => h.id === housingType);
-        let itemizedPrices = [];
-
-        const selectionSummary = getSelectionSummary(quantities, areaMaterials);
-        const matchedPackageResult = findMatchingPackage(selectionSummary, quantities);
-        const matchedPackage = matchedPackageResult ? matchedPackageResult : null;
-
-        let q = { ...quantities };
-        let total = 0;
-        let labelText = null;
-        let isPackageActive = false;
-        let isFreeEntrance = false;
-        let totalAreaCount = Object.values(quantities).some(v => v > 0) ? Object.keys(quantities).filter(k => quantities[k] > 0).length : 0;
-        
-        // ⭐️ 바닥 합산 수량
-        let totalBathroomFloorCount = (q['master_bath_floor'] || 0) + (q['common_bath_floor'] || 0);
-
-        let packageAreas = [];
-
-        if (matchedPackage) {
-            total = matchedPackage.price;
-            isPackageActive = true;
-            labelText = '패키지 할인 적용 중';
-            packageAreas = getPackageAreaIds(matchedPackage);
-            
-            // 패키지에 포함된 항목 수량 0 처리
-            packageAreas.forEach(id => { 
-                if (id === 'bathroom_floor') {
-                    q['master_bath_floor'] = 0;
-                    q['common_bath_floor'] = 0;
-                } else {
-                    q[id] = 0; 
-                }
-            });
-
-            if (quantities['entrance'] >= 1) {
-                isFreeEntrance = true;
-                q['entrance'] = 0;
-            }
-        }
-
-        if (totalBathroomFloorCount >= 2 && quantities['entrance'] >= 1 && !matchedPackage) {
-            isFreeEntrance = true;
-            isPackageActive = true;
-            labelText = '현관 서비스 적용 중';
-            q['entrance'] = 0;
-        }
-
-        let priceBeforeAllDiscount = 0;
-
-        ALL_AREAS.forEach(area => {
-            const initialCount = quantities[area.id] || 0;
-            if (initialCount === 0) return;
-            const count = q[area.id] || 0;
-            const areaMatId = area.id === 'entrance' ? 'poly' : areaMaterials[area.id];
-            const isEpoxy = areaMatId === 'kerapoxy';
-
-            const priceKey = areaMatId === 'poly' ? 'poly' : 'epoxy';
-
-            let originalPriceFromConst = (ORIGINAL_PRICES[area.id] && ORIGINAL_PRICES[area.id][priceKey] !== undefined)
-                ? ORIGINAL_PRICES[area.id][priceKey]
-                : (area.basePrice * (isEpoxy ? MATERIALS.find(m => m.id === 'kerapoxy').priceMod : 1.0) * selectedHousing.multiplier);
-
-            let itemOriginalTotal = originalPriceFromConst * initialCount;
-            priceBeforeAllDiscount += itemOriginalTotal; 
-
-            let finalUnitBasePrice = area.basePrice;
-            if (area.id === 'balcony_laundry') {
-                finalUnitBasePrice = isEpoxy ? 250000 : 100000;
-            } else if (area.id === 'kitchen_wall') {
-                finalUnitBasePrice = isEpoxy ? 250000 : 150000;
-            } else if (area.id === 'living_room') {
-                finalUnitBasePrice = isEpoxy ? 1100000 : 550000;
-            } else if (area.id === 'entrance') {
-                finalUnitBasePrice = 50000;
-            } else if (BATHROOM_AREAS.some(a => a.id === area.id)) {
-                finalUnitBasePrice = area.basePrice * (isEpoxy ? 1.8 : 1.0);
-            } else if (area.id === 'silicon_kitchen_top') {
-                finalUnitBasePrice = 50000;
-            }
-
-            const calculatedPricePerUnit = Math.floor(finalUnitBasePrice * selectedHousing.multiplier);
-            let finalCalculatedPrice = 0;
-            let finalDiscount = 0;
-            let isFreeServiceItem = false;
-            
-            // 패키지 카운트 계산 (바닥인 경우 합산)
-            let packageCount = initialCount - count;
-
-            let isPackageItemFlag = false;
-
-            // 무료 현관 또는 패키지 포함 항목 처리
-            const isAreaInPackage = packageAreas.includes(area.id) || (area.id.includes('bath_floor') && packageAreas.includes('bathroom_floor'));
-
-            if ((matchedPackage || isFreeEntrance) && isAreaInPackage && count === 0) {
-                 finalCalculatedPrice = 0;
-                 finalDiscount = itemOriginalTotal; 
-                 isFreeServiceItem = area.id === 'entrance' || isAreaInPackage;
-                 isPackageItemFlag = true; 
-            }
-            else if (area.id === 'entrance' && isFreeEntrance && !matchedPackage && count === 0) {
-                finalCalculatedPrice = 0;
-                finalDiscount = itemOriginalTotal; 
-                isFreeServiceItem = true;
-                isPackageItemFlag = true; 
-            }
-            else {
-                let remainingCalculatedPrice = calculatedPricePerUnit * count;
-                let remainingDiscount = 0;
-
-                if (area.id === 'silicon_bathtub' && totalAreaCount >= 3) {
-                    const nonPackageOriginalPrice = 80000 * count;
-                    const fixedPriceForRemaining = 50000 * count;
-                    if (count > 0) {
-                        remainingDiscount = nonPackageOriginalPrice - fixedPriceForRemaining;
-                        remainingCalculatedPrice = fixedPriceForRemaining;
-                        isPackageItemFlag = true; 
-                    }
-                } else if (area.id === 'silicon_living_baseboard' && totalAreaCount >= 3) {
-                    const nonPackageOriginalPrice = 400000 * count;
-                    const fixedPriceForRemaining = 350000 * count;
-                    if (count > 0) {
-                        remainingDiscount = nonPackageOriginalPrice - fixedPriceForRemaining;
-                        remainingCalculatedPrice = fixedPriceForRemaining;
-                        isPackageItemFlag = true;
-                    }
-                } else if (area.id === 'silicon_sink') {
-                    remainingCalculatedPrice = 30000 * count;
-                }
-                finalCalculatedPrice = remainingCalculatedPrice;
-                finalDiscount = remainingDiscount;
-                total += finalCalculatedPrice;
-            }
-
-            finalCalculatedPrice = Math.floor(finalCalculatedPrice / 1000) * 1000;
-            itemOriginalTotal = Math.floor(itemOriginalTotal / 1000) * 1000;
-            finalDiscount = Math.floor(finalDiscount / 1000) * 1000;
-
-            itemizedPrices.push({
-                id: area.id,
-                label: area.label,
-                quantity: initialCount, 
-                unit: area.unit,
-                originalPrice: itemOriginalTotal, 
-                calculatedPrice: finalCalculatedPrice,
-                discount: finalDiscount,
-                isFreeService: isFreeServiceItem,
-                isPackageItem: isPackageItemFlag || !isFreeServiceItem && (isPackageActive || finalDiscount > 0),
-                isDiscount: false,
-                // 한글로 데이터 직접 생성 (렌더링 시 오류 방지)
-                materialLabel: ['silicon_bathtub', 'silicon_kitchen_top', 'silicon_living_baseboard'].includes(area.id) 
-                    ? '실리콘' 
-                    : (areaMatId === 'poly' ? '폴리아스파틱' : '에폭시')
-            });
-        });
-
-        let discountAmount = 0;
-        REVIEW_EVENTS.forEach(evt => {
-            if (selectedReviews.has(evt.id)) {
-                discountAmount += evt.discount;
-                itemizedPrices.push({ id: evt.id, label: evt.label, quantity: 1, unit: '건', originalPrice: evt.discount, calculatedPrice: 0, discount: evt.discount, isPackageItem: false, isDiscount: true, materialLabel: 'Event' });
-            }
-        });
-        total -= discountAmount;
-
-        let originalCalculatedPrice = Math.max(0, Math.floor(total / 1000) * 1000);
-        let finalPrice = originalCalculatedPrice;
-        let minimumFeeApplied = false;
-
-        if (finalPrice > 0 && finalPrice < MIN_FEE) {
-            finalPrice = MIN_FEE;
-            minimumFeeApplied = true;
-        }
-
-
-        if (isFreeEntrance && !matchedPackage) {
-            labelText = '현관 서비스 적용 중';
-        } else if (matchedPackage) {
-            labelText = '패키지 할인 적용 중';
-        }
-
-        return {
-            price: finalPrice,
-            originalCalculatedPrice,
-            priceBeforeAllDiscount: Math.floor(priceBeforeAllDiscount / 1000) * 1000, 
-            label: labelText,
-            isPackageActive: isPackageActive || isFreeEntrance,
-            isFreeEntrance: isFreeEntrance,
-            discountAmount: priceBeforeAllDiscount - finalPrice, 
-            minimumFeeApplied,
-            itemizedPrices: itemizedPrices.filter(item => item.quantity > 0 || item.isDiscount),
-        };
-    }, [quantities, selectedReviews, housingType, areaMaterials, getSelectionSummary, findMatchingPackage]);
 
     const handleTileImageUpload = (event) => {
         const file = event.target.files[0];
