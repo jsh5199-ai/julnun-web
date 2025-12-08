@@ -74,25 +74,18 @@ const GlobalStyles = () => (
         
         body { 
             font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; 
-            background-color: #f1f5f9; /* Slate-100보다 조금 더 깊은 색 */
-            -webkit-font-smoothing: antialiased; /* 폰트 렌더링을 4k급으로 선명하게 */
+            background-color: #f1f5f9; 
+            -webkit-font-smoothing: antialiased; 
             -moz-osx-font-smoothing: grayscale;
         }
         
-        /* 스크롤바 숨김 (깔끔함 유지) */
         ::-webkit-scrollbar { display: none; }
         
-        /* ⭐️ Premium Animations */
         @keyframes gentle-fade-in { from { opacity: 0; transform: translateY(10px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
         @keyframes premium-slide-up { 
             from { transform: translateY(100%); opacity: 0; } 
             to { transform: translateY(0); opacity: 1; } 
-            /* cubic-bezier로 고급스러운 움직임 구현 */
             animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        @keyframes shimmer-gold {
-            0% { background-position: -200% 0; }
-            100% { background-position: 200% 0; }
         }
         @keyframes pulse-subtle {
             0%, 100% { opacity: 1; }
@@ -102,22 +95,13 @@ const GlobalStyles = () => (
         .animate-premium-in { animation: gentle-fade-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         .animate-slide-up-premium { animation: premium-slide-up 0.5s forwards; }
 
-        /* ⭐️ Glassmorphism 2.0: 더 선명하고 깊이감 있는 유리 효과 */
-        .glass-premium {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border-top: 1px solid rgba(255, 255, 255, 0.6);
-            box-shadow: 0 -8px 32px 0 rgba(31, 38, 135, 0.07);
-        }
+        /* Glassmorphism Classes Removed for Bottom Bar to ensure opacity */
         
-        /* 카드 호버 효과 */
         .card-premium-hover {
             transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .card-premium-hover:active { transform: scale(0.98); }
 
-        /* 레인지 슬라이더 4K 스타일 */
         input[type=range] {
             -webkit-appearance: none;
             background: transparent;
@@ -162,7 +146,6 @@ const MATERIALS = [
     },
 ];
 
-// 욕실 바닥 분리 (안방/공용)
 const BATHROOM_AREAS = [
     { id: 'master_bath_floor', label: '안방 욕실바닥', basePrice: 150000, icon: Bath, unit: '개소' },
     { id: 'common_bath_floor', label: '공용 욕실바닥', basePrice: 150000, icon: Bath, unit: '개소' },
@@ -177,7 +160,6 @@ const OTHER_AREAS = [
     { id: 'kitchen_wall', label: '주방 벽면', basePrice: 150000, icon: Utensils, unit: '구역', desc: '' },
     { id: 'living_room', label: '거실 바닥', basePrice: 550000, icon: Sofa, unit: '구역', desc: '' },
 ];
-// 실리콘 항목
 const SILICON_AREAS = [
     { id: 'silicon_bathtub', label: '욕조 테두리', basePrice: 80000, icon: Eraser, unit: '개소', desc: '' },
     { id: 'silicon_kitchen_top', label: '주방 상판 실리콘', basePrice: 50000, icon: Utensils, unit: '개소', desc: '' },
@@ -265,7 +247,7 @@ const getPackageAreaIds = (pkg) => [
 ];
 
 // =================================================================
-// [컴포넌트] 실시간 예약 알림 (Ticker) - 4K Update
+// [컴포넌트] 실시간 예약 알림 (Ticker)
 // =================================================================
 const ReservationTicker = ({ variant = 'default' }) => {
     const messages = [
@@ -305,9 +287,9 @@ const ReservationTicker = ({ variant = 'default' }) => {
         );
     }
 
-    // Default Variant (하단 플로팅)
+    // Default Variant (하단 플로팅 내부용) - 이제 미사용 가능성 있지만 유지
     return (
-        <div className={`w-full flex justify-center pb-2 transition-all duration-500`}>
+        <div className={`w-full flex justify-center pb-3 transition-all duration-500`}>
              <div className={`bg-slate-800/80 backdrop-blur-sm text-white px-4 py-1.5 rounded-full shadow-lg border border-white/10 flex items-center gap-2 transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
                 <Bell size={12} className="text-yellow-400 animate-pulse" />
                 <span className="text-[11px] font-medium truncate">{messages[index]}</span>
@@ -317,7 +299,7 @@ const ReservationTicker = ({ variant = 'default' }) => {
 };
 
 // =================================================================
-// [컴포넌트] 견적 확인 모달 (Fintech Style) - 4K Update
+// [컴포넌트] 견적 확인 모달 (Fintech Style)
 // =================================================================
 const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleReview }) => {
     const { price, label, minimumFeeApplied, itemizedPrices, priceBeforeAllDiscount } = calculation;
@@ -327,6 +309,14 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
     const discountItems = itemizedPrices.filter(i => i.isDiscount);
     const soomgoReviewEvent = REVIEW_EVENTS.find(evt => evt.id === 'soomgo_review');
     const isSoomgoReviewApplied = selectedReviews.has('soomgo_review');
+
+    // ⭐️ 소재별 뱃지 색상 결정 함수
+    const getBadgeStyle = (label) => {
+        if (label === '에폭시') return 'bg-amber-100 text-amber-700';
+        if (label === '폴리아스파틱') return 'bg-indigo-100 text-indigo-700';
+        if (label === '실리콘') return 'bg-emerald-100 text-emerald-700';
+        return 'bg-slate-100 text-slate-500';
+    };
 
     return (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center sm:p-4 animate-premium-in">
@@ -370,7 +360,10 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
                                 <div key={index} className="flex justify-between items-center text-sm group">
                                     <div className="flex flex-col">
                                         <span className="font-bold text-slate-700">{item.label}</span>
-                                        <span className="text-[10px] text-slate-400 font-medium bg-slate-100 px-1.5 py-0.5 rounded w-fit mt-0.5">{item.materialLabel}</span>
+                                        {/* ⭐️ 소재별 색상 적용된 뱃지 */}
+                                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded w-fit mt-0.5 ${getBadgeStyle(item.materialLabel)}`}>
+                                            {item.materialLabel}
+                                        </span>
                                     </div>
                                     <div className="text-right">
                                         <div className="font-bold text-slate-900">{item.calculatedPrice.toLocaleString()}원</div>
@@ -1359,14 +1352,15 @@ export default function App() {
 
             </main>
 
-            {/* 💎 Bottom Floating Bar: 4K Glass Effect */}
+            {/* 💎 ⭐️ [수정됨] Bottom Floating Island Bar: 바닥에서 띄워진 완전 불투명 카드 */}
             {hasSelections && (
-                <div className="fixed bottom-0 left-0 right-0 z-50 animate-slide-up-premium">
+                <div className="fixed bottom-6 left-4 right-4 z-50 animate-slide-up-premium">
                     <div className="max-w-lg mx-auto">
                         <div className="px-5 pb-2">
                             <ReservationTicker />
                         </div>
-                        <div className="glass-premium px-6 pt-6 pb-10 rounded-t-[2.5rem] safe-area-bottom">
+                        {/* glass-premium 제거 -> 완전 불투명 bg-white, 둥근 모서리, 강한 그림자 */}
+                        <div className="bg-white border border-slate-100 px-6 pt-6 pb-8 rounded-[2.5rem] shadow-2xl shadow-slate-400/20 safe-area-bottom">
                             <div className='flex items-end justify-between mb-5'>
                                 <div>
                                     <div className="text-xs font-bold text-slate-500 mb-1 ml-1">총 견적 예상금액</div>
