@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 
 // =================================================================
-// ⭐️ 상수 및 데이터 (로직 유지)
+// ⭐️ 상수 및 데이터
 // =================================================================
 const MIN_FEE = 200000;
 const KAKAO_CHAT_URL = 'http://pf.kakao.com/_jAxnYn/chat';
@@ -78,7 +78,7 @@ const GlobalStyles = () => (
         @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         
         .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
-        .animate-slide-up { animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .animate-slide-up { animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
         .shadow-soft { box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05); }
         .shadow-glow { box-shadow: 0 0 20px rgba(79, 70, 229, 0.15); }
@@ -107,6 +107,7 @@ const GlobalStyles = () => (
             border-radius: 2px;
         }
         
+        /* ⭐️ 하단 Safe Area 대응 클래스 */
         .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom); }
     `}</style>
 );
@@ -122,8 +123,8 @@ const MATERIALS = [
         badge: 'STANDARD', badgeColor: 'bg-slate-100 text-slate-600'
     },
     {
-        id: 'epoxy', label: '에폭시', priceMod: 1.8,
-        description: '무펄/무광, 반영구적 수명',
+        id: 'kerapoxy', label: '에폭시', priceMod: 1.8,
+        description: '호텔같은 무광택, 반영구적 수명',
         badge: 'PREMIUM', badgeColor: 'bg-amber-100 text-amber-700'
     },
 ];
@@ -517,7 +518,7 @@ const MaterialDetailModal = ({ onClose }) => (
                          <div className="shrink-0 mt-0.5"><Crown size={16} className="text-indigo-500"/></div>
                          <div>
                             <div className="font-bold text-indigo-700 text-sm mb-1">에폭시 추천</div>
-                            <p className="text-xs text-indigo-600/80 leading-snug">자가 거주로 10년 이상 계획하시거나, 호텔 같은 고급스러운 인테리어 효과를 원하시는 분께 적합합니다.</p>
+                            <p className="text-xs text-indigo-600/80 leading-snug">자가 거주로 5년 이상 계획하시거나, 호텔 같은 고급스러운 인테리어 효과를 원하시는 분께 적합합니다.</p>
                          </div>
                     </div>
                 </div>
@@ -555,7 +556,6 @@ const Accordion = ({ question, answer }) => {
 const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageURL, brightnessLevel, onBrightnessChange, onTileImageReset }) => {
     const baseColorData = GROUT_COLORS.find(c => c.id === selectedColorId) || GROUT_COLORS[0];
     const GROUT_LINE_WIDTH = 12;
-    // ⭐️ [추가] 툴팁 제어를 위한 state와 ref
     const [showCameraHint, setShowCameraHint] = useState(false);
     const simulationRef = useRef(null);
 
@@ -573,11 +573,9 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
         backgroundImage: `linear-gradient(to right, ${DARK_COLOR_CODE}, ${baseColorData.code}, ${BRIGHT_COLOR_CODE})`
     }), [baseColorData.code]);
 
-    // ⭐️ [추가] 스크롤 감지 로직 (Intersection Observer)
     useEffect(() => {
         const observer = new IntersectionObserver(([entry]) => {
             if (entry.isIntersecting) {
-                // 화면에 60% 이상 보일 때 힌트 노출
                 setShowCameraHint(true);
             }
         }, { threshold: 0.6 });
@@ -593,14 +591,13 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                 <Palette className="h-5 w-5 text-indigo-500" /> 색상 미리보기
             </h3>
 
-            {/* 1. 시뮬레이션 화면 - 액자 디자인 */}
-            {/* ⭐️ ref 연결 */}
+            {/* 1. 시뮬레이션 화면 */}
             <div ref={simulationRef} className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white mb-6 bg-slate-100 group aspect-video mx-auto max-w-md">
                 <div className="w-full h-full relative bg-slate-200">
                     <div className="absolute inset-0 transition-all duration-500" style={{ backgroundImage: `url(${effectiveTileImageURL})`, backgroundSize: 'cover', backgroundPosition: 'center', zIndex: 1 }}></div>
                     <div className="absolute inset-0 opacity-30 mix-blend-overlay" style={{ backgroundImage: 'url(/logo.png)', backgroundSize: '30%', backgroundRepeat: 'repeat', zIndex: 5 }}></div>
                     
-                    {/* 줄눈 라인 - Blend Mode 적용으로 리얼함 추가 */}
+                    {/* 줄눈 라인 */}
                     <div className="absolute top-0 bottom-0 left-1/2 shadow-sm" style={{ width: `${GROUT_LINE_WIDTH}px`, backgroundColor: effectiveGroutColor, transform: 'translateX(-50%)', zIndex: 10, mixBlendMode: 'normal', opacity: 0.9 }}></div>
                     <div className="absolute left-0 right-0 top-1/2 shadow-sm" style={{ height: `${GROUT_LINE_WIDTH}px`, backgroundColor: effectiveGroutColor, transform: 'translateY(-50%)', zIndex: 10, mixBlendMode: 'normal', opacity: 0.9 }}></div>
                     
@@ -608,7 +605,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                     <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent pointer-events-none z-20"></div>
                 </div>
                 
-                 {/* 사진 업로드 버튼 (오버레이) */}
+                 {/* 사진 업로드 버튼 */}
                  <div className="absolute bottom-4 right-4 z-30">
                      <input type="file" id="tileFileInput" accept="image/*" onChange={onTileImageUpload} style={{ display: 'none' }} />
                     <label htmlFor="tileFileInput" className="p-2.5 bg-black/50 hover:bg-black/70 backdrop-blur-md text-white rounded-full cursor-pointer shadow-lg transition flex items-center justify-center">
@@ -616,12 +613,11 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                     </label>
                  </div>
 
-                 {/* ⭐️ [추가] 스마트 카메라 힌트 (말풍선) */}
+                 {/* 스마트 카메라 힌트 */}
                  {showCameraHint && tileImageURL === DEFAULT_TILE_IMAGE_URL && (
                     <div className="absolute bottom-16 right-4 z-40 animate-bounce transition-opacity duration-500 pointer-events-none">
                         <div className="bg-indigo-600 text-white text-[11px] font-bold px-4 py-2 rounded-2xl shadow-xl relative">
                             ✨ 우리집 타일을 찍어서 확인해보세요!
-                            {/* 말풍선 꼬리 */}
                             <div className="absolute -bottom-1.5 right-6 w-3 h-3 bg-indigo-600 rotate-45 transform"></div>
                         </div>
                     </div>
@@ -658,7 +654,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
                 </div>
             </div>
 
-            {/* 4. 색상 선택 그리드 - 둥근 디자인 */}
+            {/* 4. 색상 선택 그리드 */}
             <div className="bg-white p-5 rounded-3xl shadow-soft border border-slate-100/50">
                 <div className="text-xs font-bold text-slate-400 mb-3 ml-1">컬러 선택</div>
                 <div className='grid grid-cols-5 gap-3'>
@@ -687,7 +683,6 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
 
 // ⭐️ [App Main] ⭐️
 export default function App() {
-    // ... (기존 state 및 로직 유지) ...
     const [housingType, setHousingType] = useState('new');
     const [material, setMaterial] = useState('poly');
     const [polyOption, setPolyOption] = useState('pearl');
@@ -710,7 +705,7 @@ export default function App() {
         }
     }, [quantities['entrance']]);
 
-    // ⭐️ 수량 변경 핸들러 (바닥 2곳 합산 로직 포함)
+    // ⭐️ 수량 변경 핸들러
     const handleQuantityChange = useCallback((id, delta) => {
         setQuantities(prev => {
             const currentQty = prev[id] || 0;
@@ -723,11 +718,9 @@ export default function App() {
                 if (id === 'bathtub_wall' && (newQuantities['common_bath_wall'] || 0) > 0) newQuantities['common_bath_wall'] = 0;
             }
             
-            // 바닥 합산 계산 (안방+공용)
             const prevFloorCount = (prev['master_bath_floor'] || 0) + (prev['common_bath_floor'] || 0);
             const newFloorCount = (newQuantities['master_bath_floor'] || 0) + (newQuantities['common_bath_floor'] || 0);
 
-            // 현관 무료 로직 (바닥 2곳 이상 시 자동 선택)
             if (newFloorCount >= 2 && newQuantities['entrance'] === 0) { 
                 newQuantities['entrance'] = 1; 
             }
@@ -1206,7 +1199,6 @@ export default function App() {
             <header className="sticky top-0 z-40 transition-all duration-300 bg-white/80 backdrop-blur-md border-b border-slate-100/50">
                  <ReservationTicker variant="top-bar" />
                 <div className="px-5 py-4 flex items-center justify-between max-w-lg mx-auto w-full">
-                    {/* ⭐️ [수정] 아이콘 제거 및 한글 로고 적용 + PRO 복원 */}
                     <div className="flex items-center gap-2">
                         <h1 className="text-xl font-black text-slate-900 tracking-tight">
                             줄눈의미학<span className="text-indigo-600 text-[10px] font-bold ml-1 align-top">PRO</span>
@@ -1225,14 +1217,11 @@ export default function App() {
 
             <main className="max-w-lg mx-auto p-5 space-y-10">
                 
-                {/* ⭐️ [수정된 비디오 섹션] 분리된 디자인 */}
                 <section className="animate-fade-in">
-                    {/* 1. 비디오 플레이어 카드 */}
                     <div className="bg-slate-900 rounded-[2rem] overflow-hidden shadow-soft mb-4 aspect-video relative group">
                         <iframe key={currentVideo.id} width="100%" height="100%" src={currentEmbedUrl} title={currentVideo.title} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen className="w-full h-full border-0 opacity-90 group-hover:opacity-100 transition-opacity duration-500"></iframe>
                     </div>
 
-                    {/* 2. 분리된 선택 바 (Segmented Control 스타일) */}
                     <div className="bg-white p-1.5 rounded-2xl border border-slate-100 shadow-sm flex gap-1">
                         {YOUTUBE_VIDEOS.map((video) => (
                             <button
@@ -1281,7 +1270,6 @@ export default function App() {
                                             <p className="text-xs text-slate-400 leading-snug">{item.description}</p>
                                         </div>
 
-                                        {/* 상세 옵션 버튼 - 트렌디한 디자인 */}
                                         <div className={`transition-all duration-300 overflow-hidden ${isSelected ? 'max-h-20 opacity-100 mt-auto pt-2' : 'max-h-0 opacity-0'}`}>
                                             <div className="bg-slate-50 rounded-xl p-1 flex gap-1">
                                                 {item.id === 'poly' && (
@@ -1331,7 +1319,7 @@ export default function App() {
                             </div>
                             <div>
                                 <div className="text-sm font-bold text-indigo-900">신축·구축 동일 정가제</div>
-                                <div className="text-xs text-indigo-600/70 mt-0.5">타일크기 바닥 30x30cm, 벽 30x60cm 기준</div>
+                                <div className="text-xs text-indigo-600/70 mt-0.5">바닥 30X30cm, 벽 30X60cm 타일크기 기준</div>
                             </div>
                         </div>
                     </div>
@@ -1377,55 +1365,48 @@ export default function App() {
                 </button>
             </main>
 
+            {/* ⭐️ [최종 수정] 하단 견적 바 (Bottom Sheet) */}
             {hasSelections && (
                 <div className="fixed bottom-0 left-0 right-0 z-50 animate-slide-up">
                     <div className="max-w-lg mx-auto">
-                        <div className="px-5 pb-5">
-                            <div className="bg-white/90 backdrop-blur-xl border border-white/20 p-5 shadow-[0_8px_40px_rgba(0,0,0,0.15)] safe-area-bottom rounded-3xl">
-                                <div className='flex items-end justify-between mb-4'>
-                                    <div>
-                                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Total Estimate</div>
-                                        <div className="flex items-baseline gap-1">
-                                            <span className="text-3xl font-black text-slate-900 tracking-tighter">{calculation.price.toLocaleString()}</span>
-                                            <span className="text-sm font-bold text-slate-400">원</span>
+                        <div className="bg-white shadow-[0_-10px_40px_rgba(0,0,0,0.1)] border-t border-slate-100 px-6 pt-5 pb-10 rounded-t-3xl safe-area-bottom">
+                            <div className='flex items-center justify-between mb-5'>
+                                <div>
+                                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Total Estimate</div>
+                                    <div className="flex items-baseline gap-1">
+                                        <span className="text-4xl font-black text-slate-900 tracking-tighter">{calculation.price.toLocaleString()}</span>
+                                        <span className="text-lg font-bold text-slate-400">원</span>
+                                    </div>
+                                </div>
+                                <div className='flex flex-col items-end gap-1'>
+                                    {calculation.minimumFeeApplied && (
+                                        <div className="text-[10px] font-bold text-rose-500 bg-rose-50 px-2.5 py-1 rounded-full border border-rose-100">
+                                            최소 출장비 적용
                                         </div>
-                                    </div>
-                                    
-                                    <div className='flex flex-col items-end'>
-                                        {calculation.minimumFeeApplied && (
-                                            <div className="text-[10px] font-bold text-rose-500 bg-rose-50 px-2 py-1 rounded-full mb-1">
-                                                최소 출장비 적용
-                                            </div>
-                                        )}
-                                        {calculation.label && !calculation.minimumFeeApplied && (
-                                                <div className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-full mb-1 flex items-center gap-1">
-                                                    <Sparkles size={10} fill="currentColor"/> {calculation.label}
-                                                </div>
-                                        )}
-                                        {((calculation.minimumFeeApplied || calculation.isPackageActive) && (calculation.priceBeforeAllDiscount > calculation.price)) && (
-                                            <span className="text-xs text-slate-300 line-through font-medium">
-                                                {calculation.priceBeforeAllDiscount.toLocaleString()}원
-                                            </span>
-                                        )}
-                                    </div>
+                                    )}
+                                    {calculation.label && !calculation.minimumFeeApplied && (
+                                        <div className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-100 flex items-center gap-1">
+                                            <Sparkles size={10} fill="currentColor"/> {calculation.label}
+                                        </div>
+                                    )}
                                 </div>
+                            </div>
 
-                                <div className='grid grid-cols-5 gap-3'>
-                                    <button
-                                        onClick={() => { setShowModal(true); }}
-                                        className="col-span-3 py-4 rounded-2xl font-bold text-white bg-slate-900 hover:bg-slate-800 shadow-lg shadow-slate-300 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-                                    >
-                                        <List size={18} /> 견적서 확인
-                                    </button>
-                                    <a
-                                        href={KAKAO_CHAT_URL}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="col-span-2 py-4 rounded-2xl font-bold text-[#371D1E] bg-[#FAE100] hover:brightness-95 shadow-lg shadow-yellow-200/50 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-                                    >
-                                        <Layers size={18} /> 카톡상담
-                                    </a>
-                                </div>
+                            <div className='grid grid-cols-2 gap-3'>
+                                <button
+                                    onClick={() => { setShowModal(true); }}
+                                    className="h-14 rounded-2xl font-bold text-white bg-slate-900 hover:bg-slate-800 active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-base shadow-lg shadow-slate-200"
+                                >
+                                    <List size={20} /> 견적서 확인
+                                </button>
+                                <a
+                                    href={KAKAO_CHAT_URL}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="h-14 rounded-2xl font-bold text-[#371D1E] bg-[#FAE100] hover:brightness-95 active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-base shadow-lg shadow-yellow-100"
+                                >
+                                    <Layers size={20} /> 카톡상담
+                                </a>
                             </div>
                         </div>
                     </div>
