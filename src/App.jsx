@@ -565,7 +565,7 @@ const ColorPalette = ({ selectedColorId, onSelect, onTileImageUpload, tileImageU
     return (
         <div className='mt-8 pt-6 border-t border-slate-100'>
             <h3 className="text-lg font-bold flex items-center gap-2 mb-4 text-slate-800">
-                <Palette className="h-5 w-5 text-indigo-500" /> 색상 미리보기 (시뮬레이션)
+                <Palette className="h-5 w-5 text-indigo-500" /> 색상 미리보기
             </h3>
 
             {/* 1. 시뮬레이션 화면 */}
@@ -1270,13 +1270,13 @@ export default function App() {
                                                 <div className="p-1.5 bg-white rounded-xl border border-slate-100 shadow-inner flex gap-2">
                                                      {item.id === 'poly' && (
                                                         <>
-                                                            <button onClick={(e) => { e.stopPropagation(); setPolyOption('pearl'); }} className={`flex-1 py-3 text-xs font-bold rounded-lg transition-all shadow-sm ${polyOption === 'pearl' ? 'bg-indigo-600 text-white shadow-indigo-200' : 'bg-slate-50 text-slate-400 hover:bg-white'}`}>펄 (유광)</button>
-                                                            <button onClick={(e) => { e.stopPropagation(); setPolyOption('no_pearl'); }} className={`flex-1 py-3 text-xs font-bold rounded-lg transition-all shadow-sm ${polyOption === 'no_pearl' ? 'bg-indigo-600 text-white shadow-indigo-200' : 'bg-slate-50 text-slate-400 hover:bg-white'}`}>무펄 (심플)</button>
+                                                            <button onClick={(e) => { e.stopPropagation(); setPolyOption('pearl'); }} className={`flex-1 py-3 text-xs font-bold rounded-lg transition-all shadow-sm ${polyOption === 'pearl' ? 'bg-indigo-600 text-white shadow-indigo-200' : 'bg-slate-50 text-slate-400 hover:bg-white'}`}>펄</button>
+                                                            <button onClick={(e) => { e.stopPropagation(); setPolyOption('no_pearl'); }} className={`flex-1 py-3 text-xs font-bold rounded-lg transition-all shadow-sm ${polyOption === 'no_pearl' ? 'bg-indigo-600 text-white shadow-indigo-200' : 'bg-slate-50 text-slate-400 hover:bg-white'}`}>무펄</button>
                                                         </>
                                                     )}
                                                     {item.id === 'kerapoxy' && (
                                                         <>
-                                                            <button onClick={(e) => { e.stopPropagation(); setEpoxyOption('starlike'); }} className={`flex-1 py-3 text-xs font-bold rounded-lg transition-all shadow-sm ${epoxyOption === 'starlike' ? 'bg-amber-500 text-white shadow-amber-200' : 'bg-amber-50/50 text-amber-600/60 hover:bg-white'}`}>스타라이크</button>
+                                                            <button onClick={(e) => { e.stopPropagation(); setEpoxyOption('starlike'); }} className={`flex-1 py-3 text-xs font-bold rounded-lg transition-all shadow-sm ${epoxyOption === 'starlike' ? 'bg-amber-500 text-white shadow-amber-200' : 'bg-amber-50/50 text-amber-600/60 hover:bg-white'}`}>스타라이크 EVO</button>
                                                             <button onClick={(e) => { e.stopPropagation(); setEpoxyOption('kerapoxy'); }} className={`flex-1 py-3 text-xs font-bold rounded-lg transition-all shadow-sm ${epoxyOption === 'kerapoxy' ? 'bg-amber-500 text-white shadow-amber-200' : 'bg-amber-50/50 text-amber-600/60 hover:bg-white'}`}>케라폭시</button>
                                                         </>
                                                     )}
@@ -1305,7 +1305,7 @@ export default function App() {
                 <section className="animate-premium-in" style={{ animationDelay: '200ms' }}>
                     <div className="flex items-center gap-3 mb-6 pt-10 border-t border-slate-200">
                         <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-indigo-500 to-violet-600 text-white rounded-xl text-sm font-bold shadow-md shadow-indigo-200">2</div>
-                        <h2 className="text-2xl font-black text-slate-800 tracking-tight">시공 범위는요?</h2>
+                        <h2 className="text-2xl font-black text-slate-800 tracking-tight">간편 견적 확인</h2>
                     </div>
 
                     <div className="bg-gradient-to-r from-indigo-50 to-white rounded-2xl p-5 border border-indigo-100 flex flex-col gap-3 mb-8">
@@ -1315,7 +1315,7 @@ export default function App() {
                             </div>
                             <div>
                                 <div className="text-sm font-bold text-indigo-900">추가금 없는 정가제</div>
-                                <div className="text-xs text-indigo-700/70 mt-1 leading-relaxed">신축/구축 동일 가격이며, 타일 난이도에 따른 현장 추가요금을 받지 않습니다.</div>
+                                <div className="text-xs text-indigo-700/70 mt-1 leading-relaxed">신축/구축 동일 가격이며, 바닥 30x30cm, 벽 30x60cm 타일크기 기준입니다.</div>
                             </div>
                         </div>
                     </div>
@@ -1332,7 +1332,7 @@ export default function App() {
                         <div>
                             <div className="flex items-center gap-3 mb-6 mt-12">
                                 <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-indigo-500 to-violet-600 text-white rounded-xl text-sm font-bold shadow-md shadow-indigo-200">3</div>
-                                <h2 className="text-2xl font-black text-slate-800 tracking-tight">실리콘도 하시나요?</h2>
+                                <h2 className="text-2xl font-black text-slate-800 tracking-tight">실리콘 재시공</h2>
                             </div>
                             {renderAreaList(SILICON_AREAS)}
                         </div>
