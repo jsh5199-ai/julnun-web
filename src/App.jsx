@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 
 // =================================================================
-// ⭐️ 상수 및 데이터
+// ⭐️ 상수 및 데이터 (비즈니스 로직 유지)
 // =================================================================
 const MIN_FEE = 200000;
 const KAKAO_CHAT_URL = 'http://pf.kakao.com/_jAxnYn/chat';
@@ -34,7 +34,6 @@ const BRIGHT_COLOR_CODE = '#ffffff';
 const DARK_COLOR_CODE = '#565556';
 
 const ORIGINAL_PRICES = {
-    // ⭐️ 바닥 분리에 따른 가격 데이터 매핑
     'master_bath_floor': { poly: 230000, epoxy: 400000 },
     'common_bath_floor': { poly: 230000, epoxy: 400000 },
     'shower_booth': { poly: 150000, epoxy: 300000 },
@@ -67,65 +66,78 @@ const mixColors = (color1, color2, weight) => {
 };
 
 // =================================================================
-// ⭐️ 스타일 정의
+// 💎 4K Premium Global Styles (고화질 스타일)
 // =================================================================
 const GlobalStyles = () => (
     <style>{`
         @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
         
-        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; }
+        body { 
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; 
+            background-color: #f1f5f9; /* Slate-100보다 조금 더 깊은 색 */
+            -webkit-font-smoothing: antialiased; /* 폰트 렌더링을 4k급으로 선명하게 */
+            -moz-osx-font-smoothing: grayscale;
+        }
         
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        /* 스크롤바 숨김 (깔끔함 유지) */
+        ::-webkit-scrollbar { display: none; }
         
-        /* ⭐️ 물결 반짝임 (Shimmer) 애니메이션 */
-        @keyframes shimmer {
+        /* ⭐️ Premium Animations */
+        @keyframes gentle-fade-in { from { opacity: 0; transform: translateY(10px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        @keyframes premium-slide-up { 
+            from { transform: translateY(100%); opacity: 0; } 
+            to { transform: translateY(0); opacity: 1; } 
+            /* cubic-bezier로 고급스러운 움직임 구현 */
+            animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes shimmer-gold {
             0% { background-position: -200% 0; }
             100% { background-position: 200% 0; }
         }
-        .animate-shimmer {
-            background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
-            background-size: 200% 100%;
-            animation: shimmer 2s infinite linear;
+        @keyframes pulse-subtle {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
         }
 
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-top: 1px solid rgba(255, 255, 255, 0.5);
-        }
-        
-        /* ⭐️ [수정] glass-header: 투명 효과를 제거하고 완전 불투명 흰색 배경으로 변경 */
-        .opaque-header { 
-            background: #ffffff;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-            display: flex;
-            flex-direction: column; 
-        }
+        .animate-premium-in { animation: gentle-fade-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .animate-slide-up-premium { animation: premium-slide-up 0.5s forwards; }
 
-        .card-shadow { box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); }
-        .card-hover:hover { box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06); transform: translateY(-2px); }
+        /* ⭐️ Glassmorphism 2.0: 더 선명하고 깊이감 있는 유리 효과 */
+        .glass-premium {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-top: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 -8px 32px 0 rgba(31, 38, 135, 0.07);
+        }
         
+        /* 카드 호버 효과 */
+        .card-premium-hover {
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .card-premium-hover:active { transform: scale(0.98); }
+
+        /* 레인지 슬라이더 4K 스타일 */
         input[type=range] {
             -webkit-appearance: none;
             background: transparent;
         }
         input[type=range]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            height: 20px;
-            width: 20px;
+            height: 24px;
+            width: 24px;
             border-radius: 50%;
             background: #ffffff;
-            border: 2px solid #4f46e5;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-            margin-top: -8px;
+            border: 1px solid rgba(0,0,0,0.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            margin-top: -10px;
             cursor: pointer;
+            transition: transform 0.2s;
         }
+        input[type=range]::-webkit-slider-thumb:active { transform: scale(1.1); }
         input[type=range]::-webkit-slider-runnable-track {
             width: 100%;
             height: 4px;
-            cursor: pointer;
             border-radius: 2px;
         }
         
@@ -211,7 +223,6 @@ const CUSTOM_MIXED_PACKAGES = [
     { id: 'P_MIX_NEW_B', price: 1150000, label: '혼합벽면B (바닥/공용벽E, 안방벽P) 115만', E_areas: [['bathroom_floor', 2], ['common_bath_wall', 1]], P_areas: [['master_bath_wall', 1]] },
 ];
 const NEW_USER_PACKAGES = [
-    // ⭐️ [추가] 교차 바닥 패키지 (안방P+공용E 또는 안방E+공용P) = 50만원
     { 
         id: 'MIXED_FLOOR_500K_A', 
         price: 500000, 
@@ -254,7 +265,7 @@ const getPackageAreaIds = (pkg) => [
 ];
 
 // =================================================================
-// [컴포넌트] 실시간 예약 알림 (Ticker)
+// [컴포넌트] 실시간 예약 알림 (Ticker) - 4K Update
 // =================================================================
 const ReservationTicker = ({ variant = 'default' }) => {
     const messages = [
@@ -282,17 +293,19 @@ const ReservationTicker = ({ variant = 'default' }) => {
         return () => clearInterval(interval);
     }, []);
 
+    // ⭐️ Top Bar Variant (헤더 상단)
     if (variant === 'top-bar') {
         return (
-            <div className="w-full bg-indigo-50 border-t border-indigo-100/50 py-2 flex justify-center items-center overflow-hidden relative">
+            <div className="w-full bg-gradient-to-r from-indigo-50 via-white to-indigo-50 border-b border-indigo-100/50 py-2.5 flex justify-center items-center overflow-hidden relative z-40">
                 <div className={`flex items-center gap-2 transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
-                    <Bell size={12} className="text-indigo-600 animate-pulse" />
-                    <span className="text-xs font-bold text-indigo-800 truncate">{messages[index]}</span>
+                    <div className="bg-indigo-100 p-1 rounded-full"><Bell size={10} className="text-indigo-600 animate-pulse" /></div>
+                    <span className="text-[11px] font-bold text-indigo-900 tracking-tight truncate">{messages[index]}</span>
                 </div>
             </div>
         );
     }
 
+    // Default Variant (하단 플로팅)
     return (
         <div className={`w-full flex justify-center pb-2 transition-all duration-500`}>
              <div className={`bg-slate-800/80 backdrop-blur-sm text-white px-4 py-1.5 rounded-full shadow-lg border border-white/10 flex items-center gap-2 transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
@@ -303,6 +316,9 @@ const ReservationTicker = ({ variant = 'default' }) => {
     );
 };
 
+// =================================================================
+// [컴포넌트] 견적 확인 모달 (Fintech Style) - 4K Update
+// =================================================================
 const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleReview }) => {
     const { price, label, minimumFeeApplied, itemizedPrices, priceBeforeAllDiscount } = calculation;
     const totalDiscount = priceBeforeAllDiscount - price;
@@ -313,140 +329,99 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
     const isSoomgoReviewApplied = selectedReviews.has('soomgo_review');
 
     return (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in overflow-y-auto">
-            <div className="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden animate-slide-up my-4">
-                <div className="sticky top-0 bg-white/90 backdrop-blur-md p-5 border-b border-slate-100 flex justify-between items-center z-10">
-                    <h3 className="font-bold text-lg text-slate-900 flex items-center gap-2 tracking-tight">
-                        견적서 확인
-                    </h3>
-                    <button onClick={onClose} className="bg-slate-100 p-2 rounded-full text-slate-500 hover:bg-slate-200 transition"><X size={20} /></button>
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center sm:p-4 animate-premium-in">
+            <div className="bg-white w-full max-w-sm sm:rounded-[2rem] rounded-t-[2rem] shadow-2xl overflow-hidden animate-slide-up-premium max-h-[90vh] flex flex-col">
+                <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-white/80 backdrop-blur-md sticky top-0 z-10">
+                    <h3 className="font-extrabold text-xl text-slate-900 tracking-tight">상세 견적서</h3>
+                    <button onClick={onClose} className="bg-slate-100 p-2.5 rounded-full text-slate-500 hover:bg-slate-200 transition"><X size={18} /></button>
                 </div>
 
-                <div className="p-4 overflow-y-auto max-h-[65vh] bg-slate-50">
-                    <div ref={quoteRef} className="bg-white rounded-2xl shadow-sm p-5 space-y-4 border border-slate-100">
-                        
-                        <div className='bg-slate-50 rounded-xl p-4 border border-slate-200'>
-                             <div className='flex justify-between items-start mb-2'>
-                                <div className='flex items-center gap-1.5'>
-                                    {(minimumFeeApplied || label) && (
-                                        <span className={`text-[11px] font-bold px-2.5 py-1 rounded text-white shadow-sm relative overflow-hidden ${minimumFeeApplied ? 'bg-rose-500' : 'bg-indigo-600'} animate-gentle-pulse`}>
-                                            <span className="relative z-10">{minimumFeeApplied ? '최소비용' : label}</span>
-                                            <div className="absolute inset-0 animate-shimmer" style={{ background: 'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%)' }}></div>
-                                        </span>
-                                    )}
+                <div className="p-6 overflow-y-auto bg-slate-50 flex-1">
+                    <div ref={quoteRef} className="bg-white rounded-3xl shadow-sm border border-slate-100/80 p-6 space-y-6 relative overflow-hidden">
+                        {/* 배경 워터마크 효과 */}
+                        <div className="absolute top-0 right-0 -mt-4 -mr-4 text-slate-50 opacity-50 pointer-events-none">
+                            <Crown size={120} />
+                        </div>
+
+                        {/* 가격 헤더 */}
+                        <div className="relative z-10 text-center pb-6 border-b border-dashed border-slate-200">
+                             {(minimumFeeApplied || label) && (
+                                <div className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-bold mb-3 shadow-sm ${minimumFeeApplied ? 'bg-rose-100 text-rose-600' : 'bg-indigo-100 text-indigo-600'}`}>
+                                    {minimumFeeApplied ? <Info size={10}/> : <Crown size={10}/>}
+                                    {minimumFeeApplied ? '최소비용 적용' : label}
                                 </div>
+                            )}
+                            <div className="flex items-baseline justify-center gap-2">
+                                <span className="text-4xl font-black text-slate-900 tracking-tighter drop-shadow-sm">
+                                    {price.toLocaleString()}
+                                </span>
+                                <span className="text-lg font-bold text-slate-400">원</span>
                             </div>
-                            {(minimumFeeApplied || isDiscountApplied) && (
-                                <div className="flex flex-col gap-1.5 mt-2 pt-2 border-t border-slate-200/60">
-                                    {minimumFeeApplied && <div className="text-[11px] text-slate-500 flex items-center gap-1"><Info size={12} /> 최소 시공비(20만원) 적용</div>}
-                                    
-                                    {isDiscountApplied && (
-                                        <div className="space-y-1">
-                                            <div className="text-[11px] text-slate-600 flex items-start gap-1.5 leading-snug">
-                                                <Check size={12} className="mt-0.5 shrink-0 text-indigo-600"/>
-                                                <span>변기테두리, 바닥테두리 서비스</span>
-                                            </div>
-                                            <div className="text-[11px] text-slate-600 flex items-start gap-1.5 leading-snug">
-                                                <Check size={12} className="mt-0.5 shrink-0 text-indigo-600"/>
-                                                <span>젠다이 실리콘 오염방지코팅 서비스</span>
-                                            </div>
-                                        </div>
-                                    )}
+                            {(isDiscountApplied || minimumFeeApplied) && (priceBeforeAllDiscount > price) && (
+                                <div className="text-sm text-slate-400 line-through font-medium mt-1">
+                                    {priceBeforeAllDiscount.toLocaleString()}원
                                 </div>
                             )}
                         </div>
 
-                        {packageItems.length > 0 && (
-                            <div>
-                                <div className='space-y-2'>
-                                    {packageItems.map((item, index) => {
-                                        const areaInfo = ALL_AREAS.find(a => a.id === item.id);
-                                        
-                                        let badgeClass = 'bg-slate-100 text-slate-600';
-                                        if (item.materialLabel === '에폭시') badgeClass = 'bg-amber-100 text-amber-700';
-                                        else if (item.materialLabel === '폴리아스파틱') badgeClass = 'bg-indigo-50 text-indigo-600';
-                                        else if (item.materialLabel === '실리콘') badgeClass = 'bg-emerald-50 text-emerald-600';
-
-                                        return (
-                                            <div key={index} className='flex justify-between items-center text-sm py-1.5 border-b border-slate-50 last:border-0'>
-                                                <span className='font-medium text-slate-700 text-xs'>{item.label}</span>
-                                                <div className="flex items-center gap-2">
-                                                    <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold ${badgeClass}`}>
-                                                        {item.materialLabel}
-                                                    </span>
-                                                    <span className='font-bold text-slate-900 text-xs'>{item.quantity}{areaInfo ? areaInfo.unit : '개소'}</span>
-                                                </div>
-                                            </div>
-                                        )
-                                    })}
+                        {/* 상세 내역 리스트 */}
+                        <div className="space-y-3 relative z-10">
+                            {packageItems.map((item, index) => (
+                                <div key={index} className="flex justify-between items-center text-sm group">
+                                    <div className="flex flex-col">
+                                        <span className="font-bold text-slate-700">{item.label}</span>
+                                        <span className="text-[10px] text-slate-400 font-medium bg-slate-100 px-1.5 py-0.5 rounded w-fit mt-0.5">{item.materialLabel}</span>
+                                    </div>
+                                    <div className="text-right">
+                                        <div className="font-bold text-slate-900">{item.calculatedPrice.toLocaleString()}원</div>
+                                        <div className="text-[10px] text-slate-400">{item.quantity}{ALL_AREAS.find(a=>a.id===item.id)?.unit}</div>
+                                    </div>
                                 </div>
-                            </div>
-                        )}
-
+                            ))}
+                        </div>
+                        
+                        {/* 할인 내역 */}
                         {discountItems.length > 0 && (
-                            <div className='pt-2 border-t border-dashed border-slate-200'>
+                            <div className="bg-rose-50/50 p-4 rounded-2xl border border-rose-100 space-y-2">
                                 {discountItems.map((item, index) => (
-                                    <div key={index} className='flex justify-between items-center py-1'>
-                                        <div className='flex items-center gap-1.5 text-xs font-medium text-slate-600'>
-                                            <Gift size={12} className='text-rose-500'/> {item.label}
+                                    <div key={index} className='flex justify-between items-center text-xs'>
+                                        <div className='flex items-center gap-1.5 font-bold text-rose-600'>
+                                            <Gift size={12}/> {item.label}
                                         </div>
-                                        <div className='font-bold text-xs text-rose-500'>-{item.originalPrice.toLocaleString()}원</div>
+                                        <div className='font-bold text-rose-600'>-{item.originalPrice.toLocaleString()}원</div>
                                     </div>
                                 ))}
                             </div>
                         )}
-
-                        <button
+                        
+                        {/* 숨고 리뷰 버튼 */}
+                         <button
                             onClick={() => toggleReview('soomgo_review')}
-                            className={`w-full p-3 rounded-xl border transition-all duration-300 flex items-center justify-between group ${isSoomgoReviewApplied ? 'bg-rose-50 border-rose-200' : 'bg-white border-slate-200 hover:border-slate-300'}`}
+                            className={`w-full p-4 rounded-2xl border transition-all duration-300 flex items-center justify-between group relative overflow-hidden ${isSoomgoReviewApplied ? 'bg-gradient-to-br from-rose-500 to-pink-600 border-transparent text-white shadow-lg shadow-rose-200' : 'bg-white border-slate-200 hover:border-slate-300'}`}
                         >
-                            <div className="flex items-center gap-2">
-                                <div className={`p-1.5 rounded-full ${isSoomgoReviewApplied ? 'bg-rose-500 text-white' : 'bg-slate-100 text-slate-400'}`}>
-                                    <Star size={14} fill={isSoomgoReviewApplied ? "currentColor" : "none"} />
+                            <div className="flex items-center gap-3 relative z-10">
+                                <div className={`p-2 rounded-full ${isSoomgoReviewApplied ? 'bg-white/20 text-white' : 'bg-rose-100 text-rose-500'}`}>
+                                    <Star size={16} fill={isSoomgoReviewApplied ? "currentColor" : "currentColor"} />
                                 </div>
                                 <div className="text-left">
-                                    <div className={`text-xs font-bold ${isSoomgoReviewApplied ? 'text-rose-700' : 'text-slate-700'}`}>{soomgoReviewEvent.label}</div>
-                                    <div className="text-[10px] text-rose-500 font-semibold">20,000원 추가 할인</div>
+                                    <div className={`text-sm font-bold ${isSoomgoReviewApplied ? 'text-white' : 'text-slate-800'}`}>숨고 포토리뷰 약속</div>
+                                    <div className={`text-xs font-medium ${isSoomgoReviewApplied ? 'text-white/90' : 'text-rose-500'}`}>즉시 20,000원 할인 적용</div>
                                 </div>
                             </div>
-                            <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${isSoomgoReviewApplied ? 'border-rose-500 bg-rose-500' : 'border-slate-300'}`}>
-                                {isSoomgoReviewApplied && <Check size={10} className="text-white" />}
+                            <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${isSoomgoReviewApplied ? 'border-white bg-white text-rose-500' : 'border-slate-200 bg-slate-50'}`}>
+                                {isSoomgoReviewApplied && <Check size={14} strokeWidth={4} />}
                             </div>
                         </button>
-
-                        <div className='pt-4 border-t-2 border-slate-100 flex flex-col items-end gap-1'>
-                            <div className='flex items-baseline gap-2'>
-                                {(isDiscountApplied || minimumFeeApplied) && (priceBeforeAllDiscount > price) && (
-                                    <span className="text-sm text-slate-400 line-through font-medium">
-                                        {priceBeforeAllDiscount.toLocaleString()}원
-                                    </span>
-                                )}
-                                <span className="text-3xl font-black text-[#0f172a] tracking-tighter">
-                                    {price.toLocaleString()}
-                                </span>
-                                <span className="text-base font-bold text-slate-600">원</span>
-                            </div>
-                            <div className="text-[9px] font-bold text-slate-600 text-right mt-1 leading-tight bg-slate-100 px-2 py-1 rounded inline-block ml-auto">
-                                * 타일크기 바닥 30x30cm, 벽 30x60cm 기준, 재시공은 별도문의
-                            </div>
-                        </div>
                     </div>
                 </div>
 
-                <div className="p-4 bg-white border-t border-slate-100 grid grid-cols-2 gap-3">
-                     <a
-                        href={KAKAO_CHAT_URL}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="py-3 bg-yellow-400 text-slate-900 rounded-xl font-bold hover:bg-yellow-500 transition active:scale-[0.98] flex items-center justify-center gap-2 shadow-sm text-sm"
-                    >
-                        <Layers size={16} /> 카톡상담
+                {/* 하단 버튼 그룹 */}
+                <div className="p-4 bg-white border-t border-slate-100 grid grid-cols-2 gap-3 safe-area-bottom">
+                     <a href={KAKAO_CHAT_URL} target="_blank" rel="noopener noreferrer" className="py-4 bg-[#FAE100] text-[#371D1E] rounded-2xl font-black text-sm hover:bg-[#ffe600] transition active:scale-[0.98] flex items-center justify-center gap-2 shadow-sm">
+                        <Layers size={18} fill="currentColor"/> 카톡 상담
                     </a>
-                    <a
-                        href={`tel:${PHONE_NUMBER}`}
-                        className="py-3 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition active:scale-[0.98] flex items-center justify-center gap-2 shadow-sm text-sm"
-                    >
-                       <Phone size={16} /> 상담원 연결
+                    <a href={`tel:${PHONE_NUMBER}`} className="py-4 bg-slate-900 text-white rounded-2xl font-bold text-sm hover:bg-slate-800 transition active:scale-[0.98] flex items-center justify-center gap-2 shadow-xl shadow-slate-200">
+                        <Phone size={18} /> 상담원 통화
                     </a>
                 </div>
             </div>
@@ -455,8 +430,8 @@ const QuoteModal = ({ calculation, onClose, quoteRef, selectedReviews, toggleRev
 };
 
 const MaterialDetailModal = ({ onClose }) => (
-    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white w-full max-w-md rounded-[2rem] shadow-2xl overflow-hidden animate-slide-up max-h-[85vh] flex flex-col">
+    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-premium-in">
+          <div className="bg-white w-full max-w-md rounded-[2rem] shadow-2xl overflow-hidden animate-slide-up-premium max-h-[85vh] flex flex-col">
             <div className="bg-slate-900 p-6 text-white flex justify-between items-center shrink-0">
               <h3 className="font-bold text-lg flex items-center gap-2"><Info className="h-5 w-5 text-amber-400" /> 소재별 장단점 및 추천</h3>
               <button onClick={onClose} className="bg-white/10 p-2 rounded-full hover:bg-white/20 transition"><X size={20} /></button>
@@ -561,7 +536,7 @@ const Accordion = ({ question, answer }) => {
                 <ChevronDown size={20} className={`text-slate-400 transition-transform duration-300 flex-shrink-0 ${isOpen ? 'rotate-180' : ''}`} />
             </button>
             {isOpen && (
-                <div className="pb-4 text-sm text-slate-500 leading-relaxed animate-fade-in bg-slate-50/50 p-3 rounded-lg mb-2">
+                <div className="pb-4 text-sm text-slate-500 leading-relaxed animate-premium-in bg-slate-50/50 p-3 rounded-lg mb-2">
                     {answer}
                 </div>
             )}
@@ -1123,7 +1098,7 @@ export default function App() {
             );
         }
         return (
-            <div className={`mt-3 pt-2 border-t border-slate-100 ${isQuantitySelected ? 'animate-slide-down' : ''}`}>
+            <div className={`mt-3 pt-2 border-t border-slate-100 ${isQuantitySelected ? 'animate-premium-in' : ''}`}>
                 <div className='flex gap-2'>
                     {MATERIALS.map(mat => (
                         <button
@@ -1157,7 +1132,7 @@ export default function App() {
                 const description = area.desc || area.basePrice ? ((area.desc && area.desc.trim() !== '') ? (<div className="text-xs text-indigo-500 mt-0.5">{area.desc}</div>) : null) : null;
 
                 return (
-                    <div key={area.id} className={`flex flex-col p-4 rounded-2xl border transition-all duration-300 card-shadow group ${isSelected ? 'bg-white border-indigo-500 ring-1 ring-indigo-500 shadow-lg' : 'bg-white border-transparent hover:border-slate-200'}`}>
+                    <div key={area.id} className={`flex flex-col p-4 rounded-2xl border transition-all duration-300 group ${isSelected ? 'bg-white border-indigo-500 ring-1 ring-indigo-500 shadow-lg' : 'bg-white border-transparent hover:border-slate-200 card-premium-hover shadow-sm'}`}>
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-4">
                                 <div className={`p-3 rounded-xl transition-colors duration-300 ${isSelected ? 'bg-indigo-600 text-white shadow-md' : 'bg-slate-100 text-slate-400 group-hover:text-indigo-500 group-hover:bg-indigo-50'}`}>
@@ -1191,38 +1166,43 @@ export default function App() {
         </div>
     );
 
+    // ⭐️ 4K Premium UI Layout
     return (
-        <div className={`min-h-screen bg-slate-50 font-sans pb-48 selection:bg-indigo-100 selection:text-indigo-900`}>
+        <div className="min-h-screen bg-[#F8FAFC] font-sans pb-48 selection:bg-indigo-500 selection:text-white">
             <GlobalStyles />
 
-            {/* ⭐️ [수정] glass-header 대신 opaque-header 클래스 사용 및 bg-white로 불투명 배경 확보 */}
-            <header className="opaque-header sticky top-0 z-30 transition-all duration-300 bg-white border-b border-slate-100">
+            {/* 💎 Header: 불투명한 흰색 배경 + 부드러운 그림자 */}
+            <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-xl border-b border-slate-200/50 shadow-sm transition-all duration-300">
+                <ReservationTicker variant="top-bar" />
                 <div className="px-5 py-4 flex items-center justify-between max-w-lg mx-auto w-full">
-                    <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-black shadow-lg shadow-indigo-200">
+                    <div className="flex items-center gap-2.5">
+                        <div className="w-9 h-9 bg-gradient-to-br from-indigo-600 to-violet-600 rounded-xl flex items-center justify-center text-white font-black shadow-lg shadow-indigo-200">
                             M
                         </div>
-                        <h1 className="text-xl font-black text-slate-800 tracking-tighter">MIHAK<span className="text-indigo-600 text-[10px] font-bold ml-1 align-top">PRO</span></h1>
+                        <h1 className="text-xl font-black text-slate-800 tracking-tighter">
+                            MIHAK<span className="text-indigo-600 text-[10px] font-bold ml-1 align-top bg-indigo-50 px-1 rounded">PRO</span>
+                        </h1>
                     </div>
                     <div className='flex gap-2'>
-                        <button onClick={() => window.location.href = `tel:${PHONE_NUMBER}`} className="w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-indigo-600 transition active:scale-90">
+                        <button onClick={() => window.location.href = `tel:${PHONE_NUMBER}`} className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-50 text-slate-500 border border-slate-100 hover:bg-white hover:shadow-md hover:text-indigo-600 transition active:scale-95">
                             <Phone size={18} />
                         </button>
-                        <button onClick={() => window.location.reload()} className="w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-indigo-600 transition active:scale-90">
+                        <button onClick={() => window.location.reload()} className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-50 text-slate-500 border border-slate-100 hover:bg-white hover:shadow-md hover:text-indigo-600 transition active:scale-95">
                             <RefreshCw size={18} />
                         </button>
                     </div>
                 </div>
-                <ReservationTicker variant="top-bar" />
             </header>
 
-            <main className="max-w-lg mx-auto p-5 space-y-8">
+            <main className="max-w-lg mx-auto p-5 space-y-10">
                 
-                <section className="bg-white rounded-[1.5rem] overflow-hidden shadow-xl shadow-slate-200/50 border border-white animate-fade-in group">
+                {/* 1. Video Section: 4K 카드 디자인 */}
+                <section className="bg-white rounded-[2rem] overflow-hidden shadow-2xl shadow-slate-200/60 border border-white animate-premium-in group relative transform transition-all hover:scale-[1.01]">
+                    <div className="absolute inset-0 bg-slate-900/5 z-10 pointer-events-none group-hover:opacity-0 transition"></div>
                     <div className="relative aspect-video w-full bg-slate-900">
-                         <iframe key={currentVideo.id} width="100%" height="100%" src={currentEmbedUrl} title={currentVideo.title} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen className="w-full h-full border-0 opacity-90 group-hover:opacity-100 transition-opacity duration-500"></iframe>
+                         <iframe key={currentVideo.id} width="100%" height="100%" src={currentEmbedUrl} title={currentVideo.title} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen className="w-full h-full border-0"></iframe>
                     </div>
-                    <div className="p-2 flex gap-2 bg-white">
+                    <div className="p-2 flex gap-2 bg-white/80 backdrop-blur-md">
                         {YOUTUBE_VIDEOS.map((video) => (
                             <button
                                 key={video.id}
@@ -1235,87 +1215,69 @@ export default function App() {
                     </div>
                 </section>
 
-                {/* ⭐️ [디자인 수정됨] 시공 소재 선택 섹션 - 배경 아이콘 복구, 문구 아이콘 제거 */}
-                <section className="animate-fade-in delay-200">
-                    <h2 className="text-xl font-black text-slate-800 mb-5 flex items-center gap-2">
-                        <span className="flex items-center justify-center w-7 h-7 bg-indigo-600 text-white rounded-full text-sm font-bold shadow-md shadow-indigo-200">1</span>
-                        시공 소재 안내
-                    </h2>
+                {/* 2. Materials Section */}
+                <section className="animate-premium-in" style={{ animationDelay: '100ms' }}>
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-indigo-500 to-violet-600 text-white rounded-xl text-sm font-bold shadow-md shadow-indigo-200">1</div>
+                        <h2 className="text-2xl font-black text-slate-800 tracking-tight">어떤 소재로 할까요?</h2>
+                    </div>
                     
-                    <div className="space-y-5">
+                    <div className="grid grid-cols-1 gap-5">
                         {MATERIALS.map((item) => {
                             const isSelected = item.id === material;
-                            // 소재별 테마 컬러 설정
+                            // 테마 로직 유지하되 스타일 클래스 강화
                             const theme = item.id === 'poly' 
                                 ? { 
-                                    bg: 'bg-gradient-to-br from-white to-slate-50', 
-                                    border: 'border-slate-200', 
-                                    activeBorder: 'border-indigo-500 ring-2 ring-indigo-500 ring-offset-2',
-                                    iconColor: 'text-slate-200',
-                                    activeIconColor: 'text-indigo-600',
+                                    bg: 'bg-white', 
+                                    activeBg: 'bg-gradient-to-br from-indigo-50/50 to-white',
+                                    border: 'border-slate-100', 
+                                    activeBorder: 'border-indigo-500 ring-2 ring-indigo-500/20',
                                     badge: 'bg-slate-100 text-slate-600'
-                                    }
+                                  }
                                 : { 
-                                    bg: 'bg-gradient-to-br from-[#fffdf5] to-[#fff7ed]', 
+                                    bg: 'bg-[#FFFCF5]', 
+                                    activeBg: 'bg-gradient-to-br from-[#FFF8E1] to-[#FFFCF5]',
                                     border: 'border-amber-100', 
-                                    activeBorder: 'border-amber-500 ring-2 ring-amber-500 ring-offset-2',
-                                    iconColor: 'text-amber-100',
-                                    activeIconColor: 'text-amber-600',
+                                    activeBorder: 'border-amber-500 ring-2 ring-amber-500/20',
                                     badge: 'bg-amber-100 text-amber-700'
-                                    };
+                                  };
 
                             return (
                                 <div 
                                     key={item.id} 
                                     onClick={() => setMaterial(item.id)} 
-                                    className={`relative overflow-hidden rounded-[1.5rem] cursor-pointer transition-all duration-300 group ${isSelected ? `${theme.activeBorder} shadow-xl` : `${theme.border} border shadow-sm hover:shadow-md hover:-translate-y-1`} ${theme.bg}`}
+                                    className={`relative overflow-hidden rounded-[2rem] cursor-pointer transition-all duration-300 group ${isSelected ? `${theme.activeBorder} shadow-xl ${theme.activeBg}` : `${theme.border} border shadow-sm hover:shadow-lg bg-white`}`}
                                 >
-                                    {/* ⭐️ [복구] 배경 장식 아이콘 */}
-                                    <div className={`absolute -right-4 -bottom-4 opacity-20 transition-transform duration-500 ${isSelected ? 'scale-110 rotate-12' : 'scale-100'}`}>
-                                        {item.id === 'poly' ? <Sparkles size={120} className={theme.iconColor} /> : <Crown size={120} className={theme.iconColor} />}
-                                    </div>
-
-                                    <div className="p-6 relative z-10">
-                                        <div className="flex justify-between items-start mb-3">
-                                            <div className='flex items-center gap-3'>
-                                                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${isSelected ? `${theme.activeIconColor} bg-current border-transparent` : 'border-slate-300 bg-white'}`}>
-                                                    {isSelected && <Check size={14} className="text-white" strokeWidth={4} />}
+                                    <div className="p-7 relative z-10">
+                                        <div className="flex justify-between items-start mb-4">
+                                            <div>
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded text-white ${item.id === 'poly' ? 'bg-slate-400' : 'bg-amber-400'}`}>{item.badge}</span>
                                                 </div>
-                                                <div>
-                                                    <span className={`font-black text-xl ${isSelected ? 'text-slate-900' : 'text-slate-600'}`}>{item.label}</span>
-                                                </div>
+                                                <span className={`font-black text-2xl ${isSelected ? 'text-slate-900' : 'text-slate-500'}`}>{item.label}</span>
                                             </div>
-                                            <span className={`text-[10px] font-bold tracking-wider px-3 py-1.5 rounded-full shadow-sm ${theme.badge}`}>
-                                                {item.badge}
-                                            </span>
+                                            <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${isSelected ? `bg-slate-900 border-slate-900` : 'border-slate-200 bg-white'}`}>
+                                                {isSelected && <Check size={14} className="text-white" strokeWidth={4} />}
+                                            </div>
                                         </div>
-                                        
-                                        <p className={`text-sm pl-9 leading-relaxed font-medium ${isSelected ? 'text-slate-600' : 'text-slate-400'}`}>
+                                        <p className={`text-sm leading-relaxed font-medium ${isSelected ? 'text-slate-600' : 'text-slate-400'}`}>
                                             {item.description}
                                         </p>
                                         
-                                        {/* ⭐️ [수정] 상세 옵션 버튼 - 문구 아이콘 제거 */}
-                                        <div className={`grid grid-rows-[0fr] transition-all duration-300 ease-out ${isSelected ? 'grid-rows-[1fr] mt-5' : 'mt-0'}`}>
-                                            <div className="overflow-hidden pl-1">
-                                                <div className="p-1.5 bg-white/60 backdrop-blur-sm rounded-xl border border-white/50 shadow-inner flex gap-2">
-                                                    {item.id === 'poly' && (
+                                        {/* 상세 옵션 버튼 */}
+                                        <div className={`grid grid-rows-[0fr] transition-all duration-500 ease-in-out ${isSelected ? 'grid-rows-[1fr] mt-6' : 'mt-0'}`}>
+                                            <div className="overflow-hidden">
+                                                <div className="p-1.5 bg-white rounded-xl border border-slate-100 shadow-inner flex gap-2">
+                                                     {item.id === 'poly' && (
                                                         <>
-                                                            <button onClick={(e) => { e.stopPropagation(); setPolyOption('pearl'); }} className={`flex-1 py-2.5 text-xs font-bold rounded-lg transition-all shadow-sm flex items-center justify-center gap-1 ${polyOption === 'pearl' ? 'bg-indigo-600 text-white shadow-indigo-200' : 'bg-transparent text-slate-500 hover:bg-white'}`}>
-                                                                펄
-                                                            </button>
-                                                            <button onClick={(e) => { e.stopPropagation(); setPolyOption('no_pearl'); }} className={`flex-1 py-2.5 text-xs font-bold rounded-lg transition-all shadow-sm flex items-center justify-center gap-1 ${polyOption === 'no_pearl' ? 'bg-indigo-600 text-white shadow-indigo-200' : 'bg-transparent text-slate-500 hover:bg-white'}`}>
-                                                                무펄
-                                                            </button>
+                                                            <button onClick={(e) => { e.stopPropagation(); setPolyOption('pearl'); }} className={`flex-1 py-3 text-xs font-bold rounded-lg transition-all shadow-sm ${polyOption === 'pearl' ? 'bg-indigo-600 text-white shadow-indigo-200' : 'bg-slate-50 text-slate-400 hover:bg-white'}`}>펄 (유광)</button>
+                                                            <button onClick={(e) => { e.stopPropagation(); setPolyOption('no_pearl'); }} className={`flex-1 py-3 text-xs font-bold rounded-lg transition-all shadow-sm ${polyOption === 'no_pearl' ? 'bg-indigo-600 text-white shadow-indigo-200' : 'bg-slate-50 text-slate-400 hover:bg-white'}`}>무펄 (심플)</button>
                                                         </>
                                                     )}
                                                     {item.id === 'kerapoxy' && (
                                                         <>
-                                                            <button onClick={(e) => { e.stopPropagation(); setEpoxyOption('starlike'); }} className={`flex-1 py-2.5 text-xs font-bold rounded-lg transition-all shadow-sm flex items-center justify-center gap-1 ${epoxyOption === 'starlike' ? 'bg-amber-500 text-white shadow-amber-200' : 'bg-transparent text-slate-500 hover:bg-white'}`}>
-                                                                스타라이크 EVO
-                                                            </button>
-                                                            <button onClick={(e) => { e.stopPropagation(); setEpoxyOption('kerapoxy'); }} className={`flex-1 py-2.5 text-xs font-bold rounded-lg transition-all shadow-sm flex items-center justify-center gap-1 ${epoxyOption === 'kerapoxy' ? 'bg-amber-500 text-white shadow-amber-200' : 'bg-transparent text-slate-500 hover:bg-white'}`}>
-                                                                케라폭시
-                                                            </button>
+                                                            <button onClick={(e) => { e.stopPropagation(); setEpoxyOption('starlike'); }} className={`flex-1 py-3 text-xs font-bold rounded-lg transition-all shadow-sm ${epoxyOption === 'starlike' ? 'bg-amber-500 text-white shadow-amber-200' : 'bg-amber-50/50 text-amber-600/60 hover:bg-white'}`}>스타라이크</button>
+                                                            <button onClick={(e) => { e.stopPropagation(); setEpoxyOption('kerapoxy'); }} className={`flex-1 py-3 text-xs font-bold rounded-lg transition-all shadow-sm ${epoxyOption === 'kerapoxy' ? 'bg-amber-500 text-white shadow-amber-200' : 'bg-amber-50/50 text-amber-600/60 hover:bg-white'}`}>케라폭시</button>
                                                         </>
                                                     )}
                                                 </div>
@@ -1326,12 +1288,12 @@ export default function App() {
                             );
                         })}
                     </div>
-
+                    
                     <button onClick={() => setShowMaterialModal(true)} className="w-full mt-4 py-3 bg-white border border-slate-200 text-slate-600 rounded-xl font-bold text-xs hover:bg-slate-50 transition shadow-sm flex items-center justify-center gap-1.5">
                         <HelpCircle size={14} className='text-indigo-500'/> 소재 선택이 고민되시나요? 비교 가이드 보기
                     </button>
 
-                    <ColorPalette
+                     <ColorPalette
                         selectedColorId={selectedGroutColor} onSelect={setSelectedGroutColor}
                         onTileImageUpload={handleTileImageUpload} tileImageURL={tileImageURL}
                         brightnessLevel={brightnessLevel} onBrightnessChange={setBrightnessLevel}
@@ -1339,100 +1301,89 @@ export default function App() {
                     />
                 </section>
 
-                <section className="animate-fade-in delay-300 mt-16 pt-10 border-t border-slate-200/60">
-                     <h2 className="text-xl font-black text-slate-800 mb-5 flex items-center gap-2">
-                        <span className="flex items-center justify-center w-7 h-7 bg-indigo-100 text-indigo-600 rounded-full text-sm font-bold">2</span>
-                        시공 범위 선택
-                    </h2>
+                {/* 3. Areas Section */}
+                <section className="animate-premium-in" style={{ animationDelay: '200ms' }}>
+                    <div className="flex items-center gap-3 mb-6 pt-10 border-t border-slate-200">
+                        <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-indigo-500 to-violet-600 text-white rounded-xl text-sm font-bold shadow-md shadow-indigo-200">2</div>
+                        <h2 className="text-2xl font-black text-slate-800 tracking-tight">시공 범위는요?</h2>
+                    </div>
 
-                    <div className="bg-indigo-50 rounded-2xl p-4 border border-indigo-100 shadow-sm flex flex-col gap-3 mb-6">
-                        <div className="flex items-center gap-3">
-                             <div className="p-2 bg-white rounded-full shadow-sm text-indigo-600">
-                                <ShieldCheck size={18} strokeWidth={2.5} />
+                    <div className="bg-gradient-to-r from-indigo-50 to-white rounded-2xl p-5 border border-indigo-100 flex flex-col gap-3 mb-8">
+                         <div className="flex items-start gap-4">
+                             <div className="p-2.5 bg-white rounded-xl shadow-sm text-indigo-600 mt-0.5">
+                                <ShieldCheck size={20} strokeWidth={2} />
                             </div>
-                            <div className='flex-1'>
-                                <div className="text-sm font-bold text-indigo-900">신축·구축 동일 정가제</div>
-                                <div className="text-[11px] text-indigo-700/80 leading-tight mt-0.5">난이도에 따른 추가금 없는 정직한 시공</div>
-                            </div>
-                        </div>
-                        <div className="h-px bg-indigo-200/50 w-full"></div>
-                        <div className="flex items-center gap-3">
-                             <div className="p-2 bg-white rounded-full shadow-sm text-indigo-600">
-                                <Ruler size={18} strokeWidth={2.5} />
-                            </div>
-                            <div className='flex-1'>
-                                <div className="text-sm font-bold text-indigo-900">견적 기준 사이즈</div>
-                                <div className="text-[11px] text-indigo-700/80 leading-tight mt-0.5">바닥 30x30cm, 벽면 30x60cm 타일크기 기준</div>
+                            <div>
+                                <div className="text-sm font-bold text-indigo-900">추가금 없는 정가제</div>
+                                <div className="text-xs text-indigo-700/70 mt-1 leading-relaxed">신축/구축 동일 가격이며, 타일 난이도에 따른 현장 추가요금을 받지 않습니다.</div>
                             </div>
                         </div>
                     </div>
                     
-                    <h3 className="text-sm font-bold text-slate-400 mb-3 ml-1 uppercase tracking-wider">Bathroom</h3>
-                    {renderAreaList(BATHROOM_AREAS)}
-
-                    <div className="h-px bg-slate-200 my-8"></div>
-
-                    <h3 className="text-sm font-bold text-slate-400 mb-3 ml-1 uppercase tracking-wider">Living & Kitchen</h3>
-                    {renderAreaList(OTHER_AREAS)}
-                </section>
-
-                   <section className="animate-fade-in delay-500">
-                       <h2 className="text-xl font-black text-slate-800 mb-5 flex items-center gap-2">
-                        <span className="flex items-center justify-center w-7 h-7 bg-indigo-100 text-indigo-600 rounded-full text-sm font-bold">3</span>
-                        실리콘 리폼
-                    </h2>
-                    {renderAreaList(SILICON_AREAS)}
-                </section>
-
-                <section className="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 animate-fade-in delay-700">
-                    <h2 className="text-lg font-black text-slate-800 mb-4 flex items-center gap-2">
-                        <HelpCircle className="h-5 w-5 text-amber-400"/> 자주 묻는 질문
-                    </h2>
-                    <div className="space-y-2">
-                        {FAQ_ITEMS.map((item, index) => <Accordion key={index} question={item.question} answer={item.answer} />)}
+                    <div className="space-y-8">
+                        <div>
+                            <h3 className="text-xs font-bold text-slate-400 mb-4 ml-1 uppercase tracking-widest">Bathroom</h3>
+                            {renderAreaList(BATHROOM_AREAS)}
+                        </div>
+                        <div>
+                            <h3 className="text-xs font-bold text-slate-400 mb-4 ml-1 uppercase tracking-widest">Living & Kitchen</h3>
+                            {renderAreaList(OTHER_AREAS)}
+                        </div>
+                        <div>
+                            <div className="flex items-center gap-3 mb-6 mt-12">
+                                <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-indigo-500 to-violet-600 text-white rounded-xl text-sm font-bold shadow-md shadow-indigo-200">3</div>
+                                <h2 className="text-2xl font-black text-slate-800 tracking-tight">실리콘도 하시나요?</h2>
+                            </div>
+                            {renderAreaList(SILICON_AREAS)}
+                        </div>
                     </div>
                 </section>
 
-                <button
+                {/* FAQ 및 리뷰 섹션 */}
+                <section className="bg-white p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 animate-premium-in" style={{ animationDelay: '300ms' }}>
+                    <h2 className="text-xl font-black text-slate-900 mb-6 flex items-center gap-2">
+                        <HelpCircle className="h-6 w-6 text-amber-400"/> 자주 묻는 질문
+                    </h2>
+                    <div className="space-y-1">
+                        {FAQ_ITEMS.map((item, index) => <Accordion key={index} question={item.question} answer={item.answer} />)}
+                    </div>
+                </section>
+                
+                 <button
                     onClick={() => window.open(SOOMGO_REVIEW_URL, '_blank')}
-                    className="w-full py-4 rounded-2xl bg-slate-900 text-white font-bold text-base hover:bg-slate-800 transition shadow-xl shadow-slate-300 flex items-center justify-center gap-2 active:scale-95"
+                    className="w-full py-5 rounded-[1.5rem] bg-slate-900 text-white font-bold text-lg hover:bg-slate-800 transition transform active:scale-[0.98] shadow-2xl shadow-slate-300 flex items-center justify-center gap-2"
                 >
-                    <Star size={20} className="text-amber-400" fill="currentColor" />
-                    실제 고객 후기 보러가기 (5.0점)
+                    <Star size={22} className="text-yellow-400" fill="currentColor" />
+                    실제 고객 후기 확인 (5.0점)
                 </button>
+
             </main>
 
+            {/* 💎 Bottom Floating Bar: 4K Glass Effect */}
             {hasSelections && (
-                <div className="fixed bottom-0 left-0 right-0 z-50 transition-transform duration-300 animate-slide-up">
+                <div className="fixed bottom-0 left-0 right-0 z-50 animate-slide-up-premium">
                     <div className="max-w-lg mx-auto">
                         <div className="px-5 pb-2">
                             <ReservationTicker />
                         </div>
-
-                        {/* ⭐️ [수정됨] glass-panel 제거 -> bg-white로 변경하여 완전 불투명 처리 */}
-                        <div className="bg-white border-t border-slate-200 px-5 pt-5 pb-12 shadow-[0_-8px_30px_rgba(0,0,0,0.12)] safe-area-bottom rounded-t-[2rem]">
-                            <div className='flex items-end justify-between mb-4'>
+                        <div className="glass-premium px-6 pt-6 pb-10 rounded-t-[2.5rem] safe-area-bottom">
+                            <div className='flex items-end justify-between mb-5'>
                                 <div>
-                                    <div className="text-xs font-bold text-slate-400 mb-1">예상 견적 금액</div>
+                                    <div className="text-xs font-bold text-slate-500 mb-1 ml-1">총 견적 예상금액</div>
                                     <div className="flex items-baseline gap-1">
-                                        <span className="text-3xl font-black text-[#0f172a] tracking-tighter">{calculation.price.toLocaleString()}</span>
-                                        <span className="text-base font-bold text-slate-600">원</span>
+                                        <span className="text-4xl font-black text-slate-900 tracking-tighter drop-shadow-sm">{calculation.price.toLocaleString()}</span>
+                                        <span className="text-lg font-bold text-slate-500">원</span>
                                     </div>
                                 </div>
                                 
                                 <div className='flex flex-col items-end'>
-                                    {calculation.minimumFeeApplied && (
-                                        <div className="text-[10px] font-bold text-rose-500 bg-rose-50 px-2 py-1 rounded-full mb-1">
-                                            최소 출장비 적용
+                                     {calculation.minimumFeeApplied && (
+                                        <div className="text-[10px] font-bold text-white bg-rose-500 px-2 py-0.5 rounded-full mb-1 shadow-sm animate-pulse">
+                                            최소비용 적용
                                         </div>
                                     )}
-                                    {calculation.label && !calculation.minimumFeeApplied && (
-                                            <div className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded-full mb-1 flex items-center gap-1">
-                                                <Crown size={10} fill="currentColor"/> {calculation.label}
-                                            </div>
-                                    )}
                                     {((calculation.minimumFeeApplied || calculation.isPackageActive) && (calculation.priceBeforeAllDiscount > calculation.price)) && (
-                                        <span className="text-xs text-slate-400 line-through font-medium">
+                                        <span className="text-sm text-slate-400 line-through font-medium">
                                             {calculation.priceBeforeAllDiscount.toLocaleString()}원
                                         </span>
                                     )}
@@ -1442,24 +1393,25 @@ export default function App() {
                             <div className='grid grid-cols-5 gap-3'>
                                 <button
                                     onClick={() => { setShowModal(true); }}
-                                    className="col-span-3 py-4 rounded-2xl font-bold text-white bg-slate-900 hover:bg-slate-800 shadow-lg shadow-slate-300 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                                    className="col-span-3 py-4 rounded-2xl font-bold text-white bg-slate-900 hover:bg-slate-800 shadow-lg shadow-slate-400/30 active:scale-[0.96] transition-all flex items-center justify-center gap-2 text-base"
                                 >
-                                    <List size={18} /> 견적서 확인
+                                    <List size={20} /> 견적서 보기
                                 </button>
                                 <a
                                     href={KAKAO_CHAT_URL}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="col-span-2 py-4 rounded-2xl font-bold text-slate-900 bg-[#FAE100] hover:bg-[#FCE620] shadow-lg shadow-yellow-200/50 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                                    className="col-span-2 py-4 rounded-2xl font-bold text-[#371D1E] bg-[#FAE100] hover:bg-[#ffe600] shadow-lg shadow-yellow-400/20 active:scale-[0.96] transition-all flex items-center justify-center gap-2 text-base"
                                 >
-                                    <Layers size={18} /> 카톡상담
+                                    <Layers size={20} /> 상담
                                 </a>
                             </div>
                         </div>
                     </div>
                 </div>
             )}
-
+            
+            {/* Modals */}
             {showMaterialModal && <MaterialDetailModal onClose={() => setShowMaterialModal(false)} />}
             {showModal && (
                 <QuoteModal
